@@ -1,0 +1,2371 @@
+{
+ "universidadeuropea.com": {
+  "domain": "universidadeuropea.com",
+  "emails": {
+   "postgrado@universidadeuropea.es": "https://universidadeuropea.com/master-contenidos-audiovisuales-mediaset-madrid/"
+  },
+  "pages": 7,
+  "reachable": true,
+  "given": ""
+ },
+ "myretirementworkshops.com": {
+  "domain": "myretirementworkshops.com",
+  "emails": {},
+  "pages": 7,
+  "reachable": true,
+  "given": ""
+ },
+ "athenago.com": {
+  "domain": "athenago.com",
+  "emails": {
+   "privacy@athena.com": "https://www.athena.com/privacy"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": "privacy@athena.com"
+ },
+ "alexjonesstore.com": {
+  "domain": "alexjonesstore.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "govplus.com": {
+  "domain": "govplus.com",
+  "emails": {
+   "contact@govplus.com": "https://govplus.com/contact-us",
+   "privacy@govplus.com": "https://govplus.com/privacy-policy"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": "privacy@govplus.com"
+ },
+ "homies.fr": {
+  "domain": "homies.fr",
+  "emails": {},
+  "pages": 13,
+  "reachable": true,
+  "given": ""
+ },
+ "syos.com.br": {
+  "domain": "syos.com.br",
+  "emails": {
+   "suporte@syos.com": "https://syos.com/",
+   "pre-vendas@syos.com": "https://syos.com/"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": ""
+ },
+ "nakie.co": {
+  "domain": "nakie.co",
+  "emails": {
+   "support@nakie.com.au": "https://nakie.us/pages/contact-us"
+  },
+  "pages": 5,
+  "reachable": true,
+  "given": ""
+ },
+ "survio.com": {
+  "domain": "survio.com",
+  "emails": {
+   "support@survio.com": "https://www.survio.com/en/",
+   "sales@survio.com": "https://www.survio.com/en/"
+  },
+  "pages": 1,
+  "reachable": true,
+  "given": "sales@survio.com"
+ },
+ "newbathtoday.com": {
+  "domain": "newbathtoday.com",
+  "emails": {
+   "sageadmin@sagehome.com": "https://newbathtoday.com/privacy-policy/",
+   "admin@sagehome.com": "https://newbathtoday.com/privacy-policy/"
+  },
+  "pages": 8,
+  "reachable": true,
+  "given": ""
+ },
+ "tonebase.co": {
+  "domain": "tonebase.co",
+  "emails": {
+   "team@tonebase.co": "https://www.tonebase.co/",
+   "chris@tonebase.co": "https://www.tonebase.co/privacy-and-terms"
+  },
+  "pages": 3,
+  "reachable": true,
+  "given": "team@tonebase.co"
+ },
+ "landrover.com": {
+  "domain": "landrover.com",
+  "emails": {
+   "dpoffice@jaguarlandrover.com": "https://www.landrover.com/privacy-policy/index.html",
+   "05%7c01%7cnwang14@jaguarlandrover.com": "https://www.landrover.com/privacy-policy/index.html"
+  },
+  "pages": 2,
+  "reachable": true,
+  "given": ""
+ },
+ "trustedconsumerreviews.com": {
+  "domain": "trustedconsumerreviews.com",
+  "emails": {},
+  "pages": 5,
+  "reachable": true,
+  "given": ""
+ },
+ "usclaims.com": {
+  "domain": "usclaims.com",
+  "emails": {
+   "info@usclaims.com": "https://usclaims.com/",
+   "privacy@usclaims.com": "https://usclaims.com/privacy-policy/"
+  },
+  "pages": 8,
+  "reachable": true,
+  "given": "privacy@usclaims.com"
+ },
+ "youroverseashome.com": {
+  "domain": "youroverseashome.com",
+  "emails": {
+   "info@youroverseashome.com": "https://www.youroverseashome.com/"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": "info@youroverseashome.com"
+ },
+ "alpensattel.de": {
+  "domain": "alpensattel.de",
+  "emails": {
+   "support@alpensattel.de": "https://www.alpensattel.de/policies/privacy-policy"
+  },
+  "pages": 7,
+  "reachable": true,
+  "given": ""
+ },
+ "feefo.com": {
+  "domain": "feefo.com",
+  "emails": {
+   "support@feefo.com": "https://business.feefo.com/",
+   "marketing@feefo.com": "https://business.feefo.com/company/trusted-service-awards",
+   "gdpr@ametrosgroup.com": "https://business.feefo.com/privacy-policy",
+   "dpo@evalian.co.uk": "https://business.feefo.com/privacy-policy",
+   "gdprcompliance@feefo.com": "https://business.feefo.com/privacy-policy"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": "support@feefo.com"
+ },
+ "vinseeker.com": {
+  "domain": "vinseeker.com",
+  "emails": {
+   "support@vinseeker.com": "https://vinseeker.com/"
+  },
+  "pages": 3,
+  "reachable": true,
+  "given": "support@vinseeker.com"
+ },
+ "anabolichealth.com": {
+  "domain": "anabolichealth.com",
+  "emails": {},
+  "pages": 7,
+  "reachable": true,
+  "given": "support@anabolichealth.com"
+ },
+ "covalentmetrology.com": {
+  "domain": "covalentmetrology.com",
+  "emails": {
+   "salesops@covalent.com": "https://covalent.com/",
+   "hello@covalent.com": "https://covalent.com/",
+   "jobs@covalent.com": "https://covalent.com/careers/"
+  },
+  "pages": 11,
+  "reachable": true,
+  "given": "hello@covalent.com"
+ },
+ "vnsh.com": {
+  "domain": "vnsh.com",
+  "emails": {
+   "support@attentivemobile.com": "https://vnsh.com/pages/messaging-privacy-policy"
+  },
+  "pages": 13,
+  "reachable": true,
+  "given": ""
+ },
+ "artemis.co": {
+  "domain": "artemis.co",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": "support@artemisdistribution.com"
+ },
+ "blueconic.com": {
+  "domain": "blueconic.com",
+  "emails": {
+   "finance@blueconic.com": "https://www.blueconic.com/contact",
+   "info@blueconic.com": "https://www.blueconic.com/contact",
+   "legal@blueconic.com": "https://www.blueconic.com/legal/terms"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": "info@blueconic.com"
+ },
+ "a1garage.com": {
+  "domain": "a1garage.com",
+  "emails": {
+   "privacy@a1garage.com": "https://a1garage.com/privacy/"
+  },
+  "pages": 13,
+  "reachable": true,
+  "given": "info@a1garage.com"
+ },
+ "buyaplan.co.uk": {
+  "domain": "buyaplan.co.uk",
+  "emails": {},
+  "pages": 8,
+  "reachable": true,
+  "given": ""
+ },
+ "trylensa.com": {
+  "domain": "trylensa.com",
+  "emails": {
+   "support@trylensa.com": "https://www.trylensa.com/en-us"
+  },
+  "pages": 3,
+  "reachable": true,
+  "given": ""
+ },
+ "meiji.com.tw": {
+  "domain": "meiji.com.tw",
+  "emails": {},
+  "pages": 5,
+  "reachable": true,
+  "given": ""
+ },
+ "swydo.com": {
+  "domain": "swydo.com",
+  "emails": {
+   "support@swydo.com": "https://www.swydo.com/",
+   "info@swydo.com": "https://www.swydo.com/about-us/",
+   "privacy@swydo.com": "https://www.swydo.com/privacy-policy/"
+  },
+  "pages": 10,
+  "reachable": true,
+  "given": "privacy@swydo.com"
+ },
+ "translayte.com": {
+  "domain": "translayte.com",
+  "emails": {
+   "hello@translayte.com": "https://translayte.com/",
+   "vendors@translayte.com": "https://translayte.com/contact"
+  },
+  "pages": 7,
+  "reachable": true,
+  "given": "hello@translayte.com"
+ },
+ "werkaandemuur.nl": {
+  "domain": "werkaandemuur.nl",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "notarypro.ca": {
+  "domain": "notarypro.ca",
+  "emails": {
+   "support@notarypro.ca": "https://www.notarypro.ca/",
+   "iain@notarypro.ca": "https://www.notarypro.ca/about-us/",
+   "legal@notarypro.ca": "https://www.notarypro.ca/privacy-policy/"
+  },
+  "pages": 21,
+  "reachable": true,
+  "given": ""
+ },
+ "reformcph.com": {
+  "domain": "reformcph.com",
+  "emails": {
+   "privacy@reformcph.com": "https://www.reformcph.com/us/legal/privacy-policy",
+   "press@reformcph.com": "https://www.reformcph.com/us/info/press",
+   "csus@reformcph.com": "https://www.reformcph.com/us/contact/contact-us",
+   "hi@reformcph.com": "https://www.reformcph.com/us/contact/contact-us"
+  },
+  "pages": 20,
+  "reachable": true,
+  "given": ""
+ },
+ "acquisition.com": {
+  "domain": "acquisition.com",
+  "emails": {
+   "legal@acquisition.com": "https://www.acquisition.com/privacy"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": "legal@acquisition.com"
+ },
+ "hodgetwins.com": {
+  "domain": "hodgetwins.com",
+  "emails": {},
+  "pages": 13,
+  "reachable": true,
+  "given": ""
+ },
+ "holidaycottages.co.uk": {
+  "domain": "holidaycottages.co.uk",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "materiastore.com": {
+  "domain": "materiastore.com",
+  "emails": {
+   "info@materiastore.com": "https://www.materiastore.com/"
+  },
+  "pages": 1,
+  "reachable": true,
+  "given": "info@materiastore.com"
+ },
+ "signalrelief.com": {
+  "domain": "signalrelief.com",
+  "emails": {
+   "info@signalrelief.com": "https://signalrelief.com/",
+   "angie@adadvertising.net": "https://signalrelief.com/pages/press",
+   "support@signalrelief.com": "https://signalrelief.com/policies/privacy-policy"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": "info@signalrelief.com"
+ },
+ "teachmeanatomy.info": {
+  "domain": "teachmeanatomy.info",
+  "emails": {
+   "support@teachmeseries.com": "https://teachmeanatomy.info/privacy-policy/"
+  },
+  "pages": 19,
+  "reachable": true,
+  "given": ""
+ },
+ "gabb.com": {
+  "domain": "gabb.com",
+  "emails": {
+   "legal@intercom.io": "https://gabb.com/support/en/collections/12627474-gabb-phone",
+   "media@gabb.com": "https://gabb.com/media-kit/resources/",
+   "legal@gabb.com": "https://gabb.com/privacy-policy/"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": "legal@gabb.com"
+ },
+ "icompario.com": {
+  "domain": "icompario.com",
+  "emails": {},
+  "pages": 3,
+  "reachable": true,
+  "given": ""
+ },
+ "idsgoldcoast.au": {
+  "domain": "idsgoldcoast.au",
+  "emails": {},
+  "pages": 12,
+  "reachable": true,
+  "given": ""
+ },
+ "madametarot.com.br": {
+  "domain": "madametarot.com.br",
+  "emails": {
+   "contato@madametarot.com.br": "https://www.madametarot.com.br/",
+   "contato@madametarot.com": "https://www.madametarot.com.br/pol%C3%ADtica-de-privacidade"
+  },
+  "pages": 2,
+  "reachable": true,
+  "given": "contato@madametarot.com.br"
+ },
+ "manhattanmentalhealthcounseling.com": {
+  "domain": "manhattanmentalhealthcounseling.com",
+  "emails": {},
+  "pages": 15,
+  "reachable": true,
+  "given": ""
+ },
+ "networklessons.com": {
+  "domain": "networklessons.com",
+  "emails": {},
+  "pages": 13,
+  "reachable": true,
+  "given": "security@networklessons.com"
+ },
+ "qive.com.br": {
+  "domain": "qive.com.br",
+  "emails": {
+   "suporte@qive.com.br": "https://qive.com.br/",
+   "contato@qive.com.br": "https://qive.com.br/",
+   "dpo@qive.com.br": "https://qive.com.br/politica-de-privacidade"
+  },
+  "pages": 5,
+  "reachable": true,
+  "given": "contato@qive.com.br"
+ },
+ "rise.com.br": {
+  "domain": "rise.com.br",
+  "emails": {},
+  "pages": 13,
+  "reachable": true,
+  "given": ""
+ },
+ "showpad.com": {
+  "domain": "showpad.com",
+  "emails": {
+   "press@showpad.com": "https://www.showpad.com/press",
+   "contact@apd-gba.be": "https://www.showpad.com/privacy-policy",
+   "privacy@showpad.com": "https://www.showpad.com/privacy-policy"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": "privacy@showpad.com"
+ },
+ "swiftreg.co.uk": {
+  "domain": "swiftreg.co.uk",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "thefast800.com": {
+  "domain": "thefast800.com",
+  "emails": {
+   "info@thefast800.com": "https://thefast800.com/contact-us/",
+   "support@thefast800.com": "https://thefast800.com/privacy-policy/",
+   "security@thefast800.com": "https://thefast800.com/privacy-policy/"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": "security@thefast800.com"
+ },
+ "tableandstyle.com": {
+  "domain": "tableandstyle.com",
+  "emails": {
+   "service@tableandstyle.com": "https://www.tableandstyle.com/",
+   "sales@tableandstyle.com": "https://www.tableandstyle.com/"
+  },
+  "pages": 17,
+  "reachable": true,
+  "given": ""
+ },
+ "birdseyeroofing.com": {
+  "domain": "birdseyeroofing.com",
+  "emails": {
+   "info@birdseyeroofing.com": "https://birdseyeroofing.com/"
+  },
+  "pages": 13,
+  "reachable": true,
+  "given": "info@birdseyeroofing.com"
+ },
+ "charlesandivy.co.uk": {
+  "domain": "charlesandivy.co.uk",
+  "emails": {
+   "sales@charlesandivy.co.uk": "https://www.charlesandivy.co.uk/",
+   "joanne@charlesandivy.co.uk": "https://www.charlesandivy.co.uk/pages/careers",
+   "marketing@charlesandivy.co.uk": "https://www.charlesandivy.co.uk/pages/careers"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": "sales@charlesandivy.co.uk"
+ },
+ "clicandfit.com": {
+  "domain": "clicandfit.com",
+  "emails": {
+   "service.client@clicandfit.com": "https://www.clicandfit.com/",
+   "contact@clicandfit.com": "https://www.clicandfit.com/presse"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": ""
+ },
+ "figandbloom.com.au": {
+  "domain": "figandbloom.com.au",
+  "emails": {
+   "hello@figandbloom.com": "https://figandbloom.com/",
+   "events@figandbloom.com": "https://figandbloom.com/pages/contact",
+   "media@figandbloom.com": "https://figandbloom.com/pages/media-library"
+  },
+  "pages": 12,
+  "reachable": true,
+  "given": "hello@figandbloom.com"
+ },
+ "3foodies.de": {
+  "domain": "3foodies.de",
+  "emails": {
+   "foodie@3foodies.de": "https://3foodies.de/",
+   "foodies@3foodies.de": "https://3foodies.de/pages/uber-uns"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": ""
+ },
+ "healthcode.co.uk": {
+  "domain": "healthcode.co.uk",
+  "emails": {
+   "hr@healthcode.co.uk": "https://www.healthcode.co.uk/careers/",
+   "custserv@healthcode.co.uk": "https://www.healthcode.co.uk/privacy-policy/"
+  },
+  "pages": 19,
+  "reachable": true,
+  "given": ""
+ },
+ "humbrausa.com": {
+  "domain": "humbrausa.com",
+  "emails": {},
+  "pages": 3,
+  "reachable": true,
+  "given": ""
+ },
+ "ici.coach": {
+  "domain": "ici.coach",
+  "emails": {
+   "laurent@icicoach.com": "https://ici.coach/mentions-legales/",
+   "info@icicoach.com": "https://ici.coach/mentions-legales-et-politique-de-confidentialite/"
+  },
+  "pages": 15,
+  "reachable": true,
+  "given": ""
+ },
+ "jennifermaker.com": {
+  "domain": "jennifermaker.com",
+  "emails": {
+   "hello@jennifermaker.com": "https://jennifermaker.com/"
+  },
+  "pages": 13,
+  "reachable": true,
+  "given": "hello@jennifermaker.com"
+ },
+ "kursa.cz": {
+  "domain": "kursa.cz",
+  "emails": {},
+  "pages": 1,
+  "reachable": true,
+  "given": ""
+ },
+ "maturita-dalkove.cz": {
+  "domain": "maturita-dalkove.cz",
+  "emails": {
+   "info@ssgh.cz": "https://www.maturita-dalkove.cz/",
+   "info@critical.cz": "https://www.maturita-dalkove.cz/"
+  },
+  "pages": 2,
+  "reachable": true,
+  "given": ""
+ },
+ "minhabibliotecacatolica.com.br": {
+  "domain": "minhabibliotecacatolica.com.br",
+  "emails": {
+   "contato@minhabibliotecacatolica.com.br": "https://minhabibliotecacatolica.com.br/"
+  },
+  "pages": 2,
+  "reachable": true,
+  "given": "contato@minhabibliotecacatolica.com.br"
+ },
+ "mirificascience.com": {
+  "domain": "mirificascience.com",
+  "emails": {
+   "hello@mirificascience.com": "https://mirificascience.com/"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": "hello@mirificascience.com"
+ },
+ "oneclickswitch.com.au": {
+  "domain": "oneclickswitch.com.au",
+  "emails": {
+   "support@oneclickswitch.com.au": "https://www.oneclickswitch.com.au/",
+   "privacy@bemoved.com.au": "https://hub.oneclickswitch.com.au/legal/privacy-policy"
+  },
+  "pages": 3,
+  "reachable": true,
+  "given": "support@oneclickswitch.com.au"
+ },
+ "phocassoftware.com": {
+  "domain": "phocassoftware.com",
+  "emails": {
+   "careers@phocassoftware.com": "https://www.phocassoftware.com/careers",
+   "support_uk@phocassoftware.com": "https://www.phocassoftware.com/legal-center/privacy-and-cookies-policy"
+  },
+  "pages": 8,
+  "reachable": true,
+  "given": ""
+ },
+ "resound.com": {
+  "domain": "resound.com",
+  "emails": {
+   "consumerhelp@gnresound.com": "https://www.resound.com/en-us/contact",
+   "gnresound@gnresound.com": "https://www.resound.com/en-us/contact",
+   "dt@datatilsynet.dk": "https://www.resound.com/en-us/privacy"
+  },
+  "pages": 17,
+  "reachable": true,
+  "given": ""
+ },
+ "secretfoodtours.com": {
+  "domain": "secretfoodtours.com",
+  "emails": {
+   "contact@secrettours.com": "https://www.secretfoodtours.com/",
+   "london@secrettours.com": "https://www.secretfoodtours.com/"
+  },
+  "pages": 7,
+  "reachable": true,
+  "given": "contact@secrettours.com"
+ },
+ "seeking.com": {
+  "domain": "seeking.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "tagwhistler.com": {
+  "domain": "tagwhistler.com",
+  "emails": {
+   "info@tagwhistler.com": "https://tagwhistler.com/",
+   "reservations@gibbonswhistler.com": "https://tagwhistler.com/contact-us/",
+   "groups@gibbonswhistler.com": "https://tagwhistler.com/contact-us/"
+  },
+  "pages": 17,
+  "reachable": true,
+  "given": ""
+ },
+ "withme.com": {
+  "domain": "withme.com",
+  "emails": {
+   "clientservices@withme.com": "https://withme.com/help-center/",
+   "peopleteam@withme.com": "https://withme.com/company/careers/",
+   "privacy@withme.com": "https://withme.com/company/privacy/",
+   "support@printwithme.com": "https://withme.com/company/privacy/"
+  },
+  "pages": 16,
+  "reachable": true,
+  "given": "privacy@withme.com"
+ },
+ "aemis.com": {
+  "domain": "aemis.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "allbooked.com": {
+  "domain": "allbooked.com",
+  "emails": {
+   "info@allbooked.com": "https://www.allbooked.com/platform/support"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": "info@allbooked.com"
+ },
+ "americanhealthcareacademy.com": {
+  "domain": "americanhealthcareacademy.com",
+  "emails": {},
+  "pages": 13,
+  "reachable": true,
+  "given": ""
+ },
+ "ankomn.com": {
+  "domain": "ankomn.com",
+  "emails": {
+   "service@ankomn.com": "https://ankomn.com/policies/privacy-policy"
+  },
+  "pages": 5,
+  "reachable": true,
+  "given": ""
+ },
+ "aprespass.com": {
+  "domain": "aprespass.com",
+  "emails": {},
+  "pages": 13,
+  "reachable": true,
+  "given": ""
+ },
+ "bartsparts.com": {
+  "domain": "bartsparts.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "bowwowmeow.com.au": {
+  "domain": "bowwowmeow.com.au",
+  "emails": {},
+  "pages": 1,
+  "reachable": true,
+  "given": ""
+ },
+ "brickhousenutrition.com": {
+  "domain": "brickhousenutrition.com",
+  "emails": {
+   "contact@brickhousenutrition.com": "https://brickhousenutrition.com/"
+  },
+  "pages": 5,
+  "reachable": true,
+  "given": "contact@brickhousenutrition.com"
+ },
+ "cmcapital.com.br": {
+  "domain": "cmcapital.com.br",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "collaboratemd.com": {
+  "domain": "collaboratemd.com",
+  "emails": {
+   "privacy@collaboratemd.com": "https://www.collaboratemd.com/legal/privacy-policy/",
+   "support@collaboratemd.com": "https://www.collaboratemd.com/legal/privacy-policy/"
+  },
+  "pages": 18,
+  "reachable": true,
+  "given": ""
+ },
+ "dronline.pt": {
+  "domain": "dronline.pt",
+  "emails": {
+   "infopt@dronline.com": "https://dronline.pt/"
+  },
+  "pages": 19,
+  "reachable": true,
+  "given": "dpo@dronline.com"
+ },
+ "evolutionmoney.co.uk": {
+  "domain": "evolutionmoney.co.uk",
+  "emails": {
+   "introducers@evolutionmoney.co.uk": "https://www.evolutionmoney.co.uk/",
+   "info@evolutionmoney.co.uk": "https://www.evolutionmoney.co.uk/",
+   "relationshipmanagement@evolutionlending.co.uk": "https://www.evolutionmoney.co.uk/contact-us",
+   "new.business@evolutionmoney.co.uk": "https://www.evolutionmoney.co.uk/contact-us",
+   "complaints@evolutionmoney.co.uk": "https://www.evolutionmoney.co.uk/contact-us",
+   "relationshipmanagement@progressivemoney.co.uk": "https://www.evolutionmoney.co.uk/contact-us",
+   "talent@evolutionmoney.co.uk": "https://www.evolutionmoney.co.uk/why-evolution/about-us/staff-benefits",
+   "complaint.info@financial-ombudsman.org.uk": "https://www.evolutionmoney.co.uk/legal/complaints-policy",
+   "complaints@evolutionlending.co.uk": "https://www.evolutionmoney.co.uk/legal/terms-and-conditions",
+   "auditandrisk@evolutionmoney.co.uk": "https://www.evolutionmoney.co.uk/legal/fair-processing-notice",
+   "fpnandmarketing@evolutionmoneygroup.co.uk": "https://www.evolutionmoney.co.uk/legal/fair-processing-notice"
+  },
+  "pages": 19,
+  "reachable": true,
+  "given": ""
+ },
+ "fitnessfirst.co.uk": {
+  "domain": "fitnessfirst.co.uk",
+  "emails": {
+   "membership.services@fitnessfirst.co.uk": "https://www.fitnessfirst.co.uk/policies-and-legal/gym-rules"
+  },
+  "pages": 12,
+  "reachable": true,
+  "given": ""
+ },
+ "gillies.co.uk": {
+  "domain": "gillies.co.uk",
+  "emails": {
+   "sales@gillies.co.uk": "https://www.gillies.co.uk/",
+   "privacy@gillies.co.uk": "https://www.gillies.co.uk/privacy-policy",
+   "press@gillies.co.uk": "https://www.gillies.co.uk/press-office"
+  },
+  "pages": 8,
+  "reachable": true,
+  "given": "privacy@gillies.co.uk"
+ },
+ "growthinstitute.com": {
+  "domain": "growthinstitute.com",
+  "emails": {
+   "coaching@growthinstitute.com": "https://www.growthinstitute.com/en/consulting-contact",
+   "finance@growthinstitute.com": "https://www.growthinstitute.com/en/privacy-notice-growth-institute",
+   "privacy@growthinstitute.com": "https://www.growthinstitute.com/en/privacy-notice-growth-institute",
+   "marketing@growthinstitute.com": "https://www.growthinstitute.com/en/privacy-notice-growth-institute"
+  },
+  "pages": 8,
+  "reachable": true,
+  "given": ""
+ },
+ "ifttt.com": {
+  "domain": "ifttt.com",
+  "emails": {
+   "legal@ifttt.com": "https://ifttt.com/terms#privacy-policy",
+   "ifttt@gdpr-rep.com": "https://ifttt.com/terms#privacy-policy"
+  },
+  "pages": 13,
+  "reachable": true,
+  "given": "legal@ifttt.com"
+ },
+ "infinitymotorcycles.com": {
+  "domain": "infinitymotorcycles.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "juliart.com.tw": {
+  "domain": "juliart.com.tw",
+  "emails": {},
+  "pages": 15,
+  "reachable": true,
+  "given": ""
+ },
+ "justkampers.com": {
+  "domain": "justkampers.com",
+  "emails": {
+   "roger.seymour@justkampers.co.uk": "https://www.justkampers.com/",
+   "sales@justkampers.co.uk": "https://www.justkampers.com/",
+   "jkworld@justkampers.co.uk": "https://www.justkampers.com/about-us/sponsorship/",
+   "data-controller@justkampers.co.uk": "https://www.justkampers.com/shop-with-jk/privacy-policy/",
+   "jobs@justkampers.co.uk": "https://www.justkampers.com/about-us/corporate-information/careers/"
+  },
+  "pages": 16,
+  "reachable": true,
+  "given": "sales@justkampers.co.uk"
+ },
+ "mediavalet.com": {
+  "domain": "mediavalet.com",
+  "emails": {
+   "info@mediavalet.com": "https://www.mediavalet.com/"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": "privacy@mediavalet.com"
+ },
+ "medicinemarketplace.co.uk": {
+  "domain": "medicinemarketplace.co.uk",
+  "emails": {
+   "medicines@medicinemarketplace.com": "https://www.medicinemarketplace.com",
+   "travelletter@medicinemarketplace.com": "https://www.medicinemarketplace.com"
+  },
+  "pages": 15,
+  "reachable": true,
+  "given": ""
+ },
+ "meine-landausfluege.de": {
+  "domain": "meine-landausfluege.de",
+  "emails": {
+   "kontakt@meine-landausfluege.de": "https://meine-landausfluege.de/",
+   "beschwerde@versicherungsombudsmann.de": "https://meine-landausfluege.de/impressum/",
+   "datenschutz@meine-landausfluege.de": "https://meine-landausfluege.de/datenschutz/",
+   "jobs@meine-landausfluege.de": "https://meine-landausfluege.de/unser-team/"
+  },
+  "pages": 8,
+  "reachable": true,
+  "given": "kontakt@meine-landausfluege.de"
+ },
+ "outwell.com": {
+  "domain": "outwell.com",
+  "emails": {
+   "webshop@outwell.com": "https://outwell.com/en-gb/customer-service/privacy-policy",
+   "mrssmith@dynamicweb.com": "https://outwell.com/en-gb/outwell-academy/contact-us-webshop",
+   "mrsmith@dynamicweb.com": "https://outwell.com/en-gb/outwell-academy/contact-us-webshop"
+  },
+  "pages": 13,
+  "reachable": true,
+  "given": ""
+ },
+ "radius.com": {
+  "domain": "radius.com",
+  "emails": {
+   "dataprotectionofficer@radiuspaymentsolutions.com": "https://www.radius.com/en-us/privacy-policy/",
+   "unsubscribe@radiuspaymentsolutions.com": "https://www.radius.com/en-us/privacy-policy/",
+   "dataprotectionofficer@radius.com": "https://www.radius.com/en-us/privacy-policy/",
+   "dpo@sopro.io": "https://www.radius.com/en-gb/privacy-policy/"
+  },
+  "pages": 19,
+  "reachable": true,
+  "given": ""
+ },
+ "savorfoodtours.com": {
+  "domain": "savorfoodtours.com",
+  "emails": {
+   "help@savorfoodtours.com": "https://www.savorseattletours.com/contact-us/"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": ""
+ },
+ "scaling.com": {
+  "domain": "scaling.com",
+  "emails": {
+   "info@scalingco.com": "https://scaling.com/privacy-policy",
+   "email@examples.com": "https://scaling.com/privacy-policy"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": ""
+ },
+ "shade.inc": {
+  "domain": "shade.inc",
+  "emails": {
+   "contact@gdprlocal.com": "https://shade.inc/legal/privacy-policy",
+   "privacy@shade.inc": "https://shade.inc/legal/privacy-policy",
+   "support@shade.inc": "https://shade.inc/legal/terms-of-service"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": "privacy@shade.inc"
+ },
+ "smartcurrencyexchange.com": {
+  "domain": "smartcurrencyexchange.com",
+  "emails": {
+   "info@smartcurrencyexchange.com": "https://www.smartcurrencyexchange.com/",
+   "spain@smartcurrencyexchange.com": "https://www.smartcurrencyexchange.com/about/contact/",
+   "data@smartcurrencyexchange.com": "https://www.smartcurrencyexchange.com/legal/privacy-policy/",
+   "compliance@smartcurrencyexchange.com": "https://www.smartcurrencyexchange.com/legal/app-fraud/",
+   "complaint.info@financial-ombudsman.org.uk": "https://www.smartcurrencyexchange.com/legal/complaints/",
+   "smartaccounts@smartcurrencyexchange.com": "https://www.smartcurrencyexchange.com/legal/complaints/"
+  },
+  "pages": 18,
+  "reachable": true,
+  "given": ""
+ },
+ "summitinvitational.com": {
+  "domain": "summitinvitational.com",
+  "emails": {
+   "thefivedenver@gmail.com": "https://www.summitinvitational.com/"
+  },
+  "pages": 2,
+  "reachable": true,
+  "given": ""
+ },
+ "workiz.com": {
+  "domain": "workiz.com",
+  "emails": {
+   "info@workiz.com": "https://www.workiz.com/",
+   "unsubscribe@workiz.com": "https://www.workiz.com/privacy-policy/",
+   "support@workiz.com": "https://www.workiz.com/privacy-policy/",
+   "hr@workiz.com": "https://www.workiz.com/careers/"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": "info@workiz.com"
+ },
+ "advizorpro.com": {
+  "domain": "advizorpro.com",
+  "emails": {
+   "careers@advizorpro.com": "https://advizorpro.com/careers",
+   "privacy@advizorpro.com": "https://advizorpro.com/privacy-policy"
+  },
+  "pages": 7,
+  "reachable": true,
+  "given": "privacy@advizorpro.com"
+ },
+ "alice.com.br": {
+  "domain": "alice.com.br",
+  "emails": {
+   "dpo@alice.com.br": "https://alice.com.br/politica-de-privacidade"
+  },
+  "pages": 2,
+  "reachable": true,
+  "given": ""
+ },
+ "audibel.com": {
+  "domain": "audibel.com",
+  "emails": {
+   "media_contact@starkey.com": "https://www.audibel.com/about-audibel/contact-us/",
+   "data_privacy@starkey.com": "https://www.audibel.com/privacy-and-terms/",
+   "datenschutz@datenschutzbeauftragter-hamburg.de": "https://www.audibel.com/privacy-and-terms/"
+  },
+  "pages": 16,
+  "reachable": true,
+  "given": ""
+ },
+ "blinto.co": {
+  "domain": "blinto.co",
+  "emails": {
+   "hello@blinto.co": "https://blinto.co/",
+   "info@blinto.co": "https://blinto.co/privacy-policy/"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": "hello@blinto.co"
+ },
+ "bqe.com": {
+  "domain": "bqe.com",
+  "emails": {
+   "support@bqe.com": "https://www.bqe.com/company/contact",
+   "sales@bqe.com": "https://www.bqe.com/company/contact",
+   "careers@bqe.com": "https://www.bqe.com/company/careers",
+   "prrequest@bqe.com": "https://www.bqe.com/company/press",
+   "julienne@jastilleroconsulting.com": "https://www.bqe.com/company/partners"
+  },
+  "pages": 15,
+  "reachable": true,
+  "given": "sales@bqe.com"
+ },
+ "brightraiser.com": {
+  "domain": "brightraiser.com",
+  "emails": {
+   "support@brightraiser.com": "https://brightraiser.com/"
+  },
+  "pages": 3,
+  "reachable": true,
+  "given": ""
+ },
+ "courierexchange.co.uk": {
+  "domain": "courierexchange.co.uk",
+  "emails": {},
+  "pages": 9,
+  "reachable": true,
+  "given": "courierexchange.co.uk/contact-us/"
+ },
+ "dental13.hu": {
+  "domain": "dental13.hu",
+  "emails": {},
+  "pages": 5,
+  "reachable": true,
+  "given": ""
+ },
+ "dsautomobiles.com": {
+  "domain": "dsautomobiles.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "excellenceresorts.com": {
+  "domain": "excellenceresorts.com",
+  "emails": {
+   "playamujeres@excellenceresorts.com": "https://www.excellenceresorts.com/",
+   "info@excellenceresorts.com": "https://www.excellenceresorts.com/",
+   "rivieracancun@excellenceresorts.com": "https://www.excellenceresorts.com/",
+   "puntacana@excellenceresorts.com": "https://www.excellenceresorts.com/",
+   "guestexperience.xec@excellenceresorts.com": "https://www.excellenceresorts.com/",
+   "oysterbay@excellenceresorts.com": "https://www.excellenceresorts.com/",
+   "privacy@theexcellencecollection.com": "https://www.excellenceresorts.com/legal/",
+   "info@theexcellencecollection.com": "https://www.excellenceresorts.com/legal/"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": "privacy@theexcellencecollection.com"
+ },
+ "expreso.ec": {
+  "domain": "expreso.ec",
+  "emails": {
+   "servicioalcliente@granasa.com.ec": "https://www.expreso.ec/"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": ""
+ },
+ "frameworksec.com": {
+  "domain": "frameworksec.com",
+  "emails": {
+   "contact@frameworksecurity.com": "https://frameworksecurity.com/",
+   "contact@frameworksec.com": "https://frameworksecurity.com/contact"
+  },
+  "pages": 17,
+  "reachable": true,
+  "given": "contact@frameworksec.com"
+ },
+ "gomammoth.co.uk": {
+  "domain": "gomammoth.co.uk",
+  "emails": {
+   "corporate@gomammoth.co.uk": "https://www.gomammoth.co.uk/need-help/",
+   "hello@gomammoth.co.uk": "https://www.gomammoth.co.uk/need-help/",
+   "members@gomammoth.co.uk": "https://www.gomammoth.co.uk/need-help/",
+   "jobs@gomammoth.co.uk": "https://www.gomammoth.co.uk/contact/",
+   "enquiries@gomammoth.co.uk": "https://www.gomammoth.co.uk/contact/",
+   "press@gomammoth.co.uk": "https://www.gomammoth.co.uk/contact/",
+   "venues@gomammoth.co.uk": "https://www.gomammoth.co.uk/contact/",
+   "sponsorship@gomammoth.co.uk": "https://www.gomammoth.co.uk/contact/"
+  },
+  "pages": 11,
+  "reachable": true,
+  "given": ""
+ },
+ "hangerclinic.com": {
+  "domain": "hangerclinic.com",
+  "emails": {
+   "marketing@hanger.com": "https://hangerclinic.com/privacy-policy/"
+  },
+  "pages": 15,
+  "reachable": true,
+  "given": ""
+ },
+ "haystravel.co.uk": {
+  "domain": "haystravel.co.uk",
+  "emails": {
+   "pressoffice@hays-travel.co.uk": "https://www.haystravel.co.uk/about-us/",
+   "dpmanager@hays-travel.co.uk": "https://www.haystravel.co.uk/privacy-policy/"
+  },
+  "pages": 16,
+  "reachable": true,
+  "given": ""
+ },
+ "heavyglare.com": {
+  "domain": "heavyglare.com",
+  "emails": {
+   "info@heavyglare.com": "https://heavyglare.com/",
+   "ninfo@heavyglare.com": "https://heavyglare.com/pages/contact"
+  },
+  "pages": 5,
+  "reachable": true,
+  "given": "info@heavyglare.com"
+ },
+ "honestcard.com": {
+  "domain": "honestcard.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "houseaccount.com": {
+  "domain": "houseaccount.com",
+  "emails": {
+   "support@houseaccount.com": "https://houseaccount.com/privacy"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": ""
+ },
+ "iade.europeia.pt": {
+  "domain": "iade.europeia.pt",
+  "emails": {
+   "dpo@universidadeeuropeia.pt": "https://www.iade.europeia.pt/politica-privacidade/",
+   "admissions@iade.pt": "https://www.iade.europeia.pt/contactos/",
+   "admissoes.online@iade.pt": "https://www.iade.europeia.pt/contactos/"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": ""
+ },
+ "jellyfish.com": {
+  "domain": "jellyfish.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "leasey.ai": {
+  "domain": "leasey.ai",
+  "emails": {
+   "info@leasey.ai": "https://www.leasey.ai/"
+  },
+  "pages": 15,
+  "reachable": true,
+  "given": "info@leasey.ai"
+ },
+ "liberationranches.com": {
+  "domain": "liberationranches.com",
+  "emails": {
+   "info@liberationranches.com": "https://liberationranches.com/"
+  },
+  "pages": 11,
+  "reachable": true,
+  "given": "info@liberationranches.com"
+ },
+ "getmaude.com": {
+  "domain": "getmaude.com",
+  "emails": {
+   "orders@getmaude.com": "https://getmaude.com/",
+   "press@getmaude.com": "https://getmaude.com/pages/contact"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": "privacy@getmaude.com"
+ },
+ "memphistours.com": {
+  "domain": "memphistours.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": "info@memphistours.com"
+ },
+ "moveoverseasnow.com": {
+  "domain": "moveoverseasnow.com",
+  "emails": {
+   "shawna@moveoverseasnow.com": "https://moveoverseasnow.com/",
+   "coaching@thegoodsisbrand.com": "https://moveoverseasnow.com/privacy-policy/"
+  },
+  "pages": 11,
+  "reachable": true,
+  "given": ""
+ },
+ "myblackout.com.au": {
+  "domain": "myblackout.com.au",
+  "emails": {
+   "help@myblackout.com.au": "https://myblackout.com.au/"
+  },
+  "pages": 5,
+  "reachable": true,
+  "given": "help@myblackout.com.au"
+ },
+ "newcastlesys.com": {
+  "domain": "newcastlesys.com",
+  "emails": {
+   "sales@newcastlesys.com": "https://www.newcastlesys.com/",
+   "bcorbett@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "bcooper@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "service@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "customerservice@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "ehollingsworth@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "ggootee@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "bwhite@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "cwheeler@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "s.wetzler@laubner.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "dsisto@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "dskocic@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "kledversis@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "lyablonicky@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "jcorrea@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "phoskins@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "kmaria@newcastlesys.com": "https://www.newcastlesys.com/find-your-sales-contact",
+   "hr@supplypoint.com": "https://www.newcastlesys.com/careers"
+  },
+  "pages": 10,
+  "reachable": true,
+  "given": "sales@newcastlesys.com"
+ },
+ "ongediertewinkel.nl": {
+  "domain": "ongediertewinkel.nl",
+  "emails": {
+   "info@ongediertewinkel.nl": "https://ongediertewinkel.nl/"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": "info@ongediertewinkel.nl"
+ },
+ "permitflow.com": {
+  "domain": "permitflow.com",
+  "emails": {
+   "security@permitflow.com": "https://www.permitflow.com/privacy-policy"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": "security@permitflow.com"
+ },
+ "prontopaguei.com.br": {
+  "domain": "prontopaguei.com.br",
+  "emails": {},
+  "pages": 1,
+  "reachable": true,
+  "given": ""
+ },
+ "reevul.com": {
+  "domain": "reevul.com",
+  "emails": {
+   "support@swissklip.com": "https://www.reevul.com/privacy-policy/"
+  },
+  "pages": 12,
+  "reachable": true,
+  "given": ""
+ },
+ "reviews.io": {
+  "domain": "reviews.io",
+  "emails": {
+   "info@clearer.io": "https://www.reviews.io/legal/termsconditions",
+   "gdpr@reviews.io": "https://www.reviews.io/legal/user-privacy-policy",
+   "gdpr@reviews.co.uk": "https://www.reviews.io/legal/user-privacy-policy",
+   "support@reviews.io": "https://www.reviews.io/legal/user-privacy-policy",
+   "privacy@reviews.io": "https://www.reviews.io/legal/user-privacy-policy"
+  },
+  "pages": 12,
+  "reachable": true,
+  "given": ""
+ },
+ "rnib.org.uk": {
+  "domain": "rnib.org.uk",
+  "emails": {
+   "helpline@rnib.org.uk": "https://www.rnib.org.uk",
+   "fundraising@rnib.org.uk": "https://www.rnib.org.uk/eye-care-information-advice-and-support-by-email/",
+   "dataprotectionofficer@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/navigating-sight-loss/eye-care-services-and-roles/eye-care-liaison-officers-eclos/eclo-privacy-policy/",
+   "james.adams@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "john.dixon@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "robert.shilliday@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "laura.jones@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "eyecaresupportpathway@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "helen.doyle@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "ansley.workman@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "gillian.hallard@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "gillian.clifford@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "robert.cooper@rnib.org.uk": "https://www.rnib.org.uk/your-eyes/the-eye-care-support-pathway/",
+   "lwwslenquiries@rnib.org.uk": "https://www.rnib.org.uk/living-with-sight-loss/assistive-aids-and-technology/technology-support-and-training/technology-support-we-offer/",
+   "tfl@rnib.org": "https://www.rnib.org.uk/living-with-sight-loss/assistive-aids-and-technology/technology-support-and-training/",
+   "tfl@rnib.org.uk": "https://www.rnib.org.uk/living-with-sight-loss/assistive-aids-and-technology/technology-support-and-training/successful-partnerships-with-technology-for-life/",
+   "05%7c01%7cgemma.woodward@rnib.org.uk": "https://www.rnib.org.uk/living-with-sight-loss/money-and-benefits/benefits-concessions-and-grants/employment-and-support-allowance-esa/",
+   "05%7c01%7cdigitalteam.mailbox@rnib.org.uk": "https://www.rnib.org.uk/living-with-sight-loss/money-and-benefits/cost-of-living-payments-and-information/cost-of-living/find-practical-help/",
+   "employmentline@rnib.org.uk": "https://www.rnib.org.uk/living-with-sight-loss/education-and-learning/education-for-young-people/finding-a-careers-advisor/",
+   "employmentni@rnib.org.uk": "https://www.rnib.org.uk/living-with-sight-loss/education-and-learning/education-for-young-people/finding-a-careers-advisor/",
+   "05%7c02%7cjane.sharp@rnib.org.uk": "https://www.rnib.org.uk/living-with-sight-loss/supporting-others/left-out-of-learning/",
+   "cypf@rnib.org.uk": "https://www.rnib.org.uk/living-with-sight-loss/supporting-others/left-out-of-learning/"
+  },
+  "pages": 23,
+  "reachable": true,
+  "given": ""
+ },
+ "smartenergy.com.au": {
+  "domain": "smartenergy.com.au",
+  "emails": {},
+  "pages": 13,
+  "reachable": true,
+  "given": ""
+ },
+ "spamedica.co.uk": {
+  "domain": "spamedica.co.uk",
+  "emails": {
+   "casework@ico.org.uk": "https://www.spamedica.co.uk/patient-information/privacy-notice/",
+   "dpo@spamedica.co.uk": "https://www.spamedica.co.uk/patient-information/privacy-notice/",
+   "contact@spamedica.co.uk": "https://www.spamedica.co.uk/privacy-policy/"
+  },
+  "pages": 21,
+  "reachable": true,
+  "given": "dpo@spamedica.co.uk"
+ },
+ "specsy.com": {
+  "domain": "specsy.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "teamout.com": {
+  "domain": "teamout.com",
+  "emails": {
+   "destinations@teamout.com": "https://www.teamout.com/destination-management-company-service",
+   "thomas@teamout.com": "https://www.teamout.com/contact",
+   "sales@teamout.com": "https://www.teamout.com/contact",
+   "privacy@teamout.comuk": "https://www.teamout.com/privacy-policy",
+   "eu@teamout.com": "https://www.teamout.com/privacy-policy",
+   "uk@teamout.com": "https://www.teamout.com/privacy-policy",
+   "privacy@teamout.com": "https://www.teamout.com/privacy-policy"
+  },
+  "pages": 12,
+  "reachable": true,
+  "given": "privacy@teamout.com"
+ },
+ "telus.com": {
+  "domain": "telus.com",
+  "emails": {
+   "telushealthmypet@telus.com": "https://www.telus.com/en/support/contact-us",
+   "privacy@telus.com": "https://www.telus.com/en/support/article/telus-rewards-program-terms-and-conditions",
+   "ti_gic_ta@telusdigital.com": "https://www.telus.com/en/about/careers",
+   "employment@telus.com": "https://www.telus.com/en/about/careers",
+   "liz.sauve@telus.com": "https://www.telus.com/en/about/newsroom",
+   "martin.nguyen@telus.com": "https://www.telus.com/en/about/newsroom",
+   "danielle.benn@telus.com": "https://www.telus.com/en/about/newsroom",
+   "brandi.rees@telus.com": "https://www.telus.com/en/about/newsroom",
+   "steve.beisswanger@telus.com": "https://www.telus.com/en/about/newsroom",
+   "camille.grenier@telus.com": "https://www.telus.com/en/about/newsroom",
+   "jacinthe.beaulieu@telus.com": "https://www.telus.com/en/about/newsroom",
+   "camille.finnegan@telus.com": "https://www.telus.com/en/about/newsroom",
+   "tricia.lo@telus.com": "https://www.telus.com/en/about/newsroom",
+   "emily.piccinin@telus.com": "https://www.telus.com/en/about/newsroom",
+   "jill.yeman@telus.com": "https://www.telus.com/en/about/newsroom",
+   "chelsey.higdon@telus.com": "https://www.telus.com/en/about/newsroom",
+   "richard.gilhooley@telus.com": "https://www.telus.com/en/about/newsroom",
+   "datatrustoffice@telus.com": "https://www.telus.com/en/about/trust"
+  },
+  "pages": 20,
+  "reachable": true,
+  "given": ""
+ },
+ "ewm.co.uk": {
+  "domain": "ewm.co.uk",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "outsidersmusical.com": {
+  "domain": "outsidersmusical.com",
+  "emails": {
+   "privacy@outsidersmusical.com": "https://outsidersmusical.com/privacy-policy/"
+  },
+  "pages": 7,
+  "reachable": true,
+  "given": "privacy@outsidersmusical.com"
+ },
+ "todas.cz": {
+  "domain": "todas.cz",
+  "emails": {},
+  "pages": 1,
+  "reachable": true,
+  "given": ""
+ },
+ "twine.net": {
+  "domain": "twine.net",
+  "emails": {
+   "support@twine.net": "https://www.twine.net/",
+   "privacy@twine.net": "https://www.twine.net/privacy"
+  },
+  "pages": 16,
+  "reachable": true,
+  "given": ""
+ },
+ "virtualpreparatoryacademy.com": {
+  "domain": "virtualpreparatoryacademy.com",
+  "emails": {},
+  "pages": 4,
+  "reachable": true,
+  "given": ""
+ },
+ "wunlawealth.com": {
+  "domain": "wunlawealth.com",
+  "emails": {
+   "contact@wunlawealth.com": "https://www.wunlawealth.com/",
+   "wunlawealth@gmail.com": "https://www.wunlawealth.com/"
+  },
+  "pages": 5,
+  "reachable": true,
+  "given": "contact@wunlawealth.com"
+ },
+ "z2data.com": {
+  "domain": "z2data.com",
+  "emails": {
+   "info@z2data.com": "https://www.z2data.com/",
+   "sales@z2data.com": "https://www.z2data.com/"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": "sales@z2data.com"
+ },
+ "1nce.com": {
+  "domain": "1nce.com",
+  "emails": {
+   "brad@chaseglobal.media": "https://www.1nce.com/en-us/resources/news/press-releases/1nce-raises-60-million-usd-in-new-funding",
+   "info@1nce.com": "https://www.1nce.com/en-us/imprint"
+  },
+  "pages": 19,
+  "reachable": true,
+  "given": ""
+ },
+ "apuestatotal.com": {
+  "domain": "apuestatotal.com",
+  "emails": {},
+  "pages": 1,
+  "reachable": true,
+  "given": ""
+ },
+ "askrocco.com": {
+  "domain": "askrocco.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "bkadvisory.com.au": {
+  "domain": "bkadvisory.com.au",
+  "emails": {
+   "craig@bolcorp.com.au": "https://www.bolcorp.com.au/contact-us"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": ""
+ },
+ "brinqa.com": {
+  "domain": "brinqa.com",
+  "emails": {
+   "info@brinqa.com": "https://www.brinqa.com/"
+  },
+  "pages": 12,
+  "reachable": true,
+  "given": "info@brinqa.com"
+ },
+ "brunobanani.com": {
+  "domain": "brunobanani.com",
+  "emails": {
+   "service@brunobanani.com": "https://brunobanani.com/info/kontakt/",
+   "fashion@brunobanani.de": "https://brunobanani.com/rechtliches/impressum/",
+   "steffen.stiehler@bsw-mail.de": "https://brunobanani.com/rechtliches/datenschutz/",
+   "bewerbung@brunobanani.de": "https://brunobanani.com/rechtliches/datenschutz-bewerbungen/"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": ""
+ },
+ "carahsoft.com": {
+  "domain": "carahsoft.com",
+  "emails": {
+   "contracts@carahsoft.com": "https://www.carahsoft.com/",
+   "innovation@carahsoft.com": "https://www.carahsoft.com/",
+   "sales@carahsoft.com": "https://www.carahsoft.com/",
+   "partners@carahsoft.com": "https://www.carahsoft.com/",
+   "legaltech@carahsoft.com": "https://www.carahsoft.com/solve/legal-courtroom-technology",
+   "rim@carahsoft.com": "https://www.carahsoft.com/solve/records-management",
+   "scrm@carahsoft.com": "https://www.carahsoft.com/solve/supply-chain-management",
+   "jessica.smith@carahsoft.com": "https://www.carahsoft.com/careers",
+   "pr@carahsoft.com": "https://www.carahsoft.com/news/oxide-computer-company-and-carahsoft-partner-to-bring-on-premise-cloud-computing-to-the-public-sector-2026",
+   "oxide@carahsoft.com": "https://www.carahsoft.com/news/oxide-computer-company-and-carahsoft-partner-to-bring-on-premise-cloud-computing-to-the-public-sector-2026",
+   "media@oxide.computer": "https://www.carahsoft.com/news/oxide-computer-company-and-carahsoft-partner-to-bring-on-premise-cloud-computing-to-the-public-sector-2026",
+   "carahsoft.privacy@carahsoft.com": "https://www.carahsoft.com/privacy-policy"
+  },
+  "pages": 10,
+  "reachable": true,
+  "given": "partners@carahsoft.com"
+ },
+ "classkick.com": {
+  "domain": "classkick.com",
+  "emails": {
+   "hi@classkick.com": "https://classkick.com/contact",
+   "support@classkick.com": "https://classkick.com/contact",
+   "pro@classkick.com": "https://classkick.com/contact"
+  },
+  "pages": 6,
+  "reachable": true,
+  "given": "hi@classkick.com"
+ },
+ "cogenesis.com.au": {
+  "domain": "cogenesis.com.au",
+  "emails": {
+   "contact@cogenesis.com.au": "https://cogenesis.com.au/"
+  },
+  "pages": 19,
+  "reachable": true,
+  "given": ""
+ },
+ "colorfil.com": {
+  "domain": "colorfil.com",
+  "emails": {
+   "help@colorfil.com": "https://www.colorfil.com/"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": "help@colorfil.com"
+ },
+ "comohotels.com": {
+  "domain": "comohotels.com",
+  "emails": {
+   "careers@comohotels.com": "https://www.comohotels.com/careers",
+   "privacy@comohotels.com": "https://www.comohotels.com/privacy-statement",
+   "comoshambhala.ctt@comohotels.com": "https://www.comohotels.com/contact-us",
+   "alpinadolomites@comohotels.com": "https://www.comohotels.com/contact-us",
+   "tania@grimaudcomms.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cml@comohotels.com": "https://www.comohotels.com/contact-us",
+   "felipe.gomez@comohotels.com": "https://www.comohotels.com/contact-us",
+   "jonica.paramor@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cdn@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cpy@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cup@comohotels.com": "https://www.comohotels.com/contact-us",
+   "louise.james@comohotels.com": "https://www.comohotels.com/contact-us",
+   "res.lebeauvallon@comohotels.com": "https://www.comohotels.com/contact-us",
+   "concierge@comoshambhala.com": "https://www.comohotels.com/contact-us",
+   "parrotcay@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cmb@comohotels.com": "https://www.comohotels.com/contact-us",
+   "linda.linzetto@comohotels.com": "https://www.comohotels.com/contact-us",
+   "info@comohotels.com": "https://www.comohotels.com/contact-us",
+   "enquiry@comoshambhala.com": "https://www.comohotels.com/contact-us",
+   "nicola.wood@comohotels.com": "https://www.comohotels.com/contact-us",
+   "maalifushi@comohotels.com": "https://www.comohotels.com/contact-us",
+   "philip@pepr.com.au": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cuu@comohotels.com": "https://www.comohotels.com/contact-us",
+   "met.lon@comohotels.com": "https://www.comohotels.com/contact-us",
+   "como.cordeillanbages@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cad@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cuc@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cmf@comohotels.com": "https://www.comohotels.com/contact-us",
+   "cocoaisland@comohotels.com": "https://www.comohotels.com/contact-us",
+   "uma.ubud@comohotels.com": "https://www.comohotels.com/contact-us",
+   "thehalkin@comohotels.com": "https://www.comohotels.com/contact-us",
+   "como.canggu@comohotels.com": "https://www.comohotels.com/contact-us",
+   "como.thetreasury@comohotels.com": "https://www.comohotels.com/contact-us",
+   "ivy.li@comohotels.com": "https://www.comohotels.com/contact-us",
+   "taufik.rahman@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cci@comohotels.com": "https://www.comohotels.com/contact-us",
+   "birgit.albicker@comohotels.com": "https://www.comohotels.com/contact-us",
+   "judith.ronsdorf@comohotels.com": "https://www.comohotels.com/contact-us",
+   "pointyamu@comohotels.com": "https://www.comohotels.com/contact-us",
+   "res.uma.bhutan@comohotels.com": "https://www.comohotels.com/contact-us",
+   "met.bkk@comohotels.com": "https://www.comohotels.com/contact-us",
+   "erica.condon@comohotels.com": "https://www.comohotels.com/contact-us",
+   "lemontrachet@comohotels.com": "https://www.comohotels.com/contact-us",
+   "csestate@comohotels.com": "https://www.comohotels.com/contact-us",
+   "takashi.yamada@comohotels.com": "https://www.comohotels.com/contact-us",
+   "castellodelnero@comohotels.com": "https://www.comohotels.com/contact-us",
+   "metsin@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cse@comohotels.com": "https://www.comohotels.com/contact-us",
+   "como.italy@agencemelchior.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cub@comohotels.com": "https://www.comohotels.com/contact-us",
+   "comoshambhala.cpc@comohotels.com": "https://www.comohotels.com/contact-us",
+   "heike.goetz@segara.de": "https://www.comohotels.com/media-centre",
+   "como@brandmanpr.com": "https://www.comohotels.com/media-centre",
+   "rina.ishizuka@comohotels.com": "https://www.comohotels.com/media-centre",
+   "alegesuelli@gmail.com": "https://www.comohotels.com/media-centre",
+   "comohotels@foxcomms.com": "https://www.comohotels.com/media-centre",
+   "como@agencemelchior.com": "https://www.comohotels.com/media-centre"
+  },
+  "pages": 17,
+  "reachable": true,
+  "given": ""
+ },
+ "compliancequest.com": {
+  "domain": "compliancequest.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "drsharondickerson.com": {
+  "domain": "drsharondickerson.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "elitlawyers.com.au": {
+  "domain": "elitlawyers.com.au",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "feelpure.fr": {
+  "domain": "feelpure.fr",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "fiat.fr": {
+  "domain": "fiat.fr",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "firstorion.com": {
+  "domain": "firstorion.com",
+  "emails": {
+   "user@target.com": "https://firstorion.com/",
+   "media@firstorion.com": "https://firstorion.com/press-releases/first-orion-vodafone-branded-calling-ireland",
+   "sthompson@tmcnet.com": "https://firstorion.com/press-releases/first-orion-tmc-communications-solutions-award-2026",
+   "careers@firstorion.com": "https://firstorion.com/careers",
+   "accounting@firstorion.com": "https://firstorion.com/legal",
+   "privacy@firstorion.com": "https://firstorion.com/legal",
+   "legal@firstorion.com": "https://firstorion.com/legal",
+   "support@firstorion.com": "https://firstorion.com/legal",
+   "enterprisesupport@firstorion.com": "https://firstorion.com/legal",
+   "incident@firstorion.com": "https://firstorion.com/legal",
+   "eu.enterprisesupport@firstorion.com": "https://firstorion.com/legal"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": "privacy@firstorion.com"
+ },
+ "fitr.training": {
+  "domain": "fitr.training",
+  "emails": {
+   "support@fitr.training": "https://www.coachwithfitr.com/",
+   "ryan@client.com": "https://www.coachwithfitr.com/",
+   "probablycorey@gmail.com": "https://www.coachwithfitr.com/legals/open-source",
+   "laurent@spkdev.net": "https://www.coachwithfitr.com/legals/open-source",
+   "chris@forgemotion.com": "https://www.coachwithfitr.com/legals/open-source",
+   "snatchev@google.com": "https://www.coachwithfitr.com/legals/open-source",
+   "andrey@sitnik.ru": "https://www.coachwithfitr.com/legals/open-source",
+   "code@baianat.com": "https://www.coachwithfitr.com/legals/open-source",
+   "0x142857@gmail.com": "https://www.coachwithfitr.com/legals/open-source",
+   "matz@netlab.jp": "https://www.coachwithfitr.com/legals/open-source",
+   "daniel.griesser.86@gmail.com": "https://www.coachwithfitr.com/legals/open-source",
+   "enterprise@coachwithfitr.com": "https://www.coachwithfitr.com/legals/enterprise-plan"
+  },
+  "pages": 10,
+  "reachable": true,
+  "given": "support@fitr.training"
+ },
+ "flowspace.com": {
+  "domain": "flowspace.com",
+  "emails": {
+   "mail@flowspace.com": "http://flowspace.com/contact.html"
+  },
+  "pages": 3,
+  "reachable": true,
+  "given": ""
+ },
+ "foundr.com": {
+  "domain": "foundr.com",
+  "emails": {
+   "support@foundr.com": "https://foundr.com/",
+   "marketing@foundr.com": "https://foundr.com/contact"
+  },
+  "pages": 8,
+  "reachable": true,
+  "given": ""
+ },
+ "fremontmotors.com": {
+  "domain": "fremontmotors.com",
+  "emails": {},
+  "pages": 8,
+  "reachable": true,
+  "given": ""
+ },
+ "funraise.org": {
+  "domain": "funraise.org",
+  "emails": {
+   "hello@funraise.io": "https://www.funraise.org/contact-sales",
+   "hello@funraise.org": "https://www.funraise.org/contact",
+   "support@funraise.org": "https://www.funraise.org/about/terms-and-conditions"
+  },
+  "pages": 13,
+  "reachable": true,
+  "given": "hello@funraise.org"
+ },
+ "fyeo.nl": {
+  "domain": "fyeo.nl",
+  "emails": {
+   "eindhoven@fyeo.nl": "https://fyeo.nl/contact/",
+   "rotterdam@fyeo.nl": "https://fyeo.nl/contact/",
+   "breda@fyeo.nl": "https://fyeo.nl/contact/",
+   "nijmegen@fyeo.nl": "https://fyeo.nl/contact/",
+   "amsterdam@fyeo.nl": "https://fyeo.nl/contact/",
+   "urmond@fyeo.nl": "https://fyeo.nl/contact/",
+   "utrecht@fyeo.nl": "https://fyeo.nl/contact/",
+   "zwolle@fyeo.nl": "https://fyeo.nl/contact/",
+   "leiden@fyeo.nl": "https://fyeo.nl/contact/",
+   "eersel@fyeo.nl": "https://fyeo.nl/contact/",
+   "haarlem@fyeo.nl": "https://fyeo.nl/contact/",
+   "alkmaar@fyeo.nl": "https://fyeo.nl/contact/",
+   "enschede@fyeo.nl": "https://fyeo.nl/contact/",
+   "denbosch@fyeo.nl": "https://fyeo.nl/contact/",
+   "arnhem@fyeo.nl": "https://fyeo.nl/contact/",
+   "nazorg@fyeo.nl": "https://fyeo.nl/over-ons/kwaliteit/klachten/",
+   "info@fyeo.nl": "https://fyeo.nl/privacy/",
+   "kwaliteit@fyeo.nl": "https://fyeo.nl/privacy/",
+   "adevos@qvox.nl": "https://fyeo.nl/privacy/",
+   "clientenvoorlichting@fyeo.nl": "https://fyeo.nl/privacy/"
+  },
+  "pages": 19,
+  "reachable": true,
+  "given": ""
+ },
+ "hybel.no": {
+  "domain": "hybel.no",
+  "emails": {},
+  "pages": 2,
+  "reachable": true,
+  "given": ""
+ },
+ "iamclinic.com": {
+  "domain": "iamclinic.com",
+  "emails": {},
+  "pages": 1,
+  "reachable": true,
+  "given": ""
+ },
+ "igive.com": {
+  "domain": "igive.com",
+  "emails": {
+   "support@igive.com": "https://www.iGive.com/welcome/lp19/index.cfm"
+  },
+  "pages": 16,
+  "reachable": true,
+  "given": "support@igive.com"
+ },
+ "imaginovation.net": {
+  "domain": "imaginovation.net",
+  "emails": {
+   "pperanzo@imaginovation.net.when": "https://imaginovation.net/privacy-policy/",
+   "pperanzo@imaginovation.net": "https://imaginovation.net/privacy-policy/",
+   "sales@imaginovation.net": "https://imaginovation.net/privacy-policy/"
+  },
+  "pages": 8,
+  "reachable": true,
+  "given": ""
+ },
+ "ipam.pt": {
+  "domain": "ipam.pt",
+  "emails": {
+   "dpo@universidadeeuropeia.pt": "https://www.ipam.pt/politica-privacidade/",
+   "admissoes.online@ipam.pt": "https://www.ipam.pt/contactos/",
+   "admissions.porto@ipam.pt": "https://www.ipam.pt/contactos/",
+   "admissions.lisboa@ipam.pt": "https://www.ipam.pt/contactos/",
+   "direitos.dados@ipam.pt": "https://www.ipam.pt/aviso-legal/"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": ""
+ },
+ "jamloop.com": {
+  "domain": "jamloop.com",
+  "emails": {
+   "privacy@jamloop.com": "https://jamloop.com/privacy-policy"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": ""
+ },
+ "jovasmoothie.com": {
+  "domain": "jovasmoothie.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "kcbi.org": {
+  "domain": "kcbi.org",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "krotosaudio.com": {
+  "domain": "krotosaudio.com",
+  "emails": {
+   "info@krotosaudio.com": "https://www.krotosaudio.com/privacy-policy/"
+  },
+  "pages": 15,
+  "reachable": true,
+  "given": ""
+ },
+ "madomiciliation.fr": {
+  "domain": "madomiciliation.fr",
+  "emails": {},
+  "pages": 2,
+  "reachable": true,
+  "given": ""
+ },
+ "maidpro.com": {
+  "domain": "maidpro.com",
+  "emails": {
+   "buffalo.ny@maidpro.com": "https://maidpro.com/",
+   "gardencity.mi@maidpro.com": "https://maidpro.com/",
+   "jeffersoncity.mo@maidpro.com": "https://maidpro.com/",
+   "warnerrobins.ga@maidpro.com": "https://maidpro.com/",
+   "elgin.il@maidpro.com": "https://maidpro.com/",
+   "fredericksburg.va@maidpro.com": "https://maidpro.com/",
+   "sf.ca@maidpro.com": "https://maidpro.com/",
+   "gastonia.nc@maidpro.com": "https://maidpro.com/",
+   "indianapolis.in@maidpro.com": "https://maidpro.com/",
+   "kcfeedback@maidpro.com": "https://maidpro.com/",
+   "lagrange.il@maidpro.com": "https://maidpro.com/",
+   "layton.ut@maidpro.com": "https://maidpro.com/",
+   "needham.ma@maidpro.com": "https://maidpro.com/",
+   "phoenix.az@maidpro.com": "https://maidpro.com/",
+   "thewoodlands.tx@maidpro.com": "https://maidpro.com/",
+   "columbus.ga@maidpro.com": "https://maidpro.com/",
+   "fortmyers.fl@maidpro.com": "https://maidpro.com/",
+   "lakenorman.nc@maidpro.com": "https://maidpro.com/",
+   "omaha.ne@maidpro.com": "https://maidpro.com/",
+   "claycounty.fl@maidpro.com": "https://maidpro.com/",
+   "burleson.tx@maidpro.com": "https://maidpro.com/",
+   "denver.co@maidpro.com": "https://maidpro.com/",
+   "pearland.tx@maidpro.com": "https://maidpro.com/",
+   "collegestation.tx@maidpro.com": "https://maidpro.com/",
+   "mcmurray.pa@maidpro.com": "https://maidpro.com/",
+   "southcharlotte.nc@maidpro.com": "https://maidpro.com/",
+   "catonsville.md@maidpro.com": "https://maidpro.com/",
+   "flowermound.tx@maidpro.com": "https://maidpro.com/",
+   "nashville.tn@maidpro.com": "https://maidpro.com/",
+   "springfield.ma@maidpro.com": "https://maidpro.com/",
+   "tampa.fl@maidpro.com": "https://maidpro.com/",
+   "spacecoast.fl@maidpro.com": "https://maidpro.com/",
+   "middletown.nj@maidpro.com": "https://maidpro.com/",
+   "chestnuthill.pa@maidpro.com": "https://maidpro.com/",
+   "sanantonio.tx@maidpro.com": "https://maidpro.com/",
+   "wildomar.ca@maidpro.com": "https://maidpro.com/",
+   "wichita.ks@maidpro.com": "https://maidpro.com/",
+   "centralbucks.pa@maidpro.com": "https://maidpro.com/",
+   "clarksville.tn@maidpro.com": "https://maidpro.com/",
+   "lehighvalley.pa@maidpro.com": "https://maidpro.com/",
+   "lowermanhattan.ny@maidpro.com": "https://maidpro.com/",
+   "sanjose.ca@maidpro.com": "https://maidpro.com/",
+   "wentzville.mo@maidpro.com": "https://maidpro.com/",
+   "naperville.il@maidpro.com": "https://maidpro.com/",
+   "capecod.ma@maidpro.com": "https://maidpro.com/",
+   "cypress.ca@maidpro.com": "https://maidpro.com/",
+   "pasadena.ca@maidpro.com": "https://maidpro.com/",
+   "cedarrapids.ia@maidpro.com": "https://maidpro.com/",
+   "estimates.sea@maidpro.com": "https://maidpro.com/",
+   "danbury.ct@maidpro.com": "https://maidpro.com/",
+   "hightstown.nj@maidpro.com": "https://maidpro.com/",
+   "mclean.va@maidpro.com": "https://maidpro.com/",
+   "denton@maidpro.com": "https://maidpro.com/",
+   "mooresville.nc@maidpro.com": "https://maidpro.com/",
+   "customer_service_chisw@maidpro.com": "https://maidpro.com/",
+   "jsollinger@maidpro.com": "https://maidpro.com/",
+   "plano.tx@maidpro.com": "https://maidpro.com/",
+   "henrico.va@maidpro.com": "https://maidpro.com/",
+   "agourahills.ca@maidpro.com": "https://maidpro.com/",
+   "batonrouge@maidpro.com": "https://maidpro.com/",
+   "florence.ky@maidpro.com": "https://maidpro.com/",
+   "birmingham.al@maidpro.com": "https://maidpro.com/",
+   "lakeland.fl@maidpro.com": "https://maidpro.com/",
+   "reno.nv@maidpro.com": "https://maidpro.com/",
+   "charleston.sc@maidpro.com": "https://maidpro.com/",
+   "haverhill.ma@maidpro.com": "https://maidpro.com/",
+   "kissimmee.fl@maidpro.com": "https://maidpro.com/",
+   "columbia.mo@maidpro.com": "https://maidpro.com/",
+   "barrie.on@maidpro.com": "https://maidpro.com/",
+   "ashburn.va@maidpro.com": "https://maidpro.com/",
+   "mgsupport@maidpro.com": "https://maidpro.com/",
+   "salisbury.nc@maidpro.com": "https://maidpro.com/",
+   "temecula@maidpro.com": "https://maidpro.com/",
+   "southoc@maidpro.com": "https://maidpro.com/",
+   "manhattanbeach.ca@maidpro.com": "https://maidpro.com/",
+   "mason.oh@maidpro.com": "https://maidpro.com/",
+   "mtjuliet.tn@maidpro.com": "https://maidpro.com/",
+   "tacoma.wa@maidpro.com": "https://maidpro.com/",
+   "topeka.ks@maidpro.com": "https://maidpro.com/",
+   "providence.ri@maidpro.com": "https://maidpro.com/",
+   "annapolisvalley@maidpro.com": "https://maidpro.com/",
+   "coopercity.fl@maidpro.com": "https://maidpro.com/",
+   "centralcharlotte.nc@maidpro.com": "https://maidpro.com/",
+   "baltimore.md@maidpro.com": "https://maidpro.com/",
+   "leduc@maidpro.com": "https://maidpro.com/",
+   "parker.co@maidpro.com": "https://maidpro.com/",
+   "woodbury.mn@maidpro.com": "https://maidpro.com/",
+   "thevillages.fl@maidpro.com": "https://maidpro.com/",
+   "lincolnpark.il@maidpro.com": "https://maidpro.com/",
+   "stcharles.mo@maidpro.com": "https://maidpro.com/",
+   "greenville.sc@maidpro.com": "https://maidpro.com/",
+   "chicagowp@maidpro.com": "https://maidpro.com/",
+   "buckhead.ga@maidpro.com": "https://maidpro.com/",
+   "dayton.oh@maidpro.com": "https://maidpro.com/",
+   "wilmington.de@maidpro.com": "https://maidpro.com/",
+   "exton.pa@maidpro.com": "https://maidpro.com/",
+   "abbotsford.bc@maidpro.com": "https://maidpro.com/",
+   "clevelandnorth.oh@maidpro.com": "https://maidpro.com/",
+   "orange.ca@maidpro.com": "https://maidpro.com/",
+   "ftmitchell.ky@maidpro.com": "https://maidpro.com/",
+   "raleighnorth@maidpro.com": "https://maidpro.com/",
+   "southbend.in@maidpro.com": "https://maidpro.com/",
+   "cincinnati.oh@maidpro.com": "https://maidpro.com/",
+   "northaustin.tx@maidpro.com": "https://maidpro.com/",
+   "halifax.ns@maidpro.com": "https://maidpro.com/",
+   "huntsville.al@maidpro.com": "https://maidpro.com/",
+   "cherryhill.nj@maidpro.com": "https://maidpro.com/",
+   "coloradosprings.co@maidpro.com": "https://maidpro.com/",
+   "burloak.on@maidpro.com": "https://maidpro.com/",
+   "fairlawn.nj@maidpro.com": "https://maidpro.com/",
+   "media.pa@maidpro.com": "https://maidpro.com/",
+   "andover.mn@maidpro.com": "https://maidpro.com/",
+   "houston.tx@maidpro.com": "https://maidpro.com/",
+   "eastcharlotte.nc@maidpro.com": "https://maidpro.com/",
+   "northkc.mo@maidpro.com": "https://maidpro.com/",
+   "pooler.ga@maidpro.com": "https://maidpro.com/",
+   "chattanooga.tn@maidpro.com": "https://maidpro.com/",
+   "southmiami.fl@maidpro.com": "https://maidpro.com/",
+   "midcounty.mo@maidpro.com": "https://maidpro.com/",
+   "desmoines.ia@maidpro.com": "https://maidpro.com/",
+   "garner.nc@maidpro.com": "https://maidpro.com/",
+   "naples.fl@maidpro.com": "https://maidpro.com/",
+   "thehamptons.ny@maidpro.com": "https://maidpro.com/",
+   "spring-central.tx@maidpro.com": "https://maidpro.com/",
+   "littleton.co@maidpro.com": "https://maidpro.com/",
+   "stpetersburg.fl@maidpro.com": "https://maidpro.com/",
+   "lehi.ut@maidpro.com": "https://maidpro.com/",
+   "waterloo.ia@maidpro.com": "https://maidpro.com/",
+   "grapevine.tx@maidpro.com": "https://maidpro.com/",
+   "eauclaire.wi@maidpro.com": "https://maidpro.com/",
+   "abcustomerservice@maidpro.com": "https://maidpro.com/",
+   "capitolhill.dc@maidpro.com": "https://maidpro.com/",
+   "lombard.il@maidpro.com": "https://maidpro.com/",
+   "hendersonville.tn@maidpro.com": "https://maidpro.com/",
+   "lawrence.ks@maidpro.com": "https://maidpro.com/",
+   "sanmarcos.ca@maidpro.com": "https://maidpro.com/",
+   "bronx.ny@maidpro.com": "https://maidpro.com/",
+   "metrowest.ma@maidpro.com": "https://maidpro.com/",
+   "saltlakecity.ut@maidpro.com": "https://maidpro.com/",
+   "loucs@maidpro.com": "https://maidpro.com/",
+   "traversecity.mi@maidpro.com": "https://maidpro.com/",
+   "anniston.al@maidpro.com": "https://maidpro.com/",
+   "brunswick.nj@maidpro.com": "https://maidpro.com/",
+   "centralaustin.tx@maidpro.com": "https://maidpro.com/",
+   "dallas.tx@maidpro.com": "https://maidpro.com/",
+   "fortmill.sc@maidpro.com": "https://maidpro.com/",
+   "freehold.nj@maidpro.com": "https://maidpro.com/",
+   "greensboro.nc@maidpro.com": "https://maidpro.com/",
+   "joliet.il@maidpro.com": "https://maidpro.com/",
+   "sewell.nj@maidpro.com": "https://maidpro.com/",
+   "alexandriava@maidpro.com": "https://maidpro.com/",
+   "stgeorge.ut@maidpro.com": "https://maidpro.com/",
+   "clevelandsouth.oh@maidpro.com": "https://maidpro.com/",
+   "kenosha.wi@maidpro.com": "https://maidpro.com/",
+   "sarasota.fl@maidpro.com": "https://maidpro.com/",
+   "overlandpark.ks@maidpro.com": "https://maidpro.com/",
+   "riverside.ca@maidpro.com": "https://maidpro.com/",
+   "evanston.il@maidpro.com": "https://maidpro.com/",
+   "westpalm.fl@maidpro.com": "https://maidpro.com/",
+   "monroe.ny@maidpro.com": "https://maidpro.com/",
+   "cookeville.tn@maidpro.com": "https://maidpro.com/",
+   "triangle.nc@maidpro.com": "https://maidpro.com/",
+   "edmonds.wa@maidpro.com": "https://maidpro.com/",
+   "eastorlando.fl@maidpro.com": "https://maidpro.com/",
+   "fortlauderdale.fl@maidpro.com": "https://maidpro.com/",
+   "allen.tx@maidpro.com": "https://maidpro.com/",
+   "hampstead.nh@maidpro.com": "https://maidpro.com/",
+   "longvalley.nj@maidpro.com": "https://maidpro.com/",
+   "orlandowest@maidpro.com": "https://maidpro.com/",
+   "goldco@maidpro.com": "https://maidpro.com/",
+   "fortwayne.in@maidpro.com": "https://maidpro.com/",
+   "leaguecity.tx@maidpro.com": "https://maidpro.com/",
+   "langley.bc@maidpro.com": "https://maidpro.com/",
+   "westla.ca@maidpro.com": "https://maidpro.com/",
+   "metroatlanta@maidpro.com": "https://maidpro.com/",
+   "belair.md@maidpro.com": "https://maidpro.com/",
+   "northalabama@maidpro.com": "https://maidpro.com/",
+   "plymouthmeeting@maidpro.com": "https://maidpro.com/",
+   "arlington.ma@maidpro.com": "https://maidpro.com/",
+   "newminas@maidpro.com": "https://maidpro.com/",
+   "westcounty.mo@maidpro.com": "https://maidpro.com/",
+   "wayne.pa@maidpro.com": "https://maidpro.com/",
+   "lancaster.pa@maidpro.com": "https://maidpro.com/",
+   "miamibeach.fl@maidpro.com": "https://maidpro.com/",
+   "plainsboro.nj@maidpro.com": "https://maidpro.com/",
+   "bakersfield.ca@maidpro.com": "https://maidpro.com/",
+   "barrington.il@maidpro.com": "https://maidpro.com/",
+   "middletown.de@maidpro.com": "https://maidpro.com/",
+   "portcharlotte.fl@maidpro.com": "https://maidpro.com/",
+   "westaustin.tx@maidpro.com": "https://maidpro.com/",
+   "huntingtonbeach.ca@maidpro.com": "https://maidpro.com/",
+   "westorange.nj@maidpro.com": "https://maidpro.com/",
+   "folsom.ca@maidpro.com": "https://maidpro.com/",
+   "theshoals.al@maidpro.com": "https://maidpro.com/",
+   "asheville.nc@maidpro.com": "https://maidpro.com/",
+   "portstlucie.fl@maidpro.com": "https://maidpro.com/",
+   "maidpronwi@maidpro.com": "https://maidpro.com/",
+   "boston@maidpro.com": "https://maidpro.com/",
+   "midlothian.va@maidpro.com": "https://maidpro.com/",
+   "salem.ma@maidpro.com": "https://maidpro.com/",
+   "westminster.md@maidpro.com": "https://maidpro.com/",
+   "nehouston.tx@maidpro.com": "https://maidpro.com/",
+   "camphill.pa@maidpro.com": "https://maidpro.com/",
+   "leonia.nj@maidpro.com": "https://maidpro.com/",
+   "southplainfield.nj@maidpro.com": "https://maidpro.com/",
+   "springfield.mo@maidpro.com": "https://maidpro.com/",
+   "westrox.ma@maidpro.com": "https://maidpro.com/",
+   "woodbridge.va@maidpro.com": "https://maidpro.com/",
+   "fairfax.va@maidpro.com": "https://maidpro.com/",
+   "frederick.md@maidpro.com": "https://maidpro.com/",
+   "edmonton@maidpro.com": "https://maidpro.com/",
+   "eastatlanta.ga@maidpro.com": "https://maidpro.com/",
+   "cocustomerservice@maidpro.com": "https://maidpro.com/",
+   "hudson.fl@maidpro.com": "https://maidpro.com/",
+   "edina.mn@maidpro.com": "https://maidpro.com/",
+   "volusia.fl@maidpro.com": "https://maidpro.com/",
+   "smithfield.ri@maidpro.com": "https://maidpro.com/",
+   "berkley.mi@maidpro.com": "https://maidpro.com/",
+   "braintree.ma@maidpro.com": "https://maidpro.com/",
+   "downtownla.ca@maidpro.com": "https://maidpro.com/",
+   "tulsa_estimates@maidpro.com": "https://maidpro.com/",
+   "scarsdale.ny@maidpro.com": "https://maidpro.com/",
+   "tucson.az@maidpro.com": "https://maidpro.com/",
+   "arlingtonheights.il@maidpro.com": "https://maidpro.com/",
+   "arvada.co@maidpro.com": "https://maidpro.com/",
+   "morristown.nj@maidpro.com": "https://maidpro.com/",
+   "thehamptonseast.ny@maidpro.com": "https://maidpro.com/",
+   "centralct@maidpro.com": "https://maidpro.com/",
+   "flatiron.ny@maidpro.com": "https://maidpro.com/",
+   "southshore.ma@maidpro.com": "https://maidpro.com/",
+   "houstonnorth.tx@maidpro.com": "https://maidpro.com/",
+   "tustin.ca@maidpro.com": "https://maidpro.com/",
+   "hamptonroads@maidpro.com": "https://maidpro.com/",
+   "carmel.in@maidpro.com": "https://maidpro.com/",
+   "boise.id@maidpro.com": "https://maidpro.com/",
+   "uxbridge.ma@maidpro.com": "https://maidpro.com/",
+   "bridgewater.ma@maidpro.com": "https://maidpro.com/",
+   "wakefield.ma@maidpro.com": "https://maidpro.com/",
+   "gurnee.il@maidpro.com": "https://maidpro.com/",
+   "waterloo.on@maidpro.com": "https://maidpro.com/",
+   "chicago.dws@maidpro.com": "https://maidpro.com/",
+   "somerset.nj@maidpro.com": "https://maidpro.com/",
+   "mechanicsville.va@maidpro.com": "https://maidpro.com/",
+   "stjohns.fl@maidpro.com": "https://maidpro.com/",
+   "hershey.pa@maidpro.com": "https://maidpro.com/",
+   "southern.de@maidpro.com": "https://maidpro.com/",
+   "hillsborough.nj@maidpro.com": "https://maidpro.com/",
+   "drippingsprings@maidpro.com": "https://maidpro.com/",
+   "newbraunfels.tx@maidpro.com": "https://maidpro.com/",
+   "laverne.ca@maidpro.com": "https://maidpro.com/",
+   "roselle.il@maidpro.com": "https://maidpro.com/",
+   "copperfield.tx@maidpro.com": "https://maidpro.com/",
+   "mtpleasant.nc@maidpro.com": "https://maidpro.com/",
+   "cranford.nj@maidpro.com": "https://maidpro.com/",
+   "collegeville.pa@maidpro.com": "https://maidpro.com/",
+   "mckinney.tx@maidpro.com": "https://maidpro.com/",
+   "paloalto.ca@maidpro.com": "https://maidpro.com/",
+   "jacksonville.fl@maidpro.com": "https://maidpro.com/",
+   "westerville.oh@maidpro.com": "https://maidpro.com/",
+   "thornhill.on@maidpro.com": "https://maidpro.com/",
+   "gaylord.mi@maidpro.com": "https://maidpro.com/",
+   "support@maidpro.com": "https://maidpro.com/privacy-policy"
+  },
+  "pages": 10,
+  "reachable": true,
+  "given": ""
+ },
+ "markselectrical.co.uk": {
+  "domain": "markselectrical.co.uk",
+  "emails": {
+   "sales@markselectrical.co.uk": "https://markselectrical.co.uk/",
+   "customersupport@frasers.plus": "https://markselectrical.co.uk/help/finance",
+   "trade@markselectrical.co.uk": "https://markselectrical.co.uk/help/contacts",
+   "privacy@markselectrical.co.uk": "https://markselectrical.co.uk/privacy-policy"
+  },
+  "pages": 18,
+  "reachable": true,
+  "given": ""
+ },
+ "marq.com": {
+  "domain": "marq.com",
+  "emails": {
+   "support@marq.com": "https://www.marq.com/pages/privacy/",
+   "privacy@marq.com": "https://www.marq.com/pages/privacy/"
+  },
+  "pages": 18,
+  "reachable": true,
+  "given": "privacy@marq.com"
+ },
+ "matrixmastery.com": {
+  "domain": "matrixmastery.com",
+  "emails": {},
+  "pages": 1,
+  "reachable": true,
+  "given": ""
+ },
+ "mbamission.com": {
+  "domain": "mbamission.com",
+  "emails": {
+   "info@mbamission.com": "https://www.mbamission.com/",
+   "katrina@mbamission.com": "https://www.mbamission.com/who-we-are/faq/"
+  },
+  "pages": 13,
+  "reachable": true,
+  "given": "info@mbamission.com"
+ },
+ "meumoveldemadeira.com.br": {
+  "domain": "meumoveldemadeira.com.br",
+  "emails": {
+   "atendimento@meumoveldemadeira.com.br": "https://www.meumoveldemadeira.com.br/",
+   "diretoria@meumoveldemadeira.com.br": "https://www.meumoveldemadeira.com.br/pages/contato",
+   "contato@meumoveldemadeira.com.br": "https://www.meumoveldemadeira.com.br/pages/seguranca-e-privacidade",
+   "contato@emails.meumoveldemadeira.com.br": "https://www.meumoveldemadeira.com.br/pages/seguranca-e-privacidade"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": "atendimento@meumoveldemadeira.com.br"
+ },
+ "neilpatel.com": {
+  "domain": "neilpatel.com",
+  "emails": {},
+  "pages": 0,
+  "reachable": false,
+  "given": ""
+ },
+ "nulifeinstitute.com": {
+  "domain": "nulifeinstitute.com",
+  "emails": {
+   "info@nulifeinstitut.wpenginepowered.com": "https://nulifeinstitute.com/",
+   "info@nulifeinstitute.com": "https://nulifeinstitute.com/privacy-notice"
+  },
+  "pages": 7,
+  "reachable": true,
+  "given": ""
+ },
+ "omdia.tech.informa.com": {
+  "domain": "omdia.tech.informa.com",
+  "emails": {
+   "my@email.address": "https://omdia.tech.informa.com/",
+   "press@omdia.com": "https://omdia.tech.informa.com/contact-us",
+   "customersuccess@omdia.com": "https://omdia.tech.informa.com/help",
+   "citations@omdia.com": "https://omdia.tech.informa.com/help",
+   "dpo_ttgt@techtarget.com": "https://www.informatechtarget.com/privacy-policy/",
+   "eurep_ttgt@techtarget.com": "https://www.informatechtarget.com/privacy-policy/",
+   "privacy@techtarget.com": "https://www.informatechtarget.com/privacy-policy/"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": ""
+ },
+ "pacificdebt.com": {
+  "domain": "pacificdebt.com",
+  "emails": {
+   "inquiries@pacificdebt.com": "https://www.pacificdebt.com/",
+   "carrielozano@pacificdebt.com": "https://www.pacificdebt.com/",
+   "creditorinquiries@pacificdebt.com": "https://www.pacificdebt.com/",
+   "cs@pacificdebt.com": "https://www.pacificdebt.com/",
+   "jperry@pacificdebt.com": "https://www.pacificdebt.com/about-pacific-debt",
+   "jessica@pacificdebt.com": "https://www.pacificdebt.com/about-pacific-debt",
+   "anthony@pacificdebt.com": "https://www.pacificdebt.com/about-pacific-debt",
+   "chris@pacificdebt.com": "https://www.pacificdebt.com/about-pacific-debt",
+   "juliaquirke@pacificdebt.com": "https://www.pacificdebt.com/about-pacific-debt",
+   "bcpinfo@ag.state.nv.us": "https://www.pacificdebt.com/privacy-policy",
+   "customerservice@pacificdebt.com": "https://www.pacificdebt.com/privacy-policy"
+  },
+  "pages": 10,
+  "reachable": true,
+  "given": "inquiries@pacificdebt.com"
+ },
+ "parcellab.com": {
+  "domain": "parcellab.com",
+  "emails": {
+   "support@design.com": "https://parcellab.com/contact-us/",
+   "info@parcellab.com": "https://parcellab.com/contact-us/",
+   "munich@parcellab.com": "https://parcellab.com/contact-us/",
+   "marketing@parcellab.com": "https://parcellab.com/contact-us/",
+   "parcellab@articulatecomms.com": "https://parcellab.com/press/parcellab-and-metapack-partner-to-empower-retailers-with-seamless-end-to-end-delivery-experiences/",
+   "legal@parcellab.com": "https://parcellab.com/privacy-policy/",
+   "dataprotection@parcellab.com": "https://parcellab.com/privacy-policy/"
+  },
+  "pages": 16,
+  "reachable": true,
+  "given": "security@parcellab.com"
+ },
+ "poney.com.my": {
+  "domain": "poney.com.my",
+  "emails": {
+   "customerservices@poneygroup.com": "https://poney.com.my/pages/contact-us",
+   "e-customerservices@poneygroup.com": "https://poney.com.my/pages/privacy-policy"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": ""
+ },
+ "posten.no": {
+  "domain": "posten.no",
+  "emails": {
+   "personvernombud@posten.no": "https://www.posten.no/personvern-sikkerhet"
+  },
+  "pages": 2,
+  "reachable": true,
+  "given": ""
+ },
+ "precisefitoutsolutions.com.au": {
+  "domain": "precisefitoutsolutions.com.au",
+  "emails": {},
+  "pages": 13,
+  "reachable": true,
+  "given": ""
+ },
+ "queenstownnz.co.nz": {
+  "domain": "queenstownnz.co.nz",
+  "emails": {
+   "info@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "reception@queenstownnz.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "daniellaj@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "rosew@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "rosiem@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "victoriaj@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "saraho@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "charlotteg@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "katieo@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "pault@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "orlao@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "eilidhb@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "ash@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "rubyk@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "caraa@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "cyndif@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "mat@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "amandat@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "micaelam@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "stuc@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "aimeer@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "willn@queenstown-wanaka.nz": "https://www.queenstownnz.co.nz/about-us/",
+   "crownproperty@linz.govt.nz": "https://www.queenstownnz.co.nz/media/filming-in-queenstown/",
+   "permissions@doc.govt.nz": "https://www.queenstownnz.co.nz/media/filming-in-queenstown/"
+  },
+  "pages": 11,
+  "reachable": true,
+  "given": "reception@queenstownnz.nz"
+ },
+ "qusahstore.com": {
+  "domain": "qusahstore.com",
+  "emails": {
+   "info@qusahstore.com": "https://qusahstore.com/"
+  },
+  "pages": 2,
+  "reachable": true,
+  "given": ""
+ },
+ "renovatechnology.com": {
+  "domain": "renovatechnology.com",
+  "emails": {
+   "solutions@renovatechnology.com": "https://renovatechnology.com/",
+   "rma@renovatechnology.com": "https://renovatechnology.com/support/"
+  },
+  "pages": 11,
+  "reachable": true,
+  "given": ""
+ },
+ "restoridesgarage.com": {
+  "domain": "restoridesgarage.com",
+  "emails": {
+   "support@restoridesgarage.com": "https://restoridesgarage.com/",
+   "help@restoridesgarage.com": "https://terms.pscr.pt/legal/shop/qkatqv-fe/privacy_policy"
+  },
+  "pages": 5,
+  "reachable": true,
+  "given": "support@restoridesgarage.com"
+ },
+ "rightleftagency.com": {
+  "domain": "rightleftagency.com",
+  "emails": {
+   "info@wordpress-1449091-6533741.cloudwaysapps.com": "https://rightleftagency.com/",
+   "info@rightleftagency.com": "https://rightleftagency.com/contact-us/",
+   "marketing@wordpress-1449091-6533741.cloudwaysapps.com": "https://rightleftagency.com/privacy-policy/"
+  },
+  "pages": 9,
+  "reachable": true,
+  "given": ""
+ },
+ "salescloser.ai": {
+  "domain": "salescloser.ai",
+  "emails": {
+   "investors@salescloser.ai": "https://investors.salescloser.ai/contact",
+   "support@salescloser.ai": "https://salescloser.ai/privacy-policy/"
+  },
+  "pages": 4,
+  "reachable": true,
+  "given": ""
+ },
+ "skins.nl": {
+  "domain": "skins.nl",
+  "emails": {
+   "webshop@skins.nl": "https://www.skins.nl/"
+  },
+  "pages": 7,
+  "reachable": true,
+  "given": ""
+ },
+ "stealthsociety.com": {
+  "domain": "stealthsociety.com",
+  "emails": {},
+  "pages": 1,
+  "reachable": true,
+  "given": ""
+ },
+ "surveysparrow.com": {
+  "domain": "surveysparrow.com",
+  "emails": {
+   "support@surveysparrow.com": "https://surveysparrow.com/"
+  },
+  "pages": 5,
+  "reachable": true,
+  "given": "privacy@surveysparrow.com"
+ },
+ "swipey.co": {
+  "domain": "swipey.co",
+  "emails": {
+   "hi@swipey.co": "https://swipey.co/"
+  },
+  "pages": 11,
+  "reachable": true,
+  "given": "hi@swipey.co"
+ },
+ "timberland.com.tw": {
+  "domain": "timberland.com.tw",
+  "emails": {},
+  "pages": 2,
+  "reachable": true,
+  "given": ""
+ },
+ "typetype.org": {
+  "domain": "typetype.org",
+  "emails": {
+   "help@typetype.org": "https://typetype.org/",
+   "marketing@typetype.org": "https://typetype.org/",
+   "commercial@typetype.org": "https://typetype.org/",
+   "support@typetype.org": "https://typetype.org/about/career/"
+  },
+  "pages": 14,
+  "reachable": true,
+  "given": "admin@typetype.org"
+ },
+ "waspbarcode.com": {
+  "domain": "waspbarcode.com",
+  "emails": {
+   "marketing@waspbarcode.com": "https://www.waspbarcode.com/about-us/gdpr-policy"
+  },
+  "pages": 23,
+  "reachable": true,
+  "given": ""
+ }
+}
