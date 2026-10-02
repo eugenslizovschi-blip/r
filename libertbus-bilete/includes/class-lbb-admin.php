@@ -18,6 +18,7 @@ class LBB_Admin {
 		add_action( 'admin_post_lbb_save_settings', array( __CLASS__, 'save_settings' ) );
 		add_action( 'admin_post_lbb_manifest_csv', array( __CLASS__, 'manifest_csv' ) );
 		add_action( 'admin_post_lbb_cancel_booking', array( __CLASS__, 'cancel_booking' ) );
+		add_action( 'admin_post_lbb_new_preview_link', array( __CLASS__, 'new_preview_link' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'rest' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( LBB_FILE ), function ( $links ) {
 			array_unshift( $links, '<a href="' . esc_url( admin_url( 'admin.php?page=lbb' ) ) . '">' . esc_html__( 'Panou', 'libertbus-bilete' ) . '</a>' );
@@ -414,6 +415,14 @@ class LBB_Admin {
 		return '<span class="lbb-warn">' . esc_html( sprintf( __( 'la urcare: %s', 'libertbus-bilete' ), LBB_WooCommerce::money( $amount, $cur ) ) ) . '</span>';
 	}
 
+	public static function new_preview_link() {
+		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_new_preview_link' ) ) {
+			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
+		}
+		LBB_Settings::preview_token( true );
+		self::redirect( 'lbb-settings', __( 'Link nou de previzualizare creat. Linkul vechi nu mai funcționează.', 'libertbus-bilete' ) );
+	}
+
 	public static function cancel_booking() {
 		$id = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_cancel_booking_' . $id ) ) {
@@ -533,7 +542,9 @@ class LBB_Admin {
 				}
 				echo '<p class="description">' . esc_html__( 'Implicit se propune moneda rutei (MDL spre România, RON spre Moldova); clientul poate schimba. Prețul se convertește după cursurile de mai jos.', 'libertbus-bilete' ) . '</p></td></tr>';
 				$text( 'replace_cf7', __( 'Înlocuiește formularele Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'ID-urile formularelor de rezervare (ex. de pe pagina principală) care se afișează ca formularul de rezervare cu plată. Paginile nu se modifică; ștergeți ID-ul ca să reveniți.', 'libertbus-bilete' ) );
-				$text( 'preview_cf7', __( 'Previzualizare: formulare Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'Pe paginile private (sau cu ?lbb_preview=1), doar pentru administratori, aceste formulare și cele de rută se înlocuiesc, cu butonul de plată vizibil. Clienții nu văd nimic.', 'libertbus-bilete' ) );
+				$text( 'preview_cf7', __( 'Previzualizare: formulare Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'În previzualizare (pagini private pentru admin sau linkul secret de mai jos) aceste formulare și cele de rută se înlocuiesc, cu butonul de plată vizibil. Ceilalți vizitatori nu văd nimic schimbat.', 'libertbus-bilete' ) );
+				$preview = LBB_Settings::preview_url();
+				echo '<tr><th>' . esc_html__( 'Link de previzualizare (fără login)', 'libertbus-bilete' ) . '</th><td><input type="text" class="large-text code" readonly onclick="this.select()" value="' . esc_attr( $preview ) . '"> <p class="description">' . esc_html__( 'Deschideți-l pe telefon sau trimiteți-l cuiva. Merge pe orice pagină: adăugați ?lbb_preview=… și la paginile de rută. Butonul de mai jos (sub formular) creează un link nou și îl anulează pe cel vechi.', 'libertbus-bilete' ) . ' <a href="' . esc_url( $preview ) . '" target="_blank" rel="noopener">' . esc_html__( 'Deschide', 'libertbus-bilete' ) . '</a></p></td></tr>';
 				$text( 'accent_color', __( 'Culoarea butoanelor', 'libertbus-bilete' ), __( 'Cod hex, ex. #00875a (verdele site-ului, mai închis ca textul alb să se citească bine).', 'libertbus-bilete' ) );
 				$check( 'replace_cf7_routes', __( 'Formularele de rută', 'libertbus-bilete' ), __( 'Formularele Contact Form 7 cu titlul „Oraș - Oraș” (ex. „Balti - Iasi”) devin formularul rutei respective, dacă ruta există.', 'libertbus-bilete' ) );
 				$check( 'show_approx', __( 'Echivalent în altă monedă', 'libertbus-bilete' ), __( 'Arată lângă preț „≈ 62 RON” (sau „≈ 234 MDL”), doar informativ.', 'libertbus-bilete' ) );
@@ -566,6 +577,11 @@ class LBB_Admin {
 			<h2><?php esc_html_e( 'Dezinstalare', 'libertbus-bilete' ); ?></h2>
 			<table class="form-table"><?php $check( 'delete_on_uninstall', __( 'Șterge datele', 'libertbus-bilete' ), __( 'La ștergerea plugin-ului se șterg și rutele și rezervările.', 'libertbus-bilete' ) ); ?></table>
 			<?php submit_button(); ?>
+		</form>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:-8px 0 16px">
+			<input type="hidden" name="action" value="lbb_new_preview_link">
+			<?php wp_nonce_field( 'lbb_new_preview_link' ); ?>
+			<?php submit_button( __( 'Link nou de previzualizare', 'libertbus-bilete' ), 'secondary', 'submit', false ); ?>
 		</form>
 		<?php LBB_Legal::settings_box(); ?>
 		</div>

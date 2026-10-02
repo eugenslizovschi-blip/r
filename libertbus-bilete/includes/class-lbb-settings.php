@@ -103,6 +103,22 @@ class LBB_Settings {
 		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_pay', 'allow_reserve', 'show_approx', 'replace_cf7_routes' );
 	}
 
+	/**
+	 * Cheia linkului secret de previzualizare (/?lbb_preview=CHEIE), creată la prima folosire.
+	 */
+	public static function preview_token( $regenerate = false ) {
+		$token = (string) get_option( 'lbb_preview_token', '' );
+		if ( $regenerate || strlen( $token ) < 16 ) {
+			$token = wp_generate_password( 24, false, false );
+			update_option( 'lbb_preview_token', $token, false );
+		}
+		return $token;
+	}
+
+	public static function preview_url( $path = '/' ) {
+		return add_query_arg( 'lbb_preview', self::preview_token(), home_url( $path ) );
+	}
+
 	public static function currencies() {
 		return array( 'MDL', 'RON', 'EUR', 'USD' );
 	}

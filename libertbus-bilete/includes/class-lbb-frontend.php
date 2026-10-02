@@ -17,6 +17,7 @@ class LBB_Frontend {
 		add_shortcode( 'lbb_booking', array( __CLASS__, 'shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_assets' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'handle_submit' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'preview_headers' ), 1 );
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'replace_cf7' ), 20, 2 );
 	}
 
@@ -79,14 +80,29 @@ class LBB_Frontend {
 	 * formularele se înlocuiesc și butonul de plată apare, fără să se schimbe nimic pentru clienți.
 	 */
 	public static function is_preview() {
+		$key = isset( $_GET['lbb_preview'] ) ? sanitize_text_field( wp_unslash( $_GET['lbb_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+		// Linkul secret (/?lbb_preview=CHEIE) merge și fără login: pentru telefon sau ca să-l arătați cuiva.
+		if ( '' !== $key && hash_equals( LBB_Settings::preview_token(), $key ) ) {
+			return true;
+		}
 		if ( ! is_user_logged_in() || ! current_user_can( 'manage_woocommerce' ) ) {
 			return false;
 		}
-		if ( isset( $_GET['lbb_preview'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( '' !== $key ) {
 			return true;
 		}
 		$post = get_queried_object();
 		return $post instanceof WP_Post && 'private' === $post->post_status;
+	}
+
+	/**
+	 * Paginile deschise cu linkul de previzualizare nu se pun în cache și nu se indexează.
+	 */
+	public static function preview_headers() {
+		if ( isset( $_GET['lbb_preview'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			nocache_headers();
+			header( 'X-Robots-Tag: noindex, nofollow' );
+		}
 	}
 
 	private static function can_pay_online() {
@@ -313,7 +329,7 @@ class LBB_Frontend {
 				<input type="hidden" name="lbb_action" value="book">
 				<?php if ( $preview ) : ?>
 					<input type="hidden" name="lbb_preview" value="1">
-					<p class="lbb-preview-note"><?php esc_html_e( 'Previzualizare pentru administrator: butonul de plată online e vizibil doar pentru dumneavoastră.', 'libertbus-bilete' ); ?></p>
+					<p class="lbb-preview-note"><?php esc_html_e( 'Previzualizare: formularul nou și butonul de plată online se văd doar cu acest link. Ceilalți vizitatori văd site-ul ca până acum.', 'libertbus-bilete' ); ?></p>
 				<?php endif; ?>
 				<input type="hidden" name="lbb_mode" value="<?php echo $can_pay ? 'pay' : 'reserve'; ?>" data-lbb="mode">
 				<input type="hidden" name="lbb_nonce" value="<?php echo esc_attr( wp_create_nonce( 'lbb_book' ) ); ?>">

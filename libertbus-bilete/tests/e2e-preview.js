@@ -17,6 +17,20 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await guest.goto(BASE + '/balti-iasi/');
   if (await guest.$('[data-lbb-submit][value="pay"]')) fail('vizitatorul vede „Achit online” deși plata e oprită');
 
+  // Linkul secret: fără login se vede formularul nou cu butonul de plată; o cheie greșită nu schimbă nimic.
+  const TOKEN = process.env.LBB_PREVIEW_TOKEN;
+  if (TOKEN) {
+    const resp = await guest.goto(BASE + '/formulare-vechi/?lbb_preview=' + encodeURIComponent(TOKEN));
+    if (!(await guest.$('.lbb-booking [data-lbb-submit][value="pay"]'))) fail('linkul secret nu arată formularul nou cu plata');
+    if (await guest.$('.wpcf7')) fail('cu linkul secret a rămas formularul vechi');
+    if (!/no-store|no-cache/.test(resp.headers()['cache-control'] || '')) fail('pagina de previzualizare se poate pune în cache');
+    await guest.goto(BASE + '/formulare-vechi/?lbb_preview=gresit' + Date.now());
+    if (await guest.$('.lbb-booking')) fail('o cheie greșită arată formularul nou');
+    console.log('link secret: OK');
+  } else {
+    console.log('(LBB_PREVIEW_TOKEN lipsește: sar peste linkul secret)');
+  }
+
   // Admin: pe pagina privată vede 2 formulare noi, cu butonul de plată și nota de previzualizare.
   const admin = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
   admin.on('pageerror', e => fail('pageerror: ' + e.message));

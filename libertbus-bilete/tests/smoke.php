@@ -206,6 +206,13 @@ update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_p
 lbb_t( 'fără niciun buton, formularul arată doar telefonul', false === strpos( LBB_Frontend::shortcode( array() ), '<form' ) );
 update_option( 'lbb_settings', $keep );
 
+// Linkul secret de previzualizare: stabil până se cere unul nou.
+$tok = LBB_Settings::preview_token();
+lbb_t( 'cheia de previzualizare e stabilă și lungă', strlen( $tok ) >= 16 && LBB_Settings::preview_token() === $tok );
+$tok2 = LBB_Settings::preview_token( true );
+lbb_t( 'link nou de previzualizare anulează cheia veche', $tok2 !== $tok && LBB_Settings::preview_token() === $tok2 );
+lbb_t( 'linkul de previzualizare conține cheia', false !== strpos( LBB_Settings::preview_url(), 'lbb_preview=' . $tok2 ) );
+
 // Curățenie.
 foreach ( array( 'TestB', 'TestC' ) as $lbb_dest ) {
 	$lbb_r = LBB_Routes::find( 'TestA', $lbb_dest );
