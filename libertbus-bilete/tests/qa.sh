@@ -6,6 +6,15 @@ DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FAIL=0
 echo "== Sintaxă PHP"
 for f in $(find "$DIR" -name '*.php'); do php -l "$f" >/dev/null || { echo "  eroare: $f"; FAIL=1; }; done
+echo "== Compatibilitate PHP 7.4+ (PHPCompatibility)"
+# PHPCS_DIR = un director cu tests/compat/composer.json instalat (composer install); fără el pasul se sare.
+PHPCS_DIR="${PHPCS_DIR:-$(dirname "$WP_PATH")/phpcs}"
+if [ -x "$PHPCS_DIR/vendor/bin/phpcs" ]; then
+  OUT_COMPAT=$("$PHPCS_DIR/vendor/bin/phpcs" -q --standard=PHPCompatibility --runtime-set testVersion 7.4- --extensions=php "$DIR" 2>&1)
+  if [ -n "$OUT_COMPAT" ]; then echo "$OUT_COMPAT" | head -30; FAIL=1; else echo "  ok"; fi
+else
+  echo "  sărit (setați PHPCS_DIR)"
+fi
 echo "== Teste automate"
 OUT_SMOKE=$(cd "$WP_PATH" && $WP_CLI eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
 echo "$OUT_SMOKE" | grep -E "FAIL|eșuate|Fatal"

@@ -200,7 +200,7 @@ lbb_t( 'fără „allow_pay” nu apare butonul de plată', false === strpos( $h
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'pay', 'lbb_phone' => '+37369000009' ) ) );
 lbb_t( 'fără „allow_pay” plata e refuzată și pe server', is_wp_error( $r ) && 'lbb_mode' === $r->get_error_code(), $r );
 preg_match( '/data-lbb-config="([^"]+)"/', stripslashes( $html ), $cm );
-$cfg = $cm ? json_decode( base64_decode( html_entity_decode( $cm[1] ) ), true ) : null;
+$cfg = $cm ? json_decode( base64_decode( html_entity_decode( $cm[1], ENT_QUOTES | ENT_HTML401, 'UTF-8' ) ), true ) : null;
 lbb_t( 'configurația cu diacritice supraviețuiește stripslashes()', is_array( $cfg ) && 'Alegeți orașul de plecare' === $cfg['i18n']['chooseFrom'], $cm ? substr( $cm[1], 0, 40 ) : 'lipsă' );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 0, 'allow_reserve' => 0 ) ) );
 lbb_t( 'fără niciun buton, formularul arată doar telefonul', false === strpos( LBB_Frontend::shortcode( array() ), '<form' ) );

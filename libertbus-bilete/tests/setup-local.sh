@@ -58,5 +58,10 @@ if ( is_dir( $file ) && file_exists( $file . '/index.php' ) ) { $_SERVER['SCRIPT
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 require __DIR__ . '/wordpress/index.php';
 PHP
+# Verificatorul de compatibilitate PHP 7.4 (folosit de tests/qa.sh prin PHPCS_DIR=$W/phpcs).
+if [ ! -x "$W/phpcs/vendor/bin/phpcs" ]; then
+  mkdir -p "$W/phpcs" && cp "$PLUGIN/tests/compat/composer.json" "$W/phpcs/" && (cd "$W/phpcs" && COMPOSER_ALLOW_SUPERUSER=1 composer install --quiet --no-interaction >/dev/null 2>&1) || true
+fi
+[ -x "$W/phpcs/vendor/bin/phpcs" ] && "$W/phpcs/vendor/bin/phpcs" --config-set installed_paths "$W/phpcs/vendor/phpcompatibility/php-compatibility,$W/phpcs/vendor/phpcsstandards/phpcsutils" >/dev/null 2>&1 || true
 curl -s -o /dev/null http://127.0.0.1:8080/ || { (nohup php -S 127.0.0.1:8080 -t wordpress router.php > server.log 2>&1 &); sleep 2; }
 curl -s -o /dev/null -w "WordPress de test: %{http_code}\n" http://127.0.0.1:8080/rezervare-bilet/

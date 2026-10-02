@@ -436,11 +436,12 @@ class LBB_Admin {
 		header( 'Content-Disposition: attachment; filename="pasageri-' . $date . '.csv"' );
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" );
-		fputcsv( $out, array( 'Data', 'Ora', 'Plecare', 'Destinatie', 'Bilet', 'Locuri', 'Pasageri', 'Telefon', 'Email', 'Plata', 'Comanda' ) );
+		// Separator, ghilimele și fără caracter de escape (RFC 4180), explicit: implicitul se schimbă în PHP 8.4+.
+		fputcsv( $out, array( 'Data', 'Ora', 'Plecare', 'Destinatie', 'Bilet', 'Locuri', 'Pasageri', 'Telefon', 'Email', 'Plata', 'Comanda' ), ',', '"', '' );
 		foreach ( LBB_Bookings::manifest( $date, $route ) as $b ) {
 			list( $amount, $cur ) = LBB_Bookings::pay_amount( $b );
 			$plata = 'reserved' === $b['status'] ? 'la urcare ' . $amount . ' ' . $cur : 'online';
-			fputcsv( $out, array_map( array( __CLASS__, 'csv_safe' ), array( $date, $b['dep_time'], $b['origin'], $b['destination'], $b['ticket_code'], $b['seats'], implode( '; ', $b['passengers'] ), $b['phone'], $b['email'], $plata, $b['order_id'] ) ) );
+			fputcsv( $out, array_map( array( __CLASS__, 'csv_safe' ), array( $date, $b['dep_time'], $b['origin'], $b['destination'], $b['ticket_code'], $b['seats'], implode( '; ', $b['passengers'] ), $b['phone'], $b['email'], $plata, $b['order_id'] ) ), ',', '"', '' );
 		}
 		fclose( $out );
 		exit;
