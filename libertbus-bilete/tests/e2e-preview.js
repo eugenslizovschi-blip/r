@@ -37,7 +37,11 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   // Cumpărare de test din previzualizare (plata online e oprită pentru clienți).
   await second.scrollIntoViewIfNeeded();
   await admin.waitForFunction(el => el.querySelectorAll('[data-lbb="time"] option:not([disabled])').length > 1, second);
-  await second.$eval('[data-lbb="time"]', s => { const o = [...s.options].find(x => x.value && !x.disabled); s.value = o.value; s.dispatchEvent(new Event('change')); });
+  // Dată aleatoare și ora cu cele mai multe locuri, ca testul să poată rula de multe ori.
+  const day = new Date(Date.now() + 86400000 * (2 + Math.floor(Math.random() * 25))).toISOString().slice(0, 10);
+  await second.$eval('[data-lbb="date"]', (d, v) => { d.value = v; d.dispatchEvent(new Event('change')); }, day);
+  await admin.waitForFunction(el => el.querySelectorAll('[data-lbb="time"] option:not([disabled])').length > 1, second);
+  await second.$eval('[data-lbb="time"]', s => { const o = [...s.options].filter(x => x.value && !x.disabled).sort((a, b) => parseInt(b.textContent.split('—')[1]) - parseInt(a.textContent.split('—')[1]))[0]; s.value = o.value; s.dispatchEvent(new Event('change')); });
   // Formularele înlocuite sunt compacte: pasul 1 (cursa) → „Continuă” → pasul 2 (date și plată).
   if (await second.$eval('[data-lbb="step2"]', e => !e.hidden)) fail('pasul 2 e vizibil înainte de „Continuă”');
   await (await second.$('[data-lbb="adults"]')).selectOption('5');
