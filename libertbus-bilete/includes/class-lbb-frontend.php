@@ -178,6 +178,7 @@ class LBB_Frontend {
 			'maxPassengers' => (int) LBB_Settings::get( 'max_passengers' ),
 			'requireNames'  => (bool) LBB_Settings::get( 'require_names' ),
 			'currencies'    => LBB_Settings::pay_currencies(),
+			'showApprox'    => (bool) LBB_Settings::get( 'show_approx' ),
 			'allowReserve'  => (bool) LBB_Settings::get( 'allow_reserve' ) && 'pay' !== $atts['mode'],
 			'allowPay'      => 'reserve' !== $atts['mode'],
 			'i18n'          => array(
@@ -195,7 +196,7 @@ class LBB_Frontend {
 				'namePh'      => __( 'Nume și prenume, ca în pașaport', 'libertbus-bilete' ),
 				'error'       => __( 'Nu am putut verifica locurile. Încercați din nou.', 'libertbus-bilete' ),
 				'total'       => __( 'Total de plată', 'libertbus-bilete' ),
-				'approx'      => __( 'Prețul de bază', 'libertbus-bilete' ),
+				'approxNote'  => __( 'echivalent orientativ, plata se face în moneda afișată', 'libertbus-bilete' ),
 				'payBoard'    => __( 'Se achită la urcare', 'libertbus-bilete' ),
 			),
 		);

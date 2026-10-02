@@ -7,9 +7,13 @@ FAIL=0
 echo "== Sintaxă PHP"
 for f in $(find "$DIR" -name '*.php'); do php -l "$f" >/dev/null || { echo "  eroare: $f"; FAIL=1; }; done
 echo "== Teste automate"
-(cd "$WP_PATH" && $WP_CLI eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail | tail -3) || FAIL=1
+OUT_SMOKE=$(cd "$WP_PATH" && $WP_CLI eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
+echo "$OUT_SMOKE" | grep -E "FAIL|eșuate|Fatal"
+echo "$OUT_SMOKE" | grep -q " 0 eșuate" || FAIL=1
 echo "== Rezervare cap-coadă"
-BASE="$BASE" node "$DIR/tests/e2e-flow.js" 2>&1 | grep -v CERT_AUTHORITY | grep -E 'ticket:|FAIL|ALERT|pageerror' || FAIL=1
+OUT_FLOW=$(BASE="$BASE" node "$DIR/tests/e2e-flow.js" 2>&1 | grep -v CERT_AUTHORITY)
+echo "$OUT_FLOW" | grep -E 'ticket:|FAIL|ALERT|pageerror'
+echo "$OUT_FLOW" | grep -q 'ticket:' && ! echo "$OUT_FLOW" | grep -q 'FAIL' || FAIL=1
 [ -f "$WP_PATH/wp-content/debug.log" ] && grep -E "Fatal|Warning|Notice" "$WP_PATH/wp-content/debug.log" | grep -i lbb && FAIL=1
 echo "== Vizitator nelogat"
 BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY | grep -E 'GUEST|FAIL' | grep -q 'GUEST: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }

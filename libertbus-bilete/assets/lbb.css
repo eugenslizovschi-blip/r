@@ -43,6 +43,7 @@
 .lbb-status { min-height: 1.4em; margin: -4px 0 8px; color: var(--lbb-muted); font-size: 14px; }
 .lbb-summary { background: var(--lbb-soft); border-radius: 8px; padding: 12px 14px; margin: 4px 0 14px; }
 .lbb-summary-total { font-size: 20px; font-weight: 700; margin-top: 4px; }
+.lbb-summary-approx { font-size: 15px; font-weight: 600; color: var(--lbb-muted); white-space: nowrap; }
 .lbb-summary-note { color: var(--lbb-muted); font-size: 13px; }
 .lbb-submit {
 	display: block;

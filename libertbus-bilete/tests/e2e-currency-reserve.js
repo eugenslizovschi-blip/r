@@ -30,15 +30,24 @@ async function fillForm(page, phone) {
   await fillForm(admin, '+37369111111');
   const def = await admin.$eval('[data-lbb="currency"]:checked', r => r.value);
   if (def !== 'MDL') fail('moneda implicită pentru Bălți→Iași ar trebui să fie MDL, e ' + def);
-  await admin.click('.lbb-chip:has(input[value="RON"])');
-  const summary = (await admin.textContent('[data-lbb="summary"]')).replace(/\s+/g, ' ');
-  if (!/RON/.test(summary)) fail('sumarul nu e în RON: ' + summary);
-  console.log('sumar RON:', summary);
+  const mdlSummary = (await admin.textContent('[data-lbb="summary"]')).replace(/\s+/g, ' ');
+  if (!/MDL.*≈ [\d,]+ RON/.test(mdlSummary)) fail('lipsește echivalentul în RON: ' + mdlSummary);
+  console.log('sumar MDL:', mdlSummary);
+  const ronEnabled = !!(await admin.$('[data-lbb="currency"][value="RON"]'));
+  const PAY = ronEnabled ? 'RON' : 'MDL';
+  if (ronEnabled) {
+    await admin.click('.lbb-chip:has(input[value="RON"])');
+    const summary = (await admin.textContent('[data-lbb="summary"]')).replace(/\s+/g, ' ');
+    if (!/Total de plată: [\d,]+ RON/.test(summary)) fail('sumarul nu e în RON: ' + summary);
+    console.log('sumar RON:', summary);
+  } else {
+    console.log('(plata în RON e oprită în setări: se plătește în MDL)');
+  }
   await admin.screenshot({ path: (process.env.OUT || '.') + '/form-ron.png', fullPage: true });
   await Promise.all([admin.waitForNavigation(), admin.click('[data-lbb-submit][value="pay"]')]);
   await admin.waitForSelector('#payment');
   const total = (await admin.textContent('.order-total')).replace(/\s+/g, ' ');
-  if (!/RON|lei/i.test(total)) fail('totalul de la plată nu e în RON: ' + total);
+  if (PAY === 'RON' ? !/RON|lei/i.test(total) : !/MDL/.test(total)) fail('totalul de la plată nu e în ' + PAY + ': ' + total);
   console.log('checkout total:', total);
   await admin.waitForLoadState('networkidle');
   await admin.waitForSelector('.blockUI', { state: 'detached' }).catch(() => {});
@@ -46,7 +55,7 @@ async function fillForm(page, phone) {
   if (await admin.locator('#terms').count()) await admin.locator('#terms').check();
   await Promise.all([admin.waitForURL(/order-received/, { timeout: 30000 }), admin.click('#place_order')]);
   const ticket = (await admin.textContent('.lbb-ticket')).replace(/\s+/g, ' ');
-  if (!/Achitat online .*RON/.test(ticket)) fail('biletul nu arată plata în RON: ' + ticket);
+  if (!new RegExp('Achitat online .*' + PAY).test(ticket)) fail('biletul nu arată plata în ' + PAY + ': ' + ticket);
   console.log('bilet:', ticket);
 
   // 2) Rezervare fără plată ca vizitator.

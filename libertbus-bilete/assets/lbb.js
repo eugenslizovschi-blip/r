@@ -188,7 +188,22 @@
 			var p = route.prices[ cur ] || route.prices[ cfg.currencies[ 0 ] ];
 			var childPrice = p[ 1 ] === null ? p[ 0 ] : p[ 1 ];
 			var total = adults * p[ 0 ] + children * childPrice;
-			var base = route.orig_cur !== cur ? ' (' + t.approx + ': ' + money( route.orig_price, route.orig_cur ) + ')' : '';
+			// Echivalent informativ: „≈ 62 RON” lângă suma în MDL (și invers).
+			var approx = [];
+			if ( cfg.showApprox ) {
+				[ 'MDL', 'RON', route.orig_cur ].forEach( function ( c ) {
+					if ( c !== cur && route.prices[ c ] && approx.indexOf( c ) < 0 ) {
+						approx.push( c );
+					}
+				} );
+			}
+			var approxText = function ( factor ) {
+				return approx.map( function ( c ) {
+					var q = route.prices[ c ];
+					var v = adults * q[ 0 ] + children * ( q[ 1 ] === null ? q[ 0 ] : q[ 1 ] );
+					return '≈ ' + money( Math.round( factor ? q[ 0 ] : v ), c );
+				} ).join( ', ' );
+			};
 			el.summary.textContent = '';
 			var line = document.createElement( 'div' );
 			line.className = 'lbb-summary-route';
@@ -196,9 +211,15 @@
 			var price = document.createElement( 'div' );
 			price.className = 'lbb-summary-total';
 			price.textContent = t.total + ': ' + money( total, cur );
+			if ( approx.length ) {
+				var eq = document.createElement( 'span' );
+				eq.className = 'lbb-summary-approx';
+				eq.textContent = ' (' + approxText( false ) + ')';
+				price.appendChild( eq );
+			}
 			var note = document.createElement( 'div' );
 			note.className = 'lbb-summary-note';
-			note.textContent = money( p[ 0 ], cur ) + ' / ' + t.passenger.toLowerCase() + base;
+			note.textContent = money( p[ 0 ], cur ) + ' / ' + t.passenger.toLowerCase() + ( approx.length ? ' (' + approxText( true ) + ')' : '' ) + ( approx.length ? ' · ' + t.approxNote : '' );
 			el.summary.appendChild( line );
 			el.summary.appendChild( price );
 			el.summary.appendChild( note );

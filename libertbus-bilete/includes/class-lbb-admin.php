@@ -527,6 +527,7 @@ class LBB_Admin {
 					echo '<label style="margin-right:12px"><input type="checkbox" name="pay_currencies[]" value="' . esc_attr( $cur ) . '" ' . checked( in_array( $cur, LBB_Settings::pay_currencies(), true ), true, false ) . '> ' . esc_html( $cur ) . '</label>';
 				}
 				echo '<p class="description">' . esc_html__( 'Implicit se propune moneda rutei (MDL spre România, RON spre Moldova); clientul poate schimba. Prețul se convertește după cursurile de mai jos.', 'libertbus-bilete' ) . '</p></td></tr>';
+				$check( 'show_approx', __( 'Echivalent în altă monedă', 'libertbus-bilete' ), __( 'Arată lângă preț „≈ 62 RON” (sau „≈ 234 MDL”), doar informativ.', 'libertbus-bilete' ) );
 				$check( 'require_names', __( 'Numele pasagerilor', 'libertbus-bilete' ), __( 'Obligatoriu numele fiecărui pasager (util la vamă).', 'libertbus-bilete' ) );
 				$check( 'simple_checkout', __( 'Plată simplificată', 'libertbus-bilete' ), __( 'Fără adresă poștală la plata biletelor: doar nume, telefon, email, țară.', 'libertbus-bilete' ) );
 				$check( 'autocomplete', __( 'Finalizare automată', 'libertbus-bilete' ), __( 'Comanda plătită devine „Finalizată” și clientul primește imediat emailul cu biletul.', 'libertbus-bilete' ) );

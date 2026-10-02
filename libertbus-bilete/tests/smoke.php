@@ -175,8 +175,12 @@ update_option( 'lbb_settings', $saved );
 LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'pay_currencies' => array( '', 'RON', 'XXX' ) ) ) );
 lbb_t( 'setarea monedelor filtrează valorile invalide', array( 'RON' ) === LBB_Settings::pay_currencies(), LBB_Settings::pay_currencies() );
 lbb_t( 'moneda implicită cade pe una acceptată', 'RON' === LBB_Settings::default_pay_currency( 'MDL' ) );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'pay_currencies' => 'MDL,RON' ) ) );
+lbb_t( 'cu MDL și RON, moneda rutei e propusă implicit', 'RON' === LBB_Settings::default_pay_currency( 'RON' ) && 'MDL' === LBB_Settings::default_pay_currency( 'MDL' ) );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'pay_currencies' => 'MDL', 'show_approx' => 1 ) ) );
+lbb_t( 'doar MDL: și rutele în RON se plătesc în MDL', 'MDL' === LBB_Settings::default_pay_currency( 'RON' ) );
+lbb_t( 'echivalentul afișat e în RON', array( 'RON' ) === LBB_Settings::approx_currencies( 'MDL', 'RON' ) && array( 'MDL' ) === LBB_Settings::approx_currencies( 'RON', 'MDL' ) );
 update_option( 'lbb_settings', $saved );
-lbb_t( 'moneda rutei e propusă implicit', 'RON' === LBB_Settings::default_pay_currency( 'RON' ) && 'MDL' === LBB_Settings::default_pay_currency( 'MDL' ) );
 lbb_t( 'harta formularului are prețuri în fiecare monedă', (bool) array_filter( LBB_Routes::public_map(), function ( $list ) {
 	return isset( $list[0]['prices']['MDL'], $list[0]['prices']['RON'] );
 } ) );

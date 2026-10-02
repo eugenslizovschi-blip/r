@@ -28,7 +28,8 @@ class LBB_Settings {
 			'rate_RON'           => 3.9,
 			'rate_EUR'           => 19.5,
 			'rate_USD'           => 17.5,
-			'pay_currencies'     => 'MDL,RON',
+			'pay_currencies'     => 'MDL',
+			'show_approx'        => 1,
 			'allow_reserve'      => 1,
 			'reserve_limit'      => 3,
 			'simple_checkout'    => 1,
@@ -90,7 +91,7 @@ class LBB_Settings {
 	}
 
 	public static function checkboxes() {
-		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_reserve' );
+		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_reserve', 'show_approx' );
 	}
 
 	public static function currencies() {
@@ -103,6 +104,19 @@ class LBB_Settings {
 	public static function pay_currencies() {
 		$list = array_values( array_intersect( self::currencies(), explode( ',', (string) self::get( 'pay_currencies' ) ) ) );
 		return $list ? $list : array( 'MDL' );
+	}
+
+	/**
+	 * Monedele afișate informativ („≈ 62 RON”) lângă suma de plată.
+	 *
+	 * @param string $pay   Moneda de plată.
+	 * @param string $route Moneda rutei.
+	 */
+	public static function approx_currencies( $pay, $route = '' ) {
+		if ( ! self::get( 'show_approx' ) ) {
+			return array();
+		}
+		return array_values( array_diff( array_unique( array_filter( array( 'MDL', 'RON', $route ) ) ), array( $pay ) ) );
 	}
 
 	/**

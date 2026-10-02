@@ -13,7 +13,7 @@ Clientul alege cursa, plătește cu cardul și primește biletul pe email.
   - Apare în lista de pasageri cu suma de încasat la urcare și se poate anula din admin.
   - Un telefon poate avea cel mult 3 rezervări neachitate (se schimbă din Setări).
   - Pe o singură pagină se poate lăsa doar un buton: `mode="pay"` sau `mode="reserve"` în shortcode.
-- **Plata în MDL sau RON**: clientul alege moneda în formular. Implicit se propune moneda rutei: MDL spre România, RON spre Moldova. Prețul se convertește după cursul din Setări, iar comanda WooCommerce se face în moneda aleasă. Monedele acceptate se aleg din Setări; dacă banca încasează doar în MDL, lăsați doar MDL.
+- **Plata în MDL, cu echivalent în RON**: implicit se încasează în MDL (cum lucrează Paynet), iar lângă preț apare informativ „≈ 62 RON” (și „≈ 234 MDL” la rutele cu preț în RON). Dacă banca acceptă și RON, se bifează RON în Setări și clientul alege singur moneda; comanda WooCommerce se face în moneda aleasă.
 - **Plata**: prin WooCommerce, deci merge cu orice plugin de plată (Paynet, maib, Victoriabank, BT iPay). Plugin-ul nu atinge datele cardului.
 - **Biletul**: cod `LB-XXXXXX` pe email, pe pagina de mulțumire și în contul clientului, plus link spre o pagină cu cod QR (bun de arătat șoferului sau de printat). Biletul se emite doar după confirmarea plății, iar o comandă anulată sau rambursată eliberează locurile.
 - **Admin → LibertBus**:

@@ -133,6 +133,14 @@ class LBB_WooCommerce {
 		foreach ( self::describe( $booking ) as $label => $value ) {
 			$data[] = array( 'key' => $label, 'value' => $value );
 		}
+		$cur    = get_woocommerce_currency();
+		$approx = array();
+		foreach ( LBB_Settings::approx_currencies( $cur, $booking['currency'] ) as $c ) {
+			$approx[] = '≈ ' . self::money( round( LBB_Settings::convert( $booking['amount'], $booking['currency'], $c ) ), $c );
+		}
+		if ( $approx ) {
+			$data[] = array( 'key' => __( 'Echivalent', 'libertbus-bilete' ), 'value' => implode( ', ', $approx ) );
+		}
 		return $data;
 	}
 

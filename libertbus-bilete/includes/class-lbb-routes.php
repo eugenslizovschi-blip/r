@@ -177,7 +177,7 @@ class LBB_Routes {
 				continue;
 			}
 			$prices = array();
-			foreach ( LBB_Settings::pay_currencies() as $cur ) {
+			foreach ( array_unique( array_merge( LBB_Settings::pay_currencies(), array( 'MDL', 'RON', $route['currency'] ) ) ) as $cur ) {
 				$prices[ $cur ] = array(
 					LBB_Settings::convert( $route['price'], $route['currency'], $cur ),
 					null === $route['child_price'] ? null : LBB_Settings::convert( $route['child_price'], $route['currency'], $cur ),
