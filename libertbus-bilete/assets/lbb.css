@@ -129,11 +129,11 @@ html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
 .lbb-overlay .lbb-passengers { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .lbb-overlay .lbb-passengers > legend { grid-column: 1 / -1; }
 .lbb-overlay .lbb-step2 .lbb-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-.lbb-overlay .lbb-actions { position: sticky; bottom: 0; z-index: 2; background: #fff; margin: 0 -18px; padding: 12px 18px; border-top: 1px solid var(--lbb-border); }
+.lbb-overlay .lbb-actions { position: sticky; bottom: 0; z-index: 2; background: #fff; margin: 0; padding: 12px 0; box-shadow: 0 -10px 12px -10px rgba(0, 0, 0, .25); }
 .lbb-overlay .lbb-note { padding-bottom: 16px; }
 @media (max-width: 600px) {
 	.lbb-overlay { padding: 0; background: #fff; }
 	.lbb-overlay .lbb-booking { max-width: none; min-height: 100%; margin: 0; border: 0; border-radius: 0; box-shadow: none; padding: 16px 16px 0; }
-	.lbb-overlay .lbb-actions { margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+	.lbb-overlay .lbb-actions { padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); }
 	.lbb-overlay .lbb-actions { grid-template-columns: 1fr; gap: 8px; }
 }
