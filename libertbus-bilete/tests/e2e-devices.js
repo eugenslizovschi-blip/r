@@ -44,9 +44,12 @@ async function check(browser, state, [name, dev]) {
       const c = document.createElement('canvas').getContext('2d'); const cs = getComputedStyle(time);
       c.font = cs.fontSize + ' ' + cs.fontFamily;
       const textW = c.measureText(opt).width, availW = time.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 18;
-      return { hScroll: document.documentElement.scrollWidth > innerWidth + 1, boxW: Math.round(box.width), boxH: Math.round(box.height), offRight: box.right > innerWidth + 1, offLeft: box.left < -1, small, tinyFont, timeTruncated: textW > availW, opt };
+      const tot = root.querySelector('.lbb-summary-total'); const tcs = getComputedStyle(tot);
+      const cramped = parseFloat(tcs.lineHeight) < parseFloat(tcs.fontSize) * 1.15;
+      return { cramped, hScroll: document.documentElement.scrollWidth > innerWidth + 1, boxW: Math.round(box.width), boxH: Math.round(box.height), offRight: box.right > innerWidth + 1, offLeft: box.left < -1, small, tinyFont, timeTruncated: textW > availW, opt };
     }, f);
     if (m1.hScroll) r.issues.push('pagina are scroll orizontal');
+    if (m1.cramped) r.issues.push('rândurile din rezumat se suprapun (line-height prea mic)');
     if (m1.offRight || m1.offLeft) r.issues.push('formularul iese din ecran');
     if (m1.small.length) r.issues.push('elemente sub 40px înălțime: ' + m1.small.join(','));
     if (m1.tinyFont.length) r.issues.push('font sub 16px (zoom pe iPhone): ' + m1.tinyFont.join(','));
@@ -58,12 +61,15 @@ async function check(browser, state, [name, dev]) {
       const ov = document.querySelector('.lbb-overlay'); if (!ov) return null;
       const bs = [...ov.querySelectorAll('[data-lbb-submit]')].map(b => { const q = b.getBoundingClientRect(); return { t: b.textContent.trim(), on: q.top >= 0 && q.bottom <= innerHeight, w: Math.round(q.width), h: Math.round(q.height), oneLine: q.height < 70 }; });
       const panel = ov.querySelector('.lbb-booking').getBoundingClientRect();
-      return { bs, panelW: Math.round(panel.width), hScroll: ov.scrollWidth > ov.clientWidth + 1 };
+      const back = ov.querySelector('.lbb-back'); const pay = ov.querySelector('[data-lbb-submit]');
+      const backColor = back ? getComputedStyle(back).color : '', accent = pay ? getComputedStyle(pay).borderTopColor : '';
+      return { bs, panelW: Math.round(panel.width), hScroll: ov.scrollWidth > ov.clientWidth + 1, backOk: !back || backColor === accent, backColor };
     });
     if (!m2) r.issues.push('fereastra pasului 2 nu s-a deschis');
     else {
       m2.bs.forEach(b => { if (!b.on) r.issues.push('buton ascuns: ' + b.t); if (!b.oneLine) r.issues.push('buton pe 2+ rânduri: ' + b.t); });
       if (m2.hScroll) r.issues.push('fereastra are scroll orizontal');
+      if (!m2.backOk) r.issues.push('„Schimbă cursa” are altă culoare: ' + m2.backColor);
       r.step2 = 'panou ' + m2.panelW + 'px, butoane ' + m2.bs.map(b => b.w + '×' + b.h).join(' / ');
     }
     await p.screenshot({ path: `${OUT}/${name.replace(/\W+/g, '_')}-2.png` });

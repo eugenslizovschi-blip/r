@@ -149,3 +149,8 @@ html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
 	.lbb-overlay .lbb-back { margin-bottom: 4px !important; }
 	.lbb-overlay .lbb-note { font-size: 12px; }
 }
+
+/* Tema impune înălțimi de rând mici și culori pe butoane: le fixăm în formular. */
+.lbb-booking .lbb-summary, .lbb-booking .lbb-summary div, .lbb-booking .lbb-summary span { line-height: 1.35 !important; }
+.lbb-booking .lbb-field > span, .lbb-booking .lbb-status, .lbb-booking .lbb-note, .lbb-booking .lbb-preview-note { line-height: 1.35 !important; }
+.lbb-booking button.lbb-back, .lbb-booking button.lbb-back:hover, .lbb-booking button.lbb-back:focus { color: var(--lbb-accent) !important; background: none !important; border: 0 !important; text-decoration: underline; text-underline-offset: 3px; }
