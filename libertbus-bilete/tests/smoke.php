@@ -213,6 +213,29 @@ $tok2 = LBB_Settings::preview_token( true );
 lbb_t( 'link nou de previzualizare anulează cheia veche', $tok2 !== $tok && LBB_Settings::preview_token() === $tok2 );
 lbb_t( 'linkul de previzualizare conține cheia', false !== strpos( LBB_Settings::preview_url(), 'lbb_preview=' . $tok2 ) );
 
+// Emailurile de rezervare: unul clientului, unul biroului, cu codul, suma de la urcare și telefonul.
+$lbb_mails = array();
+$lbb_catch = function ( $null, $atts ) use ( &$lbb_mails ) {
+	$lbb_mails[] = $atts;
+	return true;
+};
+add_filter( 'pre_wp_mail', $lbb_catch, 1, 2 );
+$em = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Email Test' ), '+37369000077', 'client-mail@example.com', 'MDL' );
+$em = is_array( $em ) ? LBB_Bookings::reserve( $em['token'] ) : null;
+if ( $em ) {
+	LBB_Tickets::send_reservation_emails( $em );
+}
+remove_filter( 'pre_wp_mail', $lbb_catch, 1 );
+$to_client = array_values( array_filter( $lbb_mails, function ( $m ) {
+	return 'client-mail@example.com' === $m['to'];
+} ) );
+lbb_t( 'rezervarea trimite 2 emailuri (client + birou)', 2 === count( $lbb_mails ), count( $lbb_mails ) );
+lbb_t( 'emailul clientului are codul, suma la urcare și telefonul', $em && $to_client
+	&& false !== strpos( $to_client[0]['message'], $em['ticket_code'] )
+	&& false !== strpos( $to_client[0]['message'], 'De achitat la urcare' )
+	&& false !== strpos( $to_client[0]['message'], 'href="tel:' ), $to_client ? substr( wp_strip_all_tags( $to_client[0]['message'] ), 0, 200 ) : 'lipsă' );
+lbb_t( 'emailurile de rezervare sunt HTML', $to_client && false !== strpos( implode( ' ', (array) $to_client[0]['headers'] ), 'text/html' ) );
+
 // Pe bilet (pagină și email) apare telefonul de suport ca link de apel, pe un rând.
 $notes = LBB_Tickets::notes_html();
 lbb_t( 'biletul arată telefonul de suport ca link de apel', false !== strpos( $notes, 'href="tel:' . preg_replace( '/[^\d+]/', '', LBB_Settings::get( 'support_phone' ) ) . '"' ), $notes );
