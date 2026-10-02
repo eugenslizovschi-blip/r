@@ -31,6 +31,8 @@ class LBB_Settings {
 			'pay_currencies'     => 'MDL',
 			'show_approx'        => 1,
 			'replace_cf7'        => '',
+			'preview_cf7'        => '',
+			'accent_color'       => '#00875a',
 			'replace_cf7_routes' => 0,
 			'allow_pay'          => 0,
 			'allow_reserve'      => 1,
@@ -72,7 +74,9 @@ class LBB_Settings {
 				$list  = is_array( $value ) ? $value : explode( ',', (string) $value );
 				$list  = array_values( array_intersect( self::currencies(), array_map( 'strtoupper', array_map( 'trim', $list ) ) ) );
 				$value = implode( ',', $list ? $list : array( 'MDL' ) );
-			} elseif ( 'replace_cf7' === $key ) {
+			} elseif ( 'accent_color' === $key ) {
+				$value = sanitize_hex_color( $value ) ? sanitize_hex_color( $value ) : $default;
+			} elseif ( 'replace_cf7' === $key || 'preview_cf7' === $key ) {
 				$value = implode( ',', array_filter( array_map( 'absint', preg_split( '/[\s,;]+/', (string) $value ) ) ) );
 			} elseif ( 0 === strpos( $key, 'rate_' ) ) {
 				$value = max( 0.0001, (float) str_replace( ',', '.', $value ) );

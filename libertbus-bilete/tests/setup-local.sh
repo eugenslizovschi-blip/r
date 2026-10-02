@@ -29,6 +29,17 @@ if [ "$($WP post list --post_type=page --name=rezervare-bilet --format=count)" =
   $WP post create --post_type=page --post_status=publish --post_title='Balti - Iasi' --post_name=balti-iasi --post_content='<div style="height:1400px">Spațiu de test: formularul e jos pe pagină, ca pe homepage.</div>[libertbus_rezervare from="Balti" to="Iasi"]'
   $WP eval '$s=LBB_Settings::all(); $s["test_gateway"]=1; $s["allow_pay"]=1; update_option("lbb_settings",$s);'
 fi
+# Contact Form 7 + o pagină privată de previzualizare (ca pe libertbus.md: formularul #210 și formulare de rută).
+[ -d wordpress/wp-content/plugins/contact-form-7 ] || { curl -sSL -o cf7.zip https://downloads.wordpress.org/plugin/contact-form-7.5.9.3.zip && unzip -q -o cf7.zip -d wordpress/wp-content/plugins/; }
+$WP plugin activate contact-form-7 >/dev/null
+if [ "$($WP post list --post_type=page --post_status=private --name=previzualizare-bilete --format=count)" = 0 ]; then
+  F1=$($WP post create --post_type=wpcf7_contact_form --post_status=publish --post_title='mobile bun - homepage' --porcelain)
+  F2=$($WP post create --post_type=wpcf7_contact_form --post_status=publish --post_title='Balti - Iasi' --porcelain)
+  for f in $F1 $F2; do $WP post meta update $f _form '[text* nume] [submit "Trimite"]' >/dev/null; done
+  $WP post create --post_type=page --post_status=private --post_title='Previzualizare bilete' --post_name=previzualizare-bilete --post_content="[contact-form-7 id=\"$F1\" title=\"h\"]<hr>[contact-form-7 id=\"$F2\" title=\"r\"]" >/dev/null
+  $WP post create --post_type=page --post_status=publish --post_title='Formulare vechi' --post_name=formulare-vechi --post_content="[contact-form-7 id=\"$F1\" title=\"h\"]" >/dev/null
+  $WP eval "\$s=get_option('lbb_settings',array()); \$s['preview_cf7']='$F1'; update_option('lbb_settings',\$s);"
+fi
 mkdir -p wordpress/wp-content/mu-plugins
 cat > wordpress/wp-content/mu-plugins/mail-dump.php <<'PHP'
 <?php

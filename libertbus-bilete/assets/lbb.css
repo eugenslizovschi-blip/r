@@ -1,5 +1,5 @@
 .lbb-booking {
-	--lbb-accent: #e30613;
+	--lbb-accent: #00875a;
 	--lbb-accent-ink: #fff;
 	--lbb-border: #d7dbe0;
 	--lbb-muted: #5f6b7a;
@@ -36,6 +36,8 @@
 	margin: 0;
 }
 .lbb-booking select:focus, .lbb-booking input:focus { outline: 2px solid var(--lbb-accent); outline-offset: 1px; border-color: var(--lbb-accent); }
+.lbb-booking select, .lbb-booking input[type="text"], .lbb-booking input[type="tel"], .lbb-booking input[type="email"], .lbb-booking input[type="date"] { box-shadow: none !important; height: auto !important; font-size: 16px !important; color: #1d2733 !important; background-color: #fff !important; }
+.lbb-booking label, .lbb-booking legend { text-transform: none; letter-spacing: normal; }
 .lbb-booking select:disabled { background: var(--lbb-soft); color: var(--lbb-muted); }
 .lbb-passengers { border: 0; padding: 0; margin: 0 0 12px; display: grid; gap: 10px; }
 .lbb-passengers > legend { font-weight: 700; margin-bottom: 6px; padding: 0; }
@@ -59,7 +61,26 @@
 	cursor: pointer;
 }
 .lbb-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
-.lbb-submit-alt { background: #fff; color: var(--lbb-accent); border: 2px solid var(--lbb-accent); }
+.lbb-booking .lbb-submit {
+	background: var(--lbb-accent) !important;
+	color: var(--lbb-accent-ink) !important;
+	border: 2px solid var(--lbb-accent) !important;
+	border-radius: 8px !important;
+	box-shadow: none !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+	width: 100% !important;
+	min-height: 52px !important;
+	margin: 0 !important;
+	padding: 10px 16px !important;
+	line-height: 1.2 !important;
+	font-size: 17px !important;
+	font-weight: 700 !important;
+}
+.lbb-booking .lbb-submit-alt { background: #fff !important; color: var(--lbb-accent) !important; }
+.lbb-booking .lbb-submit:hover:not(:disabled) { filter: brightness(.92); }
+.lbb-booking .lbb-submit:disabled { opacity: .45 !important; cursor: not-allowed; }
+.lbb-preview-note { background: #fff8e1; border: 1px dashed #c99a00; color: #6b5000; border-radius: 8px; padding: 8px 12px; margin: 0 0 12px; font-size: 14px; }
 .lbb-currency { border: 0; padding: 0; margin: 0 0 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .lbb-currency[hidden] { display: none; }
 .lbb-currency > legend { float: left; margin: 0 8px 0 0; padding: 0; font-weight: 700; font-size: 14px; color: var(--lbb-muted); }

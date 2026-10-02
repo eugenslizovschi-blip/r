@@ -1,0 +1,57 @@
+// E2E: previzualizarea doar pentru administrator.
+// Plata online e OPRITĂ în setări; pe pagina privată adminul vede formularul nou cu „Achit online”
+// și poate cumpăra cu plata de test; vizitatorii văd tot formularele vechi.
+// BASE=http://127.0.0.1:8080 node tests/e2e-preview.js
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const BASE = process.env.BASE || 'http://127.0.0.1:8080';
+const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
+(async () => {
+  const browser = await chromium.launch();
+  // Vizitator: pagina privată nu există, iar pe pagina publică rămâne formularul vechi chiar și cu ?lbb_preview=1.
+  const guest = await (await browser.newContext()).newPage();
+  const r = await guest.goto(BASE + '/previzualizare-bilete/');
+  if (r.status() !== 404) fail('pagina privată e accesibilă vizitatorilor: ' + r.status());
+  await guest.goto(BASE + '/formulare-vechi/?lbb_preview=1');
+  if (await guest.$('.lbb-booking')) fail('vizitatorul vede formularul nou cu ?lbb_preview=1');
+  if (!(await guest.$('.wpcf7'))) fail('vizitatorul nu mai vede formularul vechi');
+  await guest.goto(BASE + '/balti-iasi/');
+  if (await guest.$('[data-lbb-submit][value="pay"]')) fail('vizitatorul vede „Achit online” deși plata e oprită');
+
+  // Admin: pe pagina privată vede 2 formulare noi, cu butonul de plată și nota de previzualizare.
+  const admin = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+  admin.on('pageerror', e => fail('pageerror: ' + e.message));
+  await admin.goto(BASE + '/wp-login.php');
+  await admin.fill('#user_login', 'admin'); await admin.fill('#user_pass', 'admin');
+  await Promise.all([admin.waitForNavigation(), admin.click('#wp-submit')]);
+  await admin.goto(BASE + '/previzualizare-bilete/');
+  const forms = await admin.$$('.lbb-booking');
+  if (forms.length !== 2) fail('pe pagina privată trebuie 2 formulare noi, sunt ' + forms.length);
+  if (await admin.$('.wpcf7')) fail('pe pagina privată a rămas un formular vechi');
+  if (!(await admin.$('.lbb-preview-note'))) fail('lipsește nota de previzualizare');
+  const second = forms[1];
+  const preset = await second.$eval('[data-lbb="route"]', s => s.options[s.selectedIndex] && s.options[s.selectedIndex].text);
+  if (preset !== 'Iași') fail('formularul de rută nu are Iași preselectat: ' + preset);
+  const btnColor = await second.$eval('[data-lbb-submit][value="pay"]', b => getComputedStyle(b).backgroundColor);
+  console.log('admin: formulare', forms.length, '| rută preselectată:', preset, '| culoare buton:', btnColor);
+
+  // Cumpărare de test din previzualizare (plata online e oprită pentru clienți).
+  await second.scrollIntoViewIfNeeded();
+  await admin.waitForFunction(el => el.querySelectorAll('[data-lbb="time"] option:not([disabled])').length > 1, second);
+  await second.$eval('[data-lbb="time"]', s => { const o = [...s.options].find(x => x.value && !x.disabled); s.value = o.value; s.dispatchEvent(new Event('change')); });
+  await (await second.$('input[name="lbb_names[]"]')).fill('Admin Test');
+  await (await second.$('input[name="lbb_phone"]')).fill('+37369184111');
+  await (await second.$('input[name="lbb_email"]')).fill('admin-test@example.com');
+  await second.screenshot({ path: (process.env.OUT || '.') + '/preview-form.png' });
+  await Promise.all([admin.waitForNavigation(), (await second.$('[data-lbb-submit][value="pay"]')).click()]);
+  if (!/checkout/.test(admin.url())) fail('previzualizarea nu duce la plată: ' + admin.url() + ' ' + ((await admin.$('.lbb-alert')) ? await admin.textContent('.lbb-alert') : ''));
+  await admin.waitForSelector('#payment');
+  await admin.waitForLoadState('networkidle');
+  await admin.locator('#payment_method_lbb_test').check();
+  if (await admin.locator('#terms').count()) await admin.locator('#terms').check();
+  await Promise.all([admin.waitForURL(/order-received/, { timeout: 30000 }), admin.click('#place_order')]);
+  const ticket = (await admin.textContent('.lbb-ticket')).replace(/\s+/g, ' ');
+  if (!/Achitat online/.test(ticket)) fail('biletul de test nu s-a emis: ' + ticket);
+  console.log('bilet de test:', ticket.slice(0, 120));
+  console.log(process.exitCode ? 'PREVIEW: PROBLEME' : 'PREVIEW: OK');
+  await browser.close();
+})().catch(e => { console.error('FAIL', e); process.exit(1); });

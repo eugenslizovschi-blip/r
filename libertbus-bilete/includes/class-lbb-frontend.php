@@ -34,11 +34,11 @@ class LBB_Frontend {
 			return $output;
 		}
 		$id  = (int) $m[1];
-		$ids = array_map( 'intval', explode( ',', (string) LBB_Settings::get( 'replace_cf7' ) ) );
+		$ids = array_map( 'intval', explode( ',', (string) LBB_Settings::get( 'replace_cf7' ) . ( self::is_preview() ? ',' . LBB_Settings::get( 'preview_cf7' ) : '' ) ) );
 		if ( in_array( $id, $ids, true ) ) {
 			return self::shortcode( array() );
 		}
-		if ( LBB_Settings::get( 'replace_cf7_routes' ) ) {
+		if ( LBB_Settings::get( 'replace_cf7_routes' ) || self::is_preview() ) {
 			$route = self::route_for_title( get_the_title( $id ) );
 			if ( $route ) {
 				return self::shortcode( array( 'from' => $route['origin'], 'to' => $route['destination'] ) );
@@ -74,8 +74,32 @@ class LBB_Frontend {
 		return $found;
 	}
 
+	/**
+	 * Previzualizare doar pentru administratori: pe o pagină privată (sau cu ?lbb_preview=1)
+	 * formularele se înlocuiesc și butonul de plată apare, fără să se schimbe nimic pentru clienți.
+	 */
+	public static function is_preview() {
+		if ( ! is_user_logged_in() || ! current_user_can( 'manage_woocommerce' ) ) {
+			return false;
+		}
+		if ( isset( $_GET['lbb_preview'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return true;
+		}
+		$post = get_queried_object();
+		return $post instanceof WP_Post && 'private' === $post->post_status;
+	}
+
+	private static function can_pay_online() {
+		$admin_test = ! empty( $_POST['lbb_preview'] ) && current_user_can( 'manage_woocommerce' ); // phpcs:ignore WordPress.Security.NonceVerification
+		return LBB_Settings::get( 'allow_pay' ) || self::is_preview() || $admin_test;
+	}
+
 	public static function register_assets() {
 		wp_register_style( 'lbb', LBB_URL . 'assets/lbb.css', array(), LBB_VERSION );
+		$accent = LBB_Settings::get( 'accent_color' );
+		if ( $accent ) {
+			wp_add_inline_style( 'lbb', '.lbb-booking{--lbb-accent:' . $accent . '}' );
+		}
 		wp_register_script( 'lbb', LBB_URL . 'assets/lbb.js', array(), LBB_VERSION, true );
 	}
 
@@ -156,7 +180,7 @@ class LBB_Frontend {
 			$currency = LBB_Settings::default_pay_currency( $route['currency'] );
 		}
 		$reserve = isset( $data['lbb_mode'] ) && 'reserve' === $data['lbb_mode'];
-		if ( ! $reserve && ! LBB_Settings::get( 'allow_pay' ) ) {
+		if ( ! $reserve && ! self::can_pay_online() ) {
 			return new WP_Error( 'lbb_mode', __( 'Plata online nu este încă disponibilă. Folosiți „Rezerv, achit la urcare”.', 'libertbus-bilete' ) );
 		}
 		if ( $reserve ) {
@@ -210,7 +234,8 @@ class LBB_Frontend {
 			return '<p class="lbb-empty">' . esc_html__( 'Momentan nu sunt curse disponibile pentru rezervare online.', 'libertbus-bilete' ) . '</p>';
 		}
 
-		$can_pay     = LBB_Settings::get( 'allow_pay' ) && 'reserve' !== $atts['mode'];
+		$preview     = self::is_preview();
+		$can_pay     = ( LBB_Settings::get( 'allow_pay' ) || $preview ) && 'reserve' !== $atts['mode'];
 		$can_reserve = LBB_Settings::get( 'allow_reserve' ) && 'pay' !== $atts['mode'];
 		if ( ! $can_pay && ! $can_reserve ) {
 			/* translators: %s: telefon */
@@ -284,6 +309,10 @@ class LBB_Frontend {
 			<noscript><p class="lbb-alert"><?php echo esc_html( sprintf( __( 'Pentru rezervare online activați JavaScript sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::get( 'support_phone' ) ) ); ?></p></noscript>
 			<form method="post" class="lbb-form" novalidate>
 				<input type="hidden" name="lbb_action" value="book">
+				<?php if ( $preview ) : ?>
+					<input type="hidden" name="lbb_preview" value="1">
+					<p class="lbb-preview-note"><?php esc_html_e( 'Previzualizare pentru administrator: butonul de plată online e vizibil doar pentru dumneavoastră.', 'libertbus-bilete' ); ?></p>
+				<?php endif; ?>
 				<input type="hidden" name="lbb_mode" value="<?php echo $can_pay ? 'pay' : 'reserve'; ?>" data-lbb="mode">
 				<input type="hidden" name="lbb_nonce" value="<?php echo esc_attr( wp_create_nonce( 'lbb_book' ) ); ?>">
 				<div class="lbb-hp" aria-hidden="true"><label>Website <input type="text" name="lbb_website" tabindex="-1" autocomplete="off"></label></div>

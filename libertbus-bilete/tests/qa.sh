@@ -19,5 +19,9 @@ echo "== Vizitator nelogat"
 BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY | grep -E 'GUEST|FAIL' | grep -q 'GUEST: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
 echo "== Plată în RON + rezervare cu plata la urcare"
 BASE="$BASE" node "$DIR/tests/e2e-currency-reserve.js" 2>&1 | grep -v CERT_AUTHORITY | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
+echo "== Previzualizare doar pentru admin (plata online oprită pentru clienți)"
+(cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=0; update_option("lbb_settings",$s);')
+BASE="$BASE" node "$DIR/tests/e2e-preview.js" 2>&1 | grep -v CERT_AUTHORITY | grep -q 'PREVIEW: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
+(cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=1; update_option("lbb_settings",$s);')
 echo "== Rezultat: $([ $FAIL = 0 ] && echo OK || echo PROBLEME)"
 exit $FAIL

@@ -532,6 +532,8 @@ class LBB_Admin {
 				}
 				echo '<p class="description">' . esc_html__( 'Implicit se propune moneda rutei (MDL spre România, RON spre Moldova); clientul poate schimba. Prețul se convertește după cursurile de mai jos.', 'libertbus-bilete' ) . '</p></td></tr>';
 				$text( 'replace_cf7', __( 'Înlocuiește formularele Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'ID-urile formularelor de rezervare (ex. de pe pagina principală) care se afișează ca formularul de rezervare cu plată. Paginile nu se modifică; ștergeți ID-ul ca să reveniți.', 'libertbus-bilete' ) );
+				$text( 'preview_cf7', __( 'Previzualizare: formulare Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'Pe paginile private (sau cu ?lbb_preview=1), doar pentru administratori, aceste formulare și cele de rută se înlocuiesc, cu butonul de plată vizibil. Clienții nu văd nimic.', 'libertbus-bilete' ) );
+				$text( 'accent_color', __( 'Culoarea butoanelor', 'libertbus-bilete' ), __( 'Cod hex, ex. #00875a (verdele site-ului, mai închis ca textul alb să se citească bine).', 'libertbus-bilete' ) );
 				$check( 'replace_cf7_routes', __( 'Formularele de rută', 'libertbus-bilete' ), __( 'Formularele Contact Form 7 cu titlul „Oraș - Oraș” (ex. „Balti - Iasi”) devin formularul rutei respective, dacă ruta există.', 'libertbus-bilete' ) );
 				$check( 'show_approx', __( 'Echivalent în altă monedă', 'libertbus-bilete' ), __( 'Arată lângă preț „≈ 62 RON” (sau „≈ 234 MDL”), doar informativ.', 'libertbus-bilete' ) );
 				$check( 'require_names', __( 'Numele pasagerilor', 'libertbus-bilete' ), __( 'Obligatoriu numele fiecărui pasager (util la vamă).', 'libertbus-bilete' ) );
