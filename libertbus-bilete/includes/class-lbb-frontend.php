@@ -286,6 +286,7 @@ class LBB_Frontend {
 				'total'       => __( 'Total de plată', 'libertbus-bilete' ),
 				'approxNote'  => __( 'echivalent orientativ, plata se face în moneda afișată', 'libertbus-bilete' ),
 				'payBoard'    => __( 'Se achită la urcare', 'libertbus-bilete' ),
+				'dialogLabel' => __( 'Datele pasagerilor și plata', 'libertbus-bilete' ),
 			),
 		);
 

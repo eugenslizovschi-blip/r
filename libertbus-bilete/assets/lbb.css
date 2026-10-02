@@ -121,3 +121,19 @@
 .lbb-next-wrap { margin-bottom: 4px; }
 .lbb-back { background: none !important; border: 0 !important; color: var(--lbb-accent) !important; padding: 4px 0 !important; margin: 0 0 8px !important; font: inherit; font-weight: 600; cursor: pointer; box-shadow: none !important; }
 @media (max-width: 340px) { .lbb-compact .lbb-grid { grid-template-columns: 1fr; } }
+
+/* Pasul 2 al formularului compact: fereastră peste pagină */
+html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
+.lbb-overlay { position: fixed; inset: 0; z-index: 2147483000; background: rgba(15, 23, 32, .6); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; display: flex; justify-content: center; align-items: flex-start; padding: 32px 16px; box-sizing: border-box; }
+.lbb-overlay .lbb-booking { width: 100%; max-width: 560px; margin: auto 0; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); padding: 18px 18px 0; }
+.lbb-overlay .lbb-passengers { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.lbb-overlay .lbb-passengers > legend { grid-column: 1 / -1; }
+.lbb-overlay .lbb-step2 .lbb-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.lbb-overlay .lbb-actions { position: sticky; bottom: 0; z-index: 2; background: #fff; margin: 0 -18px; padding: 12px 18px; border-top: 1px solid var(--lbb-border); }
+.lbb-overlay .lbb-note { padding-bottom: 16px; }
+@media (max-width: 600px) {
+	.lbb-overlay { padding: 0; background: #fff; }
+	.lbb-overlay .lbb-booking { max-width: none; min-height: 100%; margin: 0; border: 0; border-radius: 0; box-shadow: none; padding: 16px 16px 0; }
+	.lbb-overlay .lbb-actions { margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+	.lbb-overlay .lbb-actions { grid-template-columns: 1fr; gap: 8px; }
+}

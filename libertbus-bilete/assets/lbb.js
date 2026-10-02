@@ -18,6 +18,39 @@
 		var backBtn = root.querySelector( '[data-lbb="back"]' );
 
 		// Formular compact (în căsuțe mici, ex. pe homepage): pasul 1 = cursa, pasul 2 = datele și plata.
+		var overlay = null;
+		var placeholder = null;
+
+		// Pasul 2 se deschide într-o fereastră peste pagină (ecran întreg pe telefon), ca să nu depindă
+		// de căsuța temei: pe homepage căsuța are înălțime fixă și secțiunea următoare acoperea butoanele.
+		function openOverlay() {
+			if ( overlay ) {
+				return;
+			}
+			placeholder = document.createComment( 'lbb-booking' );
+			root.parentNode.insertBefore( placeholder, root );
+			overlay = document.createElement( 'div' );
+			overlay.className = 'lbb-overlay';
+			overlay.setAttribute( 'role', 'dialog' );
+			overlay.setAttribute( 'aria-modal', 'true' );
+			overlay.setAttribute( 'aria-label', t.dialogLabel );
+			overlay.appendChild( root );
+			document.body.appendChild( overlay );
+			document.documentElement.classList.add( 'lbb-lock' );
+			overlay.scrollTop = 0;
+		}
+
+		function closeOverlay() {
+			if ( ! overlay ) {
+				return;
+			}
+			placeholder.parentNode.insertBefore( root, placeholder );
+			placeholder.parentNode.removeChild( placeholder );
+			overlay.parentNode.removeChild( overlay );
+			overlay = null;
+			document.documentElement.classList.remove( 'lbb-lock' );
+		}
+
 		function showStep( n ) {
 			if ( ! compact ) {
 				return;
@@ -28,7 +61,19 @@
 				nextWrap.hidden = n === 2;
 			}
 			step2.hidden = n === 1;
+			if ( n === 2 ) {
+				openOverlay();
+			} else {
+				closeOverlay();
+			}
 		}
+
+		document.addEventListener( 'keydown', function ( e ) {
+			if ( overlay && ( e.key === 'Escape' || e.key === 'Esc' ) ) {
+				showStep( 1 );
+				el.time.focus();
+			}
+		} );
 		var radios = root.querySelectorAll( '[data-lbb="currency"]' );
 		var currencyTouched = false;
 
@@ -328,7 +373,6 @@
 				if ( first ) {
 					first.focus();
 				}
-				root.scrollIntoView( { block: 'nearest' } );
 			} );
 		}
 		if ( backBtn ) {
