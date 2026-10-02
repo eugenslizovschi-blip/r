@@ -17,6 +17,8 @@ if ! $WP core is-installed 2>/dev/null; then
   [ -d wordpress/wp-content/plugins/woocommerce ] || { curl -sSL -o wc.zip https://downloads.wordpress.org/plugin/woocommerce.8.7.0.zip && unzip -q -o wc.zip -d wordpress/wp-content/plugins/; }
 fi
 ln -sfn "$PLUGIN" wordpress/wp-content/plugins/libertbus-bilete
+# Testele de plată au nevoie de butonul „Achit online” și de plata de test.
+$WP eval '$s=get_option("lbb_settings",array()); if(is_array($s)){ $s["allow_pay"]=1; $s["test_gateway"]=1; update_option("lbb_settings",$s); }' 2>/dev/null || true
 $WP plugin activate woocommerce libertbus-bilete
 $WP option update timezone_string Europe/Chisinau && $WP option update woocommerce_currency MDL && $WP rewrite structure '/%postname%/'
 if [ "$($WP post list --post_type=page --name=rezervare-bilet --format=count)" = 0 ]; then
@@ -25,7 +27,7 @@ if [ "$($WP post list --post_type=page --name=rezervare-bilet --format=count)" =
   $WP post update "$($WP option get woocommerce_cart_page_id)" --post_content='[woocommerce_cart]'
   $WP post create --post_type=page --post_status=publish --post_title='Rezervare bilet' --post_name=rezervare-bilet --post_content='[libertbus_rezervare]'
   $WP post create --post_type=page --post_status=publish --post_title='Balti - Iasi' --post_name=balti-iasi --post_content='[libertbus_rezervare from="Balti" to="Iasi"]'
-  $WP eval '$s=LBB_Settings::all(); $s["test_gateway"]=1; update_option("lbb_settings",$s);'
+  $WP eval '$s=LBB_Settings::all(); $s["test_gateway"]=1; $s["allow_pay"]=1; update_option("lbb_settings",$s);'
 fi
 mkdir -p wordpress/wp-content/mu-plugins
 cat > wordpress/wp-content/mu-plugins/mail-dump.php <<'PHP'

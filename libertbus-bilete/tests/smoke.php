@@ -192,6 +192,20 @@ $t = LBB_Frontend::route_for_title( 'Cluj - Falesti' );
 lbb_t( 'titlul scurt „Cluj” → Cluj-Napoca', $t && 'Cluj-Napoca' === $t['origin'], $t );
 lbb_t( 'titlurile fără rută nu se potrivesc', null === LBB_Frontend::route_for_title( 'trimite colet' ) && null === LBB_Frontend::route_for_title( 'din Balti ->' ) && null === LBB_Frontend::route_for_title( 'mobile bun - aici modificarile - da aici' ) );
 
+// Butonul de plată online pornește doar din setări; configurația formularului rezistă la stripslashes().
+$keep = get_option( 'lbb_settings', array() );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 0, 'allow_reserve' => 1 ) ) );
+$html = LBB_Frontend::shortcode( array() );
+lbb_t( 'fără „allow_pay” nu apare butonul de plată', false === strpos( $html, 'value="pay"' ) && false !== strpos( $html, 'value="reserve"' ) );
+$r = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'pay', 'lbb_phone' => '+37369000009' ) ) );
+lbb_t( 'fără „allow_pay” plata e refuzată și pe server', is_wp_error( $r ) && 'lbb_mode' === $r->get_error_code(), $r );
+preg_match( '/data-lbb-config="([^"]+)"/', stripslashes( $html ), $cm );
+$cfg = $cm ? json_decode( base64_decode( html_entity_decode( $cm[1] ) ), true ) : null;
+lbb_t( 'configurația cu diacritice supraviețuiește stripslashes()', is_array( $cfg ) && 'Alegeți orașul de plecare' === $cfg['i18n']['chooseFrom'], $cm ? substr( $cm[1], 0, 40 ) : 'lipsă' );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 0, 'allow_reserve' => 0 ) ) );
+lbb_t( 'fără niciun buton, formularul arată doar telefonul', false === strpos( LBB_Frontend::shortcode( array() ), '<form' ) );
+update_option( 'lbb_settings', $keep );
+
 // Curățenie.
 foreach ( array( 'TestB', 'TestC' ) as $lbb_dest ) {
 	$lbb_r = LBB_Routes::find( 'TestA', $lbb_dest );

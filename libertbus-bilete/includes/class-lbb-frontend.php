@@ -156,6 +156,9 @@ class LBB_Frontend {
 			$currency = LBB_Settings::default_pay_currency( $route['currency'] );
 		}
 		$reserve = isset( $data['lbb_mode'] ) && 'reserve' === $data['lbb_mode'];
+		if ( ! $reserve && ! LBB_Settings::get( 'allow_pay' ) ) {
+			return new WP_Error( 'lbb_mode', __( 'Plata online nu este încă disponibilă. Folosiți „Rezerv, achit la urcare”.', 'libertbus-bilete' ) );
+		}
 		if ( $reserve ) {
 			if ( ! LBB_Settings::get( 'allow_reserve' ) ) {
 				return new WP_Error( 'lbb_mode', __( 'Rezervarea fără plată nu este disponibilă. Achitați online.', 'libertbus-bilete' ) );
@@ -207,6 +210,13 @@ class LBB_Frontend {
 			return '<p class="lbb-empty">' . esc_html__( 'Momentan nu sunt curse disponibile pentru rezervare online.', 'libertbus-bilete' ) . '</p>';
 		}
 
+		$can_pay     = LBB_Settings::get( 'allow_pay' ) && 'reserve' !== $atts['mode'];
+		$can_reserve = LBB_Settings::get( 'allow_reserve' ) && 'pay' !== $atts['mode'];
+		if ( ! $can_pay && ! $can_reserve ) {
+			/* translators: %s: telefon */
+			return '<p class="lbb-empty">' . esc_html( sprintf( __( 'Rezervarea online nu este disponibilă momentan. Sunați la %s.', 'libertbus-bilete' ), LBB_Settings::get( 'support_phone' ) ) ) . '</p>';
+		}
+
 		wp_enqueue_style( 'lbb' );
 		wp_enqueue_script( 'lbb' );
 
@@ -234,8 +244,6 @@ class LBB_Frontend {
 			'requireNames'  => (bool) LBB_Settings::get( 'require_names' ),
 			'currencies'    => LBB_Settings::pay_currencies(),
 			'showApprox'    => (bool) LBB_Settings::get( 'show_approx' ),
-			'allowReserve'  => (bool) LBB_Settings::get( 'allow_reserve' ) && 'pay' !== $atts['mode'],
-			'allowPay'      => 'reserve' !== $atts['mode'],
 			'i18n'          => array(
 				'chooseFrom'  => __( 'Alegeți orașul de plecare', 'libertbus-bilete' ),
 				'chooseTo'    => __( 'Alegeți destinația', 'libertbus-bilete' ),
@@ -266,7 +274,7 @@ class LBB_Frontend {
 
 		ob_start();
 		?>
-		<div class="lbb-booking" id="<?php echo esc_attr( $uid ); ?>" data-lbb="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
+		<div class="lbb-booking" id="<?php echo esc_attr( $uid ); ?>" data-lbb-config="<?php echo esc_attr( base64_encode( wp_json_encode( $config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ); ?>">
 			<?php if ( $atts['title'] ) : ?>
 				<h3 class="lbb-title"><?php echo esc_html( $atts['title'] ); ?></h3>
 			<?php endif; ?>
@@ -276,7 +284,7 @@ class LBB_Frontend {
 			<noscript><p class="lbb-alert"><?php echo esc_html( sprintf( __( 'Pentru rezervare online activați JavaScript sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::get( 'support_phone' ) ) ); ?></p></noscript>
 			<form method="post" class="lbb-form" novalidate>
 				<input type="hidden" name="lbb_action" value="book">
-				<input type="hidden" name="lbb_mode" value="pay" data-lbb="mode">
+				<input type="hidden" name="lbb_mode" value="<?php echo $can_pay ? 'pay' : 'reserve'; ?>" data-lbb="mode">
 				<input type="hidden" name="lbb_nonce" value="<?php echo esc_attr( wp_create_nonce( 'lbb_book' ) ); ?>">
 				<div class="lbb-hp" aria-hidden="true"><label>Website <input type="text" name="lbb_website" tabindex="-1" autocomplete="off"></label></div>
 
@@ -331,14 +339,24 @@ class LBB_Frontend {
 				<div class="lbb-summary" data-lbb="summary" hidden></div>
 
 				<div class="lbb-actions">
-					<?php if ( 'reserve' !== $atts['mode'] ) : ?>
+					<?php if ( $can_pay ) : ?>
 						<button type="submit" value="pay" class="lbb-submit" data-lbb-submit disabled><?php esc_html_e( 'Achit online cu cardul', 'libertbus-bilete' ); ?></button>
 					<?php endif; ?>
-					<?php if ( LBB_Settings::get( 'allow_reserve' ) && 'pay' !== $atts['mode'] ) : ?>
+					<?php if ( $can_reserve ) : ?>
 						<button type="submit" value="reserve" class="lbb-submit lbb-submit-alt" data-lbb-submit disabled><?php esc_html_e( 'Rezerv, achit la urcare', 'libertbus-bilete' ); ?></button>
 					<?php endif; ?>
 				</div>
-				<p class="lbb-note"><?php echo esc_html( sprintf( __( 'La plata online locurile se păstrează %d minute cât finalizați plata. Întrebări: %s', 'libertbus-bilete' ), LBB_Settings::get( 'cart_hold_minutes' ), LBB_Settings::get( 'support_phone' ) ) ); ?></p>
+				<p class="lbb-note">
+					<?php
+					if ( $can_pay ) {
+						/* translators: 1: minute, 2: telefon */
+						echo esc_html( sprintf( __( 'La plata online locurile se păstrează %1$d minute cât finalizați plata. Întrebări: %2$s', 'libertbus-bilete' ), LBB_Settings::get( 'cart_hold_minutes' ), LBB_Settings::get( 'support_phone' ) ) );
+					} else {
+						/* translators: %s: telefon */
+						echo esc_html( sprintf( __( 'Plata se face la urcare. Primiți confirmarea pe email. Întrebări: %s', 'libertbus-bilete' ), LBB_Settings::get( 'support_phone' ) ) );
+					}
+					?>
+				</p>
 			</form>
 		</div>
 		<?php

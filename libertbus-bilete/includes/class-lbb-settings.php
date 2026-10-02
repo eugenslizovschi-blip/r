@@ -32,6 +32,7 @@ class LBB_Settings {
 			'show_approx'        => 1,
 			'replace_cf7'        => '',
 			'replace_cf7_routes' => 0,
+			'allow_pay'          => 0,
 			'allow_reserve'      => 1,
 			'reserve_limit'      => 3,
 			'simple_checkout'    => 1,
@@ -95,7 +96,7 @@ class LBB_Settings {
 	}
 
 	public static function checkboxes() {
-		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_reserve', 'show_approx', 'replace_cf7_routes' );
+		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_pay', 'allow_reserve', 'show_approx', 'replace_cf7_routes' );
 	}
 
 	public static function currencies() {

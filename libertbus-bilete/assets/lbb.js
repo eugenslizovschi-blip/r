@@ -3,7 +3,7 @@
 	'use strict';
 
 	function init( root ) {
-		var cfg = JSON.parse( root.getAttribute( 'data-lbb' ) );
+		var cfg = decodeConfig( root.getAttribute( 'data-lbb-config' ) );
 		var t = cfg.i18n;
 		var el = {};
 		[ 'from', 'route', 'date', 'time', 'status', 'adults', 'children', 'names', 'summary', 'mode' ].forEach( function ( k ) {
@@ -342,8 +342,18 @@
 		} );
 	}
 
+	// Configurația vine în base64 (JSON UTF-8), ca temele care scot „\\” din conținut să nu strice diacriticele.
+	function decodeConfig( b64 ) {
+		var bin = window.atob( b64 );
+		var bytes = new Uint8Array( bin.length );
+		for ( var i = 0; i < bin.length; i++ ) {
+			bytes[ i ] = bin.charCodeAt( i );
+		}
+		return JSON.parse( new TextDecoder( 'utf-8' ).decode( bytes ) );
+	}
+
 	function boot() {
-		var roots = document.querySelectorAll( '.lbb-booking[data-lbb]' );
+		var roots = document.querySelectorAll( '.lbb-booking[data-lbb-config]' );
 		for ( var i = 0; i < roots.length; i++ ) {
 			try {
 				init( roots[ i ] );

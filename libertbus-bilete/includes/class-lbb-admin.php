@@ -86,6 +86,9 @@ class LBB_Admin {
 			$add( 'gateway', (bool) $real, __( 'O metodă de plată cu cardul este activă', 'libertbus-bilete' ),
 				$real ? implode( ', ', $real ) : __( 'Instalați plugin-ul WooCommerce al băncii (Paynet, MAIB, Victoriabank, BT iPay), introduceți datele primite de la bancă și activați-l.', 'libertbus-bilete' ),
 				admin_url( 'admin.php?page=wc-settings&tab=checkout' ) );
+			$add( 'allow_pay', LBB_Settings::get( 'allow_pay' ) ? true : 'warn', __( 'Butonul „Achit online cu cardul” e pornit', 'libertbus-bilete' ),
+				LBB_Settings::get( 'allow_pay' ) ? '' : __( 'Acum clienții pot doar rezerva cu plata la urcare. Porniți butonul din Setări după ce plata cu cardul e activă.', 'libertbus-bilete' ),
+				admin_url( 'admin.php?page=lbb-settings' ) );
 			if ( $test ) {
 				$add( 'test_gateway', 'warn', __( 'Plata de test este pornită', 'libertbus-bilete' ), __( 'O văd doar administratorii. Opriți-o după verificări.', 'libertbus-bilete' ), admin_url( 'admin.php?page=lbb-settings' ) );
 			}
@@ -520,6 +523,7 @@ class LBB_Admin {
 				$num( 'max_days_ahead', __( 'Vânzare cu cel mult (zile) înainte', 'libertbus-bilete' ) );
 				$num( 'cart_hold_minutes', __( 'Locurile se țin în coș (minute)', 'libertbus-bilete' ) );
 				$num( 'payment_minutes', __( 'Locurile se țin cât se așteaptă plata (minute)', 'libertbus-bilete' ), __( 'După acest timp, dacă banca nu a confirmat plata, locurile se eliberează.', 'libertbus-bilete' ) );
+				$check( 'allow_pay', __( 'Plata online cu cardul', 'libertbus-bilete' ), __( 'Arată butonul „Achit online cu cardul”. Porniți-l doar după ce metoda de plată a băncii (ex. Paynet) e activă și testată.', 'libertbus-bilete' ) );
 				$check( 'allow_reserve', __( 'Rezervare fără plată', 'libertbus-bilete' ), __( 'Butonul „Rezerv, achit la urcare” lângă „Achit online cu cardul”.', 'libertbus-bilete' ) );
 				$num( 'reserve_limit', __( 'Rezervări neachitate pe un telefon', 'libertbus-bilete' ), __( 'Câte rezervări fără plată poate avea un număr de telefon în același timp (0 = fără limită). Oprește blocarea locurilor de către glumeți.', 'libertbus-bilete' ) );
 				echo '<tr><th>' . esc_html__( 'Clientul poate plăti în', 'libertbus-bilete' ) . '</th><td><input type="hidden" name="pay_currencies[]" value="">';
