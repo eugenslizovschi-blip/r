@@ -29,7 +29,11 @@ Clientul alege cursa, plătește cu cardul și primește biletul pe email.
   - „Înlocuiește formularele Contact Form 7 (ID-uri)”: ex. `210` = formularul din imaginea mare de pe pagina principală;
   - „Formularele de rută”: un formular cu titlul „Balti - Iasi” devine formularul rutei Bălți → Iași (46 de formulare se potrivesc).
 - **Formular compact în doi pași** (pentru căsuțele mici ale temei): pasul 1 = ruta, data, ora, pasagerii și prețul; pasul 2 (nume, telefon, email, butoane) se deschide într-o fereastră peste pagină, pe tot ecranul pe telefon, cu butoanele fixate jos.
-- **Previzualizare doar pentru administrator**: pe o pagină privată (ex. `/previzualizare-bilete/`) sau cu `?lbb_preview=1`, adminul logat vede formularele înlocuite și butonul de plată; clienții nu văd nimic schimbat. Formularele de previzualizare se aleg în Setări.
+- **Previzualizare**: formularele de previzualizare (Setări) se înlocuiesc și butonul de plată apare doar:
+  - pentru adminul logat, pe o pagină privată (ex. `/previzualizare-bilete/`) sau cu `?lbb_preview=1`;
+  - pentru oricine are **linkul secret** `/?lbb_preview=CHEIE` (merge pe orice pagină, fără login; cheia e în Setări, cu buton „Link nou de previzualizare” care o anulează pe cea veche). Paginile deschise așa nu intră în cache și nu se indexează.
+  Ceilalți vizitatori văd site-ul neschimbat.
+- **Telefonul de suport** apare ca link de apel, pe un singur rând, în formular, pe pagina biletului/rezervării și în emailul de rezervare.
 
 ## Instalare
 
@@ -59,7 +63,7 @@ Toate testele rulează pe o instalare de test, niciodată pe site-ul real.
 - `tests/setup-local.sh <director>` pregătește WordPress 6.4.3 + WooCommerce + Contact Form 7 pe http://127.0.0.1:8080 și verificatorul de compatibilitate PHP.
 - `tests/qa.sh` rulează tot (vezi comentariul din fișier):
   - sintaxa PHP și **compatibilitatea cu PHP 7.4+** (serverul libertbus.md rulează PHP 7.4);
-  - `tests/smoke.php`: 63 de verificări (locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, potrivirea formularelor după titlu, buton de plată oprit, diacritice);
-  - în browser: rezervare cu plată de test, vizitator nelogat (inclusiv răspunsul blocat de protecția hostingului), plată în RON și rezervare la urcare, previzualizare cu 5 pasageri;
-  - **8 dispozitive** (iPhone SE … desktop 1920), 5 browsere în paralel: fără scroll orizontal, butoane de minim 40px, text de 16px în câmpuri, ora netăiată, ambele butoane pe ecran.
+  - `tests/smoke.php`: 68 de verificări (locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, potrivirea formularelor după titlu, buton de plată oprit, diacritice, linkul secret, telefonul de pe bilet);
+  - în browser: rezervare cu plată de test, vizitator nelogat (inclusiv răspunsul blocat de protecția hostingului), plată în RON și rezervare la urcare, previzualizare cu 5 pasageri și linkul secret (cheie corectă, cheie greșită, fără cache);
+  - **8 dispozitive** (iPhone SE … desktop 1920), 5 browsere în paralel: fără scroll orizontal, butoane de minim 40px, text de 16px în câmpuri, ora netăiată, ambele butoane pe ecran, telefonul și sumele pe un singur rând.
 - `tests/e2e-devices.js` se poate rula și pe site-ul real (doar citire), cu `BASE=https://libertbus.md WP_USER=… WP_PASS=… PARALLEL=1`: protecția hostingului blochează rafalele de cereri.
