@@ -17,6 +17,7 @@ class LBB_Admin {
 		add_action( 'admin_post_lbb_delete_route', array( __CLASS__, 'delete_route' ) );
 		add_action( 'admin_post_lbb_save_settings', array( __CLASS__, 'save_settings' ) );
 		add_action( 'admin_post_lbb_manifest_csv', array( __CLASS__, 'manifest_csv' ) );
+		add_action( 'admin_post_lbb_cancel_booking', array( __CLASS__, 'cancel_booking' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'rest' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( LBB_FILE ), function ( $links ) {
 			array_unshift( $links, '<a href="' . esc_url( admin_url( 'admin.php?page=lbb' ) ) . '">' . esc_html__( 'Panou', 'libertbus-bilete' ) . '</a>' );
@@ -64,6 +65,11 @@ class LBB_Admin {
 			$add( 'currency', 'MDL' === $currency ? true : 'warn', __( 'Moneda magazinului', 'libertbus-bilete' ),
 				'MDL' === $currency ? 'MDL' : sprintf( __( 'Acum: %s. Băncile din Moldova (Paynet, MAIB, Victoriabank) încasează de regulă în MDL. Prețurile în RON se convertesc automat după cursul din Setări.', 'libertbus-bilete' ), $currency ),
 				admin_url( 'admin.php?page=wc-settings&tab=general' ) );
+
+			$pay = LBB_Settings::pay_currencies();
+			$add( 'pay_currencies', count( $pay ) > 1 ? 'warn' : true, __( 'Monede de plată pentru clienți', 'libertbus-bilete' ),
+				implode( ', ', $pay ) . ( count( $pay ) > 1 ? ' — ' . __( 'verificați că procesatorul încasează în fiecare dintre ele. Dacă banca primește doar MDL, lăsați doar MDL: clientul cu card în RON plătește oricum, conversia o face banca lui.', 'libertbus-bilete' ) : '' ),
+				admin_url( 'admin.php?page=lbb-settings' ) );
 
 			$real = array();
 			$test = false;
@@ -167,6 +173,7 @@ class LBB_Admin {
 			'tickets_confirmed'  => (int) $wpdb->get_var( "SELECT COUNT(*) FROM $t WHERE status = 'confirmed'" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'seats_confirmed'    => (int) $wpdb->get_var( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'confirmed'" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'seats_upcoming'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'confirmed' AND travel_date >= %s", wp_date( 'Y-m-d' ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'seats_reserved'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'reserved' AND travel_date >= %s", wp_date( 'Y-m-d' ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'pending_payment'    => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $t WHERE status = 'pending' AND expires_at > %s", gmdate( 'Y-m-d H:i:s' ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 	}
@@ -198,7 +205,8 @@ class LBB_Admin {
 		echo '<div class="lbb-cards">';
 		foreach ( array(
 			'routes_active'     => __( 'Rute active', 'libertbus-bilete' ),
-			'seats_upcoming'    => __( 'Locuri vândute (curse viitoare)', 'libertbus-bilete' ),
+			'seats_upcoming'    => __( 'Locuri achitate online (curse viitoare)', 'libertbus-bilete' ),
+			'seats_reserved'    => __( 'Locuri rezervate, plata la urcare', 'libertbus-bilete' ),
 			'tickets_confirmed' => __( 'Bilete emise (total)', 'libertbus-bilete' ),
 			'pending_payment'   => __( 'Așteaptă plata acum', 'libertbus-bilete' ),
 		) as $key => $label ) {
@@ -373,17 +381,43 @@ class LBB_Admin {
 			return;
 		}
 		$total = 0;
-		echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'Ora', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Pasageri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th></tr></thead><tbody>';
+		echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'Ora', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Pasageri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Plată', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th></tr></thead><tbody>';
+		$due = array();
 		foreach ( $rows as $b ) {
 			$total += $b['seats'];
 			$order  = $b['order_id'] ? wc_get_order( $b['order_id'] ) : null;
-			echo '<tr><td><strong>' . esc_html( $b['dep_time'] ) . '</strong></td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( implode( ', ', $b['passengers'] ) ) . '</td><td><a href="tel:' . esc_attr( $b['phone'] ) . '">' . esc_html( $b['phone'] ) . '</a></td><td>';
+			echo '<tr><td><strong>' . esc_html( $b['dep_time'] ) . '</strong></td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( implode( ', ', $b['passengers'] ) ) . '</td><td><a href="tel:' . esc_attr( $b['phone'] ) . '">' . esc_html( $b['phone'] ) . '</a></td><td>' . self::payment_label( $b, $due ) . '</td><td>';
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a>';
 			}
 			echo '</td></tr>';
 		}
-		echo '</tbody><tfoot><tr><th colspan="3">' . esc_html__( 'Total locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html( $total ) . '</th><th colspan="3"></th></tr></tfoot></table></div>';
+		$due_text = array();
+		foreach ( $due as $cur => $sum ) {
+			$due_text[] = LBB_WooCommerce::money( $sum, $cur );
+		}
+		echo '</tbody><tfoot><tr><th colspan="3">' . esc_html__( 'Total locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html( $total ) . '</th><th colspan="2"></th><th colspan="2">' . ( $due_text ? esc_html__( 'De încasat la urcare', 'libertbus-bilete' ) . ': ' . esc_html( implode( ' + ', $due_text ) ) : '' ) . '</th></tr></tfoot></table></div>';
+	}
+
+	/**
+	 * „achitat online” sau „la urcare: 480 MDL”; adună sumele de încasat pe monedă.
+	 */
+	private static function payment_label( array $b, array &$due ) {
+		if ( 'reserved' !== $b['status'] ) {
+			return '<span class="lbb-ok">' . esc_html__( 'achitat online', 'libertbus-bilete' ) . '</span>';
+		}
+		list( $amount, $cur ) = LBB_Bookings::pay_amount( $b );
+		$due[ $cur ] = ( isset( $due[ $cur ] ) ? $due[ $cur ] : 0 ) + $amount;
+		return '<span class="lbb-warn">' . esc_html( sprintf( __( 'la urcare: %s', 'libertbus-bilete' ), LBB_WooCommerce::money( $amount, $cur ) ) ) . '</span>';
+	}
+
+	public static function cancel_booking() {
+		$id = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
+		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_cancel_booking_' . $id ) ) {
+			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
+		}
+		$ok = LBB_Bookings::cancel( $id );
+		self::redirect( 'lbb-bookings', $ok ? __( 'Rezervarea a fost anulată, locurile sunt libere.', 'libertbus-bilete' ) : __( 'Rezervarea nu a putut fi anulată (poate e deja plătită sau anulată).', 'libertbus-bilete' ), ! $ok, array( 'status' => 'reserved' ) );
 	}
 
 	public static function manifest_csv() {
@@ -399,9 +433,11 @@ class LBB_Admin {
 		header( 'Content-Disposition: attachment; filename="pasageri-' . $date . '.csv"' );
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" );
-		fputcsv( $out, array( 'Data', 'Ora', 'Plecare', 'Destinatie', 'Bilet', 'Locuri', 'Pasageri', 'Telefon', 'Email', 'Comanda' ) );
+		fputcsv( $out, array( 'Data', 'Ora', 'Plecare', 'Destinatie', 'Bilet', 'Locuri', 'Pasageri', 'Telefon', 'Email', 'Plata', 'Comanda' ) );
 		foreach ( LBB_Bookings::manifest( $date, $route ) as $b ) {
-			fputcsv( $out, array_map( array( __CLASS__, 'csv_safe' ), array( $date, $b['dep_time'], $b['origin'], $b['destination'], $b['ticket_code'], $b['seats'], implode( '; ', $b['passengers'] ), $b['phone'], $b['email'], $b['order_id'] ) ) );
+			list( $amount, $cur ) = LBB_Bookings::pay_amount( $b );
+			$plata = 'reserved' === $b['status'] ? 'la urcare ' . $amount . ' ' . $cur : 'online';
+			fputcsv( $out, array_map( array( __CLASS__, 'csv_safe' ), array( $date, $b['dep_time'], $b['origin'], $b['destination'], $b['ticket_code'], $b['seats'], implode( '; ', $b['passengers'] ), $b['phone'], $b['email'], $plata, $b['order_id'] ) ) );
 		}
 		fclose( $out );
 		exit;
@@ -421,6 +457,7 @@ class LBB_Admin {
 		$labels = array(
 			''          => __( 'Toate', 'libertbus-bilete' ),
 			'confirmed' => __( 'Plătite', 'libertbus-bilete' ),
+			'reserved'  => __( 'Rezervate (plata la urcare)', 'libertbus-bilete' ),
 			'pending'   => __( 'Așteaptă plata', 'libertbus-bilete' ),
 			'cancelled' => __( 'Anulate', 'libertbus-bilete' ),
 			'hold'      => __( 'În coș', 'libertbus-bilete' ),
@@ -431,14 +468,20 @@ class LBB_Admin {
 			$links[] = '<li><a href="' . esc_url( admin_url( 'admin.php?page=lbb-bookings' . ( $key ? '&status=' . $key : '' ) ) ) . '"' . ( $status === $key ? ' class="current"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
 		}
 		echo implode( ' | ', $links ) . '</ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput
-		echo '<table class="widefat striped"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th></tr></thead><tbody>';
+		echo '<table class="widefat striped"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th></th></tr></thead><tbody>';
 		foreach ( LBB_Bookings::recent( 200, $status ) as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
 			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $labels[ $b['status'] ] ) ? $labels[ $b['status'] ] : $b['status'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( implode( ', ', $b['passengers'] ) ) . '<br>' . esc_html( $b['phone'] . ' ' . $b['email'] ) . '</td><td>';
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a> (' . esc_html( wc_get_order_status_name( $order->get_status() ) ) . ')';
 			}
-			echo '</td><td>' . esc_html( get_date_from_gmt( $b['created_at'], 'd.m.Y H:i' ) ) . '</td></tr>';
+			echo '</td><td>' . esc_html( get_date_from_gmt( $b['created_at'], 'd.m.Y H:i' ) ) . '</td><td>';
+			if ( 'reserved' === $b['status'] ) {
+				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'' . esc_js( __( 'Anulați rezervarea? Locurile devin libere.', 'libertbus-bilete' ) ) . '\');"><input type="hidden" name="action" value="lbb_cancel_booking"><input type="hidden" name="id" value="' . esc_attr( $b['id'] ) . '">';
+				wp_nonce_field( 'lbb_cancel_booking_' . $b['id'] );
+				echo '<button class="button button-small">' . esc_html__( 'Anulează', 'libertbus-bilete' ) . '</button></form>';
+			}
+			echo '</td></tr>';
 		}
 		echo '</tbody></table></div>';
 	}
@@ -477,6 +520,13 @@ class LBB_Admin {
 				$num( 'max_days_ahead', __( 'Vânzare cu cel mult (zile) înainte', 'libertbus-bilete' ) );
 				$num( 'cart_hold_minutes', __( 'Locurile se țin în coș (minute)', 'libertbus-bilete' ) );
 				$num( 'payment_minutes', __( 'Locurile se țin cât se așteaptă plata (minute)', 'libertbus-bilete' ), __( 'După acest timp, dacă banca nu a confirmat plata, locurile se eliberează.', 'libertbus-bilete' ) );
+				$check( 'allow_reserve', __( 'Rezervare fără plată', 'libertbus-bilete' ), __( 'Butonul „Rezerv, achit la urcare” lângă „Achit online cu cardul”.', 'libertbus-bilete' ) );
+				$num( 'reserve_limit', __( 'Rezervări neachitate pe un telefon', 'libertbus-bilete' ), __( 'Câte rezervări fără plată poate avea un număr de telefon în același timp (0 = fără limită). Oprește blocarea locurilor de către glumeți.', 'libertbus-bilete' ) );
+				echo '<tr><th>' . esc_html__( 'Clientul poate plăti în', 'libertbus-bilete' ) . '</th><td><input type="hidden" name="pay_currencies[]" value="">';
+				foreach ( LBB_Settings::currencies() as $cur ) {
+					echo '<label style="margin-right:12px"><input type="checkbox" name="pay_currencies[]" value="' . esc_attr( $cur ) . '" ' . checked( in_array( $cur, LBB_Settings::pay_currencies(), true ), true, false ) . '> ' . esc_html( $cur ) . '</label>';
+				}
+				echo '<p class="description">' . esc_html__( 'Implicit se propune moneda rutei (MDL spre România, RON spre Moldova); clientul poate schimba. Prețul se convertește după cursurile de mai jos.', 'libertbus-bilete' ) . '</p></td></tr>';
 				$check( 'require_names', __( 'Numele pasagerilor', 'libertbus-bilete' ), __( 'Obligatoriu numele fiecărui pasager (util la vamă).', 'libertbus-bilete' ) );
 				$check( 'simple_checkout', __( 'Plată simplificată', 'libertbus-bilete' ), __( 'Fără adresă poștală la plata biletelor: doar nume, telefon, email, țară.', 'libertbus-bilete' ) );
 				$check( 'autocomplete', __( 'Finalizare automată', 'libertbus-bilete' ), __( 'Comanda plătită devine „Finalizată” și clientul primește imediat emailul cu biletul.', 'libertbus-bilete' ) );

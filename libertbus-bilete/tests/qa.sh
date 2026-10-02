@@ -13,5 +13,7 @@ BASE="$BASE" node "$DIR/tests/e2e-flow.js" 2>&1 | grep -v CERT_AUTHORITY | grep 
 [ -f "$WP_PATH/wp-content/debug.log" ] && grep -E "Fatal|Warning|Notice" "$WP_PATH/wp-content/debug.log" | grep -i lbb && FAIL=1
 echo "== Vizitator nelogat"
 BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY | grep -E 'GUEST|FAIL' | grep -q 'GUEST: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
+echo "== Plată în RON + rezervare cu plata la urcare"
+BASE="$BASE" node "$DIR/tests/e2e-currency-reserve.js" 2>&1 | grep -v CERT_AUTHORITY | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
 echo "== Rezultat: $([ $FAIL = 0 ] && echo OK || echo PROBLEME)"
 exit $FAIL

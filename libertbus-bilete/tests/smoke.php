@@ -136,9 +136,59 @@ lbb_t( 'oră greșită respinsă', is_wp_error( $r ) && 'lbb_time' === $r->get_e
 lbb_t( 'orașe fără diacritice se potrivesc', 'Bălți' === LBB_Frontend::match_city( 'balti', array( 'Bălți', 'Iași' ) ) && 'Târgu Mureș' === LBB_Frontend::match_city( 'Targu-Mures', array( 'Târgu Mureș' ) ) );
 lbb_t( 'CSV fără formule', "'=SUM(A1)" === LBB_Admin::csv_safe( '=SUM(A1)' ) && '+37369184111' === LBB_Admin::csv_safe( '+37369184111' ) );
 
+// Rezervare fără plată (achitare la urcare), pe o rută proaspătă.
+$old2 = LBB_Routes::find( 'TestA', 'TestC' );
+if ( $old2 ) {
+	LBB_Routes::delete( $old2['id'] );
+}
+$rid2  = LBB_Routes::save( array( 'origin' => 'TestA', 'destination' => 'TestC', 'departures' => '10:00, 23:59', 'price' => 60, 'currency' => 'RON', 'capacity' => 3, 'active' => 1 ) );
+$route = LBB_Routes::get( $rid2 );
+$rid   = $rid2;
+$base['lbb_route'] = $rid2;
+$rv = LBB_Bookings::create_hold( $route, $tomorrow, '23:59', 2, 0, array( 'R1', 'R2' ), '+37369000001', 'r@example.com', 'RON' );
+$rv = is_array( $rv ) ? LBB_Bookings::reserve( $rv['token'] ) : $rv;
+lbb_t( 'rezervarea primește cod și stare „reserved”', 'reserved' === $rv['status'] && preg_match( '/^LB-/', $rv['ticket_code'] ), $rv );
+$d  = LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow );
+lbb_t( 'rezervarea ocupă locurile fără expirare', 1 === $d[1]['free'], $d[1] );
+lbb_t( 'rezervarea nu se poate „reînnoi” ca un coș', ! LBB_Bookings::refresh_hold( $rv['token'] ) );
+list( $amt, $cur ) = LBB_Bookings::pay_amount( $rv );
+lbb_t( 'suma de achitat e în moneda aleasă', 'RON' === $cur && abs( $amt - 120 ) < 0.01, array( $amt, $cur ) );
+lbb_t( 'rezervările active se numără pe telefon', 1 === LBB_Bookings::active_reservations( '+37369000001' ) );
+$desc = LBB_WooCommerce::describe( $rv );
+lbb_t( 'biletul rezervat arată suma la urcare', isset( $desc['De achitat la urcare'] ) && '120 RON' === $desc['De achitat la urcare'], $desc );
+lbb_t( 'anularea rezervării eliberează locurile', LBB_Bookings::cancel( $rv['id'] ) && 3 === LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow )[1]['free'] );
+lbb_t( 'o rezervare anulată nu se mai anulează', ! LBB_Bookings::cancel( $rv['id'] ) );
+
+// Limita de rezervări neachitate pe telefon (prin formular).
+$saved = get_option( 'lbb_settings', array() );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'reserve_limit' => 1, 'allow_reserve' => 1 ) ) );
+$res1 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002', 'lbb_currency' => 'MDL' ) ) );
+lbb_t( 'rezervarea din formular întoarce linkul biletului', is_string( $res1 ) && false !== strpos( $res1, 'lbb_bilet=' ), $res1 );
+$res2 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002' ) ) );
+lbb_t( 'a doua rezervare neachitată pe același telefon e refuzată', is_wp_error( $res2 ) && 'lbb_limit' === $res2->get_error_code(), $res2 );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_reserve' => 0 ) ) );
+$res3 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000003' ) ) );
+lbb_t( 'rezervarea oprită din setări e refuzată', is_wp_error( $res3 ) && 'lbb_mode' === $res3->get_error_code(), $res3 );
+update_option( 'lbb_settings', $saved );
+
+// Monede de plată.
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'pay_currencies' => array( '', 'RON', 'XXX' ) ) ) );
+lbb_t( 'setarea monedelor filtrează valorile invalide', array( 'RON' ) === LBB_Settings::pay_currencies(), LBB_Settings::pay_currencies() );
+lbb_t( 'moneda implicită cade pe una acceptată', 'RON' === LBB_Settings::default_pay_currency( 'MDL' ) );
+update_option( 'lbb_settings', $saved );
+lbb_t( 'moneda rutei e propusă implicit', 'RON' === LBB_Settings::default_pay_currency( 'RON' ) && 'MDL' === LBB_Settings::default_pay_currency( 'MDL' ) );
+lbb_t( 'harta formularului are prețuri în fiecare monedă', (bool) array_filter( LBB_Routes::public_map(), function ( $list ) {
+	return isset( $list[0]['prices']['MDL'], $list[0]['prices']['RON'] );
+} ) );
+
 // Curățenie.
-$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $rid ) );
-LBB_Routes::delete( $rid );
+foreach ( array( 'TestB', 'TestC' ) as $lbb_dest ) {
+	$lbb_r = LBB_Routes::find( 'TestA', $lbb_dest );
+	if ( $lbb_r ) {
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_r['id'] ) );
+		LBB_Routes::delete( $lbb_r['id'] );
+	}
+}
 $order->delete( true );
 $o2->delete( true );
 

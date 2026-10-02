@@ -79,6 +79,7 @@ class LBB_Install {
 			email varchar(190) NOT NULL DEFAULT '',
 			amount decimal(10,2) NOT NULL DEFAULT 0,
 			currency char(3) NOT NULL DEFAULT '',
+			pay_currency char(3) NOT NULL DEFAULT '',
 			expires_at datetime NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,

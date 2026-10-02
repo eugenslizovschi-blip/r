@@ -28,6 +28,9 @@ class LBB_Settings {
 			'rate_RON'           => 3.9,
 			'rate_EUR'           => 19.5,
 			'rate_USD'           => 17.5,
+			'pay_currencies'     => 'MDL,RON',
+			'allow_reserve'      => 1,
+			'reserve_limit'      => 3,
 			'simple_checkout'    => 1,
 			'autocomplete'       => 1,
 			'test_gateway'       => 0,
@@ -61,7 +64,11 @@ class LBB_Settings {
 				continue;
 			}
 			$value = $values[ $key ];
-			if ( 0 === strpos( $key, 'rate_' ) ) {
+			if ( 'pay_currencies' === $key ) {
+				$list  = is_array( $value ) ? $value : explode( ',', (string) $value );
+				$list  = array_values( array_intersect( self::currencies(), array_map( 'strtoupper', array_map( 'trim', $list ) ) ) );
+				$value = implode( ',', $list ? $list : array( 'MDL' ) );
+			} elseif ( 0 === strpos( $key, 'rate_' ) ) {
 				$value = max( 0.0001, (float) str_replace( ',', '.', $value ) );
 			} elseif ( is_int( $default ) ) {
 				$value = max( 0, (int) $value );
@@ -83,11 +90,27 @@ class LBB_Settings {
 	}
 
 	public static function checkboxes() {
-		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall' );
+		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_reserve' );
 	}
 
 	public static function currencies() {
 		return array( 'MDL', 'RON', 'EUR', 'USD' );
+	}
+
+	/**
+	 * Monedele în care clientul poate plăti (alege în formular).
+	 */
+	public static function pay_currencies() {
+		$list = array_values( array_intersect( self::currencies(), explode( ',', (string) self::get( 'pay_currencies' ) ) ) );
+		return $list ? $list : array( 'MDL' );
+	}
+
+	/**
+	 * Moneda implicită de plată pentru o rută: moneda rutei, dacă e acceptată.
+	 */
+	public static function default_pay_currency( $route_currency ) {
+		$list = self::pay_currencies();
+		return in_array( $route_currency, $list, true ) ? $route_currency : $list[0];
 	}
 
 	/**

@@ -33,7 +33,7 @@ const BASE = process.env.BASE || 'http://127.0.0.1:8080';
   await page.fill('input[name="lbb_email"]', 'client@example.com');
   console.log('summary:', (await page.textContent('[data-lbb="summary"]')).replace(/\s+/g, ' '));
   await page.screenshot({ path: (process.env.OUT || '.') + '/form.png', fullPage: true });
-  await Promise.all([page.waitForNavigation(), page.click('[data-lbb="submit"]')]);
+  await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
   console.log('after submit url:', page.url());
   const alert = await page.$('.lbb-alert'); if (alert) console.log('ALERT:', await alert.textContent());
   await page.waitForSelector('#payment', { timeout: 15000 });

@@ -8,6 +8,12 @@ Clientul alege cursa, plătește cu cardul și primește biletul pe email.
 - **Rute și orar**: plecare, destinație, ore, zile ale săptămânii, preț adult/copil, monedă (MDL/RON/EUR/USD), locuri online pe cursă. La activare se importă orarul real din pagina „Orar Curse” (85 de rute).
 - **Formular de rezervare**: `[libertbus_rezervare]` (toate rutele) sau `[libertbus_rezervare from="Bălți" to="Iași"]` (pe pagina unei rute). Arată orele cu locuri libere, cere numele pasagerilor, telefon, email și calculează totalul.
 - **Locuri fără vânzare dublă**: locurile se țin 15 minute în coș și 30 de minute cât se așteaptă plata, apoi se eliberează automat. Rezervarea folosește blocare în baza de date, deci două persoane nu pot lua ultimul loc în același timp.
+- **Două butoane la final**: „Achit online cu cardul” sau „Rezerv, achit la urcare”.
+  - Rezervarea fără plată ocupă locul, primește cod și link cu QR și trimite email clientului și biroului.
+  - Apare în lista de pasageri cu suma de încasat la urcare și se poate anula din admin.
+  - Un telefon poate avea cel mult 3 rezervări neachitate (se schimbă din Setări).
+  - Pe o singură pagină se poate lăsa doar un buton: `mode="pay"` sau `mode="reserve"` în shortcode.
+- **Plata în MDL sau RON**: clientul alege moneda în formular. Implicit se propune moneda rutei: MDL spre România, RON spre Moldova. Prețul se convertește după cursul din Setări, iar comanda WooCommerce se face în moneda aleasă. Monedele acceptate se aleg din Setări; dacă banca încasează doar în MDL, lăsați doar MDL.
 - **Plata**: prin WooCommerce, deci merge cu orice plugin de plată (Paynet, maib, Victoriabank, BT iPay). Plugin-ul nu atinge datele cardului.
 - **Biletul**: cod `LB-XXXXXX` pe email, pe pagina de mulțumire și în contul clientului, plus link spre o pagină cu cod QR (bun de arătat șoferului sau de printat). Biletul se emite doar după confirmarea plății, iar o comandă anulată sau rambursată eliberează locurile.
 - **Admin → LibertBus**:
@@ -43,4 +49,5 @@ Pașii sunt aceiași pentru oricare:
 ## Teste
 
 Pe o instalare de test (nu pe site-ul real): `wp eval-file wp-content/plugins/libertbus-bilete/tests/smoke.php`.
-Rulează 39 de verificări: locuri, expirare, plată întârziată, anulare, validări.
+Rulează 54 de verificări: locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, validări.
+Toată suita (inclusiv testele în browser): `tests/qa.sh` (vezi comentariul din fișier).

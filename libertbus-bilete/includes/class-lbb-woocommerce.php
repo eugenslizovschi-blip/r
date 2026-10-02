@@ -40,6 +40,7 @@ class LBB_WooCommerce {
 		add_action( 'woocommerce_before_pay_action', array( __CLASS__, 'before_pay' ) );
 		add_filter( 'woocommerce_payment_complete_order_status', array( __CLASS__, 'autocomplete' ), 10, 3 );
 
+		add_filter( 'woocommerce_currency', array( __CLASS__, 'session_currency' ), 999 );
 		add_filter( 'woocommerce_checkout_fields', array( __CLASS__, 'checkout_fields' ), 20 );
 		add_filter( 'woocommerce_checkout_get_value', array( __CLASS__, 'prefill' ), 10, 2 );
 	}
@@ -108,10 +109,17 @@ class LBB_WooCommerce {
 		if ( $booking['passengers'] ) {
 			$lines[ __( 'Pasageri', 'libertbus-bilete' ) ] = implode( ', ', $booking['passengers'] );
 		}
-		if ( $booking['currency'] && function_exists( 'get_woocommerce_currency' ) && $booking['currency'] !== get_woocommerce_currency() ) {
-			$lines[ __( 'Tarif', 'libertbus-bilete' ) ] = wc_format_decimal( $booking['amount'], 2 ) . ' ' . $booking['currency'];
+		if ( in_array( $booking['status'], array( 'confirmed', 'reserved' ), true ) ) {
+			list( $amount, $cur ) = LBB_Bookings::pay_amount( $booking );
+			$label = 'reserved' === $booking['status'] ? __( 'De achitat la urcare', 'libertbus-bilete' ) : __( 'Achitat online', 'libertbus-bilete' );
+			$lines[ $label ] = self::money( $amount, $cur );
 		}
 		return $lines;
+	}
+
+	public static function money( $amount, $currency ) {
+		$decimals = floor( $amount ) == $amount ? 0 : 2; // phpcs:ignore Universal.Operators.StrictComparisons
+		return number_format( (float) $amount, $decimals, ',', '.' ) . ' ' . $currency;
 	}
 
 	public static function item_data( $data, $item ) {
@@ -273,6 +281,31 @@ class LBB_WooCommerce {
 			}
 		}
 		return 'completed';
+	}
+
+	/**
+	 * Moneda aleasă de client în formular devine moneda coșului și a comenzii,
+	 * doar cât coșul conține numai bilete. În admin rămâne moneda magazinului.
+	 */
+	public static function session_currency( $currency ) {
+		static $busy = false;
+		if ( $busy || ( is_admin() && ! wp_doing_ajax() ) || ! function_exists( 'WC' ) || ! WC()->session ) {
+			return $currency;
+		}
+		$busy   = true;
+		$chosen = WC()->session->get( 'lbb_currency' );
+		$cart   = WC()->session->get( 'cart' );
+		$ok     = $chosen && in_array( $chosen, LBB_Settings::pay_currencies(), true ) && is_array( $cart ) && $cart;
+		if ( $ok ) {
+			$ticket = (int) get_option( LBB_Install::PRODUCT_OPTION );
+			foreach ( $cart as $item ) {
+				if ( empty( $item['product_id'] ) || (int) $item['product_id'] !== $ticket ) {
+					$ok = false;
+				}
+			}
+		}
+		$busy = false;
+		return $ok ? $chosen : $currency;
 	}
 
 	private static function cart_only_tickets() {

@@ -48,7 +48,7 @@ class LBB_Tickets {
 			<?php if ( $with_qr ) : ?>
 				<div class="lbb-ticket-qr" data-qr="<?php echo esc_attr( self::url( $booking['ticket_code'] ) ); ?>"></div>
 			<?php endif; ?>
-			<div style="font-size:13px;color:#5f6b7a;"><?php esc_html_e( 'Bilet LibertBus', 'libertbus-bilete' ); ?></div>
+			<div style="font-size:13px;color:#5f6b7a;"><?php echo 'reserved' === $booking['status'] ? esc_html__( 'Rezervare LibertBus', 'libertbus-bilete' ) : esc_html__( 'Bilet LibertBus', 'libertbus-bilete' ); ?></div>
 			<div class="lbb-ticket-code" style="font-family:Menlo,Consolas,monospace;font-size:22px;font-weight:700;letter-spacing:1px;margin:2px 0 10px;"><?php echo esc_html( $booking['ticket_code'] ); ?></div>
 			<table style="width:100%;border-collapse:collapse;">
 				<?php foreach ( $rows as $label => $value ) : ?>
@@ -59,11 +59,34 @@ class LBB_Tickets {
 				<?php endforeach; ?>
 			</table>
 			<?php if ( ! $with_qr ) : ?>
-				<p style="margin:10px 0 0;"><a href="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php esc_html_e( 'Deschide biletul cu cod QR', 'libertbus-bilete' ); ?></a></p>
+				<p style="margin:10px 0 0;"><a href="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php echo 'reserved' === $booking['status'] ? esc_html__( 'Deschide rezervarea cu cod QR', 'libertbus-bilete' ) : esc_html__( 'Deschide biletul cu cod QR', 'libertbus-bilete' ); ?></a></p>
 			<?php endif; ?>
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Rezervare fără plată: email clientului (cu linkul rezervării) și biroului.
+	 */
+	public static function send_reservation_emails( array $booking ) {
+		$route   = LBB_Routes::get( $booking['route_id'] );
+		$name    = $route ? $route['origin'] . ' → ' . $route['destination'] : '';
+		$when    = wp_date( 'd.m.Y', strtotime( $booking['travel_date'] . ' 12:00' ) ) . ' ' . $booking['dep_time'];
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+		$body    = '<p>' . esc_html__( 'Rezervarea dumneavoastră este confirmată. Plata se face la urcare, la șofer.', 'libertbus-bilete' ) . '</p>'
+			. self::html( $booking ) . self::notes_html();
+		if ( is_email( $booking['email'] ) ) {
+			/* translators: 1: ruta, 2: data și ora */
+			wp_mail( $booking['email'], sprintf( __( 'Rezervare %1$s, %2$s', 'libertbus-bilete' ), $name, $when ), $body, $headers );
+		}
+		$office = LBB_Settings::get( 'company_email' );
+		$office = is_email( $office ) ? $office : get_option( 'admin_email' );
+		$admin  = '<p>' . esc_html__( 'Rezervare nouă cu plata la urcare.', 'libertbus-bilete' ) . '</p>' . self::html( $booking )
+			. '<p>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': ' . esc_html( $booking['phone'] ) . '<br>Email: ' . esc_html( $booking['email'] ) . '</p>'
+			. '<p><a href="' . esc_url( admin_url( 'admin.php?page=lbb-bookings&status=reserved' ) ) . '">' . esc_html__( 'Vezi rezervările', 'libertbus-bilete' ) . '</a></p>';
+		/* translators: 1: cod, 2: ruta, 3: data și ora */
+		wp_mail( $office, sprintf( __( '[LibertBus] Rezervare %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $admin, $headers );
 	}
 
 	private static function notes_html() {
@@ -143,7 +166,8 @@ class LBB_Tickets {
 		header( 'X-Robots-Tag: noindex, nofollow' );
 		status_header( $booking ? 200 : 404 );
 
-		$valid = $booking && 'confirmed' === $booking['status'];
+		$valid    = $booking && in_array( $booking['status'], array( 'confirmed', 'reserved' ), true );
+		$reserved = $booking && 'reserved' === $booking['status'];
 		?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -169,7 +193,15 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<div class="state bad"><?php esc_html_e( 'Biletul nu a fost găsit. Verificați linkul din email.', 'libertbus-bilete' ); ?></div>
 	<?php else : ?>
 		<div class="state <?php echo $valid ? 'ok' : 'bad'; ?>">
-			<?php echo $valid ? esc_html__( 'Bilet valabil', 'libertbus-bilete' ) : esc_html__( 'Bilet anulat', 'libertbus-bilete' ); ?>
+			<?php
+			if ( $reserved ) {
+				esc_html_e( 'Rezervare confirmată — achitați la urcare', 'libertbus-bilete' );
+			} elseif ( $valid ) {
+				esc_html_e( 'Bilet valabil — achitat', 'libertbus-bilete' );
+			} else {
+				esc_html_e( 'Bilet anulat', 'libertbus-bilete' );
+			}
+			?>
 		</div>
 		<?php echo self::html( $booking, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<?php echo self::notes_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>

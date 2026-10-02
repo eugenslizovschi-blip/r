@@ -6,13 +6,19 @@
 		var cfg = JSON.parse( root.getAttribute( 'data-lbb' ) );
 		var t = cfg.i18n;
 		var el = {};
-		[ 'from', 'route', 'date', 'time', 'status', 'adults', 'children', 'names', 'summary', 'submit' ].forEach( function ( k ) {
+		[ 'from', 'route', 'date', 'time', 'status', 'adults', 'children', 'names', 'summary', 'mode' ].forEach( function ( k ) {
 			el[ k ] = root.querySelector( '[data-lbb="' + k + '"]' );
 		} );
+		var buttons = root.querySelectorAll( '[data-lbb-submit]' );
+		var radios = root.querySelectorAll( '[data-lbb="currency"]' );
+		var currencyTouched = false;
+
 		var childrenWrap = root.querySelector( '[data-lbb="children-wrap"]' );
 		var departures = [];
 		var request = 0;
 		var preset = cfg.preset || {};
+		var dateTouched = !! preset.date;
+		var skipped = 0;
 
 		function option( value, label, disabled ) {
 			var o = document.createElement( 'option' );
@@ -24,9 +30,31 @@
 			return o;
 		}
 
-		function money( v ) {
-			var n = Number( v ).toFixed( cfg.decimals );
-			return n.replace( '.', ',' ) + ' ' + cfg.currency;
+		function money( v, cur ) {
+			var n = Number( v );
+			var text = n % 1 === 0 ? String( n ) : n.toFixed( 2 ).replace( '.', ',' );
+			return text + ' ' + cur;
+		}
+
+		function currency() {
+			for ( var i = 0; i < radios.length; i++ ) {
+				if ( radios[ i ].checked ) {
+					return radios[ i ].value;
+				}
+			}
+			return cfg.currencies[ 0 ];
+		}
+
+		// Moneda implicită: cea a rutei (MDL spre România, RON spre Moldova), până alege clientul.
+		function syncCurrency() {
+			var route = currentRoute();
+			var want = preset.currency || ( route ? route.pay_cur : cfg.currencies[ 0 ] );
+			if ( currencyTouched && ! preset.currency ) {
+				return;
+			}
+			for ( var i = 0; i < radios.length; i++ ) {
+				radios[ i ].checked = radios[ i ].value === want;
+			}
 		}
 
 		function currentRoute() {
@@ -149,24 +177,28 @@
 			var adults = parseInt( el.adults.value || 0, 10 );
 			var children = el.children ? parseInt( el.children.value || 0, 10 ) : 0;
 			var ok = !! ( route && dep && dep.bookable && adults + children > 0 );
-			el.submit.disabled = ! ok;
+			for ( var b = 0; b < buttons.length; b++ ) {
+				buttons[ b ].disabled = ! ok;
+			}
 			if ( ! route ) {
 				el.summary.hidden = true;
 				return;
 			}
-			var childPrice = route.child_price === null ? route.price : route.child_price;
-			var total = adults * route.price + children * childPrice;
-			var base = route.orig_cur !== cfg.currencyCode ? ' (' + t.approx + ': ' + route.orig_price + ' ' + route.orig_cur + ')' : '';
+			var cur = currency();
+			var p = route.prices[ cur ] || route.prices[ cfg.currencies[ 0 ] ];
+			var childPrice = p[ 1 ] === null ? p[ 0 ] : p[ 1 ];
+			var total = adults * p[ 0 ] + children * childPrice;
+			var base = route.orig_cur !== cur ? ' (' + t.approx + ': ' + money( route.orig_price, route.orig_cur ) + ')' : '';
 			el.summary.textContent = '';
 			var line = document.createElement( 'div' );
 			line.className = 'lbb-summary-route';
 			line.textContent = el.from.value + ' → ' + route.to + ( dep ? ', ' + el.date.value.split( '-' ).reverse().join( '.' ) + ' ' + dep.time : '' );
 			var price = document.createElement( 'div' );
 			price.className = 'lbb-summary-total';
-			price.textContent = t.total + ': ' + money( total );
+			price.textContent = t.total + ': ' + money( total, cur );
 			var note = document.createElement( 'div' );
 			note.className = 'lbb-summary-note';
-			note.textContent = money( route.price ) + ' / ' + t.passenger.toLowerCase() + base;
+			note.textContent = money( p[ 0 ], cur ) + ' / ' + t.passenger.toLowerCase() + base;
 			el.summary.appendChild( line );
 			el.summary.appendChild( price );
 			el.summary.appendChild( note );
@@ -175,6 +207,7 @@
 
 		function loadDepartures() {
 			var route = currentRoute();
+			syncCurrency();
 			departures = [];
 			el.time.innerHTML = '';
 			el.time.appendChild( option( '', t.chooseTime ) );
@@ -199,7 +232,19 @@
 						return;
 					}
 					departures = data.departures || [];
-					el.status.textContent = departures.length ? '' : t.noDeparture;
+					var open = departures.filter( function ( d ) {
+						return d.bookable;
+					} );
+					// Data aleasă automat nu are plecări deschise (ex. seara): trecem la următoarea zi cu locuri.
+					if ( ! open.length && ! dateTouched && skipped < 14 && el.date.value < cfg.maxDate ) {
+						skipped++;
+						var next = new Date( el.date.value + 'T12:00:00Z' );
+						next.setUTCDate( next.getUTCDate() + 1 );
+						el.date.value = next.toISOString().slice( 0, 10 );
+						loadDepartures();
+						return;
+					}
+					el.status.textContent = departures.length ? ( open.length ? '' : t.noneOpen ) : t.noDeparture;
 					departures.forEach( function ( d ) {
 						var label = d.time + ' — ' + ( d.bookable ? d.free + ' ' + t.free : ( d.reason === 'full' ? t.full : t.closed ) );
 						el.time.appendChild( option( d.time, label, ! d.bookable ) );
@@ -235,23 +280,44 @@
 
 		el.from.addEventListener( 'change', function () {
 			preset.route = 0;
+			skipped = 0;
 			fillRoutes();
 			loadDepartures();
 		} );
-		el.route.addEventListener( 'change', loadDepartures );
-		el.date.addEventListener( 'change', loadDepartures );
+		el.route.addEventListener( 'change', function () {
+			skipped = 0;
+			loadDepartures();
+		} );
+		el.date.addEventListener( 'change', function () {
+			dateTouched = true;
+			loadDepartures();
+		} );
 		el.time.addEventListener( 'change', fillCounts );
 		el.adults.addEventListener( 'change', fillCounts );
 		if ( el.children ) {
 			el.children.addEventListener( 'change', fillCounts );
 		}
+		for ( var r = 0; r < radios.length; r++ ) {
+			radios[ r ].addEventListener( 'change', function () {
+				currencyTouched = true;
+				preset.currency = '';
+				summary();
+			} );
+		}
 		root.querySelector( 'form' ).addEventListener( 'submit', function ( e ) {
-			if ( el.submit.disabled ) {
+			var btn = e.submitter || buttons[ 0 ];
+			if ( ! btn || btn.disabled ) {
 				e.preventDefault();
 				return;
 			}
-			el.submit.disabled = true;
-			el.submit.classList.add( 'is-busy' );
+			el.mode.value = btn.value;
+			// Dezactivăm după ce browserul a citit datele, ca să nu se trimită de două ori.
+			setTimeout( function () {
+				for ( var b = 0; b < buttons.length; b++ ) {
+					buttons[ b ].disabled = true;
+				}
+				btn.classList.add( 'is-busy' );
+			}, 0 );
 		} );
 	}
 

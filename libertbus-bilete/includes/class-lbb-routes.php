@@ -176,13 +176,21 @@ class LBB_Routes {
 			if ( $route['price'] <= 0 ) {
 				continue;
 			}
+			$prices = array();
+			foreach ( LBB_Settings::pay_currencies() as $cur ) {
+				$prices[ $cur ] = array(
+					LBB_Settings::convert( $route['price'], $route['currency'], $cur ),
+					null === $route['child_price'] ? null : LBB_Settings::convert( $route['child_price'], $route['currency'], $cur ),
+				);
+			}
 			$map[ $route['origin'] ][] = array(
 				'id'          => $route['id'],
 				'to'          => $route['destination'],
-				'price'       => LBB_Settings::convert( $route['price'], $route['currency'] ),
-				'child_price' => null === $route['child_price'] ? null : LBB_Settings::convert( $route['child_price'], $route['currency'] ),
+				'prices'      => $prices,
+				'child_price' => $route['child_price'],
 				'orig_price'  => $route['price'],
 				'orig_cur'    => $route['currency'],
+				'pay_cur'     => LBB_Settings::default_pay_currency( $route['currency'] ),
 				'times'       => $route['times'],
 				'days'        => $route['days'],
 			);

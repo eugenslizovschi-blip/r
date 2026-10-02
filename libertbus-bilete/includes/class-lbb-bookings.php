@@ -6,6 +6,7 @@
  *  - hold      locurile sunt în coș, expiră după „cart_hold_minutes”;
  *  - pending   comanda e creată și se așteaptă plata, expiră după „payment_minutes”;
  *  - confirmed plata a trecut (sau comanda e „on-hold”), locurile sunt vândute;
+ *  - reserved  rezervare fără plată online, se achită la urcare; ocupă locurile;
  *  - cancelled locurile sunt eliberate.
  *
  * @package LibertBus_Bilete
@@ -37,7 +38,7 @@ class LBB_Bookings {
 		$rows = $wpdb->get_results( $wpdb->prepare(
 			'SELECT dep_time, SUM(seats) AS taken FROM ' . self::table() . "
 			WHERE route_id = %d AND travel_date = %s AND id <> %d
-			AND ( status = 'confirmed' OR ( status IN ('hold','pending') AND expires_at > %s ) )
+			AND ( status IN ('confirmed','reserved') OR ( status IN ('hold','pending') AND expires_at > %s ) )
 			GROUP BY dep_time",
 			$route_id,
 			$date,
@@ -70,7 +71,7 @@ class LBB_Bookings {
 	 *
 	 * @return array|WP_Error Rezervarea creată.
 	 */
-	public static function create_hold( array $route, $date, $time, $adults, $children, array $passengers, $phone, $email ) {
+	public static function create_hold( array $route, $date, $time, $adults, $children, array $passengers, $phone, $email, $pay_currency = '' ) {
 		global $wpdb;
 		$adults   = max( 0, (int) $adults );
 		$children = max( 0, (int) $children );
@@ -122,6 +123,7 @@ class LBB_Bookings {
 				'email'       => $email,
 				'amount'      => $amount,
 				'currency'    => $route['currency'],
+				'pay_currency' => $pay_currency ? $pay_currency : LBB_Settings::default_pay_currency( $route['currency'] ),
 				'expires_at'  => self::now_utc( LBB_Settings::get( 'cart_hold_minutes' ) ),
 				'created_at'  => $now,
 				'updated_at'  => $now,
@@ -144,7 +146,7 @@ class LBB_Bookings {
 		if ( ! $booking ) {
 			return false;
 		}
-		if ( 'confirmed' === $booking['status'] ) {
+		if ( in_array( $booking['status'], array( 'confirmed', 'reserved' ), true ) ) {
 			return false;
 		}
 		if ( 'cancelled' !== $booking['status'] && strtotime( $booking['expires_at'] . ' UTC' ) > time() + 120 ) {
@@ -226,6 +228,45 @@ class LBB_Bookings {
 		return $overbooked;
 	}
 
+	/**
+	 * Rezervare fără plată online: locurile rămân ocupate, plata se face la urcare.
+	 */
+	public static function reserve( $token ) {
+		global $wpdb;
+		$booking = self::get_by_token( $token );
+		if ( ! $booking || 'hold' !== $booking['status'] ) {
+			return null;
+		}
+		$wpdb->update( self::table(), array(
+			'status'      => 'reserved',
+			'ticket_code' => self::new_code(),
+			'expires_at'  => null,
+			'updated_at'  => self::now_utc(),
+		), array( 'id' => $booking['id'] ) );
+		return self::get( $booking['id'] );
+	}
+
+	/**
+	 * Câte rezervări neplătite are un telefon pentru curse viitoare (limită anti-abuz).
+	 */
+	public static function active_reservations( $phone ) {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table() . " WHERE phone = %s AND status = 'reserved' AND travel_date >= %s", $phone, wp_date( 'Y-m-d' ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	public static function cancel( $id ) {
+		global $wpdb;
+		return (bool) $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::table() . " SET status = 'cancelled', updated_at = %s WHERE id = %d AND status IN ('reserved','hold','pending')", self::now_utc(), $id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Suma de plată în moneda aleasă de client.
+	 */
+	public static function pay_amount( array $booking ) {
+		$cur = $booking['pay_currency'] ? $booking['pay_currency'] : $booking['currency'];
+		return array( LBB_Settings::convert( $booking['amount'], $booking['currency'], $cur ), $cur );
+	}
+
 	public static function cancel_order( $order_id ) {
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( 'UPDATE ' . self::table() . " SET status = 'cancelled', updated_at = %s WHERE order_id = %d", self::now_utc(), $order_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -303,7 +344,7 @@ class LBB_Bookings {
 	/**
 	 * Lista de pasageri pentru o zi (și opțional o rută).
 	 */
-	public static function manifest( $date, $route_id = 0, $statuses = array( 'confirmed' ) ) {
+	public static function manifest( $date, $route_id = 0, $statuses = array( 'confirmed', 'reserved' ) ) {
 		global $wpdb;
 		$in   = implode( ',', array_map( function ( $s ) use ( $wpdb ) {
 			return $wpdb->prepare( '%s', $s );

@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       LibertBus Bilete
  * Description:       Vânzare online de bilete de autocar cu plata cu cardul prin WooCommerce: rute și orar, locuri disponibile, rezervare temporară, bilete pe email, listă de pasageri.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            LibertBus
@@ -16,8 +16,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LBB_VERSION', '1.0.0' );
-define( 'LBB_DB_VERSION', '1' );
+define( 'LBB_VERSION', '1.1.0' );
+define( 'LBB_DB_VERSION', '2' );
 define( 'LBB_FILE', __FILE__ );
 define( 'LBB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LBB_URL', plugin_dir_url( __FILE__ ) );
