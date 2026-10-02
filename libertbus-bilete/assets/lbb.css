@@ -78,7 +78,10 @@
 	font-weight: 700 !important;
 }
 .lbb-booking .lbb-submit-alt { background: #fff !important; color: var(--lbb-accent) !important; }
-.lbb-booking .lbb-submit:hover:not(:disabled) { filter: brightness(.92); }
+.lbb-booking .lbb-submit:hover, .lbb-booking .lbb-submit:focus, .lbb-booking .lbb-submit:active { background: var(--lbb-accent) !important; color: var(--lbb-accent-ink) !important; border-color: var(--lbb-accent) !important; }
+.lbb-booking .lbb-submit.lbb-submit-alt:hover, .lbb-booking .lbb-submit.lbb-submit-alt:focus, .lbb-booking .lbb-submit.lbb-submit-alt:active { background: #fff !important; color: var(--lbb-accent) !important; }
+.lbb-booking .lbb-submit:hover:not(:disabled) { box-shadow: 0 0 0 3px rgba(0, 0, 0, .12) !important; }
+.lbb-booking .lbb-submit::after, .lbb-booking .lbb-submit::before { display: none !important; }
 .lbb-booking .lbb-submit:disabled { opacity: .45 !important; cursor: not-allowed; }
 .lbb-preview-note { background: #fff8e1; border: 1px dashed #c99a00; color: #6b5000; border-radius: 8px; padding: 8px 12px; margin: 0 0 12px; font-size: 14px; }
 .lbb-currency { border: 0; padding: 0; margin: 0 0 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }

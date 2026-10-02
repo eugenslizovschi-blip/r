@@ -44,6 +44,10 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await (await second.$('[data-lbb="next"]')).click();
   if (await second.$eval('[data-lbb="step1"]', e => !e.hidden)) fail('pasul 1 nu s-a ascuns după „Continuă”');
   console.log('înălțime pas 1:', Math.round(h1), 'px');
+  // Butoanele rămân lizibile sub cursor (tema Betheme schimbă culorile la hover).
+  await (await second.$('[data-lbb-submit][value="reserve"]')).hover();
+  const hov = await second.$eval('[data-lbb-submit][value="reserve"]', b => [getComputedStyle(b).backgroundColor, getComputedStyle(b).color]);
+  if (hov[0] === hov[1]) fail('butonul „Rezerv” devine ilizibil la hover: ' + hov.join(' / '));
   await (await second.$('input[name="lbb_names[]"]')).fill('Admin Test');
   await (await second.$('input[name="lbb_phone"]')).fill('+37369184111');
   await (await second.$('input[name="lbb_email"]')).fill('admin-test@example.com');
