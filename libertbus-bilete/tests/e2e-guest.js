@@ -27,6 +27,9 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
   const alert = await page.$('.lbb-alert');
   if (!alert) fail('lipsește eroarea pentru numele pasagerului'); else console.log('eroare afișată:', (await alert.textContent()).trim());
+  const inView = await page.$eval('.lbb-alert', e => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= window.innerHeight; });
+  if (!inView) fail('mesajul de eroare nu e vizibil pe ecran după reîncărcare');
+  if (!(await page.$eval('.lbb-alert', e => e === document.activeElement))) fail('mesajul de eroare nu primește focus');
   if (await page.inputValue('input[name="lbb_email"]') !== 'guest@example.com') fail('emailul nu s-a păstrat după eroare');
 
   // Formularul păstrează alegerile; completăm numele și trimitem.

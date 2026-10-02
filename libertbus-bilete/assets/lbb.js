@@ -291,6 +291,13 @@
 				} );
 		}
 
+		// După o eroare de la server pagina se reîncarcă sus: ducem clientul la mesaj (important pe telefon).
+		var alertBox = root.querySelector( '[data-lbb="alert"]' );
+		if ( alertBox ) {
+			alertBox.scrollIntoView( { block: 'center' } );
+			alertBox.focus( { preventScroll: true } );
+		}
+
 		fillFrom();
 		fillRoutes();
 		el.date.min = cfg.today;

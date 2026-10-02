@@ -26,7 +26,7 @@ if [ "$($WP post list --post_type=page --name=rezervare-bilet --format=count)" =
   $WP post update "$($WP option get woocommerce_checkout_page_id)" --post_content='[woocommerce_checkout]'
   $WP post update "$($WP option get woocommerce_cart_page_id)" --post_content='[woocommerce_cart]'
   $WP post create --post_type=page --post_status=publish --post_title='Rezervare bilet' --post_name=rezervare-bilet --post_content='[libertbus_rezervare]'
-  $WP post create --post_type=page --post_status=publish --post_title='Balti - Iasi' --post_name=balti-iasi --post_content='[libertbus_rezervare from="Balti" to="Iasi"]'
+  $WP post create --post_type=page --post_status=publish --post_title='Balti - Iasi' --post_name=balti-iasi --post_content='<div style="height:1400px">Spațiu de test: formularul e jos pe pagină, ca pe homepage.</div>[libertbus_rezervare from="Balti" to="Iasi"]'
   $WP eval '$s=LBB_Settings::all(); $s["test_gateway"]=1; $s["allow_pay"]=1; update_option("lbb_settings",$s);'
 fi
 mkdir -p wordpress/wp-content/mu-plugins

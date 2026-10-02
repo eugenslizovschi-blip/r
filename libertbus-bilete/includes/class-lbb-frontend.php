@@ -279,7 +279,7 @@ class LBB_Frontend {
 				<h3 class="lbb-title"><?php echo esc_html( $atts['title'] ); ?></h3>
 			<?php endif; ?>
 			<?php if ( self::$error ) : ?>
-				<div class="lbb-alert" role="alert"><?php echo esc_html( self::$error->get_error_message() ); ?></div>
+				<div class="lbb-alert" role="alert" tabindex="-1" data-lbb="alert"><?php echo esc_html( self::$error->get_error_message() ); ?></div>
 			<?php endif; ?>
 			<noscript><p class="lbb-alert"><?php echo esc_html( sprintf( __( 'Pentru rezervare online activați JavaScript sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::get( 'support_phone' ) ) ); ?></p></noscript>
 			<form method="post" class="lbb-form" novalidate>
