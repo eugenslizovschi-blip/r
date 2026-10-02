@@ -89,9 +89,17 @@ class LBB_Tickets {
 		wp_mail( $office, sprintf( __( '[LibertBus] Rezervare %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $admin, $headers );
 	}
 
-	private static function notes_html() {
+	/**
+	 * Textul de pe bilet plus telefonul de suport (pentru anulare sau schimbarea datei).
+	 */
+	public static function notes_html() {
 		$notes = trim( (string) LBB_Settings::get( 'ticket_notes' ) );
-		return $notes ? '<p style="color:#5f6b7a;">' . nl2br( esc_html( $notes ) ) . '</p>' : '';
+		$html  = $notes ? '<p style="color:#5f6b7a;">' . nl2br( esc_html( $notes ) ) . '</p>' : '';
+		if ( trim( (string) LBB_Settings::get( 'support_phone' ) ) ) {
+			/* translators: %s: telefon */
+			$html .= '<p style="color:#5f6b7a;">' . sprintf( esc_html__( 'Anulare sau schimbarea datei: %s', 'libertbus-bilete' ), LBB_Settings::phone_link() ) . '</p>';
+		}
+		return $html;
 	}
 
 	public static function email( $order, $sent_to_admin, $plain_text, $email = null ) {

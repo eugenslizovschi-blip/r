@@ -213,6 +213,11 @@ $tok2 = LBB_Settings::preview_token( true );
 lbb_t( 'link nou de previzualizare anulează cheia veche', $tok2 !== $tok && LBB_Settings::preview_token() === $tok2 );
 lbb_t( 'linkul de previzualizare conține cheia', false !== strpos( LBB_Settings::preview_url(), 'lbb_preview=' . $tok2 ) );
 
+// Pe bilet (pagină și email) apare telefonul de suport ca link de apel, pe un rând.
+$notes = LBB_Tickets::notes_html();
+lbb_t( 'biletul arată telefonul de suport ca link de apel', false !== strpos( $notes, 'href="tel:' . preg_replace( '/[^\d+]/', '', LBB_Settings::get( 'support_phone' ) ) . '"' ), $notes );
+lbb_t( 'telefonul de pe bilet nu se rupe pe rânduri', false === strpos( strip_tags( $notes ), '691 84' ) );
+
 // Curățenie.
 foreach ( array( 'TestB', 'TestC' ) as $lbb_dest ) {
 	$lbb_r = LBB_Routes::find( 'TestA', $lbb_dest );
