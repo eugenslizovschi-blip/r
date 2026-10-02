@@ -52,6 +52,12 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const btns = await admin.$$eval('.lbb-overlay [data-lbb-submit]', bs => bs.map(b => { const r = b.getBoundingClientRect(); return { v: b.value, ok: r.top >= 0 && r.bottom <= window.innerHeight && r.height > 30 }; }));
   if (btns.length !== 2 || btns.some(b => !b.ok)) fail('butoanele nu sunt toate vizibile pe ecran: ' + JSON.stringify(btns));
   await admin.screenshot({ path: (process.env.OUT || '.') + '/preview-step2-5pax.png' });
+  // Tab rămâne în fereastră: de pe ultimul buton revine la primul element, Shift+Tab invers.
+  await admin.focus('.lbb-overlay [data-lbb-submit][value="reserve"]');
+  await admin.keyboard.press('Tab');
+  if (!(await admin.evaluate(() => !!document.activeElement.closest('.lbb-overlay')))) fail('Tab iese din fereastră');
+  await admin.keyboard.press('Shift+Tab');
+  if (!(await admin.evaluate(() => document.activeElement.value === 'reserve'))) fail('Shift+Tab nu revine la ultimul buton');
   await admin.keyboard.press('Escape');
   if (await admin.$('.lbb-overlay')) fail('Escape nu închide fereastra');
   await (await second.$('[data-lbb="next"]')).click();

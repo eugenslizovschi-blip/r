@@ -69,9 +69,35 @@
 		}
 
 		document.addEventListener( 'keydown', function ( e ) {
-			if ( overlay && ( e.key === 'Escape' || e.key === 'Esc' ) ) {
+			if ( ! overlay ) {
+				return;
+			}
+			if ( e.key === 'Escape' || e.key === 'Esc' ) {
 				showStep( 1 );
 				el.time.focus();
+				return;
+			}
+			// Tab rămâne în fereastră (pagina din spate nu se vede).
+			if ( e.key === 'Tab' ) {
+				var items = Array.prototype.filter.call(
+					overlay.querySelectorAll( 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])' ),
+					function ( n ) {
+						return ! n.disabled && n.type !== 'hidden' && n.offsetParent !== null && ! n.closest( '.lbb-hp' );
+					}
+				);
+				if ( ! items.length ) {
+					return;
+				}
+				var first = items[ 0 ];
+				var last = items[ items.length - 1 ];
+				var inside = overlay.contains( document.activeElement );
+				if ( e.shiftKey && ( document.activeElement === first || ! inside ) ) {
+					e.preventDefault();
+					last.focus();
+				} else if ( ! e.shiftKey && ( document.activeElement === last || ! inside ) ) {
+					e.preventDefault();
+					first.focus();
+				}
 			}
 		} );
 		var radios = root.querySelectorAll( '[data-lbb="currency"]' );
