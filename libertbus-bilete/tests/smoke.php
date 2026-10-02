@@ -185,6 +185,13 @@ lbb_t( 'harta formularului are prețuri în fiecare monedă', (bool) array_filte
 	return isset( $list[0]['prices']['MDL'], $list[0]['prices']['RON'] );
 } ) );
 
+// Potrivirea formularelor Contact Form 7 cu rutele, după titlu.
+$t = LBB_Frontend::route_for_title( 'Balti - Iasi' );
+lbb_t( 'titlul „Balti - Iasi” → Bălți → Iași (nu Iași Aeroport)', $t && 'Iași' === $t['destination'], $t );
+$t = LBB_Frontend::route_for_title( 'Cluj - Falesti' );
+lbb_t( 'titlul scurt „Cluj” → Cluj-Napoca', $t && 'Cluj-Napoca' === $t['origin'], $t );
+lbb_t( 'titlurile fără rută nu se potrivesc', null === LBB_Frontend::route_for_title( 'trimite colet' ) && null === LBB_Frontend::route_for_title( 'din Balti ->' ) && null === LBB_Frontend::route_for_title( 'mobile bun - aici modificarile - da aici' ) );
+
 // Curățenie.
 foreach ( array( 'TestB', 'TestC' ) as $lbb_dest ) {
 	$lbb_r = LBB_Routes::find( 'TestA', $lbb_dest );

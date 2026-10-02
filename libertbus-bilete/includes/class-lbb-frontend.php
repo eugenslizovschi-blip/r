@@ -17,6 +17,61 @@ class LBB_Frontend {
 		add_shortcode( 'lbb_booking', array( __CLASS__, 'shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_assets' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'handle_submit' ) );
+		add_filter( 'do_shortcode_tag', array( __CLASS__, 'replace_cf7' ), 20, 2 );
+	}
+
+	/**
+	 * Înlocuiește la afișare formularele Contact Form 7 de rezervare cu formularul nostru,
+	 * fără să modifice paginile (se anulează din Setări):
+	 *  - formularele cu ID-urile din „replace_cf7” → formularul cu toate rutele;
+	 *  - cu „replace_cf7_routes”, un formular cu titlul „Balti - Iasi” → formularul rutei Bălți → Iași.
+	 */
+	public static function replace_cf7( $output, $tag ) {
+		if ( 'contact-form-7' !== $tag && 'contact-form' !== $tag ) {
+			return $output;
+		}
+		if ( ! is_string( $output ) || ! preg_match( '/wpcf7-f(\d+)-/', $output, $m ) ) {
+			return $output;
+		}
+		$id  = (int) $m[1];
+		$ids = array_map( 'intval', explode( ',', (string) LBB_Settings::get( 'replace_cf7' ) ) );
+		if ( in_array( $id, $ids, true ) ) {
+			return self::shortcode( array() );
+		}
+		if ( LBB_Settings::get( 'replace_cf7_routes' ) ) {
+			$route = self::route_for_title( get_the_title( $id ) );
+			if ( $route ) {
+				return self::shortcode( array( 'from' => $route['origin'], 'to' => $route['destination'] ) );
+			}
+		}
+		return $output;
+	}
+
+	/**
+	 * „Cluj - Balti” → ruta activă „Cluj-Napoca → Bălți” (fără diacritice, potrivire de început).
+	 */
+	public static function route_for_title( $title ) {
+		$parts = preg_split( '/\s+[-–—]\s+|\s*[–—]\s*/u', html_entity_decode( (string) $title, ENT_QUOTES, 'UTF-8' ) );
+		if ( 2 !== count( $parts ) ) {
+			return null;
+		}
+		$from = self::fold( $parts[0] );
+		$to   = self::fold( $parts[1] );
+		if ( '' === $from || '' === $to ) {
+			return null;
+		}
+		$found = null;
+		foreach ( LBB_Routes::all( true ) as $route ) {
+			$o = self::fold( $route['origin'] );
+			$d = self::fold( $route['destination'] );
+			if ( $route['price'] > 0 && 0 === strpos( $o, $from ) && 0 === strpos( $d, $to ) ) {
+				// Preferăm potrivirea exactă („Iasi” → „Iași”, nu „Iași Aeroport”).
+				if ( ! $found || ( $o === $from && $d === $to ) ) {
+					$found = $route;
+				}
+			}
+		}
+		return $found;
 	}
 
 	public static function register_assets() {

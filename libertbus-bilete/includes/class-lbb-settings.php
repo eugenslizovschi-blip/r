@@ -30,6 +30,8 @@ class LBB_Settings {
 			'rate_USD'           => 17.5,
 			'pay_currencies'     => 'MDL',
 			'show_approx'        => 1,
+			'replace_cf7'        => '',
+			'replace_cf7_routes' => 0,
 			'allow_reserve'      => 1,
 			'reserve_limit'      => 3,
 			'simple_checkout'    => 1,
@@ -69,6 +71,8 @@ class LBB_Settings {
 				$list  = is_array( $value ) ? $value : explode( ',', (string) $value );
 				$list  = array_values( array_intersect( self::currencies(), array_map( 'strtoupper', array_map( 'trim', $list ) ) ) );
 				$value = implode( ',', $list ? $list : array( 'MDL' ) );
+			} elseif ( 'replace_cf7' === $key ) {
+				$value = implode( ',', array_filter( array_map( 'absint', preg_split( '/[\s,;]+/', (string) $value ) ) ) );
 			} elseif ( 0 === strpos( $key, 'rate_' ) ) {
 				$value = max( 0.0001, (float) str_replace( ',', '.', $value ) );
 			} elseif ( is_int( $default ) ) {
@@ -91,7 +95,7 @@ class LBB_Settings {
 	}
 
 	public static function checkboxes() {
-		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_reserve', 'show_approx' );
+		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_reserve', 'show_approx', 'replace_cf7_routes' );
 	}
 
 	public static function currencies() {
