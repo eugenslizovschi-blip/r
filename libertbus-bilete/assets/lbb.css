@@ -1,0 +1,77 @@
+.lbb-booking {
+	--lbb-accent: #e30613;
+	--lbb-accent-ink: #fff;
+	--lbb-border: #d7dbe0;
+	--lbb-muted: #5f6b7a;
+	--lbb-bg: #fff;
+	--lbb-soft: #f5f7fa;
+	max-width: 760px;
+	margin: 0 auto 24px;
+	padding: 20px;
+	background: var(--lbb-bg);
+	border: 1px solid var(--lbb-border);
+	border-radius: 12px;
+	box-sizing: border-box;
+	color: #1d2733;
+	font-size: 16px;
+	line-height: 1.4;
+}
+.lbb-booking *, .lbb-booking *::before, .lbb-booking *::after { box-sizing: border-box; }
+.lbb-title { margin: 0 0 12px; }
+.lbb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.lbb-grid-2 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.lbb-field { display: flex; flex-direction: column; gap: 4px; margin: 0; font-weight: 600; font-size: 14px; }
+.lbb-field > span { color: var(--lbb-muted); }
+.lbb-booking select, .lbb-booking input[type="text"], .lbb-booking input[type="tel"], .lbb-booking input[type="email"], .lbb-booking input[type="date"] {
+	width: 100%;
+	min-height: 46px;
+	padding: 8px 12px;
+	border: 1px solid var(--lbb-border);
+	border-radius: 8px;
+	background: #fff;
+	font: inherit;
+	font-weight: 400;
+	color: inherit;
+	margin: 0;
+}
+.lbb-booking select:focus, .lbb-booking input:focus { outline: 2px solid var(--lbb-accent); outline-offset: 1px; border-color: var(--lbb-accent); }
+.lbb-booking select:disabled { background: var(--lbb-soft); color: var(--lbb-muted); }
+.lbb-passengers { border: 0; padding: 0; margin: 0 0 12px; display: grid; gap: 10px; }
+.lbb-passengers > legend { font-weight: 700; margin-bottom: 6px; padding: 0; }
+.lbb-passengers[hidden] { display: none; }
+.lbb-status { min-height: 1.4em; margin: -4px 0 8px; color: var(--lbb-muted); font-size: 14px; }
+.lbb-summary { background: var(--lbb-soft); border-radius: 8px; padding: 12px 14px; margin: 4px 0 14px; }
+.lbb-summary-total { font-size: 20px; font-weight: 700; margin-top: 4px; }
+.lbb-summary-note { color: var(--lbb-muted); font-size: 13px; }
+.lbb-submit {
+	display: block;
+	width: 100%;
+	min-height: 52px;
+	border: 0;
+	border-radius: 8px;
+	background: var(--lbb-accent);
+	color: var(--lbb-accent-ink);
+	font: inherit;
+	font-size: 17px;
+	font-weight: 700;
+	cursor: pointer;
+}
+.lbb-submit:disabled { opacity: .45; cursor: not-allowed; }
+.lbb-submit.is-busy { opacity: .7; cursor: progress; }
+.lbb-note { margin: 10px 0 0; color: var(--lbb-muted); font-size: 13px; text-align: center; }
+.lbb-alert { background: #fdecea; color: #8a1c13; border: 1px solid #f5c2bd; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; }
+.lbb-empty { padding: 12px; background: #f5f7fa; border-radius: 8px; }
+.lbb-hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; overflow: hidden; }
+
+/* Biletul din email / pagina de mulțumire / pagina biletului */
+.lbb-ticket { border: 2px dashed #c9ced6; border-radius: 12px; padding: 16px; margin: 0 0 16px; background: #fff; color: #1d2733; }
+.lbb-ticket h3 { margin: 0 0 8px; }
+.lbb-ticket-code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+.lbb-ticket table { width: 100%; border-collapse: collapse; }
+.lbb-ticket th, .lbb-ticket td { text-align: left; padding: 4px 8px 4px 0; vertical-align: top; }
+.lbb-ticket-qr { float: right; margin: 0 0 8px 12px; }
+
+@media (max-width: 480px) {
+	.lbb-booking { padding: 14px; border-radius: 0; border-left: 0; border-right: 0; }
+	.lbb-ticket-qr { float: none; margin: 0 0 8px; }
+}
