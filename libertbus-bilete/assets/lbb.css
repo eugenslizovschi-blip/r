@@ -108,3 +108,13 @@
 	.lbb-booking { padding: 14px; border-radius: 0; border-left: 0; border-right: 0; }
 	.lbb-ticket-qr { float: none; margin: 0 0 8px; }
 }
+
+/* Formular compact (în căsuțe mici, ex. imaginea mare de pe homepage) */
+.lbb-compact { padding: 14px; }
+.lbb-compact .lbb-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 10px; }
+.lbb-compact .lbb-field { font-size: 13px; }
+.lbb-compact .lbb-summary { margin: 4px 0 10px; padding: 10px 12px; }
+.lbb-compact .lbb-summary-total { font-size: 18px; }
+.lbb-next-wrap { margin-bottom: 4px; }
+.lbb-back { background: none !important; border: 0 !important; color: var(--lbb-accent) !important; padding: 4px 0 !important; margin: 0 0 8px !important; font: inherit; font-weight: 600; cursor: pointer; box-shadow: none !important; }
+@media (max-width: 340px) { .lbb-compact .lbb-grid { grid-template-columns: 1fr; } }

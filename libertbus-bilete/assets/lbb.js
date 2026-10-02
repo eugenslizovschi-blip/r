@@ -10,6 +10,25 @@
 			el[ k ] = root.querySelector( '[data-lbb="' + k + '"]' );
 		} );
 		var buttons = root.querySelectorAll( '[data-lbb-submit]' );
+		var compact = root.classList.contains( 'lbb-compact' );
+		var step1 = root.querySelector( '[data-lbb="step1"]' );
+		var step2 = root.querySelector( '[data-lbb="step2"]' );
+		var nextWrap = root.querySelector( '[data-lbb="next-wrap"]' );
+		var nextBtn = root.querySelector( '[data-lbb="next"]' );
+		var backBtn = root.querySelector( '[data-lbb="back"]' );
+
+		// Formular compact (în căsuțe mici, ex. pe homepage): pasul 1 = cursa, pasul 2 = datele și plata.
+		function showStep( n ) {
+			if ( ! compact ) {
+				return;
+			}
+			root.setAttribute( 'data-step', String( n ) );
+			step1.hidden = n === 2;
+			if ( nextWrap ) {
+				nextWrap.hidden = n === 2;
+			}
+			step2.hidden = n === 1;
+		}
 		var radios = root.querySelectorAll( '[data-lbb="currency"]' );
 		var currencyTouched = false;
 
@@ -180,6 +199,9 @@
 			for ( var b = 0; b < buttons.length; b++ ) {
 				buttons[ b ].disabled = ! ok;
 			}
+			if ( nextBtn ) {
+				nextBtn.disabled = ! ok;
+			}
 			if ( ! route ) {
 				el.summary.hidden = true;
 				return;
@@ -296,6 +318,24 @@
 		if ( alertBox ) {
 			alertBox.scrollIntoView( { block: 'center' } );
 			alertBox.focus( { preventScroll: true } );
+		}
+
+		showStep( root.getAttribute( 'data-step' ) === '2' ? 2 : 1 );
+		if ( nextBtn ) {
+			nextBtn.addEventListener( 'click', function () {
+				showStep( 2 );
+				var first = step2.querySelector( 'input' );
+				if ( first ) {
+					first.focus();
+				}
+				root.scrollIntoView( { block: 'nearest' } );
+			} );
+		}
+		if ( backBtn ) {
+			backBtn.addEventListener( 'click', function () {
+				showStep( 1 );
+				el.time.focus();
+			} );
 		}
 
 		fillFrom();

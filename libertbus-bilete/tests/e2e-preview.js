@@ -38,6 +38,12 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await second.scrollIntoViewIfNeeded();
   await admin.waitForFunction(el => el.querySelectorAll('[data-lbb="time"] option:not([disabled])').length > 1, second);
   await second.$eval('[data-lbb="time"]', s => { const o = [...s.options].find(x => x.value && !x.disabled); s.value = o.value; s.dispatchEvent(new Event('change')); });
+  // Formularele înlocuite sunt compacte: pasul 1 (cursa) → „Continuă” → pasul 2 (date și plată).
+  if (await second.$eval('[data-lbb="step2"]', e => !e.hidden)) fail('pasul 2 e vizibil înainte de „Continuă”');
+  const h1 = await second.evaluate(e => e.getBoundingClientRect().height);
+  await (await second.$('[data-lbb="next"]')).click();
+  if (await second.$eval('[data-lbb="step1"]', e => !e.hidden)) fail('pasul 1 nu s-a ascuns după „Continuă”');
+  console.log('înălțime pas 1:', Math.round(h1), 'px');
   await (await second.$('input[name="lbb_names[]"]')).fill('Admin Test');
   await (await second.$('input[name="lbb_phone"]')).fill('+37369184111');
   await (await second.$('input[name="lbb_email"]')).fill('admin-test@example.com');

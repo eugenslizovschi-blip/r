@@ -36,12 +36,12 @@ class LBB_Frontend {
 		$id  = (int) $m[1];
 		$ids = array_map( 'intval', explode( ',', (string) LBB_Settings::get( 'replace_cf7' ) . ( self::is_preview() ? ',' . LBB_Settings::get( 'preview_cf7' ) : '' ) ) );
 		if ( in_array( $id, $ids, true ) ) {
-			return self::shortcode( array() );
+			return self::shortcode( array( 'compact' => '1' ) );
 		}
 		if ( LBB_Settings::get( 'replace_cf7_routes' ) || self::is_preview() ) {
 			$route = self::route_for_title( get_the_title( $id ) );
 			if ( $route ) {
-				return self::shortcode( array( 'from' => $route['origin'], 'to' => $route['destination'] ) );
+				return self::shortcode( array( 'from' => $route['origin'], 'to' => $route['destination'], 'compact' => '1' ) );
 			}
 		}
 		return $output;
@@ -228,7 +228,7 @@ class LBB_Frontend {
 	}
 
 	public static function shortcode( $atts ) {
-		$atts = shortcode_atts( array( 'from' => '', 'to' => '', 'title' => '', 'mode' => 'both' ), $atts, 'libertbus_rezervare' );
+		$atts = shortcode_atts( array( 'from' => '', 'to' => '', 'title' => '', 'mode' => 'both', 'compact' => '' ), $atts, 'libertbus_rezervare' );
 		$map  = LBB_Routes::public_map();
 		if ( ! $map ) {
 			return '<p class="lbb-empty">' . esc_html__( 'Momentan nu sunt curse disponibile pentru rezervare online.', 'libertbus-bilete' ) . '</p>';
@@ -299,7 +299,8 @@ class LBB_Frontend {
 
 		ob_start();
 		?>
-		<div class="lbb-booking" id="<?php echo esc_attr( $uid ); ?>" data-lbb-config="<?php echo esc_attr( base64_encode( wp_json_encode( $config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ); ?>">
+		<?php $compact = '' !== $atts['compact'] && '0' !== $atts['compact']; ?>
+		<div class="lbb-booking<?php echo $compact ? ' lbb-compact' : ''; ?>" data-step="<?php echo self::$error ? '2' : '1'; ?>" id="<?php echo esc_attr( $uid ); ?>" data-lbb-config="<?php echo esc_attr( base64_encode( wp_json_encode( $config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ); ?>">
 			<?php if ( $atts['title'] ) : ?>
 				<h3 class="lbb-title"><?php echo esc_html( $atts['title'] ); ?></h3>
 			<?php endif; ?>
@@ -317,6 +318,7 @@ class LBB_Frontend {
 				<input type="hidden" name="lbb_nonce" value="<?php echo esc_attr( wp_create_nonce( 'lbb_book' ) ); ?>">
 				<div class="lbb-hp" aria-hidden="true"><label>Website <input type="text" name="lbb_website" tabindex="-1" autocomplete="off"></label></div>
 
+				<div class="lbb-step1" data-lbb="step1">
 				<div class="lbb-grid">
 					<label class="lbb-field"><span><?php esc_html_e( 'De unde plecați', 'libertbus-bilete' ); ?></span>
 						<select name="lbb_from" data-lbb="from" required></select>
@@ -343,7 +345,20 @@ class LBB_Frontend {
 					</label>
 					<?php endif; ?>
 				</div>
+				</div>
 
+				<div class="lbb-summary" data-lbb="summary" hidden></div>
+
+				<?php if ( $compact ) : ?>
+					<div class="lbb-next-wrap" data-lbb="next-wrap">
+						<button type="button" class="lbb-submit" data-lbb="next" disabled><?php esc_html_e( 'Continuă', 'libertbus-bilete' ); ?></button>
+					</div>
+				<?php endif; ?>
+
+				<div class="lbb-step2" data-lbb="step2">
+				<?php if ( $compact ) : ?>
+					<button type="button" class="lbb-back" data-lbb="back">← <?php esc_html_e( 'Schimbă cursa', 'libertbus-bilete' ); ?></button>
+				<?php endif; ?>
 				<fieldset class="lbb-passengers" data-lbb="names">
 					<legend><?php esc_html_e( 'Pasageri', 'libertbus-bilete' ); ?></legend>
 				</fieldset>
@@ -365,8 +380,6 @@ class LBB_Frontend {
 					<?php endforeach; ?>
 				</fieldset>
 
-				<div class="lbb-summary" data-lbb="summary" hidden></div>
-
 				<div class="lbb-actions">
 					<?php if ( $can_pay ) : ?>
 						<button type="submit" value="pay" class="lbb-submit" data-lbb-submit disabled><?php esc_html_e( 'Achit online cu cardul', 'libertbus-bilete' ); ?></button>
@@ -386,6 +399,7 @@ class LBB_Frontend {
 					}
 					?>
 				</p>
+				</div>
 			</form>
 		</div>
 		<?php
