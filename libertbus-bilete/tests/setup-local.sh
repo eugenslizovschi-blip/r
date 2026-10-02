@@ -1,0 +1,49 @@
+#!/bin/bash
+# Pornește (sau reface) un WordPress de test cu WooCommerce și plugin-ul, pe http://127.0.0.1:8080.
+# Folosire: tests/setup-local.sh /cale/director-de-lucru
+set -e
+W="${1:?director de lucru}"
+PLUGIN="$(cd "$(dirname "$0")/.." && pwd)"
+mkdir -p "$W" && cd "$W"
+pgrep -x mariadbd >/dev/null || pgrep -x mysqld >/dev/null || { (mysqld_safe --user=mysql >/dev/null 2>&1 &); sleep 5; }
+mysql -uroot -e "CREATE DATABASE IF NOT EXISTS wp; CREATE USER IF NOT EXISTS 'wp'@'localhost' IDENTIFIED BY 'wp'; GRANT ALL ON wp.* TO 'wp'@'localhost';"
+[ -f wp-cli.phar ] || curl -sSL -o wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+[ -d wordpress ] || { curl -sSL -o wp.zip https://wordpress.org/wordpress-6.4.3.zip && unzip -q wp.zip; }
+WP="php $W/wp-cli.phar --allow-root --path=$W/wordpress"
+if ! $WP core is-installed 2>/dev/null; then
+  $WP config create --dbname=wp --dbuser=wp --dbpass=wp --dbhost=localhost --skip-check --force
+  $WP config set WP_DEBUG true --raw && $WP config set WP_DEBUG_LOG true --raw && $WP config set WP_DEBUG_DISPLAY false --raw
+  $WP core install --url=http://127.0.0.1:8080 --title="LibertBus Test" --admin_user=admin --admin_password=admin --admin_email=admin@example.com --skip-email
+  [ -d wordpress/wp-content/plugins/woocommerce ] || { curl -sSL -o wc.zip https://downloads.wordpress.org/plugin/woocommerce.8.7.0.zip && unzip -q -o wc.zip -d wordpress/wp-content/plugins/; }
+fi
+ln -sfn "$PLUGIN" wordpress/wp-content/plugins/libertbus-bilete
+$WP plugin activate woocommerce libertbus-bilete
+$WP option update timezone_string Europe/Chisinau && $WP option update woocommerce_currency MDL && $WP rewrite structure '/%postname%/'
+if [ "$($WP post list --post_type=page --name=rezervare-bilet --format=count)" = 0 ]; then
+  $WP eval 'WC_Install::create_pages();'
+  $WP post update "$($WP option get woocommerce_checkout_page_id)" --post_content='[woocommerce_checkout]'
+  $WP post update "$($WP option get woocommerce_cart_page_id)" --post_content='[woocommerce_cart]'
+  $WP post create --post_type=page --post_status=publish --post_title='Rezervare bilet' --post_name=rezervare-bilet --post_content='[libertbus_rezervare]'
+  $WP post create --post_type=page --post_status=publish --post_title='Balti - Iasi' --post_name=balti-iasi --post_content='[libertbus_rezervare from="Balti" to="Iasi"]'
+  $WP eval '$s=LBB_Settings::all(); $s["test_gateway"]=1; update_option("lbb_settings",$s);'
+fi
+mkdir -p wordpress/wp-content/mu-plugins
+cat > wordpress/wp-content/mu-plugins/mail-dump.php <<'PHP'
+<?php
+add_filter( 'pre_wp_mail', function ( $null, $atts ) {
+	wp_mkdir_p( WP_CONTENT_DIR . '/mail' );
+	file_put_contents( WP_CONTENT_DIR . '/mail/' . microtime( true ) . '.html', 'TO: ' . implode( ',', (array) $atts['to'] ) . "\nSUBJECT: " . $atts['subject'] . "\n\n" . $atts['message'] );
+	return true;
+}, 10, 2 );
+PHP
+cat > router.php <<'PHP'
+<?php
+$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+$file = __DIR__ . '/wordpress' . $path;
+if ( '/' !== $path && file_exists( $file ) && ! is_dir( $file ) ) { return false; }
+if ( is_dir( $file ) && file_exists( $file . '/index.php' ) ) { $_SERVER['SCRIPT_NAME'] = rtrim( $path, '/' ) . '/index.php'; require $file . '/index.php'; return; }
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+require __DIR__ . '/wordpress/index.php';
+PHP
+curl -s -o /dev/null http://127.0.0.1:8080/ || { (nohup php -S 127.0.0.1:8080 -t wordpress router.php > server.log 2>&1 &); sleep 2; }
+curl -s -o /dev/null -w "WordPress de test: %{http_code}\n" http://127.0.0.1:8080/rezervare-bilet/
