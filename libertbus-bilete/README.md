@@ -24,6 +24,12 @@ Clientul alege cursa, plătește cu cardul și primește biletul pe email.
   - **Setări**: locuri, timpi, cursuri valutare, datele firmei, plată de test.
 - **Pagini legale cerute de bancă**: termeni, anulare și rambursare, plata online, confidențialitate. Se creează ca ciorne, cu datele firmei completate automat.
 - **Plată de test**: o metodă vizibilă doar administratorilor, ca să verificați tot drumul fără bancă.
+- **Butonul „Achit online cu cardul” e oprit implicit**: se pornește din Setări („Plata online cu cardul”) după ce metoda de plată a băncii e activă și testată. Până atunci clienții pot doar rezerva cu plata la urcare, iar serverul refuză plățile online.
+- **Înlocuirea formularelor vechi Contact Form 7**, fără a modifica paginile (se anulează ștergând setarea):
+  - „Înlocuiește formularele Contact Form 7 (ID-uri)”: ex. `210` = formularul din imaginea mare de pe pagina principală;
+  - „Formularele de rută”: un formular cu titlul „Balti - Iasi” devine formularul rutei Bălți → Iași (46 de formulare se potrivesc).
+- **Formular compact în doi pași** (pentru căsuțele mici ale temei): pasul 1 = ruta, data, ora, pasagerii și prețul; pasul 2 (nume, telefon, email, butoane) se deschide într-o fereastră peste pagină, pe tot ecranul pe telefon, cu butoanele fixate jos.
+- **Previzualizare doar pentru administrator**: pe o pagină privată (ex. `/previzualizare-bilete/`) sau cu `?lbb_preview=1`, adminul logat vede formularele înlocuite și butonul de plată; clienții nu văd nimic schimbat. Formularele de previzualizare se aleg în Setări.
 
 ## Instalare
 
@@ -48,6 +54,12 @@ Pașii sunt aceiași pentru oricare:
 
 ## Teste
 
-Pe o instalare de test (nu pe site-ul real): `wp eval-file wp-content/plugins/libertbus-bilete/tests/smoke.php`.
-Rulează 54 de verificări: locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, validări.
-Toată suita (inclusiv testele în browser): `tests/qa.sh` (vezi comentariul din fișier).
+Toate testele rulează pe o instalare de test, niciodată pe site-ul real.
+
+- `tests/setup-local.sh <director>` pregătește WordPress 6.4.3 + WooCommerce + Contact Form 7 pe http://127.0.0.1:8080 și verificatorul de compatibilitate PHP.
+- `tests/qa.sh` rulează tot (vezi comentariul din fișier):
+  - sintaxa PHP și **compatibilitatea cu PHP 7.4+** (serverul libertbus.md rulează PHP 7.4);
+  - `tests/smoke.php`: 63 de verificări (locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, potrivirea formularelor după titlu, buton de plată oprit, diacritice);
+  - în browser: rezervare cu plată de test, vizitator nelogat (inclusiv răspunsul blocat de protecția hostingului), plată în RON și rezervare la urcare, previzualizare cu 5 pasageri;
+  - **8 dispozitive** (iPhone SE … desktop 1920), 5 browsere în paralel: fără scroll orizontal, butoane de minim 40px, text de 16px în câmpuri, ora netăiată, ambele butoane pe ecran.
+- `tests/e2e-devices.js` se poate rula și pe site-ul real (doar citire), cu `BASE=https://libertbus.md WP_USER=… WP_PASS=… PARALLEL=1`: protecția hostingului blochează rafalele de cereri.
