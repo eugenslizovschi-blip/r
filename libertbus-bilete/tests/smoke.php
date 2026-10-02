@@ -155,7 +155,7 @@ list( $amt, $cur ) = LBB_Bookings::pay_amount( $rv );
 lbb_t( 'suma de achitat e în moneda aleasă', 'RON' === $cur && abs( $amt - 120 ) < 0.01, array( $amt, $cur ) );
 lbb_t( 'rezervările active se numără pe telefon', 1 === LBB_Bookings::active_reservations( '+37369000001' ) );
 $desc = LBB_WooCommerce::describe( $rv );
-lbb_t( 'biletul rezervat arată suma la urcare', isset( $desc['De achitat la urcare'] ) && '120 RON' === $desc['De achitat la urcare'], $desc );
+lbb_t( 'biletul rezervat arată suma la urcare', isset( $desc['De achitat la urcare'] ) && "120\u{00A0}RON" === $desc['De achitat la urcare'], $desc );
 lbb_t( 'anularea rezervării eliberează locurile', LBB_Bookings::cancel( $rv['id'] ) && 3 === LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow )[1]['free'] );
 lbb_t( 'o rezervare anulată nu se mai anulează', ! LBB_Bookings::cancel( $rv['id'] ) );
 

@@ -119,6 +119,21 @@ class LBB_Settings {
 		return add_query_arg( 'lbb_preview', self::preview_token(), home_url( $path ) );
 	}
 
+	/**
+	 * Telefonul de suport fără ruperi de rând (spații nedespărțitoare), ca text.
+	 */
+	public static function phone_text() {
+		return str_replace( ' ', "\u{00A0}", trim( (string) self::get( 'support_phone' ) ) );
+	}
+
+	/**
+	 * Telefonul de suport ca link de apel, pe un singur rând.
+	 */
+	public static function phone_link() {
+		$phone = trim( (string) self::get( 'support_phone' ) );
+		return '<a class="lbb-phone" href="tel:' . esc_attr( preg_replace( '/[^\d+]/', '', $phone ) ) . '">' . esc_html( self::phone_text() ) . '</a>';
+	}
+
 	public static function currencies() {
 		return array( 'MDL', 'RON', 'EUR', 'USD' );
 	}

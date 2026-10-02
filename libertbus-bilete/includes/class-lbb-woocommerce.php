@@ -119,7 +119,8 @@ class LBB_WooCommerce {
 
 	public static function money( $amount, $currency ) {
 		$decimals = floor( $amount ) == $amount ? 0 : 2; // phpcs:ignore Universal.Operators.StrictComparisons
-		return number_format( (float) $amount, $decimals, ',', '.' ) . ' ' . $currency;
+		// Spațiu nedespărțitor: „2535 MDL” nu se rupe pe două rânduri.
+		return number_format( (float) $amount, $decimals, ',', '.' ) . "\u{00A0}" . $currency;
 	}
 
 	public static function item_data( $data, $item ) {

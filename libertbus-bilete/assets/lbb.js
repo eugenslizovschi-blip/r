@@ -123,7 +123,7 @@
 		function money( v, cur ) {
 			var n = Number( v );
 			var text = n % 1 === 0 ? String( n ) : n.toFixed( 2 ).replace( '.', ',' );
-			return text + ' ' + cur;
+			return text + '\u00a0' + cur; // nu se rupe între sumă și monedă
 		}
 
 		function currency() {
@@ -324,7 +324,7 @@
 				return approx.map( function ( c ) {
 					var q = route.prices[ c ];
 					var v = adults * q[ 0 ] + children * ( q[ 1 ] === null ? q[ 0 ] : q[ 1 ] );
-					return '≈ ' + money( Math.round( factor ? q[ 0 ] : v ), c );
+					return '≈\u00a0' + money( Math.round( factor ? q[ 0 ] : v ), c );
 				} ).join( ', ' );
 			};
 			el.summary.textContent = '';

@@ -63,13 +63,20 @@ async function check(browser, state, [name, dev]) {
       const panel = ov.querySelector('.lbb-booking').getBoundingClientRect();
       const back = ov.querySelector('.lbb-back'); const pay = ov.querySelector('[data-lbb-submit]');
       const backColor = back ? getComputedStyle(back).color : '', accent = pay ? getComputedStyle(pay).borderTopColor : '';
-      return { bs, panelW: Math.round(panel.width), hScroll: ov.scrollWidth > ov.clientWidth + 1, backOk: !back || backColor === accent, backColor };
+      // Telefonul și sumele nu se rup pe două rânduri.
+      const phone = ov.querySelector('a.lbb-phone');
+      const phoneLines = phone ? phone.getClientRects().length : 0;
+      const tot = ov.querySelector('.lbb-summary-total');
+      const totalSplit = tot ? /\d [A-Z]{3}/.test(tot.textContent) : false;
+      return { bs, panelW: Math.round(panel.width), hScroll: ov.scrollWidth > ov.clientWidth + 1, backOk: !back || backColor === accent, backColor, phoneLines, totalSplit };
     });
     if (!m2) r.issues.push('fereastra pasului 2 nu s-a deschis');
     else {
       m2.bs.forEach(b => { if (!b.on) r.issues.push('buton ascuns: ' + b.t); if (!b.oneLine) r.issues.push('buton pe 2+ rânduri: ' + b.t); });
       if (m2.hScroll) r.issues.push('fereastra are scroll orizontal');
       if (!m2.backOk) r.issues.push('„Schimbă cursa” are altă culoare: ' + m2.backColor);
+      if (m2.phoneLines !== 1) r.issues.push('telefonul de la final e rupt pe ' + m2.phoneLines + ' rânduri (sau lipsește)');
+      if (m2.totalSplit) r.issues.push('suma și moneda se pot despărți pe rânduri diferite');
       r.step2 = 'panou ' + m2.panelW + 'px, butoane ' + m2.bs.map(b => b.w + '×' + b.h).join(' / ');
     }
     await p.screenshot({ path: `${OUT}/${name.replace(/\W+/g, '_')}-2.png` });
