@@ -8,12 +8,19 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   page.on('pageerror', e => fail('pageerror: ' + e.message));
+  // Prima cerere pentru locuri primește pagina HTML a protecției hostingului: formularul trebuie să reîncerce.
+  let blocked = 0;
+  await page.route('**/lbb/v1/departures**', route => {
+    if (blocked++ === 0) return route.fulfill({ status: 200, contentType: 'text/html', body: '<!DOCTYPE html><title>One moment, please...</title>' });
+    return route.continue();
+  });
   await page.goto(BASE + '/balti-iasi/');
   await page.waitForSelector('[data-lbb="route"] option:checked', { state: 'attached' });
   const day = new Date(Date.now() + 86400000 * (21 + Math.floor(Math.random() * 20))).toISOString().slice(0, 10);
   await page.fill('[data-lbb="date"]', day);
   await page.dispatchEvent('[data-lbb="date"]', 'change');
   await page.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled])').length > 1);
+  if (blocked < 2) fail('formularul nu a reîncercat după răspunsul HTML');
   const time = await page.$eval('[data-lbb="time"] option:not([disabled]):not([value=""])', o => o.value);
   await page.selectOption('[data-lbb="time"]', time);
   const routeId = await page.inputValue('[data-lbb="route"]');

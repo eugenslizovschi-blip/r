@@ -137,3 +137,15 @@ html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
 	.lbb-overlay .lbb-actions { padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); }
 	.lbb-overlay .lbb-actions { grid-template-columns: 1fr; gap: 8px; }
 }
+
+/* Ecrane mici (ex. iPhone SE): în fereastra pasului 2 rezumatul se strânge, ca să încapă numele. */
+@media (max-height: 740px) {
+	.lbb-overlay .lbb-summary { padding: 8px 10px; margin-bottom: 8px; }
+	.lbb-overlay .lbb-summary-route { font-size: 14px; }
+	.lbb-overlay .lbb-summary-total { font-size: 16px; margin-top: 2px; }
+	.lbb-overlay .lbb-summary-note { display: none; }
+	.lbb-overlay .lbb-preview-note { font-size: 12px; padding: 6px 10px; margin-bottom: 8px; }
+	.lbb-overlay .lbb-booking .lbb-submit { min-height: 46px !important; font-size: 16px !important; padding: 8px 12px !important; }
+	.lbb-overlay .lbb-back { margin-bottom: 4px !important; }
+	.lbb-overlay .lbb-note { font-size: 12px; }
+}

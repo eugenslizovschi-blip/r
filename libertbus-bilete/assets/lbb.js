@@ -192,9 +192,39 @@
 			el.route.disabled = ! list.length;
 		}
 
+		// Protecția hostingului poate răspunde o clipă cu o pagină HTML în loc de JSON: reîncercăm.
+		function getJSON( url, tries ) {
+			return fetch( url, { credentials: 'same-origin', headers: { Accept: 'application/json' } } )
+				.then( function ( r ) {
+					return r.text().then( function ( body ) {
+						var data = null;
+						try {
+							data = JSON.parse( body );
+						} catch ( e ) {}
+						if ( ! r.ok || ! data ) {
+							throw new Error( 'bad response ' + r.status );
+						}
+						return data;
+					} );
+				} )
+				.catch( function ( err ) {
+					if ( tries <= 1 ) {
+						throw err;
+					}
+					return new Promise( function ( resolve ) {
+						setTimeout( resolve, 1500 );
+					} ).then( function () {
+						return getJSON( url, tries - 1 );
+					} );
+				} );
+		}
+
 		function fillCounts() {
 			var route = currentRoute();
 			var dep = currentDeparture();
+			if ( compact && dep && dep.bookable ) {
+				el.status.textContent = dep.time + ': ' + dep.free + ' ' + t.free;
+			}
 			var max = cfg.maxPassengers;
 			if ( dep && dep.free < max ) {
 				max = dep.free;
@@ -334,13 +364,7 @@
 			var id = ++request;
 			el.status.textContent = t.loading;
 			var url = cfg.restUrl + ( cfg.restUrl.indexOf( '?' ) > -1 ? '&' : '?' ) + 'route_id=' + route.id + '&date=' + encodeURIComponent( el.date.value );
-			fetch( url, { credentials: 'same-origin', headers: { Accept: 'application/json' } } )
-				.then( function ( r ) {
-					if ( ! r.ok ) {
-						throw new Error( r.status );
-					}
-					return r.json();
-				} )
+			getJSON( url, 3 )
 				.then( function ( data ) {
 					if ( id !== request ) {
 						return;
@@ -360,7 +384,10 @@
 					}
 					el.status.textContent = departures.length ? ( open.length ? '' : t.noneOpen ) : t.noDeparture;
 					departures.forEach( function ( d ) {
-						var label = d.time + ' — ' + ( d.bookable ? d.free + ' ' + t.free : ( d.reason === 'full' ? t.full : t.closed ) );
+						// În formularul compact lista e îngustă: doar ora; locurile libere apar sub câmpuri.
+						var label = compact
+							? d.time + ( d.bookable ? '' : ' · ' + ( d.reason === 'full' ? t.full : t.closed ) )
+							: d.time + ' — ' + ( d.bookable ? d.free + ' ' + t.free : ( d.reason === 'full' ? t.full : t.closed ) );
 						el.time.appendChild( option( d.time, label, ! d.bookable ) );
 					} );
 					var firstOpen = departures.filter( function ( d ) {
