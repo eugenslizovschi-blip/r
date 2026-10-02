@@ -281,7 +281,7 @@ class LBB_Frontend {
 				'closed'      => __( 'vânzare închisă', 'libertbus-bilete' ),
 				'passenger'   => __( 'Pasager', 'libertbus-bilete' ),
 				'child'       => __( 'copil', 'libertbus-bilete' ),
-				'namePh'      => __( 'Nume și prenume, ca în pașaport', 'libertbus-bilete' ),
+				'namePh'      => __( 'Nume și prenume', 'libertbus-bilete' ),
 				'error'       => __( 'Nu am putut verifica locurile. Încercați din nou.', 'libertbus-bilete' ),
 				'total'       => __( 'Total de plată', 'libertbus-bilete' ),
 				'approxNote'  => __( 'echivalent orientativ, plata se face în moneda afișată', 'libertbus-bilete' ),
@@ -361,7 +361,7 @@ class LBB_Frontend {
 					<button type="button" class="lbb-back" data-lbb="back">← <?php esc_html_e( 'Schimbă cursa', 'libertbus-bilete' ); ?></button>
 				<?php endif; ?>
 				<fieldset class="lbb-passengers" data-lbb="names">
-					<legend><?php esc_html_e( 'Pasageri', 'libertbus-bilete' ); ?></legend>
+					<legend><?php esc_html_e( 'Pasageri', 'libertbus-bilete' ); ?> <span class="lbb-legend-hint"><?php esc_html_e( '(numele ca în pașaport)', 'libertbus-bilete' ); ?></span></legend>
 				</fieldset>
 
 				<div class="lbb-grid lbb-grid-2">

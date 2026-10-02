@@ -154,3 +154,5 @@ html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
 .lbb-booking .lbb-summary, .lbb-booking .lbb-summary div, .lbb-booking .lbb-summary span { line-height: 1.35 !important; }
 .lbb-booking .lbb-field > span, .lbb-booking .lbb-status, .lbb-booking .lbb-note, .lbb-booking .lbb-preview-note { line-height: 1.35 !important; }
 .lbb-booking button.lbb-back, .lbb-booking button.lbb-back:hover, .lbb-booking button.lbb-back:focus { color: var(--lbb-accent) !important; background: none !important; border: 0 !important; text-decoration: underline; text-underline-offset: 3px; }
+
+.lbb-legend-hint { font-weight: 400; font-size: 13px; color: var(--lbb-muted); }
