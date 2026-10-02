@@ -11,5 +11,7 @@ echo "== Teste automate"
 echo "== Rezervare cap-coadă"
 BASE="$BASE" node "$DIR/tests/e2e-flow.js" 2>&1 | grep -v CERT_AUTHORITY | grep -E 'ticket:|FAIL|ALERT|pageerror' || FAIL=1
 [ -f "$WP_PATH/wp-content/debug.log" ] && grep -E "Fatal|Warning|Notice" "$WP_PATH/wp-content/debug.log" | grep -i lbb && FAIL=1
+echo "== Vizitator nelogat"
+BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY | grep -E 'GUEST|FAIL' | grep -q 'GUEST: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
 echo "== Rezultat: $([ $FAIL = 0 ] && echo OK || echo PROBLEME)"
 exit $FAIL
