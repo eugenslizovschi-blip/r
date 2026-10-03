@@ -85,7 +85,7 @@ fi
 [ -x "$W/phpcs/vendor/bin/phpcs" ] && "$W/phpcs/vendor/bin/phpcs" --config-set installed_paths "$W/phpcs/vendor/phpcompatibility/php-compatibility,$W/phpcs/vendor/phpcsstandards/phpcsutils" >/dev/null 2>&1 || true
 # Serverul de test pornește mereu din nou, cu 4 procese: cu unul singur, o cerere lentă (ex. cron-ul WordPress)
 # le blochează pe celelalte și testele din browser expiră din când în când.
-pkill -f "[p]hp -S 127\.0\.0\.1:8080" 2>/dev/null; sleep 1
+pkill -f "[p]hp -S 127\.0\.0\.1:8080" 2>/dev/null || true; sleep 1
 (PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8080 -t wordpress router.php > server.log 2>&1 &)
 for i in 1 2 3 4 5 6 7 8 9 10; do curl -s -o /dev/null http://127.0.0.1:8080/ && break; sleep 1; done
 curl -s -o /dev/null -w "WordPress de test: %{http_code}\n" http://127.0.0.1:8080/rezervare-bilet/
