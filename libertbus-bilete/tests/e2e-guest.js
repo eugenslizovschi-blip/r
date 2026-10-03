@@ -51,11 +51,12 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await page.waitForFunction(() => document.querySelectorAll('input[name="lbb_names[]"]').length > 0);
   // Un nume fără litere e oprit chiar în browser, fără reîncărcare.
   await page.fill('input[name="lbb_names[]"]', ' - ');
-  const url0 = page.url();
+  // Formularul trimite la aceeași adresă: un semn pus pe pagină dispare dacă pagina se reîncarcă.
+  await page.evaluate(() => { window.__lbbNoReload = 1; });
   await page.click('[data-lbb-submit][value="pay"]');
-  await page.waitForTimeout(500);
-  const bad = await page.$eval('input[name="lbb_names[]"]', i => ({ ok: i.checkValidity(), msg: i.validationMessage }));
-  if (bad.ok || !/două litere/.test(bad.msg) || page.url() !== url0) fail('numele „-” nu e oprit în browser: ' + JSON.stringify(bad));
+  await page.waitForTimeout(800);
+  const bad = await page.$eval('input[name="lbb_names[]"]', i => ({ ok: i.checkValidity(), msg: i.validationMessage, focus: i === document.activeElement, stayed: window.__lbbNoReload === 1 }));
+  if (bad.ok || !/două litere/.test(bad.msg) || !bad.stayed || !bad.focus) fail('numele „-” nu e oprit în browser: ' + JSON.stringify(bad));
   await page.fill('input[name="lbb_names[]"]', 'Ли');
   if (!(await page.$eval('input[name="lbb_names[]"]', i => i.checkValidity()))) fail('numele scurt în chirilică e respins în browser');
   await page.fill('input[name="lbb_names[]"]', 'Vasile Guest');

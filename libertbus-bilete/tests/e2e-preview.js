@@ -101,9 +101,25 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   if (nameInputs.length !== 5) fail('trebuie 5 câmpuri de nume, sunt ' + nameInputs.length);
   for (let i = 0; i < nameInputs.length; i++) await nameInputs[i].fill('Admin Test ' + (i + 1));
   await (await second.$('input[name="lbb_phone"]')).fill('+37369184111');
-  await (await second.$('input[name="lbb_email"]')).fill('admin-test@example.com');
-  await second.screenshot({ path: (process.env.OUT || '.') + '/preview-form.png' });
+  // Eroare de la server (email acceptat de browser, refuzat de server) pe o pagină cu 2 formulare:
+  // mesajul și datele apar doar în formularul trimis, care se redeschide la pasul 2.
+  await (await second.$('input[name="lbb_email"]')).fill('a@b');
   await Promise.all([admin.waitForNavigation(), (await second.$('[data-lbb-submit][value="pay"]')).click()]);
+  await admin.waitForSelector('.lbb-overlay .lbb-booking');
+  const after = await admin.evaluate(() => ({
+    alerts: document.querySelectorAll('[data-lbb="alert"]').length,
+    overlays: document.querySelectorAll('.lbb-overlay').length,
+    inOverlay: !!document.querySelector('.lbb-overlay [data-lbb="alert"]'),
+    focused: document.activeElement === document.querySelector('[data-lbb="alert"]'),
+    names: [...document.querySelectorAll('.lbb-overlay input[name="lbb_names[]"]')].map(i => i.value).join('|'),
+    route: (s => s.options[s.selectedIndex] && s.options[s.selectedIndex].text)(document.querySelector('.lbb-overlay [data-lbb="route"]')),
+  }));
+  if (after.alerts !== 1 || after.overlays !== 1 || !after.inOverlay || !after.focused) fail('eroarea nu e doar în formularul trimis: ' + JSON.stringify(after));
+  if (after.route !== 'Iași' || !/^Admin Test 1\|.*Admin Test 5$/.test(after.names)) fail('formularul trimis nu și-a păstrat datele: ' + JSON.stringify(after));
+  const resent = await admin.$('.lbb-overlay .lbb-booking');
+  await (await resent.$('input[name="lbb_email"]')).fill('admin-test@example.com');
+  await resent.screenshot({ path: (process.env.OUT || '.') + '/preview-form.png' });
+  await Promise.all([admin.waitForNavigation(), (await resent.$('[data-lbb-submit][value="pay"]')).click()]);
   if (!/checkout/.test(admin.url())) fail('previzualizarea nu duce la plată: ' + admin.url() + ' ' + ((await admin.$('.lbb-alert')) ? await admin.textContent('.lbb-alert') : ''));
   await admin.waitForSelector('#payment');
   await admin.waitForLoadState('networkidle');

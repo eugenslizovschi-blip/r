@@ -289,7 +289,10 @@ class LBB_Frontend {
 
 		$tz        = wp_timezone();
 		$today     = new DateTimeImmutable( 'now', $tz );
-		$posted    = self::$error ? wp_unslash( $_POST ) : array(); // phpcs:ignore WordPress.Security.NonceVerification
+		// Cu mai multe formulare pe pagină, eroarea și datele trimise aparțin doar celui trimis.
+		$form_key  = substr( md5( wp_json_encode( $atts ) ), 0, 10 );
+		$error     = self::$error && ( empty( $_POST['lbb_form'] ) || $form_key === $_POST['lbb_form'] ) ? self::$error : null; // phpcs:ignore WordPress.Security.NonceVerification
+		$posted    = $error ? wp_unslash( $_POST ) : array(); // phpcs:ignore WordPress.Security.NonceVerification
 		$preset    = array(
 			'from'     => isset( $posted['lbb_from'] ) ? sanitize_text_field( $posted['lbb_from'] ) : self::match_city( $atts['from'], array_keys( $map ) ),
 			'route'    => isset( $posted['lbb_route'] ) ? (int) $posted['lbb_route'] : 0,
@@ -347,12 +350,12 @@ class LBB_Frontend {
 		ob_start();
 		?>
 		<?php $compact = '' !== $atts['compact'] && '0' !== $atts['compact']; ?>
-		<div class="lbb-booking<?php echo $compact ? ' lbb-compact' : ''; ?>" data-step="<?php echo self::$error ? '2' : '1'; ?>" id="<?php echo esc_attr( $uid ); ?>" data-lbb-config="<?php echo esc_attr( base64_encode( wp_json_encode( $config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ); ?>">
+		<div class="lbb-booking<?php echo $compact ? ' lbb-compact' : ''; ?>" data-step="<?php echo $error ? '2' : '1'; ?>" id="<?php echo esc_attr( $uid ); ?>" data-lbb-config="<?php echo esc_attr( base64_encode( wp_json_encode( $config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ); ?>">
 			<?php if ( $atts['title'] ) : ?>
 				<h3 class="lbb-title"><?php echo esc_html( $atts['title'] ); ?></h3>
 			<?php endif; ?>
-			<?php if ( self::$error ) : ?>
-				<div class="lbb-alert" role="alert" tabindex="-1" data-lbb="alert"><?php echo esc_html( self::$error->get_error_message() ); ?></div>
+			<?php if ( $error ) : ?>
+				<div class="lbb-alert" role="alert" tabindex="-1" data-lbb="alert"><?php echo esc_html( $error->get_error_message() ); ?></div>
 			<?php endif; ?>
 			<noscript><p class="lbb-alert"><?php echo sprintf( esc_html__( 'Pentru rezervare online activați JavaScript sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_link() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p></noscript>
 			<form method="post" class="lbb-form" novalidate>
@@ -363,6 +366,7 @@ class LBB_Frontend {
 				<?php endif; ?>
 				<input type="hidden" name="lbb_mode" value="<?php echo $can_pay ? 'pay' : 'reserve'; ?>" data-lbb="mode">
 				<input type="hidden" name="lbb_nonce" value="<?php echo esc_attr( wp_create_nonce( 'lbb_book' ) ); ?>">
+				<input type="hidden" name="lbb_form" value="<?php echo esc_attr( $form_key ); ?>">
 				<div class="lbb-hp" aria-hidden="true"><label>Website <input type="text" name="lbb_website" tabindex="-1" autocomplete="off"></label></div>
 
 				<div class="lbb-step1" data-lbb="step1">

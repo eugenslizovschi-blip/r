@@ -426,14 +426,15 @@
 				} );
 		}
 
+		showStep( root.getAttribute( 'data-step' ) === '2' ? 2 : 1 );
+
 		// După o eroare de la server pagina se reîncarcă sus: ducem clientul la mesaj (important pe telefon).
+		// După showStep, pentru că mutarea formularului în fereastră ar pierde focusul.
 		var alertBox = root.querySelector( '[data-lbb="alert"]' );
 		if ( alertBox ) {
 			alertBox.scrollIntoView( { block: 'center' } );
 			alertBox.focus( { preventScroll: true } );
 		}
-
-		showStep( root.getAttribute( 'data-step' ) === '2' ? 2 : 1 );
 		if ( nextBtn ) {
 			nextBtn.addEventListener( 'click', function () {
 				showStep( 2 );
@@ -497,6 +498,16 @@
 			if ( ! btn || btn.disabled ) {
 				e.preventDefault();
 				return;
+			}
+			// Formularul are novalidate (restul erorilor vin de la server): numele greșite le oprim aici.
+			var nameInputs = el.names.querySelectorAll( 'input' );
+			for ( var k = 0; k < nameInputs.length; k++ ) {
+				if ( nameInputs[ k ].validity.customError ) {
+					e.preventDefault();
+					nameInputs[ k ].focus();
+					nameInputs[ k ].reportValidity();
+					return;
+				}
 			}
 			el.mode.value = btn.value;
 			// Dezactivăm după ce browserul a citit datele, ca să nu se trimită de două ori.
