@@ -117,6 +117,20 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await ctx.close();
   }
 
+  // Vizitatorii care au ales cu versiunea 1.4.0 au cookie-ul vechi („all” / „necessary”): alegerea rămâne valabilă.
+  for (const [old, wantGa] of [['all', true], ['necessary', false]]) {
+    const ctx = await browser.newContext();
+    await ctx.addCookies([{ name: 'lbb_cookie_consent', value: old, url: BASE }]);
+    const page = await ctx.newPage();
+    let ga = 0;
+    page.on('request', r => { if (/googletagmanager\.com/.test(r.url())) ga++; });
+    await page.goto(BASE + '/balti-iasi/');
+    await page.waitForTimeout(800);
+    if (await page.isVisible('#lbb-cc')) fail('cookie vechi „' + old + '”: bannerul reapare');
+    if (!!ga !== wantGa) fail('cookie vechi „' + old + '”: Google Analytics ' + (ga ? 'pornește' : 'nu pornește'));
+    await ctx.close();
+  }
+
   // Politica de confidențialitate e publicată și legată de WordPress/WooCommerce.
   const p = await (await browser.newContext()).newPage();
   const r = await p.goto(BASE + '/politica-de-confidentialitate/');
