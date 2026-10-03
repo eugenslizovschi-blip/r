@@ -470,6 +470,14 @@
 			} );
 		}
 		root.querySelector( 'form' ).addEventListener( 'submit', function ( e ) {
+			// Enter la pasul 1 al formularului compact = „Continuă”, nu trimitere fără nume.
+			if ( compact && root.getAttribute( 'data-step' ) !== '2' ) {
+				e.preventDefault();
+				if ( nextBtn && ! nextBtn.disabled ) {
+					nextBtn.click();
+				}
+				return;
+			}
 			var btn = e.submitter || buttons[ 0 ];
 			if ( ! btn || btn.disabled ) {
 				e.preventDefault();

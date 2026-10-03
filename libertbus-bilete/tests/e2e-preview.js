@@ -69,6 +69,13 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   if (await second.$eval('[data-lbb="step2"]', e => !e.hidden)) fail('pasul 2 e vizibil înainte de „Continuă”');
   await (await second.$('[data-lbb="adults"]')).selectOption('5');
   const h1 = await second.evaluate(e => e.getBoundingClientRect().height);
+  // Enter în pasul 1 deschide pasul 2 (nu trimite formularul fără nume).
+  const urlBefore = admin.url();
+  await (await second.$('[data-lbb="date"]')).press('Enter');
+  await admin.waitForTimeout(600);
+  if (admin.url() !== urlBefore || await admin.$('.lbb-alert')) fail('Enter la pasul 1 a trimis formularul');
+  if (!(await admin.$('.lbb-overlay .lbb-booking'))) fail('Enter la pasul 1 nu a deschis pasul 2');
+  await admin.keyboard.press('Escape');
   await (await second.$('[data-lbb="next"]')).click();
   // Pasul 2 e într-o fereastră peste pagină; ambele butoane se văd pe ecran chiar cu 5 pasageri.
   if (!(await admin.$('.lbb-overlay .lbb-booking'))) fail('pasul 2 nu s-a deschis în fereastră');
