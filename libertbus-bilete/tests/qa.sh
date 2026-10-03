@@ -32,6 +32,11 @@ echo "== Previzualizare doar pentru admin (plata online oprită pentru clienți)
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=0; update_option("lbb_settings",$s);')
 LBB_PREVIEW_TOKEN=$(cd "$WP_PATH" && $WP_CLI eval 'echo LBB_Settings::preview_token();' 2>/dev/null) BASE="$BASE" node "$DIR/tests/e2e-preview.js" 2>&1 | grep -v CERT_AUTHORITY | grep -q 'PREVIEW: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=1; update_option("lbb_settings",$s);')
+echo "== Paginile de admin (Panou, Rute, Pasageri, Rezervări, Setări) și CSV-ul cu pasageri"
+LOG="$WP_PATH/wp-content/debug.log"; BEFORE=$( [ -f "$LOG" ] && wc -l < "$LOG" || echo 0 )
+OUT_ADM=$(BASE="$BASE" node "$DIR/tests/e2e-admin.js" 2>&1 | grep -v CERT_AUTHORITY)
+NEW_ERR=$( [ -f "$LOG" ] && tail -n +$((BEFORE + 1)) "$LOG" | grep -E "Fatal|Warning|Notice|Deprecated" | grep -i lbb )
+echo "$OUT_ADM" | grep -q "ADMIN: OK" && [ -z "$NEW_ERR" ] && echo "  ok" || { echo "$OUT_ADM" | grep FAIL | head -5; echo "$NEW_ERR" | head -5; echo "  PROBLEME"; FAIL=1; }
 echo "== Cookies: banner, Google Analytics blocat până la acord, paginile legale"
 OUT_CC=$(BASE="$BASE" OUT="${OUT:-.}" node "$DIR/tests/e2e-cookies.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_CC" | grep -q "COOKIES: OK" && echo "  ok" || { echo "$OUT_CC" | grep FAIL | head -5; echo "  PROBLEME"; FAIL=1; }
