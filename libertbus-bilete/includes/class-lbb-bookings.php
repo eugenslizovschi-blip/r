@@ -80,8 +80,8 @@ class LBB_Bookings {
 			return new WP_Error( 'lbb_seats', __( 'Alegeți cel puțin un pasager.', 'libertbus-bilete' ) );
 		}
 		if ( $seats > (int) LBB_Settings::get( 'max_passengers' ) ) {
-			/* translators: %d: număr maxim de pasageri */
-			return new WP_Error( 'lbb_seats', sprintf( __( 'Online se pot rezerva cel mult %d locuri odată. Pentru grupuri sunați-ne.', 'libertbus-bilete' ), LBB_Settings::get( 'max_passengers' ) ) );
+			/* translators: 1: număr maxim de pasageri, 2: telefonul de suport */
+			return new WP_Error( 'lbb_seats', sprintf( __( 'Online se pot rezerva cel mult %1$d locuri odată. Pentru grupuri sunați la %2$s.', 'libertbus-bilete' ), LBB_Settings::get( 'max_passengers' ), LBB_Settings::phone_text() ) );
 		}
 		if ( $children && null === $route['child_price'] ) {
 			$adults  += $children;
@@ -100,7 +100,8 @@ class LBB_Bookings {
 				return new WP_Error( 'lbb_departure', __( 'Nu există plecare la ora aleasă în ziua aceasta.', 'libertbus-bilete' ) );
 			}
 			if ( 'closed' === $departure['reason'] ) {
-				return new WP_Error( 'lbb_departure', __( 'Vânzarea online pentru această plecare s-a încheiat. Sunați-ne pentru locuri.', 'libertbus-bilete' ) );
+				/* translators: %s: telefonul de suport */
+				return new WP_Error( 'lbb_departure', sprintf( __( 'Vânzarea online pentru această plecare s-a încheiat. Pentru locuri sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ) );
 			}
 			if ( $departure['free'] < $seats ) {
 				/* translators: %d: locuri libere */

@@ -60,7 +60,10 @@ lbb_t( 'ultimul loc rezervat', is_array( $h3 ) );
 $deps = LBB_Routes::departures_on( $route, $tomorrow );
 lbb_t( 'cursa apare completă', 0 === $deps[0]['free'] && 'full' === $deps[0]['reason'], $deps[0] );
 lbb_t( 'ora inexistentă respinsă', is_wp_error( LBB_Bookings::create_hold( $route, $tomorrow, '11:11', 1, 0, array(), '', '' ) ) );
-lbb_t( 'prea mulți pasageri respinși', is_wp_error( LBB_Bookings::create_hold( $route, $tomorrow, '23:59', 99, 0, array(), '', '' ) ) );
+$r = LBB_Bookings::create_hold( $route, $tomorrow, '23:59', 99, 0, array(), '', '' );
+lbb_t( 'prea mulți pasageri respinși, cu telefonul pentru grupuri', is_wp_error( $r ) && false !== strpos( $r->get_error_message(), LBB_Settings::phone_text() ), $r );
+$r = LBB_Bookings::create_hold( $route, ( new DateTimeImmutable( 'yesterday', $tz ) )->format( 'Y-m-d' ), '23:59', 1, 0, array( 'Ion' ), '', '' );
+lbb_t( 'plecarea închisă e respinsă, cu telefonul', is_wp_error( $r ) && 'lbb_departure' === $r->get_error_code() && false !== strpos( $r->get_error_message(), LBB_Settings::phone_text() ), $r );
 lbb_t( 'zero pasageri respinși', is_wp_error( LBB_Bookings::create_hold( $route, $tomorrow, '23:59', 0, 0, array(), '', '' ) ) );
 
 // Expirare: locurile din coș se eliberează și se pot relua.
@@ -217,6 +220,7 @@ lbb_t( 'fără „allow_pay” plata e refuzată și pe server', is_wp_error( $r
 preg_match( '/data-lbb-config="([^"]+)"/', stripslashes( $html ), $cm );
 $cfg = $cm ? json_decode( base64_decode( html_entity_decode( $cm[1], ENT_QUOTES | ENT_HTML401, 'UTF-8' ) ), true ) : null;
 lbb_t( 'configurația cu diacritice supraviețuiește stripslashes()', is_array( $cfg ) && 'Alegeți orașul de plecare' === $cfg['i18n']['chooseFrom'], $cm ? substr( $cm[1], 0, 40 ) : 'lipsă' );
+lbb_t( 'mesajul „nu mai sunt locuri online” are telefonul', is_array( $cfg ) && false !== strpos( $cfg['i18n']['noneOpen'], LBB_Settings::phone_text() ), is_array( $cfg ) ? $cfg['i18n']['noneOpen'] : '' );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 0, 'allow_reserve' => 0 ) ) );
 lbb_t( 'fără niciun buton, formularul arată doar telefonul', false === strpos( LBB_Frontend::shortcode( array() ), '<form' ) );
 update_option( 'lbb_settings', $keep );

@@ -315,7 +315,8 @@ class LBB_Frontend {
 				'noDeparture' => __( 'În ziua aleasă nu sunt plecări pe această rută. Alegeți altă dată.', 'libertbus-bilete' ),
 				/* translators: %s: ultima dată la care se poate rezerva online. */
 				'dateRange'   => sprintf( __( 'Online se poate rezerva de azi până pe %s. Alegeți o dată din acest interval.', 'libertbus-bilete' ), $today->modify( '+' . (int) LBB_Settings::get( 'max_days_ahead' ) . ' days' )->format( 'd.m.Y' ) ),
-				'noneOpen'    => __( 'Pentru ziua aleasă nu mai sunt locuri online. Alegeți altă dată sau sunați-ne.', 'libertbus-bilete' ),
+				/* translators: %s: telefonul de suport */
+				'noneOpen'    => sprintf( __( 'Pentru ziua aleasă nu mai sunt locuri online. Alegeți altă dată sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
 				'free'        => __( 'locuri libere', 'libertbus-bilete' ),
 				'full'        => __( 'complet', 'libertbus-bilete' ),
 				'closed'      => __( 'vânzare închisă', 'libertbus-bilete' ),
