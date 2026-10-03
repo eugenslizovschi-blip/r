@@ -205,7 +205,9 @@ class LBB_Frontend {
 		$names = array_slice( $names, 0, $seats );
 
 		$phone = self::normalize_phone( isset( $data['lbb_phone'] ) ? $data['lbb_phone'] : '' );
-		if ( strlen( preg_replace( '/\D/', '', $phone ) ) < 8 ) {
+		$digits = strlen( preg_replace( '/\D/', '', $phone ) );
+		// Un număr internațional are cel mult 15 cifre (E.164); mai lung e o greșeală de tastare.
+		if ( $digits < 8 || $digits > 15 ) {
 			return new WP_Error( 'lbb_phone', __( 'Introduceți un număr de telefon valid, cu prefixul țării (+373 sau +40).', 'libertbus-bilete' ) );
 		}
 		$email = isset( $data['lbb_email'] ) ? sanitize_email( $data['lbb_email'] ) : '';
@@ -407,7 +409,7 @@ class LBB_Frontend {
 
 				<div class="lbb-grid lbb-grid-2">
 					<label class="lbb-field"><span><?php esc_html_e( 'Telefon (cu +373 sau +40)', 'libertbus-bilete' ); ?></span>
-						<input type="tel" name="lbb_phone" required autocomplete="tel" inputmode="tel" placeholder="+373" value="<?php echo esc_attr( isset( $posted['lbb_phone'] ) ? sanitize_text_field( $posted['lbb_phone'] ) : '' ); ?>">
+						<input type="tel" name="lbb_phone" required autocomplete="tel" inputmode="tel" maxlength="30" placeholder="+373" value="<?php echo esc_attr( isset( $posted['lbb_phone'] ) ? sanitize_text_field( $posted['lbb_phone'] ) : '' ); ?>">
 					</label>
 					<label class="lbb-field"><span><?php esc_html_e( 'Email (aici primiți biletul)', 'libertbus-bilete' ); ?></span>
 						<input type="email" name="lbb_email" required autocomplete="email" value="<?php echo esc_attr( isset( $posted['lbb_email'] ) ? sanitize_email( $posted['lbb_email'] ) : '' ); ?>">
