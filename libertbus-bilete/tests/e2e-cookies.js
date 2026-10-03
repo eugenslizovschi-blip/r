@@ -7,8 +7,11 @@ const OUT = process.env.OUT || '.';
 const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
 (async () => {
   const browser = await chromium.launch();
+  // Testul nu depinde de internet: cererile spre Google primesc local un script gol (cererea tot se numără).
+  const offline = (ctx) => ctx.route(/googletagmanager\.com|google-analytics\.com/, r => r.fulfill({ status: 200, contentType: 'application/javascript', body: '' }));
   for (const vp of [{ width: 375, height: 667, name: 'iphone-se' }, { width: 1280, height: 800, name: 'desktop' }]) {
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+    await offline(ctx);
     const page = await ctx.newPage();
     page.on('pageerror', e => fail(vp.name + ' pageerror: ' + e.message));
     let ga = 0;
@@ -137,6 +140,7 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   // Vizitatorii care au ales cu versiunea 1.4.0 au cookie-ul vechi („all” / „necessary”): alegerea rămâne valabilă.
   for (const [old, wantGa] of [['all', true], ['necessary', false]]) {
     const ctx = await browser.newContext();
+    await offline(ctx);
     await ctx.addCookies([{ name: 'lbb_cookie_consent', value: old, url: BASE }]);
     const page = await ctx.newPage();
     let ga = 0;
@@ -151,6 +155,7 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   // Un <footer> din conținut (semnătura unui citat) nu trebuie să primească linkurile legale.
   {
     const ctx = await browser.newContext();
+    await offline(ctx);
     await ctx.addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
     const page = await ctx.newPage();
     await page.goto(BASE + '/citat/');
@@ -160,7 +165,9 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   }
 
   // Politica de confidențialitate e publicată și legată de WordPress/WooCommerce.
-  const p = await (await browser.newContext()).newPage();
+  const pctx = await browser.newContext();
+  await offline(pctx);
+  const p = await pctx.newPage();
   const r = await p.goto(BASE + '/politica-de-confidentialitate/');
   const body = await p.textContent('body');
   if (r.status() !== 200 || !/Google Analytics/.test(body) || !/Politica de cookies/.test(body)) fail('Politica de confidențialitate lipsește sau nu pomenește cookies');
