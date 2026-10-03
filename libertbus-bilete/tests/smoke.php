@@ -349,6 +349,64 @@ lbb_t( 'fus orar: alt decalaj rămâne cum e', '+05:00' === ( new DateTimeImmuta
 update_option( 'timezone_string', $tz_keep[0] );
 update_option( 'gmt_offset', $tz_keep[1] );
 
+// Pagina Setări: fiecare setare are câmp, iar o salvare fără modificări nu schimbă nimic
+// (o bifă fără câmp s-ar debifa pe tăcute la fiecare salvare).
+wp_set_current_user( 1 );
+ob_start();
+LBB_Admin::page_settings();
+$form_html = ob_get_clean();
+$dom = new DOMDocument();
+libxml_use_internal_errors( true );
+$dom->loadHTML( '<?xml encoding="utf-8"?>' . $form_html );
+libxml_clear_errors();
+$post = array();
+$seen = array();
+foreach ( $dom->getElementsByTagName( 'form' ) as $f ) {
+	$is_settings = false;
+	foreach ( $f->getElementsByTagName( 'input' ) as $in ) {
+		if ( 'action' === $in->getAttribute( 'name' ) && 'lbb_save_settings' === $in->getAttribute( 'value' ) ) {
+			$is_settings = true;
+		}
+	}
+	if ( ! $is_settings ) {
+		continue;
+	}
+	foreach ( array( 'input', 'textarea', 'select' ) as $tag ) {
+		foreach ( $f->getElementsByTagName( $tag ) as $el ) {
+			$name = $el->getAttribute( 'name' );
+			if ( '' === $name ) {
+				continue;
+			}
+			$key          = preg_replace( '/\[\]$/', '', $name );
+			$seen[ $key ] = true;
+			$type         = strtolower( $el->getAttribute( 'type' ) );
+			if ( ( 'checkbox' === $type || 'radio' === $type ) && ! $el->hasAttribute( 'checked' ) ) {
+				continue;
+			}
+			$val = 'textarea' === $tag ? $el->textContent : $el->getAttribute( 'value' );
+			if ( '[]' === substr( $name, -2 ) ) {
+				$post[ $key ][] = $val;
+			} else {
+				$post[ $key ] = $val;
+			}
+		}
+	}
+}
+$missing = array_diff( array_keys( LBB_Settings::defaults() ), array_keys( $seen ), array( 'rate_MDL' ) );
+lbb_t( 'Setări: fiecare setare are câmp în formular', ! $missing, implode( ',', $missing ) );
+$before = LBB_Settings::all();
+LBB_Settings::save( $post );
+$after   = LBB_Settings::all();
+$changed = array();
+foreach ( array_keys( LBB_Settings::defaults() ) as $k ) {
+	$v = $before[ $k ];
+	if ( (string) ( is_array( $v ) ? implode( ',', $v ) : $v ) !== (string) ( is_array( $after[ $k ] ) ? implode( ',', $after[ $k ] ) : $after[ $k ] ) ) {
+		$changed[] = $k;
+	}
+}
+lbb_t( 'Setări: salvarea fără modificări nu schimbă nicio setare', ! $changed, implode( ',', $changed ) );
+update_option( 'lbb_settings', $before );
+
 // Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
 LBB_Frontend::register_assets();
 $js_ver = wp_scripts()->registered['lbb']->ver;
