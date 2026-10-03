@@ -37,6 +37,13 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
       return pad < cc.height ? 'padding ' + pad + ' < ' + Math.round(cc.height) : '';
     });
     if (covered) fail(vp.name + ': bannerul acoperă sfârșitul paginii: ' + covered);
+    // La rotirea telefonului / micșorarea ferestrei bannerul devine mai înalt: spațiul de jos crește odată cu el.
+    await page.setViewportSize({ width: 320, height: vp.height });
+    await page.waitForTimeout(400);
+    const afterResize = await page.evaluate(() => ({ pad: parseFloat(getComputedStyle(document.body).paddingBottom), h: document.getElementById('lbb-cc').getBoundingClientRect().height }));
+    if (afterResize.pad < afterResize.h) fail(vp.name + ': după redimensionare bannerul acoperă sfârșitul paginii ' + JSON.stringify(afterResize));
+    await page.setViewportSize({ width: vp.width, height: vp.height });
+    await page.waitForTimeout(300);
     if (!(await page.$('#lbb-cc a[href*="politica-de-cookies"]'))) fail(vp.name + ': bannerul nu are link spre Politica de cookies');
     await page.screenshot({ path: OUT + '/cookies-' + vp.name + '.png' });
     if (ga) fail(vp.name + ': Google Analytics s-a încărcat fără acord');

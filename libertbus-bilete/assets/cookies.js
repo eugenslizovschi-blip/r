@@ -103,6 +103,13 @@
 		document.body.style.paddingBottom = ( base + box.offsetHeight + 24 ) + 'px';
 	}
 
+	// Bannerul își schimbă înălțimea la rotirea telefonului sau la redimensionare: refacem spațiul.
+	window.addEventListener( 'resize', function () {
+		if ( box && ! box.hidden && pad !== null ) {
+			fitPage();
+		}
+	} );
+
 	function show( withSettings ) {
 		if ( ! box ) {
 			return;
