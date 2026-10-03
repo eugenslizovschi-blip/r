@@ -288,6 +288,13 @@ foreach ( array( 'TestB', 'TestC' ) as $lbb_dest ) {
 $order->delete( true );
 $o2->delete( true );
 
+// Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
+LBB_Frontend::register_assets();
+$js_ver = wp_scripts()->registered['lbb']->ver;
+$css_ver = wp_styles()->registered['lbb']->ver;
+lbb_t( 'versiunea lbb.js conține data fișierului', LBB_VERSION . '.' . filemtime( LBB_DIR . 'assets/lbb.js' ) === $js_ver, $js_ver );
+lbb_t( 'versiunea lbb.css conține data fișierului', LBB_VERSION . '.' . filemtime( LBB_DIR . 'assets/lbb.css' ) === $css_ver, $css_ver );
+
 echo "\n" . $GLOBALS['lbb_ok'] . ' ok, ' . $GLOBALS['lbb_fail'] . " eșuate\n";
 if ( $GLOBALS['lbb_fail'] ) {
 	exit( 1 );

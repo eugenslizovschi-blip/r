@@ -184,7 +184,7 @@ class LBB_Tickets {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title><?php echo esc_html( $booking ? $booking['ticket_code'] . ' — ' . get_bloginfo( 'name' ) : __( 'Bilet negăsit', 'libertbus-bilete' ) ); ?></title>
-<link rel="stylesheet" href="<?php echo esc_url( LBB_URL . 'assets/lbb.css?ver=' . LBB_VERSION ); ?>">
+<link rel="stylesheet" href="<?php echo esc_url( LBB_URL . 'assets/lbb.css?ver=' . LBB_Frontend::asset_ver( 'lbb.css' ) ); ?>">
 <style>
 body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#1d2733}
 .wrap{max-width:560px;margin:0 auto}

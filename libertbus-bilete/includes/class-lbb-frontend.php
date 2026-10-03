@@ -110,13 +110,22 @@ class LBB_Frontend {
 		return LBB_Settings::get( 'allow_pay' ) || self::is_preview() || $admin_test;
 	}
 
+	/**
+	 * Versiunea unui fișier din assets/: se schimbă la fiecare modificare a fișierului,
+	 * ca browserul și cache-ul hostingului să nu păstreze JS/CSS vechi după o actualizare.
+	 */
+	public static function asset_ver( $file ) {
+		$mtime = @filemtime( LBB_DIR . 'assets/' . $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return LBB_VERSION . ( $mtime ? '.' . $mtime : '' );
+	}
+
 	public static function register_assets() {
-		wp_register_style( 'lbb', LBB_URL . 'assets/lbb.css', array(), LBB_VERSION );
+		wp_register_style( 'lbb', LBB_URL . 'assets/lbb.css', array(), self::asset_ver( 'lbb.css' ) );
 		$accent = LBB_Settings::get( 'accent_color' );
 		if ( $accent ) {
 			wp_add_inline_style( 'lbb', '.lbb-booking{--lbb-accent:' . $accent . '}' );
 		}
-		wp_register_script( 'lbb', LBB_URL . 'assets/lbb.js', array(), LBB_VERSION, true );
+		wp_register_script( 'lbb', LBB_URL . 'assets/lbb.js', array(), self::asset_ver( 'lbb.js' ), true );
 	}
 
 	/**
