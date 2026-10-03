@@ -303,6 +303,22 @@ lbb_t( 'cookies: un script deja blocat nu se dublează', LBB_Cookies::block_scri
 lbb_t( 'cookies: [lbb_firma_date] nu lasă câmpuri goale', false === strpos( LBB_Legal::company_block(), 'completați' ) && false !== strpos( LBB_Legal::company_block(), 'tel:' ) );
 lbb_t( 'cookies: o pagină „Privacy Policy” doar cu un formular nu contează ca politică', ! LBB_Legal::is_real_policy( wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Privacy Policy', 'post_content' => '[contact-form-7 id="1"]' ) ) ) );
 
+// Setările „Banner cookies” și „Linkuri în subsol” chiar opresc ce promit (pagina reală, prin HTTP).
+$cc_keep = get_option( 'lbb_settings', array() );
+$cc_page = function () {
+	$r = wp_remote_get( home_url( '/balti-iasi/' ), array( 'timeout' => 20 ) );
+	return is_wp_error( $r ) ? '' : wp_remote_retrieve_body( $r );
+};
+$on = $cc_page();
+lbb_t( 'cookies pornite: banner, linkuri în subsol și Google Analytics blocat', false !== strpos( $on, 'id="lbb-cc"' ) && false !== strpos( $on, 'id="lbb-legal-links"' ) && false !== strpos( $on, 'data-lbb-consent="statistics" async src="https://www.googletagmanager.com' ), strlen( $on ) );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'cookie_banner' => 0 ) ) );
+$off = $cc_page();
+lbb_t( 'banner oprit: fără banner, fără „Setări cookies”, Google Analytics nemodificat', false === strpos( $off, 'id="lbb-cc"' ) && false === strpos( $off, '#lbb-cookies' ) && false === strpos( $off, 'data-lbb-consent' ) && false !== strpos( $off, '<script async src="https://www.googletagmanager.com' ), strlen( $off ) );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'cookie_banner' => 1, 'footer_links' => 0 ) ) );
+$nolinks = $cc_page();
+lbb_t( 'linkuri în subsol oprite: lipsesc, bannerul rămâne', false === strpos( $nolinks, 'id="lbb-legal-links"' ) && false !== strpos( $nolinks, 'id="lbb-cc"' ), strlen( $nolinks ) );
+update_option( 'lbb_settings', $cc_keep );
+
 // Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
 LBB_Frontend::register_assets();
 $js_ver = wp_scripts()->registered['lbb']->ver;
