@@ -23,6 +23,8 @@ async function fillForm(page, phone) {
   const browser = await browser_launch();
   // 1) Plată în RON ca admin.
   const admin = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  // Testul nu e despre cookies: vizitatorul și-a ales deja preferința (bannerul e testat în e2e-cookies.js).
+  await admin.context().addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
   admin.on('pageerror', e => fail('pageerror: ' + e.message));
   await admin.goto(BASE + '/wp-login.php');
   await admin.fill('#user_login', 'admin'); await admin.fill('#user_pass', 'admin');
@@ -61,6 +63,8 @@ async function fillForm(page, phone) {
   // 2) Rezervare fără plată ca vizitator.
   const guestCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const guest = await guestCtx.newPage();
+  // Testul nu e despre cookies: vizitatorul și-a ales deja preferința (bannerul e testat în e2e-cookies.js).
+  await guest.context().addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
   guest.on('pageerror', e => fail('pageerror: ' + e.message));
   await fillForm(guest, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
   await guest.screenshot({ path: (process.env.OUT || '.') + '/form-buttons.png', fullPage: true });

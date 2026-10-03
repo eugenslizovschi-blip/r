@@ -552,6 +552,7 @@ class LBB_Admin {
 				$check( 'simple_checkout', __( 'Plată simplificată', 'libertbus-bilete' ), __( 'Fără adresă poștală la plata biletelor: doar nume, telefon, email, țară.', 'libertbus-bilete' ) );
 				$check( 'autocomplete', __( 'Finalizare automată', 'libertbus-bilete' ), __( 'Comanda plătită devine „Finalizată” și clientul primește imediat emailul cu biletul.', 'libertbus-bilete' ) );
 				$check( 'test_gateway', __( 'Plată de test', 'libertbus-bilete' ), __( 'Metodă de plată falsă, vizibilă doar administratorilor, pentru verificări.', 'libertbus-bilete' ) );
+				$check( 'cookie_banner', __( 'Banner cookies', 'libertbus-bilete' ), __( 'Întreabă vizitatorii („Accept toate” / „Doar necesare”) și blochează Google Analytics și alte scripturi de statistică până la acord. Un link spre #lbb-cookies (ex. în meniul de jos) redeschide bannerul.', 'libertbus-bilete' ) );
 				?>
 			</table>
 			<h2><?php esc_html_e( 'Cursuri valutare', 'libertbus-bilete' ); ?></h2>

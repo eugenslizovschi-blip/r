@@ -288,6 +288,19 @@ foreach ( array( 'TestB', 'TestC' ) as $lbb_dest ) {
 $order->delete( true );
 $o2->delete( true );
 
+// Cookies: scripturile de statistică se blochează până la acord, restul rămân neatinse.
+$ga = "<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-X\"></script>\n<script>\nwindow.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('config', 'G-X');\n</script>";
+$out = LBB_Cookies::block_scripts( $ga );
+lbb_t( 'cookies: scriptul Google Analytics extern e blocat', false !== strpos( $out, '<script type="text/plain" data-lbb-consent="statistics" async src="https://www.googletagmanager.com' ), $out );
+lbb_t( 'cookies: codul gtag din pagină e blocat', 2 === substr_count( $out, 'type="text/plain"' ), $out );
+$keep = '<script src="/wp-includes/js/jquery/jquery.min.js"></script><script type="application/ld+json">{"name":"gtag( x"}</script><script>var a = 1;</script>';
+lbb_t( 'cookies: jQuery, JSON-LD și scripturile obișnuite rămân neatinse', LBB_Cookies::block_scripts( $keep ) === $keep );
+$typed = LBB_Cookies::block_scripts( "<script type='text/javascript' src='https://connect.facebook.net/en_US/fbevents.js'></script>" );
+lbb_t( 'cookies: tipul vechi se înlocuiește (Facebook Pixel)', "<script type=\"text/plain\" data-lbb-consent=\"statistics\" src='https://connect.facebook.net/en_US/fbevents.js'></script>" === $typed, $typed );
+lbb_t( 'cookies: un script deja blocat nu se dublează', LBB_Cookies::block_scripts( $out ) === $out );
+lbb_t( 'cookies: [lbb_firma_date] nu lasă câmpuri goale', false === strpos( LBB_Legal::company_block(), 'completați' ) && false !== strpos( LBB_Legal::company_block(), 'tel:' ) );
+lbb_t( 'cookies: o pagină „Privacy Policy” doar cu un formular nu contează ca politică', ! LBB_Legal::is_real_policy( wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Privacy Policy', 'post_content' => '[contact-form-7 id="1"]' ) ) ) );
+
 // Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
 LBB_Frontend::register_assets();
 $js_ver = wp_scripts()->registered['lbb']->ver;

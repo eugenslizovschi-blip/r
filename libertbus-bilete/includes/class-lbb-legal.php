@@ -1,6 +1,6 @@
 <?php
 /**
- * Paginile cerute de bănci: termeni, anulare și rambursare, plata online.
+ * Paginile legale: termeni, anulare și rambursare, plata online (cerute de bănci), confidențialitate și cookies.
  * Se creează ca ciorne, cu datele firmei luate din Setări prin [lbb_firma camp="..."].
  *
  * Textele sunt un punct de plecare, nu consultanță juridică: verificați-le cu juristul/contabilul.
@@ -16,6 +16,7 @@ class LBB_Legal {
 
 	public static function init() {
 		add_shortcode( 'lbb_firma', array( __CLASS__, 'company_shortcode' ) );
+		add_shortcode( 'lbb_firma_date', array( __CLASS__, 'company_block' ) );
 		add_action( 'admin_post_lbb_create_legal', array( __CLASS__, 'create' ) );
 		add_action( 'transition_post_status', array( __CLASS__, 'link_terms' ), 10, 3 );
 	}
@@ -26,13 +27,33 @@ class LBB_Legal {
 			'refund'  => array( 'title' => __( 'Politica de anulare și rambursare', 'libertbus-bilete' ), 'slug' => 'politica-de-anulare-si-rambursare' ),
 			'payment' => array( 'title' => __( 'Plata online cu cardul', 'libertbus-bilete' ), 'slug' => 'plata-online' ),
 			'privacy' => array( 'title' => __( 'Politica de confidențialitate', 'libertbus-bilete' ), 'slug' => 'politica-de-confidentialitate' ),
+			'cookies' => array( 'title' => __( 'Politica de cookies', 'libertbus-bilete' ), 'slug' => 'politica-de-cookies' ),
 		);
+	}
+
+	/**
+	 * Paginile care nu depind de contractul cu banca se publică direct (cerute pentru bannerul de cookies).
+	 * Celelalte rămân ciorne până le citiți.
+	 */
+	public static function publish_now() {
+		return array( 'privacy', 'cookies' );
+	}
+
+	/**
+	 * O pagină de confidențialitate existentă contează doar dacă are text (nu doar un formular).
+	 */
+	public static function is_real_policy( $page_id ) {
+		$post = $page_id ? get_post( $page_id ) : null;
+		if ( ! $post || 'publish' !== $post->post_status ) {
+			return false;
+		}
+		return strlen( trim( wp_strip_all_tags( strip_shortcodes( $post->post_content ) ) ) ) > 300;
 	}
 
 	public static function page_id( $key ) {
 		if ( 'privacy' === $key ) {
 			$wp_privacy = (int) get_option( 'wp_page_for_privacy_policy' );
-			if ( $wp_privacy && 'publish' === get_post_status( $wp_privacy ) ) {
+			if ( self::is_real_policy( $wp_privacy ) ) {
 				$saved = get_option( self::OPTION, array() );
 				if ( empty( $saved['privacy'] ) || 'publish' !== get_post_status( (int) $saved['privacy'] ) ) {
 					return $wp_privacy;
@@ -61,11 +82,30 @@ class LBB_Legal {
 		return '' === $value ? '<mark>[' . esc_html__( 'completați în LibertBus → Setări', 'libertbus-bilete' ) . ']</mark>' : esc_html( $value );
 	}
 
+	/**
+	 * [lbb_firma_date] — datele de contact cu ce e completat în Setări (fără goluri pe pagini publicate).
+	 */
+	public static function company_block() {
+		$name    = (string) LBB_Settings::get( 'company_name' );
+		$idno    = (string) LBB_Settings::get( 'company_idno' );
+		$address = (string) LBB_Settings::get( 'company_address' );
+		$email   = (string) LBB_Settings::get( 'company_email' );
+		$email   = $email ? $email : (string) get_option( 'admin_email' );
+		$parts   = array( esc_html( $name ? $name : 'LibertBus' ) );
+		if ( $idno ) {
+			$parts[] = 'IDNO ' . esc_html( $idno );
+		}
+		if ( $address ) {
+			$parts[] = esc_html( $address );
+		}
+		return implode( ', ', $parts ) . '<br>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': ' . LBB_Settings::phone_link() . ', email: <a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>';
+	}
+
 	public static function settings_box() {
 		?>
 		<hr id="legal">
 		<h2><?php esc_html_e( 'Pagini legale (cerute de bancă)', 'libertbus-bilete' ); ?></h2>
-		<p><?php esc_html_e( 'Butonul creează ciorne cu texte-model. Completați întâi datele firmei mai sus, citiți textele, ajustați-le cu juristul și publicați-le. Le legați apoi în meniul de jos al site-ului.', 'libertbus-bilete' ); ?></p>
+		<p><?php esc_html_e( 'Butonul creează paginile care lipsesc, cu texte-model. Politica de confidențialitate și cea de cookies se publică imediat (bannerul de cookies trimite la ele); termenii, anularea și plata online rămân ciorne: completați întâi datele firmei mai sus, citiți textele, ajustați-le cu juristul și publicați-le. Le legați apoi în meniul de jos al site-ului.', 'libertbus-bilete' ); ?></p>
 		<table class="widefat striped" style="max-width:700px"><tbody>
 		<?php foreach ( self::pages() as $key => $page ) : ?>
 			<?php $id = self::page_id( $key ); ?>
@@ -81,7 +121,7 @@ class LBB_Legal {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-top:12px">
 			<input type="hidden" name="action" value="lbb_create_legal">
 			<?php wp_nonce_field( 'lbb_create_legal' ); ?>
-			<?php submit_button( __( 'Creează ciornele care lipsesc', 'libertbus-bilete' ), 'secondary', 'submit', false ); ?>
+			<?php submit_button( __( 'Creează paginile care lipsesc', 'libertbus-bilete' ), 'secondary', 'submit', false ); ?>
 		</form>
 		<?php
 	}
@@ -91,30 +131,53 @@ class LBB_Legal {
 			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
 		}
 		check_admin_referer( 'lbb_create_legal' );
+		$created = self::create_missing();
+		wp_safe_redirect( add_query_arg( array(
+			'page'    => 'lbb-settings',
+			'lbb_msg' => rawurlencode( sprintf( __( 'Pagini create: %d (confidențialitate și cookies publicate, celelalte ciorne).', 'libertbus-bilete' ), $created ) ),
+		), admin_url( 'admin.php' ) ) . '#legal' );
+		exit;
+	}
+
+	/**
+	 * Creează paginile care lipsesc și întoarce câte s-au creat.
+	 */
+	public static function create_missing() {
 		$saved   = get_option( self::OPTION, array() );
 		$created = 0;
 		foreach ( self::pages() as $key => $page ) {
-			if ( self::page_id( $key ) ) {
+			$existing = self::page_id( $key );
+			if ( $existing ) {
+				// O ciornă creată de o versiune veche și neatinsă primește textul nou și se publică.
+				$post = get_post( $existing );
+				if ( in_array( $key, self::publish_now(), true ) && 'draft' === $post->post_status && $post->post_modified_gmt === $post->post_date_gmt && ! empty( $saved[ $key ] ) && (int) $saved[ $key ] === $existing ) {
+					wp_update_post( array( 'ID' => $existing, 'post_status' => 'publish', 'post_content' => self::content( $key ) ) );
+					if ( 'privacy' === $key && ! self::is_real_policy( (int) get_option( 'wp_page_for_privacy_policy' ) ) ) {
+						update_option( 'wp_page_for_privacy_policy', $existing );
+					}
+					$created++;
+				}
 				continue;
 			}
 			$id = wp_insert_post( array(
 				'post_type'    => 'page',
-				'post_status'  => 'draft',
+				'post_status'  => in_array( $key, self::publish_now(), true ) ? 'publish' : 'draft',
 				'post_title'   => $page['title'],
 				'post_name'    => $page['slug'],
 				'post_content' => self::content( $key ),
 			) );
 			if ( $id && ! is_wp_error( $id ) ) {
 				$saved[ $key ] = $id;
+				update_option( self::OPTION, $saved );
 				$created++;
+				// WooCommerce și WordPress leagă „Politica de confidențialitate” din pagina de plată de această opțiune.
+				if ( 'privacy' === $key && ! self::is_real_policy( (int) get_option( 'wp_page_for_privacy_policy' ) ) ) {
+					update_option( 'wp_page_for_privacy_policy', $id );
+				}
 			}
 		}
 		update_option( self::OPTION, $saved );
-		wp_safe_redirect( add_query_arg( array(
-			'page'    => 'lbb-settings',
-			'lbb_msg' => rawurlencode( sprintf( __( 'Ciorne create: %d.', 'libertbus-bilete' ), $created ) ),
-		), admin_url( 'admin.php' ) ) . '#legal' );
-		exit;
+		return $created;
 	}
 
 	/**
@@ -207,23 +270,61 @@ $date
 <p>Dacă plata nu a reușit, locurile se păstrează pentru scurt timp și puteți încerca din nou. Pentru orice întrebare sunați la $telefon sau scrieți la $email.</p>
 HTML;
 			case 'privacy':
+				$cookies = home_url( '/politica-de-cookies/' );
 				return <<<HTML
-<p>Această politică explică ce date personale colectăm la rezervarea biletelor și cum le folosim, conform Legii nr. 133/2011 privind protecția datelor cu caracter personal.</p>
-$date
+<p>Această politică explică ce date personale colectăm pe <a href="$site">$site</a>, de ce și cât timp le păstrăm. Respectăm legislația Republicii Moldova privind protecția datelor cu caracter personal și, pentru călătorii din Uniunea Europeană, Regulamentul (UE) 2016/679 (GDPR).</p>
+<h2>Cine răspunde de date</h2>
+<p>[lbb_firma_date]</p>
 <h2>Ce date colectăm</h2>
-<p>Numele pasagerilor, telefonul, emailul, datele călătoriei și istoricul comenzilor. Datele cardului nu le primim și nu le stocăm: plata este procesată de bancă.</p>
+<ul>
+<li><strong>La rezervare și plată:</strong> numele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, istoricul comenzilor. Datele cardului nu ajung la noi: plata este procesată de bancă.</li>
+<li><strong>Din formularele de contact:</strong> numele, telefonul și mesajul trimis.</li>
+<li><strong>La vizitarea site-ului:</strong> date tehnice (adresa IP, tipul browserului) necesare funcționării și securității site-ului și, doar dacă acceptați, statistici de vizitare prin Google Analytics. Detalii în <a href="$cookies">Politica de cookies</a>.</li>
+</ul>
 <h2>De ce le folosim</h2>
 <ul>
-<li>pentru emiterea biletului și lista de îmbarcare;</li>
+<li>pentru rezervare, emiterea biletului și lista de îmbarcare (executarea contractului de transport);</li>
 <li>pentru a vă anunța despre schimbări ale cursei;</li>
-<li>pentru obligațiile contabile și fiscale.</li>
+<li>pentru obligațiile contabile și fiscale (obligație legală);</li>
+<li>pentru siguranța site-ului și, cu acordul dumneavoastră, pentru statistici.</li>
 </ul>
 <h2>Cui le transmitem</h2>
-<p>Doar băncii/procesatorului de plăți, autorităților la cerere legală și, la trecerea frontierei, autorităților vamale și de frontieră. Nu vindem datele.</p>
+<p>Doar cât e necesar: băncii sau procesatorului de plăți, firmei care găzduiește site-ul, Google (statistici, doar cu acord), autorităților la cerere legală și, la trecerea frontierei, autorităților vamale și de frontieră. Nu vindem datele.</p>
 <h2>Cât le păstrăm</h2>
-<p>Datele comenzilor se păstrează pe durata cerută de legislația contabilă. Celelalte date se șterg la cerere.</p>
+<p>Datele comenzilor se păstrează cât cere legislația contabilă. Mesajele din formularele de contact se păstrează cât e nevoie pentru a vă răspunde. Celelalte date se șterg la cerere, dacă legea nu ne obligă să le păstrăm.</p>
 <h2>Drepturile dumneavoastră</h2>
-<p>Puteți cere acces, corectare sau ștergere scriind la $email.</p>
+<p>Puteți cere acces la date, corectarea sau ștergerea lor, vă puteți opune prelucrării și vă puteți retrage oricând acordul pentru cookies. Scrieți-ne folosind datele de mai sus. Aveți dreptul să depuneți plângere la Centrul Național pentru Protecția Datelor cu Caracter Personal al Republicii Moldova sau, dacă locuiți în UE, la autoritatea de protecție a datelor din țara dumneavoastră.</p>
+HTML;
+			case 'cookies':
+				$privacy = self::page_id( 'privacy' ) ? get_permalink( self::page_id( 'privacy' ) ) : home_url( '/politica-de-confidentialitate/' );
+				return <<<HTML
+<p>Cookies sunt fișiere mici pe care site-ul le salvează în browser. Pe <a href="$site">$site</a> folosim doar cookies necesare și, numai dacă apăsați „Accept toate”, cookies de statistică.</p>
+<h2>Cookies necesare (fără ele site-ul nu funcționează)</h2>
+<table>
+<thead><tr><th>Cookie</th><th>La ce folosește</th><th>Durata</th></tr></thead>
+<tbody>
+<tr><td>lbb_cookie_consent</td><td>Ține minte alegerea dumneavoastră despre cookies.</td><td>6 luni</td></tr>
+<tr><td>woocommerce_cart_hash, woocommerce_items_in_cart, wp_woocommerce_session_*</td><td>Păstrează biletul în coș până la plată.</td><td>sesiune / 2 zile</td></tr>
+<tr><td>wordpress_*, wordfence_*</td><td>Autentificarea și securitatea contului (doar pentru administratori).</td><td>sesiune</td></tr>
+</tbody>
+</table>
+<p>La plata cu cardul, pagina băncii sau a procesatorului de plăți poate folosi propriile cookies, pentru siguranța plății și prevenirea fraudei.</p>
+<h2>Cookies de statistică și marketing (doar cu acordul dumneavoastră)</h2>
+<table>
+<thead><tr><th>Cookie</th><th>Furnizor și scop</th><th>Durata</th></tr></thead>
+<tbody>
+<tr><td>_ga, _ga_*</td><td>Google Analytics: numără vizitele și paginile văzute, anonim.</td><td>13 luni</td></tr>
+<tr><td>_gcl_au</td><td>Google: măsoară eficiența reclamelor.</td><td>3 luni</td></tr>
+<tr><td>sbjs_*</td><td>WooCommerce: de unde a venit vizita (ex. Google, Facebook), legat de comandă.</td><td>sesiune</td></tr>
+</tbody>
+</table>
+<p>Până nu acceptați, aceste scripturi nu se încarcă deloc. Google Analytics este furnizat de Google Ireland Limited: <a href="https://policies.google.com/privacy" rel="noopener">politica Google</a>.</p>
+<p>Fonturile site-ului se încarcă de la Google Fonts; ele nu pun cookies, dar Google primește adresa IP a browserului pentru a trimite fonturile.</p>
+<h2>Cum vă schimbați alegerea</h2>
+[lbb_cookie_settings]
+<p>Puteți șterge sau bloca oricând cookies și din setările browserului. Mai multe despre datele personale găsiți în <a href="$privacy">Politica de confidențialitate</a>.</p>
+<h2>Contact</h2>
+<p>[lbb_firma_date]</p>
 HTML;
 		}
 		return '';

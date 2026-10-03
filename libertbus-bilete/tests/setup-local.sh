@@ -49,6 +49,17 @@ add_filter( 'pre_wp_mail', function ( $null, $atts ) {
 	return true;
 }, 10, 2 );
 PHP
+# Imită modulul „GA Google Analytics” de pe libertbus.md (același cod), plus scripturi care NU trebuie blocate.
+cat > wordpress/wp-content/mu-plugins/fake-analytics.php <<'PHP'
+<?php
+add_action( 'wp_head', function () {
+	echo "\t\t<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-TEST000000\"></script>\n";
+	echo "\t\t<script>\n\t\t\twindow.dataLayer = window.dataLayer || [];\n\t\t\tfunction gtag(){dataLayer.push(arguments);}\n\t\t\tgtag('js', new Date());\n\t\t\tgtag('config', 'G-TEST000000');\n\t\t</script>\n";
+	echo '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"gtag( test"}</script>' . "\n";
+	echo "<script>window.lbbTestInline = 1;</script>\n";
+} );
+PHP
+$WP eval 'LBB_Legal::create_missing();' >/dev/null
 cat > router.php <<'PHP'
 <?php
 $path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );

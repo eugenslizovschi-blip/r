@@ -1,0 +1,47 @@
+/* Bannerul de cookies: mic, jos, nu acoperă tot ecranul. */
+.lbb-cc {
+	position: fixed;
+	left: 12px;
+	right: 12px;
+	bottom: 12px;
+	z-index: 2147482000; /* sub fereastra formularului de rezervare */
+	max-width: 560px;
+	margin: 0 auto;
+	padding: 14px 16px;
+	background: #fff;
+	color: #1d2733;
+	border: 1px solid #d7dbe0;
+	border-radius: 12px;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+	font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+	box-sizing: border-box;
+}
+.lbb-cc[hidden] { display: none !important; }
+.lbb-cc *, .lbb-cc *::before, .lbb-cc *::after { box-sizing: border-box; }
+.lbb-cc .lbb-cc-text { margin: 0 0 12px !important; padding: 0 !important; color: #1d2733 !important; font-size: 15px !important; line-height: 1.45 !important; }
+.lbb-cc .lbb-cc-text a { color: #00875a !important; text-decoration: underline !important; font-weight: 600; }
+.lbb-cc .lbb-cc-btns { display: flex; gap: 8px; }
+.lbb-cc .lbb-cc-btn {
+	flex: 1 1 0;
+	min-height: 44px !important;
+	margin: 0 !important;
+	padding: 8px 12px !important;
+	border: 2px solid #00875a !important;
+	border-radius: 8px !important;
+	background: #fff !important;
+	color: #00875a !important;
+	font: inherit !important;
+	font-weight: 700 !important;
+	line-height: 1.2 !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+	box-shadow: none !important;
+	cursor: pointer;
+}
+.lbb-cc .lbb-cc-btn.lbb-cc-accept { background: #00875a !important; color: #fff !important; }
+.lbb-cc .lbb-cc-btn:focus-visible { outline: 3px solid #1d2733 !important; outline-offset: 2px; }
+.lbb-cc .lbb-cc-btn::before, .lbb-cc .lbb-cc-btn::after { display: none !important; }
+@media (max-width: 360px) {
+	.lbb-cc { left: 8px; right: 8px; bottom: 8px; padding: 12px; }
+	.lbb-cc .lbb-cc-text { font-size: 14px !important; }
+}

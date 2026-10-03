@@ -22,7 +22,7 @@ Clientul alege cursa, plătește cu cardul și primește biletul pe email.
   - **Pasageri**: lista de îmbarcare pe zi, printabilă, export CSV;
   - **Rezervări**;
   - **Setări**: locuri, timpi, cursuri valutare, datele firmei, plată de test.
-- **Pagini legale cerute de bancă**: termeni, anulare și rambursare, plata online, confidențialitate. Se creează ca ciorne, cu datele firmei completate automat.
+- **Pagini legale**: termeni, anulare și rambursare, plata online (cerute de bancă), confidențialitate și cookies. Confidențialitatea și cookies se publică direct (le cere bannerul); celelalte se creează ca ciorne, cu datele firmei completate automat.
 - **Plată de test**: o metodă vizibilă doar administratorilor, ca să verificați tot drumul fără bancă.
 - **Butonul „Achit online cu cardul” e oprit implicit**: se pornește din Setări („Plata online cu cardul”) după ce metoda de plată a băncii e activă și testată. Până atunci clienții pot doar rezerva cu plata la urcare, iar serverul refuză plățile online.
 - **Înlocuirea formularelor vechi Contact Form 7**, fără a modifica paginile (se anulează ștergând setarea):
@@ -33,6 +33,10 @@ Clientul alege cursa, plătește cu cardul și primește biletul pe email.
   - pentru adminul logat, pe o pagină privată (ex. `/previzualizare-bilete/`) sau cu `?lbb_preview=1`;
   - pentru oricine are **linkul secret** `/?lbb_preview=CHEIE` (merge pe orice pagină, fără login; cheia e în Setări, cu buton „Link nou de previzualizare” care o anulează pe cea veche). Paginile deschise așa nu intră în cache și nu se indexează.
   Ceilalți vizitatori văd site-ul neschimbat.
+- **Cookies (banner minimalist)**: la prima vizită apare jos un mesaj scurt cu „Doar necesare” și „Accept toate” (butoane la fel de mari) și link spre Politica de cookies.
+  - Google Analytics, Facebook Pixel, Hotjar, Clarity, Yandex și sursa vizitei din WooCommerce (`sbjs_*`) nu se încarcă deloc până la „Accept toate”; scripturile se blochează în pagină, deci merge și cu cache.
+  - Alegerea se ține 6 luni (`lbb_cookie_consent`). Un link spre `#lbb-cookies` (ex. „Setări cookies” în meniul de jos) sau butonul de pe Politica de cookies redeschide bannerul; la retragerea acordului se șterg cookies-urile de statistică.
+  - Se oprește din Setări („Banner cookies”).
 - **Telefonul de suport** apare ca link de apel, pe un singur rând, în formular, pe pagina biletului/rezervării și în emailul de rezervare.
 
 ## Instalare
@@ -63,7 +67,8 @@ Toate testele rulează pe o instalare de test, niciodată pe site-ul real.
 - `tests/setup-local.sh <director>` pregătește WordPress 6.4.3 + WooCommerce + Contact Form 7 pe http://127.0.0.1:8080 și verificatorul de compatibilitate PHP.
 - `tests/qa.sh` rulează tot (vezi comentariul din fișier):
   - sintaxa PHP și **compatibilitatea cu PHP 7.4+** (serverul libertbus.md rulează PHP 7.4);
-  - `tests/smoke.php`: 94 de verificări (emailurile de rezervare, locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, potrivirea formularelor după titlu, buton de plată oprit, diacritice, linkul secret, telefonul de pe bilet și din mesajele „sunați-ne”, numerele scrise local 069… / 07… aduse la +373 / +40, numerele și emailurile prea lungi refuzate cu mesaj clar, numele fără litere refuzate, versiunea JS/CSS schimbată la fiecare modificare a fișierelor);
+  - `tests/smoke.php`: 101 verificări (blocarea scripturilor de statistică, emailurile de rezervare, locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, potrivirea formularelor după titlu, buton de plată oprit, diacritice, linkul secret, telefonul de pe bilet și din mesajele „sunați-ne”, numerele scrise local 069… / 07… aduse la +373 / +40, numerele și emailurile prea lungi refuzate cu mesaj clar, numele fără litere refuzate, versiunea JS/CSS schimbată la fiecare modificare a fișierelor);
   - în browser: rezervare cu plată de test, vizitator nelogat (inclusiv răspunsul blocat de protecția hostingului și o dată trecută sau prea îndepărtată, pe care Safari de pe iPhone o permite, și un nume fără litere oprit direct în browser), plată în RON și rezervare la urcare, previzualizare cu 5 pasageri și linkul secret (cheie corectă, cheie greșită, fără cache), eroare de la server pe o pagină cu 2 formulare (mesajul doar în formularul trimis, cu focus);
+  - cookies: bannerul pe iPhone SE și desktop, Google Analytics și `sbjs_*` blocate până la acord, „Doar necesare”, „Accept toate”, retragerea acordului, paginile legale publicate;
   - **8 dispozitive** (iPhone SE … desktop 1920), 5 browsere în paralel: fără scroll orizontal, butoane de minim 40px, text de 16px în câmpuri, ora netăiată, ambele butoane pe ecran, telefonul și sumele pe un singur rând.
 - `tests/e2e-devices.js` se poate rula și pe site-ul real (doar citire), cu `BASE=https://libertbus.md WP_USER=… WP_PASS=… PARALLEL=1`: protecția hostingului blochează rafalele de cereri.
