@@ -55,7 +55,16 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const day = new Date(Date.now() + 86400000 * (2 + Math.floor(Math.random() * 25))).toISOString().slice(0, 10);
   await second.$eval('[data-lbb="date"]', (d, v) => { d.value = v; d.dispatchEvent(new Event('change')); }, day);
   await admin.waitForFunction(el => el.querySelectorAll('[data-lbb="time"] option:not([disabled])').length > 1, second);
-  await second.$eval('[data-lbb="time"]', s => { const o = [...s.options].filter(x => x.value && !x.disabled).sort((a, b) => parseInt(b.textContent.split('—')[1]) - parseInt(a.textContent.split('—')[1]))[0]; s.value = o.value; s.dispatchEvent(new Event('change')); });
+  // În formularul compact lista arată doar ora: alegem prima oră la care se pot selecta 5 pasageri.
+  const okTime = await second.evaluate(root => {
+    const t = root.querySelector('[data-lbb="time"]');
+    for (const o of [...t.options].filter(x => x.value && !x.disabled)) {
+      t.value = o.value; t.dispatchEvent(new Event('change'));
+      if ([...root.querySelector('[data-lbb="adults"]').options].some(a => a.value === '5')) return o.value;
+    }
+    return '';
+  });
+  if (!okTime) fail('nicio oră cu 5 locuri libere în ziua aleasă');
   // Formularele înlocuite sunt compacte: pasul 1 (cursa) → „Continuă” → pasul 2 (date și plată).
   if (await second.$eval('[data-lbb="step2"]', e => !e.hidden)) fail('pasul 2 e vizibil înainte de „Continuă”');
   await (await second.$('[data-lbb="adults"]')).selectOption('5');
