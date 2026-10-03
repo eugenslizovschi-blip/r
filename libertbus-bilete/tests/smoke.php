@@ -319,6 +319,14 @@ $nolinks = $cc_page();
 lbb_t( 'linkuri în subsol oprite: lipsesc, bannerul rămâne', false === strpos( $nolinks, 'id="lbb-legal-links"' ) && false !== strpos( $nolinks, 'id="lbb-cc"' ), strlen( $nolinks ) );
 update_option( 'lbb_settings', $cc_keep );
 
+// Nota de confidențialitate din formularul de rezervare (Legea 195/2024): doar cu politica publicată.
+$priv_id = LBB_Legal::page_id( 'privacy' );
+$form    = LBB_Frontend::shortcode( array() );
+lbb_t( 'formularul are nota cu link spre Politica de confidențialitate', $priv_id && false !== strpos( $form, 'lbb-privacy-note' ) && false !== strpos( $form, esc_url( get_permalink( $priv_id ) ) ), $priv_id );
+wp_update_post( array( 'ID' => $priv_id, 'post_status' => 'draft' ) );
+lbb_t( 'fără politică publicată, nota nu apare (fără link mort)', false === strpos( LBB_Frontend::shortcode( array() ), 'lbb-privacy-note' ) );
+wp_update_post( array( 'ID' => $priv_id, 'post_status' => 'publish' ) );
+
 // Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
 LBB_Frontend::register_assets();
 $js_ver = wp_scripts()->registered['lbb']->ver;
