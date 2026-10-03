@@ -44,7 +44,9 @@ const BASE = process.env.BASE || 'http://127.0.0.1:8080';
   console.log('review:', (await page.textContent('.woocommerce-checkout-review-order-table')).replace(/\s+/g, ' ').slice(0, 300));
   await page.screenshot({ path: (process.env.OUT || '.') + '/checkout.png', fullPage: true });
   await page.check('#payment_method_lbb_test');
-  const terms = await page.$('#terms'); if (terms) await terms.check();
+  // WooCommerce redesenează blocul de plată după alegerea metodei: căutăm bifa din nou, nu păstrăm elementul vechi.
+  await page.waitForLoadState('networkidle');
+  if (await page.locator('#terms').count()) await page.locator('#terms').check();
   await Promise.all([page.waitForURL(/order-received/, { timeout: 30000 }), page.click('#place_order')]);
   console.log('thank you url:', page.url());
   const ticket = await page.textContent('.lbb-ticket');
