@@ -136,6 +136,25 @@ class LBB_Settings {
 		return '<a class="lbb-phone" href="tel:' . esc_attr( preg_replace( '/[^\d+]/', '', $phone ) ) . '">' . esc_html( self::phone_text() ) . '</a>';
 	}
 
+	/**
+	 * Fusul orar al orarului. Dacă în WordPress e doar un decalaj fix de +2 sau +3 (ex. „UTC+2”, ca pe
+	 * libertbus.md), folosim Europe/Chisinau: altfel vara ora ar fi greșită cu o oră și vânzarea s-ar închide
+	 * prea târziu. Un oraș ales în WordPress are întâietate.
+	 */
+	public static function tz() {
+		if ( get_option( 'timezone_string' ) ) {
+			return wp_timezone();
+		}
+		return in_array( (float) get_option( 'gmt_offset' ), array( 2.0, 3.0 ), true ) ? new DateTimeZone( 'Europe/Chisinau' ) : wp_timezone();
+	}
+
+	/**
+	 * Data de azi (Y-m-d) în fusul orar al orarului.
+	 */
+	public static function today() {
+		return ( new DateTimeImmutable( 'now', self::tz() ) )->format( 'Y-m-d' );
+	}
+
 	public static function currencies() {
 		return array( 'MDL', 'RON', 'EUR', 'USD' );
 	}

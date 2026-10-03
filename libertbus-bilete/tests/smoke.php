@@ -327,6 +327,28 @@ wp_update_post( array( 'ID' => $priv_id, 'post_status' => 'draft' ) );
 lbb_t( 'fără politică publicată, nota nu apare (fără link mort)', false === strpos( LBB_Frontend::shortcode( array() ), 'lbb-privacy-note' ) );
 wp_update_post( array( 'ID' => $priv_id, 'post_status' => 'publish' ) );
 
+// Fusul orar: cu „UTC+2” fix în WordPress (ca pe libertbus.md), orele merg după Chișinău, cu ora de vară.
+$tz_keep  = array( get_option( 'timezone_string' ), get_option( 'gmt_offset' ) );
+update_option( 'timezone_string', '' );
+update_option( 'gmt_offset', 2 );
+lbb_t( 'fus orar: „UTC+2” fix devine Europe/Chisinau', 'Europe/Chisinau' === LBB_Settings::tz()->getName(), LBB_Settings::tz()->getName() );
+$chis = new DateTimeImmutable( 'now', new DateTimeZone( 'Europe/Chisinau' ) );
+if ( '+03:00' === $chis->format( 'P' ) ) {
+	// Vara: plecare peste 30 de minute (ora Chișinăului) = vânzare închisă (limita e 60 de minute).
+	$soon = $chis->modify( '+30 minutes' );
+	$tzr  = LBB_Routes::save( array( 'origin' => 'TzA', 'destination' => 'TzB', 'departures' => $soon->format( 'H:i' ), 'price' => 10, 'currency' => 'MDL', 'capacity' => 5, 'active' => 1 ) );
+	$deps = LBB_Routes::departures_on( LBB_Routes::get( $tzr ), $soon->format( 'Y-m-d' ) );
+	lbb_t( 'fus orar: vara, plecarea de peste 30 de minute e închisă', isset( $deps[0] ) && ! $deps[0]['bookable'], $deps );
+	LBB_Routes::delete( $tzr );
+}
+update_option( 'timezone_string', 'Europe/Bucharest' );
+lbb_t( 'fus orar: un oraș ales în WordPress are întâietate', 'Europe/Bucharest' === LBB_Settings::tz()->getName() );
+update_option( 'timezone_string', '' );
+update_option( 'gmt_offset', 5 );
+lbb_t( 'fus orar: alt decalaj rămâne cum e', '+05:00' === ( new DateTimeImmutable( 'now', LBB_Settings::tz() ) )->format( 'P' ) );
+update_option( 'timezone_string', $tz_keep[0] );
+update_option( 'gmt_offset', $tz_keep[1] );
+
 // Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
 LBB_Frontend::register_assets();
 $js_ver = wp_scripts()->registered['lbb']->ver;

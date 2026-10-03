@@ -296,7 +296,7 @@ class LBB_Frontend {
 		wp_enqueue_style( 'lbb' );
 		wp_enqueue_script( 'lbb' );
 
-		$tz        = wp_timezone();
+		$tz        = LBB_Settings::tz();
 		$today     = new DateTimeImmutable( 'now', $tz );
 		// Cu mai multe formulare pe pagină, eroarea și datele trimise aparțin doar celui trimis.
 		$form_key  = substr( md5( wp_json_encode( $atts ) ), 0, 10 );

@@ -136,7 +136,7 @@ class LBB_Routes {
 	 * @param string $date  Y-m-d, în fusul orar al site-ului.
 	 */
 	public static function departures_on( array $route, $date ) {
-		$tz  = wp_timezone();
+		$tz  = LBB_Settings::tz();
 		$day = DateTimeImmutable::createFromFormat( '!Y-m-d', $date, $tz );
 		if ( ! $day || $day->format( 'Y-m-d' ) !== $date ) {
 			return array();

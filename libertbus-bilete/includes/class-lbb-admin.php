@@ -58,7 +58,7 @@ class LBB_Admin {
 
 		$tz = get_option( 'timezone_string' );
 		$add( 'timezone', $tz ? true : 'warn', __( 'Fusul orar e setat pe un oraș', 'libertbus-bilete' ),
-			$tz ? $tz : __( 'Acum e un decalaj fix (UTC+2), care greșește cu o oră vara. Alegeți „Chișinău”.', 'libertbus-bilete' ),
+			$tz ? $tz : __( 'Acum e un decalaj fix (ex. UTC+2), care greșește cu o oră vara. Orarul biletelor folosește deja ora Chișinăului, dar alegeți „Chișinău” ca să fie corecte și comenzile și emailurile WooCommerce.', 'libertbus-bilete' ),
 			admin_url( 'options-general.php' ) );
 
 		if ( $wc ) {
@@ -176,8 +176,8 @@ class LBB_Admin {
 			'routes_active'      => (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . LBB_Routes::table() . ' WHERE active = 1' ), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			'tickets_confirmed'  => (int) $wpdb->get_var( "SELECT COUNT(*) FROM $t WHERE status = 'confirmed'" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'seats_confirmed'    => (int) $wpdb->get_var( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'confirmed'" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			'seats_upcoming'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'confirmed' AND travel_date >= %s", wp_date( 'Y-m-d' ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			'seats_reserved'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'reserved' AND travel_date >= %s", wp_date( 'Y-m-d' ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'seats_upcoming'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'confirmed' AND travel_date >= %s", LBB_Settings::today() ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'seats_reserved'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'reserved' AND travel_date >= %s", LBB_Settings::today() ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'pending_payment'    => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $t WHERE status = 'pending' AND expires_at > %s", gmdate( 'Y-m-d H:i:s' ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 	}
@@ -361,10 +361,10 @@ class LBB_Admin {
 	}
 
 	public static function page_manifest() {
-		$date  = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : wp_date( 'Y-m-d' ); // phpcs:ignore WordPress.Security.NonceVerification
+		$date  = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : LBB_Settings::today(); // phpcs:ignore WordPress.Security.NonceVerification
 		$route = isset( $_GET['route'] ) ? (int) $_GET['route'] : 0; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
-			$date = wp_date( 'Y-m-d' );
+			$date = LBB_Settings::today();
 		}
 		self::header( sprintf( __( 'Pasageri — %s', 'libertbus-bilete' ), wp_date( 'd.m.Y', strtotime( $date . ' 12:00' ) ) ) );
 		?>
@@ -436,7 +436,7 @@ class LBB_Admin {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_manifest_csv' ) ) {
 			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
 		}
-		$date  = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : wp_date( 'Y-m-d' );
+		$date  = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : LBB_Settings::today();
 		$route = isset( $_GET['route'] ) ? (int) $_GET['route'] : 0;
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
 			wp_die( 'Data invalidă' );

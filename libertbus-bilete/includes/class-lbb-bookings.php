@@ -252,7 +252,7 @@ class LBB_Bookings {
 	 */
 	public static function active_reservations( $phone ) {
 		global $wpdb;
-		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table() . " WHERE phone = %s AND status = 'reserved' AND travel_date >= %s", $phone, wp_date( 'Y-m-d' ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table() . " WHERE phone = %s AND status = 'reserved' AND travel_date >= %s", $phone, LBB_Settings::today() ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	public static function cancel( $id ) {
