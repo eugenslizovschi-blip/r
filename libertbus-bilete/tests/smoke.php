@@ -236,6 +236,9 @@ lbb_t( 'emailul clientului are codul, suma la urcare și telefonul', $em && $to_
 	&& false !== strpos( $to_client[0]['message'], 'href="tel:' ), $to_client ? substr( wp_strip_all_tags( $to_client[0]['message'] ), 0, 200 ) : 'lipsă' );
 lbb_t( 'emailurile de rezervare sunt HTML', $to_client && false !== strpos( implode( ' ', (array) $to_client[0]['headers'] ), 'text/html' ) );
 
+// Accesibilitate: prețul se anunță cititoarelor de ecran când se schimbă.
+lbb_t( 'rezumatul cu prețul e anunțat (aria-live)', (bool) preg_match( '/data-lbb="summary"[^>]*aria-live="polite"/', LBB_Frontend::shortcode( array() ) ) );
+
 // Pe bilet (pagină și email) apare telefonul de suport ca link de apel, pe un rând.
 $notes = LBB_Tickets::notes_html();
 lbb_t( 'biletul arată telefonul de suport ca link de apel', false !== strpos( $notes, 'href="tel:' . preg_replace( '/[^\d+]/', '', LBB_Settings::get( 'support_phone' ) ) . '"' ), $notes );

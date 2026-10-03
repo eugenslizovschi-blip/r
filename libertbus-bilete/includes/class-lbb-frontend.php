@@ -364,7 +364,7 @@ class LBB_Frontend {
 				</div>
 				</div>
 
-				<div class="lbb-summary" data-lbb="summary" hidden></div>
+				<div class="lbb-summary" data-lbb="summary" aria-live="polite" aria-atomic="true" hidden></div>
 
 				<?php if ( $compact ) : ?>
 					<div class="lbb-next-wrap" data-lbb="next-wrap">
