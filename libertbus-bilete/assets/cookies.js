@@ -183,6 +183,22 @@
 		} );
 	}
 
+	// Escape: cine a ales deja închide bannerul fără schimbări; la prima vizită doar se strâng „Setări”.
+	document.addEventListener( 'keydown', function ( e ) {
+		if ( ( e.key !== 'Escape' && e.key !== 'Esc' ) || ! box || box.hidden ) {
+			return;
+		}
+		if ( read() !== null ) {
+			hide();
+		} else if ( panel && ! panel.hidden ) {
+			show( false );
+			var btn = box.querySelector( '[data-lbb-cc="settings"]' );
+			if ( btn ) {
+				btn.focus();
+			}
+		}
+	} );
+
 	// „Setări cookies”: orice link spre #lbb-cookies redeschide bannerul, cu categoriile.
 	document.addEventListener( 'click', function ( e ) {
 		var a = e.target.closest ? e.target.closest( 'a[href$="#lbb-cookies"]' ) : null;

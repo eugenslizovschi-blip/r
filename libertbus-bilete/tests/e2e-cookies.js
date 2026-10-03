@@ -49,6 +49,10 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     if (ga) fail(vp.name + ': Google Analytics s-a încărcat fără acord');
     if ((await trackers()).length) fail(vp.name + ': cookies de statistică fără acord: ' + (await trackers()).join(','));
     if (await page.evaluate(() => typeof window.dataLayer !== 'undefined')) fail(vp.name + ': codul gtag a rulat fără acord');
+    // La prima vizită Escape doar strânge „Setări”: bannerul rămâne până la o alegere.
+    await page.click('#lbb-cc [data-lbb-cc="settings"]');
+    await page.keyboard.press('Escape');
+    if (!(await page.isVisible('#lbb-cc')) || await page.isVisible('#lbb-cc [data-lbb-cc-panel]')) fail(vp.name + ': Escape la prima vizită trebuie doar să strângă „Setări”');
     if (await page.evaluate(() => window.lbbTestInline !== 1)) fail(vp.name + ': un script obișnuit a fost blocat');
     if (!(await page.$('script[type="application/ld+json"]'))) fail(vp.name + ': JSON-LD a fost modificat');
 
@@ -70,6 +74,12 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     if (!foot || !foot.inFooter || !/Politica de confidențialitate/.test(foot.text) || !/Politica de cookies/.test(foot.text) || !/Setări cookies/.test(foot.text)) fail(vp.name + ': linkurile din subsol lipsesc ' + JSON.stringify(foot));
     await page.click('#lbb-legal-links a[href="#lbb-cookies"]');
     if (!(await page.isVisible('#lbb-cc'))) fail(vp.name + ': „Setări cookies” din subsol nu redeschide bannerul');
+    // Escape închide bannerul redeschis, fără să schimbe alegerea.
+    await page.keyboard.press('Escape');
+    if (await page.isVisible('#lbb-cc')) fail(vp.name + ': Escape nu închide bannerul redeschis');
+    if ((await consent() || {}).cats !== '') fail(vp.name + ': Escape a schimbat alegerea');
+    if (await page.evaluate(() => document.body.style.paddingBottom !== '')) fail(vp.name + ': spațiul de jos rămâne după Escape');
+    await page.click('#lbb-legal-links a[href="#lbb-cookies"]');
     await page.click('#lbb-cc [data-lbb-cc="necessary"]');
 
     // Din Politica de cookies: „Schimbă preferințele” → „Accept toate” pornește statistica.
