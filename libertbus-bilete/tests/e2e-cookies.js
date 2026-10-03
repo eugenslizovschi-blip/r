@@ -148,6 +148,17 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await ctx.close();
   }
 
+  // Un <footer> din conținut (semnătura unui citat) nu trebuie să primească linkurile legale.
+  {
+    const ctx = await browser.newContext();
+    await ctx.addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
+    const page = await ctx.newPage();
+    await page.goto(BASE + '/citat/');
+    const where = await page.evaluate(() => { const n = document.getElementById('lbb-legal-links'); return n ? { inQuote: !!n.closest('blockquote'), inFooter: !!n.closest('footer') } : null; });
+    if (!where || where.inQuote || !where.inFooter) fail('linkurile legale au ajuns în locul greșit pe o pagină cu citat ' + JSON.stringify(where));
+    await ctx.close();
+  }
+
   // Politica de confidențialitate e publicată și legată de WordPress/WooCommerce.
   const p = await (await browser.newContext()).newPage();
   const r = await p.goto(BASE + '/politica-de-confidentialitate/');

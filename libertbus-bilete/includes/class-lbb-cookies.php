@@ -174,7 +174,9 @@ class LBB_Cookies {
 			return;
 		}
 		echo '<p class="lbb-legal-links" id="lbb-legal-links">' . implode( ' <span aria-hidden="true">·</span> ', $links ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput
-		echo "<script>(function(){var n=document.getElementById('lbb-legal-links'),t=document.querySelector('#Footer .copyright,footer .copyright,.site-footer .site-info,footer');if(n&&t){t.appendChild(n);n.className+=' is-in-footer';}})();</script>\n";
+		// Selectorii pe rând, în ordinea preferinței (o listă „a,b,c” ar lua primul element din pagină,
+		// ex. <footer> dintr-un citat); la final, ultimul <footer> care nu e în conținut.
+		echo "<script>(function(){var n=document.getElementById('lbb-legal-links');if(!n)return;var s=['#Footer .copyright','#colophon .site-info','.site-footer .site-info','body>footer','.wp-site-blocks>footer','footer.site-footer','#colophon'],t=null,i,f;for(i=0;i<s.length&&!t;i++){t=document.querySelector(s[i]);}if(!t){f=document.querySelectorAll('footer');for(i=f.length-1;i>=0&&!t;i--){if(!f[i].closest('blockquote,article,figure,aside'))t=f[i];}}if(t){t.appendChild(n);n.className+=' is-in-footer';}})();</script>\n";
 		echo '<style>.lbb-legal-links{margin:2px auto 0 !important;padding:0 12px;font-size:13px !important;line-height:1.8 !important;text-align:center;color:inherit}.lbb-legal-links a{color:inherit !important;text-decoration:underline !important;white-space:nowrap}.lbb-legal-links span{margin:0 6px;opacity:.6}.lbb-legal-links:not(.is-in-footer){max-width:1200px}</style>' . "\n";
 	}
 

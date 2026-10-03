@@ -60,6 +60,8 @@ add_action( 'wp_head', function () {
 } );
 PHP
 $WP eval 'LBB_Legal::create_missing();' >/dev/null
+# Pagină cu un <footer> în conținut (semnătura unui citat): linkurile legale trebuie să ajungă în subsolul site-ului, nu aici.
+$WP post list --post_type=page --name=citat --format=ids | grep -q . || $WP post create --post_type=page --post_status=publish --post_title='Citat' --post_name=citat --post_content='<blockquote><p>Călătorie plăcută!</p><footer>— LibertBus</footer></blockquote>' >/dev/null
 cat > router.php <<'PHP'
 <?php
 $path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
