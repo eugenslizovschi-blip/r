@@ -51,6 +51,15 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await page.waitForTimeout(800);
     if (await page.isVisible('#lbb-cc')) fail(vp.name + ': bannerul reapare după „Doar necesare”');
     if (ga || (await trackers()).length) fail(vp.name + ': statistica pornește după „Doar necesare”');
+    // Subsolul are linkurile legale și „Setări cookies”, care redeschide bannerul.
+    const foot = await page.evaluate(() => {
+      const n = document.getElementById('lbb-legal-links');
+      return n ? { inFooter: !!n.closest('footer'), text: n.textContent.replace(/\s+/g, ' ').trim() } : null;
+    });
+    if (!foot || !foot.inFooter || !/Politica de confidențialitate/.test(foot.text) || !/Politica de cookies/.test(foot.text) || !/Setări cookies/.test(foot.text)) fail(vp.name + ': linkurile din subsol lipsesc ' + JSON.stringify(foot));
+    await page.click('#lbb-legal-links a[href="#lbb-cookies"]');
+    if (!(await page.isVisible('#lbb-cc'))) fail(vp.name + ': „Setări cookies” din subsol nu redeschide bannerul');
+    await page.click('#lbb-cc [data-lbb-cc="necessary"]');
 
     // Din Politica de cookies: „Schimbă preferințele” → „Accept toate” pornește statistica.
     await page.goto(BASE + '/politica-de-cookies/');

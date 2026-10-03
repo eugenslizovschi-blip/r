@@ -37,6 +37,7 @@ class LBB_Settings {
 			'allow_pay'          => 0,
 			'allow_reserve'      => 1,
 			'cookie_banner'      => 1,
+			'footer_links'       => 1,
 			'reserve_limit'      => 3,
 			'simple_checkout'    => 1,
 			'autocomplete'       => 1,
@@ -101,7 +102,7 @@ class LBB_Settings {
 	}
 
 	public static function checkboxes() {
-		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_pay', 'allow_reserve', 'show_approx', 'replace_cf7_routes', 'cookie_banner' );
+		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_pay', 'allow_reserve', 'show_approx', 'replace_cf7_routes', 'cookie_banner', 'footer_links' );
 	}
 
 	/**

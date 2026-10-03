@@ -36,6 +36,7 @@ Clientul alege cursa, plătește cu cardul și primește biletul pe email.
 - **Cookies (banner minimalist)**: la prima vizită apare jos un mesaj scurt cu „Doar necesare” și „Accept toate” (butoane la fel de mari) și link spre Politica de cookies.
   - Google Analytics, Facebook Pixel, Hotjar, Clarity, Yandex și sursa vizitei din WooCommerce (`sbjs_*`) nu se încarcă deloc până la „Accept toate”; scripturile se blochează în pagină, deci merge și cu cache.
   - Alegerea se ține 6 luni (`lbb_cookie_consent`). Un link spre `#lbb-cookies` (ex. „Setări cookies” în meniul de jos) sau butonul de pe Politica de cookies redeschide bannerul; la retragerea acordului se șterg cookies-urile de statistică.
+  - Sub textul de copyright din subsol apar linkurile spre paginile legale publicate și „Setări cookies” (se oprește din Setări, „Linkuri în subsol”).
   - Se oprește din Setări („Banner cookies”).
 - **Telefonul de suport** apare ca link de apel, pe un singur rând, în formular, pe pagina biletului/rezervării și în emailul de rezervare.
 
