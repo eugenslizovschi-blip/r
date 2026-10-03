@@ -49,6 +49,15 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
 
   // Formularul păstrează alegerile; completăm numele și trimitem.
   await page.waitForFunction(() => document.querySelectorAll('input[name="lbb_names[]"]').length > 0);
+  // Un nume fără litere e oprit chiar în browser, fără reîncărcare.
+  await page.fill('input[name="lbb_names[]"]', ' - ');
+  const url0 = page.url();
+  await page.click('[data-lbb-submit][value="pay"]');
+  await page.waitForTimeout(500);
+  const bad = await page.$eval('input[name="lbb_names[]"]', i => ({ ok: i.checkValidity(), msg: i.validationMessage }));
+  if (bad.ok || !/două litere/.test(bad.msg) || page.url() !== url0) fail('numele „-” nu e oprit în browser: ' + JSON.stringify(bad));
+  await page.fill('input[name="lbb_names[]"]', 'Ли');
+  if (!(await page.$eval('input[name="lbb_names[]"]', i => i.checkValidity()))) fail('numele scurt în chirilică e respins în browser');
   await page.fill('input[name="lbb_names[]"]', 'Vasile Guest');
   await page.waitForFunction(() => !document.querySelector('[data-lbb-submit]').disabled);
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);

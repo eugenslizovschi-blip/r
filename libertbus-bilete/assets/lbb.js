@@ -283,12 +283,20 @@
 				input.maxLength = 80;
 				input.required = cfg.requireNames;
 				input.value = values[ n ] || '';
+				input.addEventListener( 'input', checkName );
+				checkName.call( input );
 				label.appendChild( span );
 				label.appendChild( input );
 				el.names.appendChild( label );
 			}
 			el.names.hidden = total === 0;
 			summary();
+		}
+
+		// Ca pe server: un nume are cel puțin două litere (orice alfabet), altfel browserul oprește trimiterea.
+		function checkName() {
+			var letters = this.value.match( LETTERS );
+			this.setCustomValidity( this.value.trim() && ( ! letters || letters.length < 2 ) ? t.nameInvalid : '' );
 		}
 
 		function summary() {
@@ -499,6 +507,13 @@
 				btn.classList.add( 'is-busy' );
 			}, 0 );
 		} );
+	}
+
+	var LETTERS;
+	try {
+		LETTERS = new RegExp( '\\p{L}', 'gu' );
+	} catch ( x ) {
+		LETTERS = /[A-Za-z\u00C0-\u024F\u0400-\u04FF]/g; // Browsere vechi fără \p{L}.
 	}
 
 	// Configurația vine în base64 (JSON UTF-8), ca temele care scot „\\” din conținut să nu strice diacriticele.
