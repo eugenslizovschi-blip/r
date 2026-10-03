@@ -459,6 +459,17 @@ class LBB_Frontend {
 					}
 					?>
 				</p>
+				<?php
+				$privacy = LBB_Legal::page_id( 'privacy' );
+				if ( $privacy && 'publish' === get_post_status( $privacy ) ) :
+					?>
+					<p class="lbb-note lbb-privacy-note">
+						<?php
+						/* translators: %s: link spre Politica de confidențialitate */
+						echo sprintf( esc_html__( 'Datele se folosesc doar pentru rezervare și călătorie. Detalii: %s.', 'libertbus-bilete' ), '<a href="' . esc_url( get_permalink( $privacy ) ) . '">' . esc_html__( 'Politica de confidențialitate', 'libertbus-bilete' ) . '</a>' ); // phpcs:ignore WordPress.Security.EscapeOutput
+						?>
+					</p>
+				<?php endif; ?>
 				</div>
 			</form>
 		</div>

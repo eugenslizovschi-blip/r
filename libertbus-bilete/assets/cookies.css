@@ -20,9 +20,18 @@
 .lbb-cc *, .lbb-cc *::before, .lbb-cc *::after { box-sizing: border-box; }
 .lbb-cc .lbb-cc-text { margin: 0 0 12px !important; padding: 0 !important; color: #1d2733 !important; font-size: 15px !important; line-height: 1.45 !important; }
 .lbb-cc .lbb-cc-text a { color: #00875a !important; text-decoration: underline !important; font-weight: 600; }
-.lbb-cc .lbb-cc-btns { display: flex; gap: 8px; }
+.lbb-cc .lbb-cc-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-areas: "nec set acc"; gap: 8px; }
+.lbb-cc [data-lbb-cc="necessary"] { grid-area: nec; }
+.lbb-cc [data-lbb-cc="settings"] { grid-area: set; }
+.lbb-cc [data-lbb-cc="all"] { grid-area: acc; }
+.lbb-cc.is-settings [data-lbb-cc="settings"] { display: none !important; }
+.lbb-cc.is-settings .lbb-cc-btns { grid-template-columns: 1fr 1fr; grid-template-areas: "nec acc"; }
+.lbb-cc .lbb-cc-panel { margin: 0 0 12px; padding: 10px 0 0; border-top: 1px solid #e3e6ea; }
+.lbb-cc .lbb-cc-panel[hidden] { display: none !important; }
+.lbb-cc .lbb-cc-opt { display: flex !important; gap: 10px; align-items: flex-start; margin: 0 0 10px !important; font-size: 14px !important; line-height: 1.4 !important; font-weight: 400 !important; color: #1d2733 !important; text-transform: none !important; cursor: pointer; }
+.lbb-cc .lbb-cc-opt input { width: 20px !important; height: 20px !important; min-width: 20px; margin: 1px 0 0 !important; accent-color: #00875a; }
+.lbb-cc .lbb-cc-btn.lbb-cc-save { width: 100%; background: #1d2733 !important; border-color: #1d2733 !important; color: #fff !important; }
 .lbb-cc .lbb-cc-btn {
-	flex: 1 1 0;
 	min-height: 44px !important;
 	margin: 0 !important;
 	padding: 8px 12px !important;
@@ -41,6 +50,9 @@
 .lbb-cc .lbb-cc-btn.lbb-cc-accept { background: #00875a !important; color: #fff !important; }
 .lbb-cc .lbb-cc-btn:focus-visible { outline: 3px solid #1d2733 !important; outline-offset: 2px; }
 .lbb-cc .lbb-cc-btn::before, .lbb-cc .lbb-cc-btn::after { display: none !important; }
+@media (max-width: 440px) {
+	.lbb-cc .lbb-cc-btns { grid-template-columns: 1fr 1fr; grid-template-areas: "nec acc" "set set"; }
+}
 @media (max-width: 360px) {
 	.lbb-cc { left: 8px; right: 8px; bottom: 8px; padding: 12px; }
 	.lbb-cc .lbb-cc-text { font-size: 14px !important; }

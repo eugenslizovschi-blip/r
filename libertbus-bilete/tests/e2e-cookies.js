@@ -14,7 +14,9 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     let ga = 0;
     page.on('request', r => { if (/googletagmanager\.com|google-analytics\.com/.test(r.url())) ga++; });
     const trackers = async () => (await ctx.cookies()).filter(c => /^(_ga|_gcl|sbjs_)/.test(c.name)).map(c => c.name);
-    const consent = async () => ((await ctx.cookies()).find(c => c.name === 'lbb_cookie_consent') || {}).value;
+    // Acordul: „v1|statistics,marketing|20261003” → { cats: 'statistics,marketing', date: '20261003' }.
+    const consent = async () => { const c = (await ctx.cookies()).find(x => x.name === 'lbb_cookie_consent'); if (!c) return null; const [v, cats, date] = decodeURIComponent(c.value).split('|'); return { v, cats, date }; };
+    const today = new Date(); const ymd = '' + today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
 
     // Prima vizită: bannerul apare, nimic de statistică nu pornește.
     await page.goto(BASE + '/balti-iasi/');
@@ -22,9 +24,10 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     const box = await page.$eval('#lbb-cc', e => { const r = e.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, h: r.height }; });
     if (box.left < 0 || box.right > vp.width || box.bottom > vp.height || box.top < 0) fail(vp.name + ': bannerul iese din ecran ' + JSON.stringify(box));
     if (box.h > vp.height * 0.4) fail(vp.name + ': bannerul acoperă prea mult din ecran (' + Math.round(box.h) + 'px)');
-    const btns = await page.$$eval('#lbb-cc button', bs => bs.map(b => ({ t: b.textContent.trim(), h: b.getBoundingClientRect().height, w: b.getBoundingClientRect().width })));
-    if (btns.length !== 2 || btns.some(b => b.h < 44)) fail(vp.name + ': butoane greșite ' + JSON.stringify(btns));
-    if (Math.abs(btns[0].w - btns[1].w) > 2) fail(vp.name + ': „Doar necesare” trebuie să fie la fel de mare ca „Accept toate” ' + JSON.stringify(btns));
+    const btns = await page.$$eval('#lbb-cc .lbb-cc-btns button', bs => bs.map(b => ({ a: b.dataset.lbbCc, h: b.getBoundingClientRect().height, w: b.getBoundingClientRect().width })));
+    if (btns.length !== 3 || btns.some(b => b.h < 44)) fail(vp.name + ': trebuie 3 butoane („Doar necesare”, „Setări”, „Accept toate”) ' + JSON.stringify(btns));
+    const bw = Object.fromEntries(btns.map(b => [b.a, b.w]));
+    if (Math.abs(bw.necessary - bw.all) > 2) fail(vp.name + ': „Doar necesare” trebuie să fie la fel de mare ca „Accept toate” ' + JSON.stringify(btns));
     if (await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)) fail(vp.name + ': scroll orizontal cu bannerul');
     // La capătul paginii, ultimul conținut rămâne deasupra bannerului (ex. butonul de plată).
     const covered = await page.evaluate(() => {
@@ -46,7 +49,8 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await page.click('#lbb-cc [data-lbb-cc="necessary"]');
     if (await page.isVisible('#lbb-cc')) fail(vp.name + ': bannerul nu se închide la „Doar necesare”');
     if (await page.evaluate(() => document.body.style.paddingBottom !== '')) fail(vp.name + ': spațiul de sub pagină rămâne după închiderea bannerului');
-    if (await consent() !== 'necessary') fail(vp.name + ': alegerea nu s-a salvat');
+    const c1 = await consent();
+    if (!c1 || c1.v !== 'v1' || c1.cats !== '' || c1.date !== ymd) fail(vp.name + ': alegerea nu s-a salvat cu versiune și dată ' + JSON.stringify(c1));
     await page.reload();
     await page.waitForTimeout(800);
     if (await page.isVisible('#lbb-cc')) fail(vp.name + ': bannerul reapare după „Doar necesare”');
@@ -72,7 +76,7 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await page.waitForFunction(() => typeof window.dataLayer !== 'undefined');
     await page.waitForTimeout(800);
     if (!ga) fail(vp.name + ': Google Analytics nu pornește după „Accept toate”');
-    if (await consent() !== 'all') fail(vp.name + ': acordul nu s-a salvat');
+    if ((await consent() || {}).cats !== 'statistics,marketing') fail(vp.name + ': acordul nu s-a salvat ' + JSON.stringify(await consent()));
     if (!(await trackers()).some(n => /^sbjs_/.test(n))) fail(vp.name + ': sursa vizitei (WooCommerce) nu pornește după acord');
 
     // După acord, la reîncărcare statistica pornește direct, fără banner.
@@ -88,7 +92,27 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await page.waitForSelector('#lbb-cc:not([hidden])');
     await Promise.all([page.waitForNavigation(), page.click('#lbb-cc [data-lbb-cc="necessary"]')]);
     if ((await trackers()).length) fail(vp.name + ': cookies de statistică rămân după retragerea acordului: ' + (await trackers()).join(','));
-    if (await consent() !== 'necessary') fail(vp.name + ': retragerea nu s-a salvat');
+    if ((await consent() || {}).cats !== '') fail(vp.name + ': retragerea nu s-a salvat');
+
+    // „Setări”: doar statistică → Google Analytics pornește fără reclame, sursa vizitei (marketing) nu.
+    ga = 0;
+    await page.click('#lbb-legal-links a[href="#lbb-cookies"]');
+    await page.waitForSelector('#lbb-cc [data-lbb-cc-panel]:not([hidden])');
+    if (await page.isChecked('#lbb-cc input[value="statistics"]') || await page.isChecked('#lbb-cc input[value="marketing"]')) fail(vp.name + ': categoriile refuzate apar bifate');
+    await page.check('#lbb-cc input[value="statistics"]');
+    await page.click('#lbb-cc [data-lbb-cc="save"]');
+    await page.waitForFunction(() => typeof window.dataLayer !== 'undefined');
+    await page.waitForTimeout(800);
+    if ((await consent() || {}).cats !== 'statistics') fail(vp.name + ': „Setări” nu a salvat doar statistica ' + JSON.stringify(await consent()));
+    if (!ga) fail(vp.name + ': statistica aleasă din „Setări” nu pornește');
+    if ((await trackers()).some(n => /^sbjs_/.test(n))) fail(vp.name + ': marketingul pornește fără acord');
+    const cm = await page.evaluate(() => { const e = [...window.dataLayer].find(x => x[0] === 'consent'); return e ? e[2] : null; });
+    if (!cm || cm.analytics_storage !== 'granted' || cm.ad_storage !== 'denied') fail(vp.name + ': Google nu primește refuzul pentru reclame ' + JSON.stringify(cm));
+    await page.reload();
+    await page.click('#lbb-legal-links a[href="#lbb-cookies"]');
+    if (!(await page.isChecked('#lbb-cc input[value="statistics"]'))) fail(vp.name + ': „Setări” nu arată alegerea salvată');
+    await page.click('#lbb-cc [data-lbb-cc="necessary"]').catch(() => {});
+    await page.waitForLoadState('load');
     console.log(vp.name + ': ok');
     await ctx.close();
   }

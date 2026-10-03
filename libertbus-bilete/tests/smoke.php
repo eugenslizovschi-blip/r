@@ -296,7 +296,9 @@ lbb_t( 'cookies: codul gtag din pagină e blocat', 2 === substr_count( $out, 'ty
 $keep = '<script src="/wp-includes/js/jquery/jquery.min.js"></script><script type="application/ld+json">{"name":"gtag( x"}</script><script>var a = 1;</script>';
 lbb_t( 'cookies: jQuery, JSON-LD și scripturile obișnuite rămân neatinse', LBB_Cookies::block_scripts( $keep ) === $keep );
 $typed = LBB_Cookies::block_scripts( "<script type='text/javascript' src='https://connect.facebook.net/en_US/fbevents.js'></script>" );
-lbb_t( 'cookies: tipul vechi se înlocuiește (Facebook Pixel)', "<script type=\"text/plain\" data-lbb-consent=\"statistics\" src='https://connect.facebook.net/en_US/fbevents.js'></script>" === $typed, $typed );
+lbb_t( 'cookies: tipul vechi se înlocuiește (Facebook Pixel, marketing)', "<script type=\"text/plain\" data-lbb-consent=\"marketing\" src='https://connect.facebook.net/en_US/fbevents.js'></script>" === $typed, $typed );
+$sb = LBB_Cookies::block_scripts( '<script src="/wp-content/plugins/woocommerce/assets/js/sourcebuster/sourcebuster.min.js"></script>' );
+lbb_t( 'cookies: sursa vizitei din WooCommerce e marketing', false !== strpos( $sb, 'data-lbb-consent="marketing"' ), $sb );
 lbb_t( 'cookies: un script deja blocat nu se dublează', LBB_Cookies::block_scripts( $out ) === $out );
 lbb_t( 'cookies: [lbb_firma_date] nu lasă câmpuri goale', false === strpos( LBB_Legal::company_block(), 'completați' ) && false !== strpos( LBB_Legal::company_block(), 'tel:' ) );
 lbb_t( 'cookies: o pagină „Privacy Policy” doar cu un formular nu contează ca politică', ! LBB_Legal::is_real_policy( wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Privacy Policy', 'post_content' => '[contact-form-7 id="1"]' ) ) ) );

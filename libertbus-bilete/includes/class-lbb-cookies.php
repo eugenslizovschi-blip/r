@@ -17,14 +17,20 @@ class LBB_Cookies {
 	const COOKIE = 'lbb_cookie_consent';
 
 	/**
-	 * Scripturi externe care pun cookies de statistică sau marketing (după adresa fișierului).
+	 * Scripturi externe de statistică (după adresa fișierului).
 	 */
-	const TRACKER_SRC = '#googletagmanager\.com|google-analytics\.com|googleadservices\.com|doubleclick\.net|connect\.facebook\.net|static\.hotjar\.com|clarity\.ms|mc\.yandex\.ru|analytics\.tiktok\.com|sourcebuster|order-attribution#i';
+	const STATS_SRC = '#googletagmanager\.com|google-analytics\.com|static\.hotjar\.com|clarity\.ms|mc\.yandex\.ru#i';
 
 	/**
-	 * Scripturi scrise direct în pagină care pornesc aceleași servicii.
+	 * Scripturi externe de marketing: reclame și sursa vizitei din WooCommerce.
 	 */
-	const TRACKER_INLINE = '#\bgtag\s*\(|\bfbq\s*\(|_hjSettings|\bym\s*\(\s*\d|clarity\s*\(|\bsbjs\.init#';
+	const MARKETING_SRC = '#googleadservices\.com|doubleclick\.net|connect\.facebook\.net|analytics\.tiktok\.com|sourcebuster|order-attribution#i';
+
+	/**
+	 * Cod scris direct în pagină care pornește aceleași servicii.
+	 */
+	const STATS_INLINE     = '#\bgtag\s*\(|_hjSettings|\bym\s*\(\s*\d|clarity\s*\(#';
+	const MARKETING_INLINE = '#\bfbq\s*\(|\bsbjs\.init|\bttq\.#';
 
 	/** @var int|null Nivelul de buffer deschis de noi. */
 	private static $level = null;
@@ -99,13 +105,16 @@ class LBB_Cookies {
 				if ( preg_match( '#\btype\s*=\s*["\']?([^"\'\s>]+)#i', $attrs, $t ) && ! preg_match( '#^(text/javascript|application/javascript|module)$#i', $t[1] ) ) {
 					return $m[0];
 				}
-				$src     = preg_match( '#\bsrc\s*=\s*["\']([^"\']+)#i', $attrs, $s ) ? $s[1] : '';
-				$tracker = $src ? preg_match( self::TRACKER_SRC, $src ) : preg_match( self::TRACKER_INLINE, $body );
-				if ( ! $tracker ) {
+				$src = preg_match( '#\bsrc\s*=\s*["\']([^"\']+)#i', $attrs, $s ) ? $s[1] : '';
+				if ( $src ? preg_match( self::MARKETING_SRC, $src ) : preg_match( self::MARKETING_INLINE, $body ) ) {
+					$cat = 'marketing';
+				} elseif ( $src ? preg_match( self::STATS_SRC, $src ) : preg_match( self::STATS_INLINE, $body ) ) {
+					$cat = 'statistics';
+				} else {
 					return $m[0];
 				}
 				$attrs = preg_replace( '#\s+type\s*=\s*(["\'])[^"\']*\1|\s+type\s*=\s*[^\s>]+#i', '', $attrs );
-				return '<script type="text/plain" data-lbb-consent="statistics"' . $attrs . '>' . $body . '</script>';
+				return '<script type="text/plain" data-lbb-consent="' . $cat . '"' . $attrs . '>' . $body . '</script>';
 			},
 			$html
 		);
@@ -123,13 +132,20 @@ class LBB_Cookies {
 		?>
 		<div class="lbb-cc" id="lbb-cc" role="region" aria-label="<?php esc_attr_e( 'Cookies', 'libertbus-bilete' ); ?>" hidden>
 			<p class="lbb-cc-text">
-				<?php esc_html_e( 'Folosim cookies necesare pentru funcționarea site-ului. Cu acordul dumneavoastră folosim și Google Analytics, ca să vedem ce pagini sunt utile.', 'libertbus-bilete' ); ?>
+				<?php esc_html_e( 'Folosim cookies necesare pentru funcționarea site-ului. Cu acordul dumneavoastră folosim și cookies de statistică (Google Analytics) și de marketing.', 'libertbus-bilete' ); ?>
 				<?php if ( $link ) : ?>
 					<a href="<?php echo esc_url( $link ); ?>"><?php esc_html_e( 'Detalii', 'libertbus-bilete' ); ?></a>
 				<?php endif; ?>
 			</p>
+			<div class="lbb-cc-panel" data-lbb-cc-panel hidden>
+				<label class="lbb-cc-opt"><input type="checkbox" checked disabled> <span><strong><?php esc_html_e( 'Necesare', 'libertbus-bilete' ); ?></strong> — <?php esc_html_e( 'coșul, rezervarea, securitatea. Mereu active.', 'libertbus-bilete' ); ?></span></label>
+				<label class="lbb-cc-opt"><input type="checkbox" value="statistics"> <span><strong><?php esc_html_e( 'Statistică', 'libertbus-bilete' ); ?></strong> — <?php esc_html_e( 'Google Analytics: ce pagini sunt vizitate.', 'libertbus-bilete' ); ?></span></label>
+				<label class="lbb-cc-opt"><input type="checkbox" value="marketing"> <span><strong><?php esc_html_e( 'Marketing', 'libertbus-bilete' ); ?></strong> — <?php esc_html_e( 'reclame Google și de unde a venit vizita.', 'libertbus-bilete' ); ?></span></label>
+				<button type="button" class="lbb-cc-btn lbb-cc-save" data-lbb-cc="save"><?php esc_html_e( 'Salvez alegerea', 'libertbus-bilete' ); ?></button>
+			</div>
 			<div class="lbb-cc-btns">
 				<button type="button" class="lbb-cc-btn" data-lbb-cc="necessary"><?php esc_html_e( 'Doar necesare', 'libertbus-bilete' ); ?></button>
+				<button type="button" class="lbb-cc-btn" data-lbb-cc="settings"><?php esc_html_e( 'Setări', 'libertbus-bilete' ); ?></button>
 				<button type="button" class="lbb-cc-btn lbb-cc-accept" data-lbb-cc="all"><?php esc_html_e( 'Accept toate', 'libertbus-bilete' ); ?></button>
 			</div>
 		</div>

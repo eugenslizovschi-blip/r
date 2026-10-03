@@ -271,56 +271,83 @@ $date
 HTML;
 			case 'privacy':
 				$cookies = home_url( '/politica-de-cookies/' );
+				$updated = wp_date( 'd.m.Y' );
 				return <<<HTML
-<p>Această politică explică ce date personale colectăm pe <a href="$site">$site</a>, de ce și cât timp le păstrăm. Respectăm legislația Republicii Moldova privind protecția datelor cu caracter personal și, pentru călătorii din Uniunea Europeană, Regulamentul (UE) 2016/679 (GDPR).</p>
-<h2>Cine răspunde de date</h2>
+<p>Această politică explică ce date personale prelucrăm pe <a href="$site">$site</a> și în legătură cu călătoriile, de ce, pe ce temei, cui le transmitem și cât le păstrăm. Respectăm Legea nr. 195/2024 privind protecția datelor cu caracter personal (aplicabilă din 23 august 2026) și, pentru persoanele din Uniunea Europeană, Regulamentul (UE) 2016/679 (GDPR).</p>
+<h2>1. Operatorul datelor</h2>
 <p>[lbb_firma_date]</p>
-<h2>Ce date colectăm</h2>
+<h2>2. Ce date prelucrăm, de ce, pe ce temei și cât timp</h2>
 <ul>
-<li><strong>La rezervare și plată:</strong> numele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, istoricul comenzilor. Datele cardului nu ajung la noi: plata este procesată de bancă.</li>
-<li><strong>Din formularele de contact:</strong> numele, telefonul și mesajul trimis.</li>
-<li><strong>La vizitarea site-ului:</strong> date tehnice (adresa IP, tipul browserului) necesare funcționării și securității site-ului și, doar dacă acceptați, statistici de vizitare prin Google Analytics. Detalii în <a href="$cookies">Politica de cookies</a>.</li>
+<li><strong>Rezervarea și biletul:</strong> numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri, codul biletului. Scop: rezervarea locului, emiterea biletului, lista de îmbarcare, anunțarea schimbărilor de cursă. Temei: executarea contractului de transport. Păstrare: 3 ani de la data călătoriei, cu excepția documentelor contabile.</li>
+<li><strong>Plata:</strong> suma, moneda, data și rezultatul plății, codul tranzacției. Datele cardului nu ajung la noi: le introduceți doar pe pagina procesatorului de plăți. Temei: executarea contractului și obligația legală (contabilitate, fiscalitate). Păstrare: cât cere legislația contabilă și fiscală.</li>
+<li><strong>Mesajele trimise prin formularele site-ului, telefon sau Viber:</strong> numele, telefonul, emailul și conținutul mesajului. Scop: să vă răspundem și să pregătim rezervarea. Temei: demersuri la cererea dumneavoastră înainte de contract și interesul nostru legitim de a răspunde. Păstrare: cel mult 1 an.</li>
+<li><strong>Securitatea site-ului:</strong> adresa IP, tipul browserului, paginile accesate, încercările de autentificare. Scop: protecția împotriva atacurilor și a abuzurilor. Temei: interes legitim. Păstrare: cel mult 90 de zile.</li>
+<li><strong>Statistică (doar cu acordul dumneavoastră):</strong> Google Analytics — paginile vizitate, durata vizitei, dispozitivul, orașul aproximativ. Temei: consimțământ. Păstrare: 14 luni.</li>
+<li><strong>Marketing (doar cu acordul dumneavoastră):</strong> de unde a venit vizita (ex. Google, Facebook) și măsurarea reclamelor Google. Temei: consimțământ. Păstrare: până la 3 luni.</li>
 </ul>
-<h2>De ce le folosim</h2>
+<p>Datele copiilor care călătoresc le primim de la părintele sau însoțitorul care face rezervarea. Nu luăm decizii automate și nu facem profilare cu efecte juridice asupra dumneavoastră.</p>
+<h2>3. Cui transmitem datele</h2>
 <ul>
-<li>pentru rezervare, emiterea biletului și lista de îmbarcare (executarea contractului de transport);</li>
-<li>pentru a vă anunța despre schimbări ale cursei;</li>
-<li>pentru obligațiile contabile și fiscale (obligație legală);</li>
-<li>pentru siguranța site-ului și, cu acordul dumneavoastră, pentru statistici.</li>
+<li>băncii și procesatorului de plăți (pentru plata cu cardul);</li>
+<li>firmei care găzduiește site-ul și furnizorului de email (stocare și trimiterea biletelor);</li>
+<li>Google Ireland Limited și Google LLC (statistică și reclame, doar cu acord);</li>
+<li>șoferilor și personalului nostru, doar lista de îmbarcare a cursei;</li>
+<li>poliției de frontieră și autorităților vamale din Republica Moldova și România, la trecerea frontierei, și altor autorități, doar la cerere legală.</li>
 </ul>
-<h2>Cui le transmitem</h2>
-<p>Doar cât e necesar: băncii sau procesatorului de plăți, firmei care găzduiește site-ul, Google (statistici, doar cu acord), autorităților la cerere legală și, la trecerea frontierei, autorităților vamale și de frontieră. Nu vindem datele.</p>
-<h2>Cât le păstrăm</h2>
-<p>Datele comenzilor se păstrează cât cere legislația contabilă. Mesajele din formularele de contact se păstrează cât e nevoie pentru a vă răspunde. Celelalte date se șterg la cerere, dacă legea nu ne obligă să le păstrăm.</p>
-<h2>Drepturile dumneavoastră</h2>
-<p>Puteți cere acces la date, corectarea sau ștergerea lor, vă puteți opune prelucrării și vă puteți retrage oricând acordul pentru cookies. Scrieți-ne folosind datele de mai sus. Aveți dreptul să depuneți plângere la Centrul Național pentru Protecția Datelor cu Caracter Personal al Republicii Moldova sau, dacă locuiți în UE, la autoritatea de protecție a datelor din țara dumneavoastră.</p>
+<p>Nu vindem și nu închiriem datele.</p>
+<h2>4. Transferuri în alte țări</h2>
+<p>Pentru cursele spre România, datele pasagerilor ajung la autoritățile de frontieră din România (Uniunea Europeană). Google poate prelucra datele de statistică și în SUA; transferul se face pe baza Cadrului UE–SUA privind protecția datelor (Data Privacy Framework) și a clauzelor contractuale standard ale Comisiei Europene.</p>
+<h2>5. Drepturile dumneavoastră</h2>
+<ul>
+<li>să fiți informat și să aveți acces la datele dumneavoastră;</li>
+<li>să cereți corectarea datelor greșite;</li>
+<li>să cereți ștergerea datelor („dreptul de a fi uitat”);</li>
+<li>să cereți restricționarea prelucrării;</li>
+<li>să primiți datele într-un format structurat (portabilitate);</li>
+<li>să vă opuneți prelucrării bazate pe interes legitim;</li>
+<li>să nu faceți obiectul unei decizii bazate exclusiv pe prelucrare automată;</li>
+<li>să vă retrageți oricând acordul pentru cookies, fără a afecta prelucrarea făcută până atunci.</li>
+</ul>
+<p>Scrieți-ne la datele de contact de la punctul 1. Răspundem în cel mult o lună (termenul se poate prelungi cu două luni pentru cereri complexe, cu anunțarea dumneavoastră).</p>
+<h2>6. Plângeri</h2>
+<p>Puteți depune plângere la Centrul Național pentru Protecția Datelor cu Caracter Personal: str. Serghei Lazo 48, mun. Chișinău, MD-2004, telefon +373 22 820 801, email centru@datepersonale.md, <a href="https://datepersonale.md" rel="noopener">datepersonale.md</a>. Dacă locuiți în Uniunea Europeană, vă puteți adresa și autorității de protecție a datelor din țara dumneavoastră.</p>
+<h2>7. Siguranța datelor</h2>
+<p>Site-ul folosește conexiune criptată (HTTPS), accesul la date îl au doar persoanele care se ocupă de rezervări, iar plata cu cardul se face pe pagina securizată a procesatorului de plăți.</p>
+<h2>8. Cookies</h2>
+<p>Detalii despre cookies și cum vă schimbați alegerea găsiți în <a href="$cookies">Politica de cookies</a>.</p>
+<p><em>Versiunea 1.0, actualizată la $updated.</em></p>
 HTML;
 			case 'cookies':
 				$privacy = self::page_id( 'privacy' ) ? get_permalink( self::page_id( 'privacy' ) ) : home_url( '/politica-de-confidentialitate/' );
+				$updated = wp_date( 'd.m.Y' );
 				return <<<HTML
-<p>Cookies sunt fișiere mici pe care site-ul le salvează în browser. Pe <a href="$site">$site</a> folosim doar cookies necesare și, numai dacă apăsați „Accept toate”, cookies de statistică.</p>
+<p>Cookies sunt fișiere mici pe care site-ul le salvează în browser. Pe <a href="$site">$site</a> folosim cookies necesare și, doar dacă vă dați acordul, cookies de statistică și de marketing. Până nu acceptați, scripturile de statistică și marketing nu se încarcă deloc. Respectăm Legea nr. 195/2024 privind protecția datelor cu caracter personal și Legea nr. 284/2004 privind comerțul electronic.</p>
 <h2>Cookies necesare</h2>
 <p>Fără ele site-ul nu funcționează, de aceea nu cer acord.</p>
 <ul>
-<li><strong>lbb_cookie_consent</strong> — ține minte alegerea dumneavoastră despre cookies. Durata: 6 luni.</li>
+<li><strong>lbb_cookie_consent</strong> — ține minte alegerea dumneavoastră despre cookies și data ei. Durata: 6 luni.</li>
 <li><strong>woocommerce_cart_hash, woocommerce_items_in_cart, wp_woocommerce_session_*</strong> — păstrează biletul în coș până la plată. Durata: sesiune / 2 zile.</li>
 <li><strong>wordpress_*, wordfence_*</strong> — autentificarea și securitatea contului, doar pentru administratori. Durata: sesiune.</li>
 </ul>
 <p>La plata cu cardul, pagina băncii sau a procesatorului de plăți poate folosi propriile cookies, pentru siguranța plății și prevenirea fraudei.</p>
-<h2>Cookies de statistică și marketing</h2>
-<p>Se folosesc doar dacă apăsați „Accept toate”.</p>
+<h2>Cookies de statistică (cu acordul dumneavoastră)</h2>
 <ul>
-<li><strong>_ga, _ga_*</strong> — Google Analytics: numără vizitele și paginile văzute. Durata: 13 luni.</li>
-<li><strong>_gcl_au</strong> — Google: măsoară eficiența reclamelor. Durata: 3 luni.</li>
+<li><strong>_ga, _ga_*</strong> — Google Analytics: numără vizitele și paginile văzute. Furnizor: Google Ireland Limited. Durata: 13 luni.</li>
+</ul>
+<h2>Cookies de marketing (cu acordul dumneavoastră)</h2>
+<ul>
+<li><strong>_gcl_au</strong> — Google: măsoară eficiența reclamelor. Furnizor: Google Ireland Limited. Durata: 3 luni.</li>
 <li><strong>sbjs_*</strong> — WooCommerce: de unde a venit vizita (ex. Google, Facebook), legat de comandă. Durata: sesiune.</li>
 </ul>
-<p>Până nu acceptați, aceste scripturi nu se încarcă deloc. Google Analytics este furnizat de Google Ireland Limited: <a href="https://policies.google.com/privacy" rel="noopener">politica Google</a>.</p>
+<p>Google poate prelucra datele și în SUA, pe baza Cadrului UE–SUA privind protecția datelor și a clauzelor contractuale standard: <a href="https://policies.google.com/privacy" rel="noopener">politica Google</a>.</p>
 <p>Fonturile site-ului se încarcă de la Google Fonts; ele nu pun cookies, dar Google primește adresa IP a browserului pentru a trimite fonturile.</p>
 <h2>Cum vă schimbați alegerea</h2>
+<p>Puteți accepta sau refuza fiecare categorie din „Setări” și vă puteți retrage oricând acordul, la fel de ușor cum l-ați dat: folosiți linkul „Setări cookies” din subsolul fiecărei pagini sau butonul de mai jos. La retragere, cookies-urile de statistică și marketing se șterg.</p>
 [lbb_cookie_settings]
 <p>Puteți șterge sau bloca oricând cookies și din setările browserului. Mai multe despre datele personale găsiți în <a href="$privacy">Politica de confidențialitate</a>.</p>
 <h2>Contact</h2>
 <p>[lbb_firma_date]</p>
+<p><em>Versiunea 1.0, actualizată la $updated.</em></p>
 HTML;
 		}
 		return '';

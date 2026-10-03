@@ -1,25 +1,66 @@
-/* LibertBus: acordul pentru cookies. Fără dependențe. */
+/* LibertBus: acordul pentru cookies (Legea nr. 195/2024 / GDPR). Fără dependențe. */
 ( function () {
 	'use strict';
 
 	var NAME = 'lbb_cookie_consent';
+	var VERSION = 'v1';
 	var DAYS = 180;
+	var CATS = [ 'statistics', 'marketing' ];
 	var box = document.getElementById( 'lbb-cc' );
+	var panel = box && box.querySelector( '[data-lbb-cc-panel]' );
 
+	// Valoarea cookie-ului: „v1|statistics,marketing|20261003” (versiunea textului, categoriile, data acordului).
 	function read() {
 		var m = document.cookie.match( new RegExp( '(?:^|; )' + NAME + '=([^;]*)' ) );
-		return m ? decodeURIComponent( m[ 1 ] ) : '';
+		if ( ! m ) {
+			return null;
+		}
+		var v = decodeURIComponent( m[ 1 ] );
+		if ( v === 'all' ) {
+			return CATS.slice();
+		}
+		if ( v === 'necessary' ) {
+			return [];
+		}
+		var parts = v.split( '|' );
+		return parts.length > 1 && parts[ 1 ] ? parts[ 1 ].split( ',' ).filter( function ( c ) {
+			return CATS.indexOf( c ) > -1;
+		} ) : [];
 	}
 
-	function write( value ) {
-		document.cookie = NAME + '=' + value + '; path=/; max-age=' + ( DAYS * 86400 ) + '; SameSite=Lax' + ( location.protocol === 'https:' ? '; Secure' : '' );
+	function write( cats ) {
+		var d = new Date();
+		var day = d.getFullYear() + ( '0' + ( d.getMonth() + 1 ) ).slice( -2 ) + ( '0' + d.getDate() ).slice( -2 );
+		document.cookie = NAME + '=' + encodeURIComponent( VERSION + '|' + cats.join( ',' ) + '|' + day ) + '; path=/; max-age=' + ( DAYS * 86400 ) + '; SameSite=Lax' + ( location.protocol === 'https:' ? '; Secure' : '' );
 	}
 
-	// Pornește scripturile blocate, în ordinea din pagină.
-	function activate() {
+	// Google: statistica fără reclame dacă „Marketing” nu e bifat (Consent Mode).
+	function googleConsent( cats ) {
+		window.dataLayer = window.dataLayer || [];
+		var gtag = function () {
+			window.dataLayer.push( arguments );
+		};
+		var ads = cats.indexOf( 'marketing' ) > -1 ? 'granted' : 'denied';
+		gtag( 'consent', 'default', {
+			analytics_storage: cats.indexOf( 'statistics' ) > -1 ? 'granted' : 'denied',
+			ad_storage: ads,
+			ad_user_data: ads,
+			ad_personalization: ads,
+		} );
+	}
+
+	// Pornește scripturile blocate din categoriile acceptate, în ordinea din pagină.
+	function activate( cats ) {
+		if ( ! cats.length ) {
+			return;
+		}
+		googleConsent( cats );
 		var list = document.querySelectorAll( 'script[type="text/plain"][data-lbb-consent]' );
 		for ( var i = 0; i < list.length; i++ ) {
 			var old = list[ i ];
+			if ( cats.indexOf( old.getAttribute( 'data-lbb-consent' ) ) < 0 ) {
+				continue;
+			}
 			var s = document.createElement( 'script' );
 			for ( var a = 0; a < old.attributes.length; a++ ) {
 				var at = old.attributes[ a ];
@@ -36,7 +77,7 @@
 		}
 	}
 
-	// La retragerea acordului ștergem cookies-urile de statistică deja puse.
+	// La retragerea acordului ștergem cookies-urile deja puse.
 	function clearTrackers() {
 		var host = location.hostname.replace( /^www\./, '' );
 		document.cookie.split( '; ' ).forEach( function ( c ) {
@@ -53,15 +94,32 @@
 	// să se poată derula deasupra lui.
 	var pad = null;
 
-	function show() {
-		if ( box ) {
-			box.hidden = false;
-			if ( pad === null ) {
-				pad = document.body.style.paddingBottom;
-				var base = parseFloat( window.getComputedStyle( document.body ).paddingBottom ) || 0;
-				document.body.style.paddingBottom = ( base + box.offsetHeight + 24 ) + 'px';
-			}
+	function fitPage() {
+		if ( pad === null ) {
+			pad = document.body.style.paddingBottom;
 		}
+		document.body.style.paddingBottom = '';
+		var base = parseFloat( window.getComputedStyle( document.body ).paddingBottom ) || 0;
+		document.body.style.paddingBottom = ( base + box.offsetHeight + 24 ) + 'px';
+	}
+
+	function show( withSettings ) {
+		if ( ! box ) {
+			return;
+		}
+		box.hidden = false;
+		if ( panel ) {
+			var cats = read() || [];
+			CATS.forEach( function ( c ) {
+				var cb = panel.querySelector( 'input[value="' + c + '"]' );
+				if ( cb ) {
+					cb.checked = cats.indexOf( c ) > -1;
+				}
+			} );
+			panel.hidden = ! withSettings;
+			box.classList.toggle( 'is-settings', !! withSettings );
+		}
+		fitPage();
 	}
 
 	function hide() {
@@ -74,34 +132,57 @@
 		}
 	}
 
-	function choose( value ) {
-		var before = read();
-		write( value );
+	function choose( cats ) {
+		var before = read() || [];
+		write( cats );
 		hide();
-		if ( value === 'all' ) {
-			activate();
-		} else if ( before === 'all' ) {
+		var withdrawn = before.some( function ( c ) {
+			return cats.indexOf( c ) < 0;
+		} );
+		if ( withdrawn ) {
 			clearTrackers();
 			location.reload();
+		} else if ( before.length && cats.length > before.length ) {
+			// Unele scripturi rulează deja: o reîncărcare pornește totul o singură dată, cu acordul nou.
+			location.reload();
+		} else if ( ! before.length ) {
+			activate( cats );
 		}
 	}
 
 	if ( box ) {
 		box.addEventListener( 'click', function ( e ) {
 			var btn = e.target.closest ? e.target.closest( '[data-lbb-cc]' ) : null;
-			if ( btn ) {
-				choose( btn.getAttribute( 'data-lbb-cc' ) );
+			if ( ! btn ) {
+				return;
+			}
+			var action = btn.getAttribute( 'data-lbb-cc' );
+			if ( action === 'all' ) {
+				choose( CATS.slice() );
+			} else if ( action === 'necessary' ) {
+				choose( [] );
+			} else if ( action === 'settings' ) {
+				show( true );
+				var first = panel && panel.querySelector( 'input' );
+				if ( first ) {
+					first.focus();
+				}
+			} else if ( action === 'save' ) {
+				choose( CATS.filter( function ( c ) {
+					var cb = panel.querySelector( 'input[value="' + c + '"]' );
+					return cb && cb.checked;
+				} ) );
 			}
 		} );
 	}
 
-	// „Setări cookies”: orice link spre #lbb-cookies redeschide bannerul.
+	// „Setări cookies”: orice link spre #lbb-cookies redeschide bannerul, cu categoriile.
 	document.addEventListener( 'click', function ( e ) {
 		var a = e.target.closest ? e.target.closest( 'a[href$="#lbb-cookies"]' ) : null;
 		if ( a ) {
 			e.preventDefault();
-			show();
-			var first = box && box.querySelector( 'button' );
+			show( true );
+			var first = box && box.querySelector( 'input, button' );
 			if ( first ) {
 				first.focus();
 			}
@@ -111,13 +192,13 @@
 	// După ce s-a citit toată pagina: unele scripturi blocate vin după acesta, în subsol.
 	function start() {
 		var current = read();
-		if ( current === 'all' ) {
-			activate();
-		} else if ( current !== 'necessary' ) {
-			show();
+		if ( current === null ) {
+			show( false );
+		} else {
+			activate( current );
 		}
 		if ( location.hash === '#lbb-cookies' ) {
-			show();
+			show( true );
 		}
 	}
 

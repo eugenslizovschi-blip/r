@@ -159,3 +159,6 @@ html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
 
 /* Telefonul de suport: un singur rând, se poate apăsa pentru apel. */
 .lbb-booking a.lbb-phone, .lbb-empty a.lbb-phone { white-space: nowrap; color: inherit !important; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+.lbb-privacy-note { margin-top: 6px; font-size: 12px; }
+.lbb-privacy-note a { color: inherit !important; text-decoration: underline !important; }
