@@ -77,6 +77,14 @@ async function fillForm(page, phone) {
   const rticket = (await guest.textContent('.lbb-ticket')).replace(/\s+/g, ' ');
   if (!/De achitat la urcare .*MDL/.test(rticket)) fail('rezervarea nu arată suma la urcare: ' + rticket);
   console.log('rezervare:', state, '|', rticket);
+  // Pagina biletului are date personale: fără cache, fără indexare, fără Referer (linkul conține cheia k=).
+  const tr = await guest.request.get(guest.url());
+  const h = tr.headers();
+  if (!/no-store/.test(h['cache-control'] || '') || !/noindex/.test(h['x-robots-tag'] || '') || h['referrer-policy'] !== 'no-referrer') fail('pagina biletului: antete greșite ' + JSON.stringify({ cc: h['cache-control'], robots: h['x-robots-tag'], ref: h['referrer-policy'] }));
+  // Un link cu cheia greșită nu arată nimic din rezervare.
+  const forged = await guest.request.get(guest.url().replace(/([?&]k=)[^&]+/, '$1' + '0'.repeat(20)));
+  const fbody = await forged.text();
+  if (forged.status() !== 404 || /lbb-ticket|Test Pasager/.test(fbody)) fail('un link fals arată rezervarea: ' + forged.status());
   await guest.waitForTimeout(500);
   await guest.screenshot({ path: (process.env.OUT || '.') + '/reservation.png', fullPage: true });
   console.log(process.exitCode ? 'CURRENCY+RESERVE: PROBLEME' : 'CURRENCY+RESERVE: OK');

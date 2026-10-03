@@ -171,7 +171,10 @@ class LBB_Tickets {
 		$sig     = isset( $_GET['k'] ) ? sanitize_text_field( wp_unslash( $_GET['k'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
 		$booking = hash_equals( self::signature( $code ), $sig ) ? LBB_Bookings::get_by_code( $code ) : null;
 		nocache_headers();
+		// Date personale: nimic în cache (nici la hosting), fără indexare, iar linkul cu cheia k= nu pleacă în Referer.
+		header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private' );
 		header( 'X-Robots-Tag: noindex, nofollow' );
+		header( 'Referrer-Policy: no-referrer' );
 		status_header( $booking ? 200 : 404 );
 
 		$valid    = $booking && in_array( $booking['status'], array( 'confirmed', 'reserved' ), true );
