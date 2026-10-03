@@ -14,6 +14,8 @@ const BASE = process.env.BASE || 'http://127.0.0.1:8080';
   await page.goto(BASE + '/wp-login.php');
   await page.fill('#user_login', 'admin'); await page.fill('#user_pass', 'admin');
   await Promise.all([page.waitForNavigation(), page.click('#wp-submit')]);
+  // Login eșuat (ex. parolă în format nou după o actualizare WordPress): oprim clar, nu așteptăm la nesfârșit.
+  if (/wp-login\.php/.test(page.url())) { console.error('FAIL login admin eșuat: ' + page.url()); process.exit(1); }
   // route page with preset
   await page.goto(BASE + '/balti-iasi/');
   await page.waitForSelector('[data-lbb="from"]');

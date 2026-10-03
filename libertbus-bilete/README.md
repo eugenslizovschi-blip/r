@@ -66,7 +66,7 @@ Pașii sunt aceiași pentru oricare:
 
 Toate testele rulează pe o instalare de test, niciodată pe site-ul real.
 
-- `tests/setup-local.sh <director>` pregătește WordPress 6.4.3 + WooCommerce + Contact Form 7 pe http://127.0.0.1:8080 și verificatorul de compatibilitate PHP.
+- `tests/setup-local.sh <director>` pregătește WordPress 6.4.3 (ca pe site, fără actualizări automate) + WooCommerce + Contact Form 7 pe http://127.0.0.1:8080 și verificatorul de compatibilitate PHP. Cu `WP_VERSION=7.1.2` se verifică o actualizare a WordPress (QA-ul a trecut și pe 7.1.2).
 - `tests/qa.sh` rulează tot (vezi comentariul din fișier):
   - sintaxa PHP și **compatibilitatea cu PHP 7.4+** (serverul libertbus.md rulează PHP 7.4);
   - `tests/smoke.php`: 102 verificări (blocarea scripturilor de statistică, emailurile de rezervare, locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, potrivirea formularelor după titlu, buton de plată oprit, diacritice, linkul secret, telefonul de pe bilet și din mesajele „sunați-ne”, numerele scrise local 069… / 07… aduse la +373 / +40, numerele și emailurile prea lungi refuzate cu mesaj clar, numele fără litere refuzate, versiunea JS/CSS schimbată la fiecare modificare a fișierelor);

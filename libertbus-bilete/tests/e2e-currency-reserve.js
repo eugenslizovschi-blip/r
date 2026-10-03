@@ -29,6 +29,8 @@ async function fillForm(page, phone) {
   await admin.goto(BASE + '/wp-login.php');
   await admin.fill('#user_login', 'admin'); await admin.fill('#user_pass', 'admin');
   await Promise.all([admin.waitForNavigation(), admin.click('#wp-submit')]);
+  // Login eșuat (ex. parolă în format nou după o actualizare WordPress): oprim clar, nu așteptăm la nesfârșit.
+  if (/wp-login\.php/.test(admin.url())) { console.error('FAIL login admin eșuat: ' + admin.url()); process.exit(1); }
   await fillForm(admin, '+37369111111');
   const def = await admin.$eval('[data-lbb="currency"]:checked', r => r.value);
   if (def !== 'MDL') fail('moneda implicită pentru Bălți→Iași ar trebui să fie MDL, e ' + def);

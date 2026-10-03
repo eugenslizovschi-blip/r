@@ -39,6 +39,8 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await admin.goto(BASE + '/wp-login.php');
   await admin.fill('#user_login', 'admin'); await admin.fill('#user_pass', 'admin');
   await Promise.all([admin.waitForNavigation(), admin.click('#wp-submit')]);
+  // Login eșuat (ex. parolă în format nou după o actualizare WordPress): oprim clar, nu așteptăm la nesfârșit.
+  if (/wp-login\.php/.test(admin.url())) { console.error('FAIL login admin eșuat: ' + admin.url()); process.exit(1); }
   await admin.goto(BASE + '/previzualizare-bilete/');
   const forms = await admin.$$('.lbb-booking');
   if (forms.length !== 2) fail('pe pagina privată trebuie 2 formulare noi, sunt ' + forms.length);

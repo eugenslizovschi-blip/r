@@ -94,6 +94,8 @@ async function check(browser, state, [name, dev]) {
   await lp.waitForSelector('#user_login', { timeout: 150000 });
   await lp.fill('#user_login', process.env.WP_USER || 'admin'); await lp.fill('#user_pass', process.env.WP_PASS || 'admin');
   await Promise.all([lp.waitForNavigation({ timeout: 150000 }), lp.click('#wp-submit')]);
+  // Login eșuat (ex. parolă în format nou după o actualizare WordPress): oprim clar, nu așteptăm la nesfârșit.
+  if (/wp-login\.php/.test(lp.url())) { console.error('FAIL login admin eșuat: ' + lp.url()); process.exit(1); }
   const state = await lctx.storageState(); await lctx.close();
   const results = []; const queue = LIST.slice(); const N = parseInt(process.env.PARALLEL || '5', 10);
   await Promise.all(Array.from({ length: N }, async () => { while (queue.length) results.push(await check(browser, state, queue.shift())); }));

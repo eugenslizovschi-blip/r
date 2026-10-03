@@ -8,7 +8,9 @@ mkdir -p "$W" && cd "$W"
 pgrep -x mariadbd >/dev/null || pgrep -x mysqld >/dev/null || { (mysqld_safe --user=mysql >/dev/null 2>&1 &); sleep 5; }
 mysql -uroot -e "CREATE DATABASE IF NOT EXISTS wp; CREATE USER IF NOT EXISTS 'wp'@'localhost' IDENTIFIED BY 'wp'; GRANT ALL ON wp.* TO 'wp'@'localhost';"
 [ -f wp-cli.phar ] || curl -sSL -o wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-[ -d wordpress ] || { curl -sSL -o wp.zip https://wordpress.org/wordpress-6.4.3.zip && unzip -q wp.zip; }
+# Aceeași versiune ca pe libertbus.md; WP_VERSION=7.1.2 tests/setup-local.sh … testează o actualizare.
+WP_VERSION="${WP_VERSION:-6.4.3}"
+[ -d wordpress ] || { curl -sSL -o wp.zip "https://wordpress.org/wordpress-$WP_VERSION.zip" && unzip -q wp.zip; }
 WP="php $W/wp-cli.phar --allow-root --path=$W/wordpress"
 if ! $WP core is-installed 2>/dev/null; then
   $WP config create --dbname=wp --dbuser=wp --dbpass=wp --dbhost=localhost --skip-check --force
@@ -16,6 +18,11 @@ if ! $WP core is-installed 2>/dev/null; then
   $WP core install --url=http://127.0.0.1:8080 --title="LibertBus Test" --admin_user=admin --admin_password=admin --admin_email=admin@example.com --skip-email
   [ -d wordpress/wp-content/plugins/woocommerce ] || { curl -sSL -o wc.zip https://downloads.wordpress.org/plugin/woocommerce.8.7.0.zip && unzip -q -o wc.zip -d wordpress/wp-content/plugins/; }
 fi
+# Fără actualizări automate (altfel WordPress trece singur la ultima versiune), apoi versiunea cerută.
+$WP config set AUTOMATIC_UPDATER_DISABLED true --raw >/dev/null
+[ "$($WP core version)" = "$WP_VERSION" ] || $WP core update --version="$WP_VERSION" --force >/dev/null
+# Parola admin-ului de test, mereu din nou: WordPress 7 o salvează în alt format (bcrypt), pe care 6.4 nu-l citește.
+$WP user update admin --user_pass=admin --skip-email >/dev/null
 ln -sfn "$PLUGIN" wordpress/wp-content/plugins/libertbus-bilete
 # Testele de plată au nevoie de butonul „Achit online” și de plata de test.
 $WP eval '$s=get_option("lbb_settings",array()); if(is_array($s)){ $s["allow_pay"]=1; $s["test_gateway"]=1; update_option("lbb_settings",$s); }' 2>/dev/null || true
