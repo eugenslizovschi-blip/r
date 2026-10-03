@@ -159,7 +159,7 @@ class LBB_Cookies {
 		}
 		echo '<p class="lbb-legal-links" id="lbb-legal-links">' . implode( ' <span aria-hidden="true">·</span> ', $links ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput
 		echo "<script>(function(){var n=document.getElementById('lbb-legal-links'),t=document.querySelector('#Footer .copyright,footer .copyright,.site-footer .site-info,footer');if(n&&t){t.appendChild(n);n.className+=' is-in-footer';}})();</script>\n";
-		echo '<style>.lbb-legal-links{margin:10px auto 0 !important;padding:8px 12px;font-size:13px !important;line-height:1.8 !important;text-align:center;color:inherit}.lbb-legal-links a{color:inherit !important;text-decoration:underline !important;white-space:nowrap}.lbb-legal-links span{margin:0 6px;opacity:.6}.lbb-legal-links:not(.is-in-footer){max-width:1200px}</style>' . "\n";
+		echo '<style>.lbb-legal-links{margin:2px auto 0 !important;padding:0 12px;font-size:13px !important;line-height:1.8 !important;text-align:center;color:inherit}.lbb-legal-links a{color:inherit !important;text-decoration:underline !important;white-space:nowrap}.lbb-legal-links span{margin:0 6px;opacity:.6}.lbb-legal-links:not(.is-in-footer){max-width:1200px}</style>' . "\n";
 	}
 
 	/**
