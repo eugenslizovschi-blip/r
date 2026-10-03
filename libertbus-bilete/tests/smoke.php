@@ -130,6 +130,14 @@ lbb_t( 'linkul biletului e semnat', false !== strpos( LBB_Tickets::url( $code ),
 $base = array( 'lbb_route' => $rid, 'lbb_date' => $tomorrow, 'lbb_time' => '23:59', 'lbb_adults' => 1, 'lbb_names' => array( 'Ion' ), 'lbb_phone' => '+37369184111', 'lbb_email' => 'ion@example.com' );
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_names' => array() ) ) );
 lbb_t( 'fără nume respins', is_wp_error( $r ) && 'lbb_names' === $r->get_error_code(), $r );
+$r = LBB_Frontend::book( array_merge( $base, array( 'lbb_names' => array( ' - ' ) ) ) );
+lbb_t( 'nume fără litere („-”) respins', is_wp_error( $r ) && 'lbb_names' === $r->get_error_code(), $r );
+$r = LBB_Frontend::book( array_merge( $base, array( 'lbb_adults' => 2, 'lbb_names' => array( 'Ion Popescu', '1' ) ) ) );
+lbb_t( 'al doilea pasager cu nume „1” respins', is_wp_error( $r ) && 'lbb_names' === $r->get_error_code(), $r );
+$r = LBB_Frontend::book( array_merge( $base, array( 'lbb_names' => array( 'Țîrdea Ștefan' ) ) ) );
+lbb_t( 'nume cu diacritice acceptat (ajunge la verificarea locurilor)', ! is_wp_error( $r ) || 'lbb_names' !== $r->get_error_code(), $r );
+$r = LBB_Frontend::book( array_merge( $base, array( 'lbb_names' => array( 'Ли' ) ) ) );
+lbb_t( 'nume scurt în chirilică acceptat', ! is_wp_error( $r ) || 'lbb_names' !== $r->get_error_code(), $r );
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_phone' => '123' ) ) );
 foreach ( array(
 	'069 184 111'      => '+37369184111',

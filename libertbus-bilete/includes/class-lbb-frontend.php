@@ -195,7 +195,8 @@ class LBB_Frontend {
 		$names = array();
 		foreach ( isset( $data['lbb_names'] ) ? (array) $data['lbb_names'] : array() as $name ) {
 			$name = trim( sanitize_text_field( $name ) );
-			if ( '' !== $name ) {
+			// „.”, „-” sau „1” nu sunt nume: cerem cel puțin două litere (orice alfabet).
+			if ( preg_match_all( '/\p{L}/u', $name ) >= 2 ) {
 				$names[] = mb_substr( $name, 0, 80 );
 			}
 		}
