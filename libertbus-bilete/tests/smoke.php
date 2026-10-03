@@ -147,6 +147,9 @@ foreach ( array(
 lbb_t( 'telefon greșit respins', is_wp_error( $r ) && 'lbb_phone' === $r->get_error_code(), $r );
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_phone' => '+373 69 184 111 69 184 111' ) ) );
 lbb_t( 'telefon prea lung (tastat de două ori) respins cu mesaj clar', is_wp_error( $r ) && 'lbb_phone' === $r->get_error_code(), $r );
+$r = LBB_Frontend::book( array_merge( $base, array( 'lbb_email' => str_repeat( 'a', 64 ) . '@' . str_repeat( 'b', 63 ) . '.' . str_repeat( 'c', 63 ) . '.com' ) ) );
+lbb_t( 'email prea lung pentru baza de date respins cu mesaj clar', is_wp_error( $r ) && 'lbb_email' === $r->get_error_code(), $r );
+lbb_t( 'câmpul de email are limită de lungime', false !== strpos( LBB_Frontend::shortcode( array() ), 'name="lbb_email" required autocomplete="email" maxlength="190"' ) );
 lbb_t( 'câmpul de telefon are limită de lungime', false !== strpos( LBB_Frontend::shortcode( array() ), 'name="lbb_phone" required autocomplete="tel" inputmode="tel" maxlength="30"' ) );
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_email' => 'nu-e-email' ) ) );
 lbb_t( 'email greșit respins', is_wp_error( $r ) && 'lbb_email' === $r->get_error_code(), $r );

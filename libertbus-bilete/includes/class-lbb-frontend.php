@@ -211,7 +211,8 @@ class LBB_Frontend {
 			return new WP_Error( 'lbb_phone', __( 'Introduceți un număr de telefon valid, cu prefixul țării (+373 sau +40).', 'libertbus-bilete' ) );
 		}
 		$email = isset( $data['lbb_email'] ) ? sanitize_email( $data['lbb_email'] ) : '';
-		if ( ! is_email( $email ) ) {
+		// Coloana din baza de date are 190 de caractere; peste ar da „nu s-a putut salva” la nesfârșit.
+		if ( ! is_email( $email ) || strlen( $email ) > 190 ) {
 			return new WP_Error( 'lbb_email', __( 'Introduceți o adresă de email validă. Acolo primiți biletul.', 'libertbus-bilete' ) );
 		}
 
@@ -412,7 +413,7 @@ class LBB_Frontend {
 						<input type="tel" name="lbb_phone" required autocomplete="tel" inputmode="tel" maxlength="30" placeholder="+373" value="<?php echo esc_attr( isset( $posted['lbb_phone'] ) ? sanitize_text_field( $posted['lbb_phone'] ) : '' ); ?>">
 					</label>
 					<label class="lbb-field"><span><?php esc_html_e( 'Email (aici primiți biletul)', 'libertbus-bilete' ); ?></span>
-						<input type="email" name="lbb_email" required autocomplete="email" value="<?php echo esc_attr( isset( $posted['lbb_email'] ) ? sanitize_email( $posted['lbb_email'] ) : '' ); ?>">
+						<input type="email" name="lbb_email" required autocomplete="email" maxlength="190" value="<?php echo esc_attr( isset( $posted['lbb_email'] ) ? sanitize_email( $posted['lbb_email'] ) : '' ); ?>">
 					</label>
 				</div>
 
