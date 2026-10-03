@@ -16,6 +16,14 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   });
   await page.goto(BASE + '/balti-iasi/');
   await page.waitForSelector('[data-lbb="route"] option:checked', { state: 'attached' });
+  // Safari pe iPhone lasă date în afara min/max: mesajul trebuie să spună intervalul, nu „nu sunt plecări”.
+  for (const bad of [new Date(Date.now() - 86400000 * 3), new Date(Date.now() + 86400000 * 400)]) {
+    await page.fill('[data-lbb="date"]', bad.toISOString().slice(0, 10));
+    await page.dispatchEvent('[data-lbb="date"]', 'change');
+    const st = await page.textContent('[data-lbb="status"]');
+    const timeOff = await page.$eval('[data-lbb="time"]', s => s.disabled);
+    if (!/Online se poate rezerva de azi până pe \d\d\.\d\d\.\d{4}/.test(st) || !timeOff) fail('data în afara intervalului: „' + st + '”');
+  }
   const day = new Date(Date.now() + 86400000 * (21 + Math.floor(Math.random() * 20))).toISOString().slice(0, 10);
   await page.fill('[data-lbb="date"]', day);
   await page.dispatchEvent('[data-lbb="date"]', 'change');

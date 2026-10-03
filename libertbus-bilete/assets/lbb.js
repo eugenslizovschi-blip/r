@@ -361,6 +361,13 @@
 				fillCounts();
 				return;
 			}
+			// Safari pe iPhone nu respectă min/max la calendar: explicăm intervalul în loc de „nu sunt plecări”.
+			if ( el.date.value < cfg.today || el.date.value > cfg.maxDate ) {
+				request++;
+				el.status.textContent = t.dateRange;
+				fillCounts();
+				return;
+			}
 			var id = ++request;
 			el.status.textContent = t.loading;
 			var url = cfg.restUrl + ( cfg.restUrl.indexOf( '?' ) > -1 ? '&' : '?' ) + 'route_id=' + route.id + '&date=' + encodeURIComponent( el.date.value );

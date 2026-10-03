@@ -313,6 +313,8 @@ class LBB_Frontend {
 				'chooseTime'  => __( 'Alegeți ora', 'libertbus-bilete' ),
 				'loading'     => __( 'Se verifică locurile…', 'libertbus-bilete' ),
 				'noDeparture' => __( 'În ziua aleasă nu sunt plecări pe această rută. Alegeți altă dată.', 'libertbus-bilete' ),
+				/* translators: %s: ultima dată la care se poate rezerva online. */
+				'dateRange'   => sprintf( __( 'Online se poate rezerva de azi până pe %s. Alegeți o dată din acest interval.', 'libertbus-bilete' ), $today->modify( '+' . (int) LBB_Settings::get( 'max_days_ahead' ) . ' days' )->format( 'd.m.Y' ) ),
 				'noneOpen'    => __( 'Pentru ziua aleasă nu mai sunt locuri online. Alegeți altă dată sau sunați-ne.', 'libertbus-bilete' ),
 				'free'        => __( 'locuri libere', 'libertbus-bilete' ),
 				'full'        => __( 'complet', 'libertbus-bilete' ),
