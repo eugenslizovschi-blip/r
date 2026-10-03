@@ -299,25 +299,21 @@ HTML;
 				$privacy = self::page_id( 'privacy' ) ? get_permalink( self::page_id( 'privacy' ) ) : home_url( '/politica-de-confidentialitate/' );
 				return <<<HTML
 <p>Cookies sunt fișiere mici pe care site-ul le salvează în browser. Pe <a href="$site">$site</a> folosim doar cookies necesare și, numai dacă apăsați „Accept toate”, cookies de statistică.</p>
-<h2>Cookies necesare (fără ele site-ul nu funcționează)</h2>
-<table>
-<thead><tr><th>Cookie</th><th>La ce folosește</th><th>Durata</th></tr></thead>
-<tbody>
-<tr><td>lbb_cookie_consent</td><td>Ține minte alegerea dumneavoastră despre cookies.</td><td>6 luni</td></tr>
-<tr><td>woocommerce_cart_hash, woocommerce_items_in_cart, wp_woocommerce_session_*</td><td>Păstrează biletul în coș până la plată.</td><td>sesiune / 2 zile</td></tr>
-<tr><td>wordpress_*, wordfence_*</td><td>Autentificarea și securitatea contului (doar pentru administratori).</td><td>sesiune</td></tr>
-</tbody>
-</table>
+<h2>Cookies necesare</h2>
+<p>Fără ele site-ul nu funcționează, de aceea nu cer acord.</p>
+<ul>
+<li><strong>lbb_cookie_consent</strong> — ține minte alegerea dumneavoastră despre cookies. Durata: 6 luni.</li>
+<li><strong>woocommerce_cart_hash, woocommerce_items_in_cart, wp_woocommerce_session_*</strong> — păstrează biletul în coș până la plată. Durata: sesiune / 2 zile.</li>
+<li><strong>wordpress_*, wordfence_*</strong> — autentificarea și securitatea contului, doar pentru administratori. Durata: sesiune.</li>
+</ul>
 <p>La plata cu cardul, pagina băncii sau a procesatorului de plăți poate folosi propriile cookies, pentru siguranța plății și prevenirea fraudei.</p>
-<h2>Cookies de statistică și marketing (doar cu acordul dumneavoastră)</h2>
-<table>
-<thead><tr><th>Cookie</th><th>Furnizor și scop</th><th>Durata</th></tr></thead>
-<tbody>
-<tr><td>_ga, _ga_*</td><td>Google Analytics: numără vizitele și paginile văzute, anonim.</td><td>13 luni</td></tr>
-<tr><td>_gcl_au</td><td>Google: măsoară eficiența reclamelor.</td><td>3 luni</td></tr>
-<tr><td>sbjs_*</td><td>WooCommerce: de unde a venit vizita (ex. Google, Facebook), legat de comandă.</td><td>sesiune</td></tr>
-</tbody>
-</table>
+<h2>Cookies de statistică și marketing</h2>
+<p>Se folosesc doar dacă apăsați „Accept toate”.</p>
+<ul>
+<li><strong>_ga, _ga_*</strong> — Google Analytics: numără vizitele și paginile văzute. Durata: 13 luni.</li>
+<li><strong>_gcl_au</strong> — Google: măsoară eficiența reclamelor. Durata: 3 luni.</li>
+<li><strong>sbjs_*</strong> — WooCommerce: de unde a venit vizita (ex. Google, Facebook), legat de comandă. Durata: sesiune.</li>
+</ul>
 <p>Până nu acceptați, aceste scripturi nu se încarcă deloc. Google Analytics este furnizat de Google Ireland Limited: <a href="https://policies.google.com/privacy" rel="noopener">politica Google</a>.</p>
 <p>Fonturile site-ului se încarcă de la Google Fonts; ele nu pun cookies, dar Google primește adresa IP a browserului pentru a trimite fonturile.</p>
 <h2>Cum vă schimbați alegerea</h2>
