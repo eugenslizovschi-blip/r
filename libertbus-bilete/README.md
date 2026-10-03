@@ -11,7 +11,7 @@ Clientul alege cursa, plătește cu cardul și primește biletul pe email.
 - **Două butoane la final**: „Achit online cu cardul” sau „Rezerv, achit la urcare”.
   - Rezervarea fără plată ocupă locul, primește cod și link cu QR și trimite email clientului și biroului.
   - Apare în lista de pasageri cu suma de încasat la urcare și se poate anula din admin.
-  - Un telefon poate avea cel mult 3 rezervări neachitate (se schimbă din Setări).
+  - Un telefon poate avea cel mult 3 rezervări neachitate (se schimbă din Setări). Numerele scrise local (069…, 07…, 00373…) se salvează ca +373… / +40…, deci contează o singură dată.
   - Pe o singură pagină se poate lăsa doar un buton: `mode="pay"` sau `mode="reserve"` în shortcode.
 - **Plata în MDL, cu echivalent în RON**: implicit se încasează în MDL (cum lucrează Paynet), iar lângă preț apare informativ „≈ 62 RON” (și „≈ 234 MDL” la rutele cu preț în RON). Dacă banca acceptă și RON, se bifează RON în Setări și clientul alege singur moneda; comanda WooCommerce se face în moneda aleasă.
 - **Plata**: prin WooCommerce, deci merge cu orice plugin de plată (Paynet, maib, Victoriabank, BT iPay). Plugin-ul nu atinge datele cardului.
@@ -63,7 +63,7 @@ Toate testele rulează pe o instalare de test, niciodată pe site-ul real.
 - `tests/setup-local.sh <director>` pregătește WordPress 6.4.3 + WooCommerce + Contact Form 7 pe http://127.0.0.1:8080 și verificatorul de compatibilitate PHP.
 - `tests/qa.sh` rulează tot (vezi comentariul din fișier):
   - sintaxa PHP și **compatibilitatea cu PHP 7.4+** (serverul libertbus.md rulează PHP 7.4);
-  - `tests/smoke.php`: 72 de verificări (emailurile de rezervare, locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, potrivirea formularelor după titlu, buton de plată oprit, diacritice, linkul secret, telefonul de pe bilet);
+  - `tests/smoke.php`: 82 de verificări (emailurile de rezervare, locuri, expirare, plată întârziată, anulare, rezervare la urcare, monede, potrivirea formularelor după titlu, buton de plată oprit, diacritice, linkul secret, telefonul de pe bilet, numerele scrise local 069… / 07… aduse la +373 / +40);
   - în browser: rezervare cu plată de test, vizitator nelogat (inclusiv răspunsul blocat de protecția hostingului), plată în RON și rezervare la urcare, previzualizare cu 5 pasageri și linkul secret (cheie corectă, cheie greșită, fără cache);
   - **8 dispozitive** (iPhone SE … desktop 1920), 5 browsere în paralel: fără scroll orizontal, butoane de minim 40px, text de 16px în câmpuri, ora netăiată, ambele butoane pe ecran, telefonul și sumele pe un singur rând.
 - `tests/e2e-devices.js` se poate rula și pe site-ul real (doar citire), cu `BASE=https://libertbus.md WP_USER=… WP_PASS=… PARALLEL=1`: protecția hostingului blochează rafalele de cereri.

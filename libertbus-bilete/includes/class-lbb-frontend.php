@@ -146,6 +146,28 @@ class LBB_Frontend {
 	}
 
 	/**
+	 * Aduce telefonul la forma internațională, ca același număr scris local
+	 * (069…, 07…, 00373…) să conteze o singură dată la limita de rezervări.
+	 */
+	public static function normalize_phone( $raw ) {
+		$phone = preg_replace( '/[^\d+]/', '', (string) $raw );
+		$phone = '+' === substr( $phone, 0, 1 ) ? '+' . str_replace( '+', '', $phone ) : str_replace( '+', '', $phone );
+		if ( 0 === strpos( $phone, '00' ) ) {
+			return '+' . substr( $phone, 2 );
+		}
+		if ( preg_match( '/^0(\d{8})$/', $phone, $m ) ) {
+			return '+373' . $m[1]; // Moldova: 069 123 456, 0231 12 345.
+		}
+		if ( preg_match( '/^0(7\d{8})$/', $phone, $m ) ) {
+			return '+40' . $m[1]; // România: 07xx xxx xxx.
+		}
+		if ( preg_match( '/^(373\d{8}|407\d{8})$/', $phone ) ) {
+			return '+' . $phone;
+		}
+		return $phone;
+	}
+
+	/**
 	 * Validează datele, ține locurile și adaugă biletul în coș.
 	 *
 	 * Cu lbb_mode=reserve locurile se rezervă fără plată și se întoarce linkul rezervării.
@@ -182,7 +204,7 @@ class LBB_Frontend {
 		}
 		$names = array_slice( $names, 0, $seats );
 
-		$phone = isset( $data['lbb_phone'] ) ? preg_replace( '/[^\d+]/', '', $data['lbb_phone'] ) : '';
+		$phone = self::normalize_phone( isset( $data['lbb_phone'] ) ? $data['lbb_phone'] : '' );
 		if ( strlen( preg_replace( '/\D/', '', $phone ) ) < 8 ) {
 			return new WP_Error( 'lbb_phone', __( 'Introduceți un număr de telefon valid, cu prefixul țării (+373 sau +40).', 'libertbus-bilete' ) );
 		}

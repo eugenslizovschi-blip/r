@@ -128,6 +128,19 @@ $base = array( 'lbb_route' => $rid, 'lbb_date' => $tomorrow, 'lbb_time' => '23:5
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_names' => array() ) ) );
 lbb_t( 'fără nume respins', is_wp_error( $r ) && 'lbb_names' === $r->get_error_code(), $r );
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_phone' => '123' ) ) );
+foreach ( array(
+	'069 184 111'      => '+37369184111',
+	'0231 12 345'      => '+37323112345',
+	'00373 69 184 111' => '+37369184111',
+	'373 69184111'     => '+37369184111',
+	'+373 69-184-111'  => '+37369184111',
+	'0740 123 456'     => '+40740123456',
+	'+40 740 123 456'  => '+40740123456',
+	'+49 151 2345678'  => '+491512345678',
+	'69+184'           => '69184',
+) as $in => $want ) {
+	lbb_t( 'telefon normalizat: ' . $in, $want === LBB_Frontend::normalize_phone( $in ), LBB_Frontend::normalize_phone( $in ) );
+}
 lbb_t( 'telefon greșit respins', is_wp_error( $r ) && 'lbb_phone' === $r->get_error_code(), $r );
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_email' => 'nu-e-email' ) ) );
 lbb_t( 'email greșit respins', is_wp_error( $r ) && 'lbb_email' === $r->get_error_code(), $r );
@@ -166,6 +179,8 @@ $res1 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 
 lbb_t( 'rezervarea din formular întoarce linkul biletului', is_string( $res1 ) && false !== strpos( $res1, 'lbb_bilet=' ), $res1 );
 $res2 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002' ) ) );
 lbb_t( 'a doua rezervare neachitată pe același telefon e refuzată', is_wp_error( $res2 ) && 'lbb_limit' === $res2->get_error_code(), $res2 );
+$res2b = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '069 000 002' ) ) );
+lbb_t( 'același număr scris local (069…) e prins de limită', is_wp_error( $res2b ) && 'lbb_limit' === $res2b->get_error_code(), $res2b );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_reserve' => 0 ) ) );
 $res3 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000003' ) ) );
 lbb_t( 'rezervarea oprită din setări e refuzată', is_wp_error( $res3 ) && 'lbb_mode' === $res3->get_error_code(), $res3 );
