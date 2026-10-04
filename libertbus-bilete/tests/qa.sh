@@ -42,7 +42,7 @@ echo "$OUT_ADM" | grep -q "ADMIN: OK" && [ -z "$NEW_ERR" ] && echo "  ok" || { e
 echo "== Cookies: banner, Google Analytics blocat până la acord, paginile legale"
 OUT_CC=$(BASE="$BASE" OUT="${OUT:-.}" node "$DIR/tests/e2e-cookies.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_CC" | grep -q "COOKIES: OK" && echo "  ok" || { echo "$OUT_CC" | grep FAIL | head -5; echo "  PROBLEME"; FAIL=1; }
-echo "== Accesibilitate (axe-core): formular, banner cookies, pagina biletului"
+echo "== Accesibilitate (axe-core): formular, banner cookies, pagina biletului, paginile de admin"
 # AXE_JS = axe.min.js din pachetul axe-core (tests/setup-local.sh îl descarcă); fără el pasul se sare.
 AXE_JS="${AXE_JS:-$(dirname "$WP_PATH")/axe/package/axe.min.js}"
 if [ -f "$AXE_JS" ]; then
