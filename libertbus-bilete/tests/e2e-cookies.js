@@ -14,8 +14,8 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await offline(ctx);
     const page = await ctx.newPage();
     page.on('pageerror', e => fail(vp.name + ' pageerror: ' + e.message));
-    let ga = 0;
-    page.on('request', r => { if (/googletagmanager\.com|google-analytics\.com/.test(r.url())) ga++; });
+    let ga = 0, gtm = 0;
+    page.on('request', r => { if (/googletagmanager\.com|google-analytics\.com/.test(r.url())) ga++; if (/googletagmanager\.com\/gtm\.js/.test(r.url())) gtm++; });
     const trackers = async () => (await ctx.cookies()).filter(c => /^(_ga|_gcl|sbjs_)/.test(c.name)).map(c => c.name);
     // Acordul: „v1|statistics,marketing|20261003” → { cats: 'statistics,marketing', date: '20261003' }.
     const consent = async () => { const c = (await ctx.cookies()).find(x => x.name === 'lbb_cookie_consent'); if (!c) return null; const [v, cats, date] = decodeURIComponent(c.value).split('|'); return { v, cats, date }; };
@@ -52,6 +52,7 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     if (ga) fail(vp.name + ': Google Analytics s-a încărcat fără acord');
     if ((await trackers()).length) fail(vp.name + ': cookies de statistică fără acord: ' + (await trackers()).join(','));
     if (await page.evaluate(() => typeof window.dataLayer !== 'undefined')) fail(vp.name + ': codul gtag a rulat fără acord');
+    if (await page.$('noscript iframe, iframe[src*="googletagmanager"]') || /ns\.html\?id=GTM/.test(await page.content())) fail(vp.name + ': iframe-ul Google Tag Manager din <noscript> a rămas în pagină');
     // La prima vizită Escape doar strânge „Setări”: bannerul rămâne până la o alegere.
     await page.click('#lbb-cc [data-lbb-cc="settings"]');
     await page.keyboard.press('Escape');
@@ -96,6 +97,7 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await page.waitForFunction(() => typeof window.dataLayer !== 'undefined');
     await page.waitForTimeout(800);
     if (!ga) fail(vp.name + ': Google Analytics nu pornește după „Accept toate”');
+    if (!gtm) fail(vp.name + ': Google Tag Manager (pus după <body>) nu pornește după „Accept toate”');
     if ((await consent() || {}).cats !== 'statistics,marketing') fail(vp.name + ': acordul nu s-a salvat ' + JSON.stringify(await consent()));
     if (!(await trackers()).some(n => /^sbjs_/.test(n))) fail(vp.name + ': sursa vizitei (WooCommerce) nu pornește după acord');
 

@@ -65,6 +65,11 @@ add_action( 'wp_head', function () {
 	echo '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"gtag( test"}</script>' . "\n";
 	echo "<script>window.lbbTestInline = 1;</script>\n";
 } );
+// Google Tag Manager, cum îl pun pluginurile: încărcătorul și <noscript> imediat după <body>.
+add_action( 'wp_body_open', function () {
+	echo "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TEST');</script>\n";
+	echo '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TEST" height="0" width="0" style="display:none"></iframe></noscript>' . "\n";
+} );
 PHP
 $WP eval 'LBB_Legal::create_missing();' >/dev/null
 # Pagină cu un <footer> în conținut (semnătura unui citat): linkurile legale trebuie să ajungă în subsolul site-ului, nu aici.

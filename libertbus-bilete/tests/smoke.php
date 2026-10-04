@@ -316,6 +316,12 @@ lbb_t( 'cookies: tipul vechi se înlocuiește (Facebook Pixel, marketing)', "<sc
 $sb = LBB_Cookies::block_scripts( '<script src="/wp-content/plugins/woocommerce/assets/js/sourcebuster/sourcebuster.min.js"></script>' );
 lbb_t( 'cookies: sursa vizitei din WooCommerce e marketing', false !== strpos( $sb, 'data-lbb-consent="marketing"' ), $sb );
 lbb_t( 'cookies: un script deja blocat nu se dublează', LBB_Cookies::block_scripts( $out ) === $out );
+// Google Tag Manager: încărcătorul din pagină nu conține gtag(, iar <noscript> pune un iframe de urmărire.
+$gtm = LBB_Cookies::block_scripts( "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TEST');</script>" );
+lbb_t( 'cookies: încărcătorul Google Tag Manager e blocat', 0 === strpos( $gtm, '<script type="text/plain" data-lbb-consent="statistics">' ), $gtm );
+$ns = LBB_Cookies::block_scripts( '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TEST" height="0" width="0"></iframe></noscript><noscript><img height="1" width="1" src="https://www.facebook.com/tr?id=1&ev=PageView&noscript=1"/></noscript><noscript><p>Activați JavaScript.</p></noscript>' );
+lbb_t( 'cookies: urmărirea din <noscript> (GTM, Facebook) se scoate, restul rămâne', '<noscript><p>Activați JavaScript.</p></noscript>' === $ns, $ns );
+lbb_t( 'cookies: și codul pus imediat după <body> trece prin blocare', has_action( 'wp_body_open', array( 'LBB_Cookies', 'buffer_start' ) ) && has_action( 'wp_body_open', array( 'LBB_Cookies', 'buffer_end' ) ) );
 lbb_t( 'cookies: [lbb_firma_date] nu lasă câmpuri goale', false === strpos( LBB_Legal::company_block(), 'completați' ) && false !== strpos( LBB_Legal::company_block(), 'tel:' ) );
 lbb_t( 'cookies: o pagină „Privacy Policy” doar cu un formular nu contează ca politică', ! LBB_Legal::is_real_policy( wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Privacy Policy', 'post_content' => '[contact-form-7 id="1"]' ) ) ) );
 

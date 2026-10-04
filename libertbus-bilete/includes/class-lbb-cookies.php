@@ -29,8 +29,13 @@ class LBB_Cookies {
 	/**
 	 * Cod scris direct în pagină care pornește aceleași servicii.
 	 */
-	const STATS_INLINE     = '#\bgtag\s*\(|_hjSettings|\bym\s*\(\s*\d|clarity\s*\(#';
+	const STATS_INLINE     = '#\bgtag\s*\(|googletagmanager\.com/gtm\.js|_hjSettings|\bym\s*\(\s*\d|clarity\s*\(#';
 	const MARKETING_INLINE = '#\bfbq\s*\(|\bsbjs\.init|\bttq\.#';
+
+	/**
+	 * Pixeli din <noscript> (fără JavaScript): Google Tag Manager, Analytics, Facebook.
+	 */
+	const NOSCRIPT_SRC = 'googletagmanager\.com|google-analytics\.com|doubleclick\.net|facebook\.com/tr\b|mc\.yandex\.ru';
 
 	/** @var int|null Nivelul de buffer deschis de noi. */
 	private static $level = null;
@@ -44,7 +49,8 @@ class LBB_Cookies {
 			return;
 		}
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ) );
-		foreach ( array( 'wp_head', 'wp_footer' ) as $hook ) {
+		// wp_body_open: acolo pun pluginurile partea a doua din Google Tag Manager.
+		foreach ( array( 'wp_head', 'wp_body_open', 'wp_footer' ) as $hook ) {
 			add_action( $hook, array( __CLASS__, 'buffer_start' ), -99999 );
 			add_action( $hook, array( __CLASS__, 'buffer_end' ), PHP_INT_MAX );
 		}
@@ -93,6 +99,15 @@ class LBB_Cookies {
 	 * și nu le descarcă) până la acord.
 	 */
 	public static function block_scripts( $html ) {
+		// <noscript> se afișează doar fără JavaScript, când bannerul nu poate cere acordul:
+		// pixelii de urmărire de acolo (iframe GTM, imaginea Facebook) se scot de tot.
+		$html = preg_replace_callback(
+			'#<noscript\b[^>]*>(.*?)</noscript>#is',
+			function ( $m ) {
+				return preg_match( '#\bsrc\s*=\s*["\']?[^"\'\s>]*(' . self::NOSCRIPT_SRC . ')#i', $m[1] ) ? '' : $m[0];
+			},
+			$html
+		);
 		return preg_replace_callback(
 			'#<script\b([^>]*)>(.*?)</script>#is',
 			function ( $m ) {
