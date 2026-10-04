@@ -289,19 +289,24 @@
 			adults = Math.min( Math.max( adults, children ? 0 : 1 ), max );
 			children = Math.min( children, max - adults );
 
-			el.adults.innerHTML = '';
-			for ( var a = 0; a <= max; a++ ) {
-				el.adults.appendChild( option( a, a ) );
-			}
+			fillNumbers( el.adults, max );
 			el.adults.value = adults;
 			if ( el.children ) {
-				el.children.innerHTML = '';
-				for ( var c = 0; c <= max - adults; c++ ) {
-					el.children.appendChild( option( c, c ) );
-				}
+				fillNumbers( el.children, max - adults );
 				el.children.value = children;
 			}
 			fillNames( adults, children );
+		}
+
+		// Opțiunile 0…max se refac doar dacă s-a schimbat maximul: un selector deschis pe telefon s-ar închide.
+		function fillNumbers( select, max ) {
+			if ( select.options.length === max + 1 ) {
+				return;
+			}
+			select.innerHTML = '';
+			for ( var i = 0; i <= max; i++ ) {
+				select.appendChild( option( i, i ) );
+			}
 		}
 
 		// Câmpurile existente rămân pe loc (doar se adaugă sau se scot de la coadă): orele vin după o cerere,

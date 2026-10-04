@@ -58,11 +58,15 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await page.keyboard.type('Io');
   if (await page.$eval('input[name="lbb_names[]"]', i => i.hasAttribute('aria-invalid'))) fail('marcajul rămâne după ce clientul scrie');
   // Orele sosesc cât clientul scrie: câmpul de nume nu se reface sub degete (cursorul și textul rămân).
+  const optsBefore = await page.$eval('[data-lbb="adults"]', s => { s.options[0].__lbbMark = 1; return s.options.length; });
   gate = null; release();
   await page.waitForFunction(() => !document.querySelector('[data-lbb="time"]').disabled, null, { timeout: 15000 });
   await page.waitForTimeout(300);
   const typing = await page.evaluate(() => { const a = document.activeElement; return { name: a && a.name, value: a && a.value }; });
   if (typing.name !== 'lbb_names[]' || typing.value !== 'Io') fail('câmpul de nume s-a refăcut cât clientul scria: ' + JSON.stringify(typing));
+  // La fel selectorul „Adulți”: dacă numărul maxim nu s-a schimbat, opțiunile rămân (un selector deschis pe telefon nu se închide).
+  const opts = await page.$eval('[data-lbb="adults"]', s => ({ n: s.options.length, same: s.options[0].__lbbMark === 1 }));
+  if (opts.n === optsBefore && !opts.same) fail('selectorul „Adulți” s-a refăcut fără motiv la sosirea orelor');
   await page.fill('input[name="lbb_names[]"]', '');
 
   // Formularul păstrează alegerile; completăm numele și trimitem.
