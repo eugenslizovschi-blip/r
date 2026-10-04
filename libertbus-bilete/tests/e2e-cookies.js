@@ -53,6 +53,12 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     if ((await trackers()).length) fail(vp.name + ': cookies de statistică fără acord: ' + (await trackers()).join(','));
     if (await page.evaluate(() => typeof window.dataLayer !== 'undefined')) fail(vp.name + ': codul gtag a rulat fără acord');
     if (await page.$('noscript iframe, iframe[src*="googletagmanager"]') || /ns\.html\?id=GTM/.test(await page.content())) fail(vp.name + ': iframe-ul Google Tag Manager din <noscript> a rămas în pagină');
+    // De la tastatură: „Setări” mută cursorul pe prima bifă care se poate schimba (butonul „Setări” dispare).
+    await page.focus('#lbb-cc [data-lbb-cc="settings"]');
+    await page.keyboard.press('Enter');
+    const focused = await page.evaluate(() => document.activeElement && document.activeElement.value);
+    if (focused !== 'statistics') fail(vp.name + ': după „Setări” cursorul trebuie să fie pe bifa „Statistică”, e pe ' + focused);
+    await page.keyboard.press('Escape');
     // La prima vizită Escape doar strânge „Setări”: bannerul rămâne până la o alegere.
     await page.click('#lbb-cc [data-lbb-cc="settings"]');
     await page.keyboard.press('Escape');
@@ -91,8 +97,11 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     const text = await page.textContent('body');
     if (!/_ga/.test(text) || !/lbb_cookie_consent/.test(text) || !/Doar|necesare/.test(text)) fail(vp.name + ': Politica de cookies nu descrie cookies-urile');
     if (/completați în LibertBus/.test(text)) fail(vp.name + ': Politica de cookies are câmpuri necompletate');
-    await page.click('a.lbb-cc-open');
+    await page.focus('a.lbb-cc-open');
+    await page.keyboard.press('Enter');
     await page.waitForSelector('#lbb-cc:not([hidden])');
+    const fromLink = await page.evaluate(() => document.activeElement && document.activeElement.value);
+    if (fromLink !== 'statistics') fail(vp.name + ': „Schimbă preferințele” trebuie să ducă cursorul în banner, pe „Statistică”, e pe ' + fromLink);
     await page.click('#lbb-cc [data-lbb-cc="all"]');
     await page.waitForFunction(() => typeof window.dataLayer !== 'undefined');
     await page.waitForTimeout(800);

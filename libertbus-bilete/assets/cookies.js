@@ -139,6 +139,14 @@
 		}
 	}
 
+	// Cursorul pe prima bifă care se poate schimba („Necesare” e mereu bifată și dezactivată).
+	function focusFirst() {
+		var first = box && box.querySelector( '[data-lbb-cc-panel] input:not([disabled]), button' );
+		if ( first ) {
+			first.focus();
+		}
+	}
+
 	function choose( cats ) {
 		var before = read() || [];
 		write( cats );
@@ -170,10 +178,7 @@
 				choose( [] );
 			} else if ( action === 'settings' ) {
 				show( true );
-				var first = panel && panel.querySelector( 'input' );
-				if ( first ) {
-					first.focus();
-				}
+				focusFirst();
 			} else if ( action === 'save' ) {
 				choose( CATS.filter( function ( c ) {
 					var cb = panel.querySelector( 'input[value="' + c + '"]' );
@@ -205,10 +210,7 @@
 		if ( a ) {
 			e.preventDefault();
 			show( true );
-			var first = box && box.querySelector( 'input, button' );
-			if ( first ) {
-				first.focus();
-			}
+			focusFirst();
 		}
 	} );
 
