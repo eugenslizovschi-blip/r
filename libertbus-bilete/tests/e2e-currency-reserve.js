@@ -78,6 +78,11 @@ async function fillForm(page, phone) {
   const rticket = (await guest.textContent('.lbb-ticket')).replace(/\s+/g, ' ');
   if (!/De achitat la urcare .*MDL/.test(rticket)) fail('rezervarea nu arată suma la urcare: ' + rticket);
   console.log('rezervare:', state, '|', rticket);
+  // Codul QR are text pentru cititoarele de ecran (imaginea generată nu se citește de două ori).
+  await guest.waitForSelector('.lbb-ticket-qr img, .lbb-ticket-qr canvas', { state: 'attached' });
+  const qr = await guest.$eval('.lbb-ticket-qr', e => ({ role: e.getAttribute('role'), label: e.getAttribute('aria-label') || '', imgs: [...e.querySelectorAll('img')].map(i => i.hasAttribute('alt')) }));
+  const code = (rticket.match(/LB-[A-Z0-9]+/) || [''])[0];
+  if (qr.role !== 'img' || !qr.label.includes(code) || qr.imgs.some(a => !a)) fail('codul QR nu are text alternativ: ' + JSON.stringify(qr));
   // Pagina biletului are date personale: fără cache, fără indexare, fără Referer (linkul conține cheia k=).
   const tr = await guest.request.get(guest.url());
   const h = tr.headers();

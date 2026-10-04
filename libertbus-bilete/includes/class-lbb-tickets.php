@@ -46,7 +46,7 @@ class LBB_Tickets {
 		?>
 		<div class="lbb-ticket" style="border:2px dashed #c9ced6;border-radius:12px;padding:16px;margin:0 0 16px;background:#fff;color:#1d2733;">
 			<?php if ( $with_qr ) : ?>
-				<div class="lbb-ticket-qr" data-qr="<?php echo esc_attr( self::url( $booking['ticket_code'] ) ); ?>"></div>
+				<div class="lbb-ticket-qr" role="img" aria-label="<?php /* translators: %s: codul biletului */ echo esc_attr( sprintf( __( 'Cod QR al biletului %s', 'libertbus-bilete' ), $booking['ticket_code'] ) ); ?>" data-qr="<?php echo esc_attr( self::url( $booking['ticket_code'] ) ); ?>"></div>
 			<?php endif; ?>
 			<div style="font-size:13px;color:#5f6b7a;"><?php echo 'reserved' === $booking['status'] ? esc_html__( 'Rezervare LibertBus', 'libertbus-bilete' ) : esc_html__( 'Bilet LibertBus', 'libertbus-bilete' ); ?></div>
 			<div class="lbb-ticket-code" style="font-family:Menlo,Consolas,monospace;font-size:22px;font-weight:700;letter-spacing:1px;margin:2px 0 10px;"><?php echo esc_html( $booking['ticket_code'] ); ?></div>
@@ -239,6 +239,9 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<script>
 		document.querySelectorAll('[data-qr]').forEach(function(el){
 			if (window.QRCode) { new QRCode(el, {text: el.getAttribute('data-qr'), width: 132, height: 132, correctLevel: QRCode.CorrectLevel.M}); }
+			// Textul e pe container (role="img"); imaginea și canvasul generate nu se mai citesc o dată.
+			el.querySelectorAll('img').forEach(function(i){ i.setAttribute('alt', ''); });
+			el.querySelectorAll('canvas').forEach(function(c){ c.setAttribute('aria-hidden', 'true'); });
 		});
 		</script>
 	<?php endif; ?>

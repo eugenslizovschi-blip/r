@@ -621,13 +621,7 @@
 		} );
 		// „Înapoi” din browser: din memorie (bfcache) pagina revine cu butoanele blocate de trimiterea de mai sus;
 		// la o reîncărcare browserul pune la loc data aleasă de client după ce s-au cerut orele pentru azi.
-		window.addEventListener( 'pageshow', function ( e ) {
-			if ( e.persisted ) {
-				for ( var b = 0; b < buttons.length; b++ ) {
-					buttons[ b ].classList.remove( 'is-busy' );
-				}
-				summary();
-			}
+		function syncRestored() {
 			var keep = rememberedTime();
 			if ( ( el.date.value && el.date.value !== shownDate ) || ( keep && ! el.time.value ) ) {
 				dateTouched = true;
@@ -636,6 +630,21 @@
 					preset.time = keep;
 				}
 				loadDepartures();
+			}
+		}
+		window.addEventListener( 'pageshow', function ( e ) {
+			if ( e.persisted ) {
+				for ( var b = 0; b < buttons.length; b++ ) {
+					buttons[ b ].classList.remove( 'is-busy' );
+				}
+				summary();
+			}
+			syncRestored();
+			// Uneori browserul pune câmpurile la loc abia după „pageshow”: mai verificăm o dată puțin mai târziu.
+			var nav = window.performance && performance.getEntriesByType ? performance.getEntriesByType( 'navigation' )[ 0 ] : null;
+			if ( e.persisted || ( nav && 'back_forward' === nav.type ) ) {
+				setTimeout( syncRestored, 300 );
+				setTimeout( syncRestored, 1000 );
 			}
 		} );
 	}
