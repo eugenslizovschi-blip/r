@@ -306,21 +306,42 @@
 
 		// Câmpurile existente rămân pe loc (doar se adaugă sau se scot de la coadă): orele vin după o cerere,
 		// iar un câmp refăcut cât clientul scrie i-ar lua cursorul și i-ar închide tastatura pe telefon.
+		// Adulții sunt primii, copiii după ei. Când se schimbă câți adulți sau copii sunt, fiecare grup își
+		// păstrează numele (altfel un adult ar ajunge pe locul de copil, iar numele copilului s-ar pierde).
+		var nameCounts = null;
+
 		function fillNames( adults, children ) {
 			var total = adults + children;
 			var labels = el.names.querySelectorAll( 'label.lbb-field' );
 			var stored = ! labels.length && preset.names ? preset.names : [];
+			var regroup = !! ( nameCounts && labels.length && ( nameCounts[ 0 ] !== adults || nameCounts[ 1 ] !== children ) );
+			if ( regroup ) {
+				var old = [];
+				for ( var i = 0; i < labels.length; i++ ) {
+					old.push( labels[ i ].querySelector( 'input' ).value );
+				}
+				stored = old.slice( 0, Math.min( adults, nameCounts[ 0 ] ) );
+				while ( stored.length < adults ) {
+					stored.push( '' );
+				}
+				stored = stored.concat( old.slice( nameCounts[ 0 ], nameCounts[ 0 ] + children ) );
+			}
 			for ( var n = 0; n < total; n++ ) {
 				var label = labels[ n ];
 				if ( ! label ) {
 					label = nameField( n, stored[ n ] || '' );
 					el.names.appendChild( label );
+				} else if ( regroup ) {
+					var input = label.querySelector( 'input' );
+					input.value = stored[ n ] || '';
+					checkName.call( input );
 				}
 				label.querySelector( 'span' ).textContent = t.passenger + ' ' + ( n + 1 ) + ( n >= adults ? ' (' + t.child + ')' : '' );
 			}
 			for ( var r = labels.length - 1; r >= total; r-- ) {
 				el.names.removeChild( labels[ r ] );
 			}
+			nameCounts = [ adults, children ];
 			el.names.hidden = total === 0;
 			summary();
 		}

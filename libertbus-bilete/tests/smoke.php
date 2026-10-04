@@ -323,7 +323,9 @@ $ns = LBB_Cookies::block_scripts( '<noscript><iframe src="https://www.googletagm
 lbb_t( 'cookies: urmărirea din <noscript> (GTM, Facebook) se scoate, restul rămâne', '<noscript><p>Activați JavaScript.</p></noscript>' === $ns, $ns );
 lbb_t( 'cookies: și codul pus imediat după <body> trece prin blocare', has_action( 'wp_body_open', array( 'LBB_Cookies', 'buffer_start' ) ) && has_action( 'wp_body_open', array( 'LBB_Cookies', 'buffer_end' ) ) );
 lbb_t( 'cookies: [lbb_firma_date] nu lasă câmpuri goale', false === strpos( LBB_Legal::company_block(), 'completați' ) && false !== strpos( LBB_Legal::company_block(), 'tel:' ) );
-lbb_t( 'cookies: o pagină „Privacy Policy” doar cu un formular nu contează ca politică', ! LBB_Legal::is_real_policy( wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Privacy Policy', 'post_content' => '[contact-form-7 id="1"]' ) ) ) );
+$pp_form = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Privacy Policy', 'post_content' => '[contact-form-7 id="1"]' ) );
+lbb_t( 'cookies: o pagină „Privacy Policy” doar cu un formular nu contează ca politică', ! LBB_Legal::is_real_policy( $pp_form ) );
+wp_delete_post( $pp_form, true ); // altfel fiecare rulare lasă o pagină publicată în plus
 
 // Setările „Banner cookies” și „Linkuri în subsol” chiar opresc ce promit (pagina reală, prin HTTP).
 $cc_keep = get_option( 'lbb_settings', array() );

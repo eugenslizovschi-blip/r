@@ -96,6 +96,41 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const after = (await (await page.request.get(`${BASE}/wp-json/lbb/v1/departures?route_id=${routeId}&date=${day}`)).json()).departures.find(d => d.time === time).free;
   if (after !== before) fail(`locul nu s-a eliberat după scoaterea din coș (înainte ${before}, după ${after})`);
   console.log(`locuri: ${before} → ${during} → ${after}`);
+
+  // Adulți și copii: când scade numărul adulților, numele copilului rămâne la copil (nu trece un adult pe locul de copil).
+  {
+    const kid = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await kid.context().addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
+    await kid.goto(BASE + '/balti-iasi/');
+    await kid.waitForSelector('[data-lbb="route"] option:checked', { state: 'attached' });
+    // O rută cu preț pentru copii (Chișinău → Iași în datele de test).
+    const fromCity = await kid.$$eval('[data-lbb="from"] option', os => (os.find(o => /Chi.in.u/.test(o.textContent)) || {}).value);
+    await kid.selectOption('[data-lbb="from"]', fromCity);
+    const childRoute = await kid.$$eval('[data-lbb="route"] option', os => (os.find(o => /Ia.i/.test(o.textContent)) || {}).value);
+    await kid.selectOption('[data-lbb="route"]', childRoute);
+    for (let d = 16; d < 24; d++) {
+      await kid.fill('[data-lbb="date"]', new Date(Date.now() + 86400000 * d).toISOString().slice(0, 10));
+      await kid.dispatchEvent('[data-lbb="date"]', 'change');
+      await kid.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option').length > 1 || /nu sunt/.test(document.querySelector('[data-lbb="status"]').textContent), null, { timeout: 10000 }).catch(() => {});
+      if (await kid.$('[data-lbb="time"] option:not([disabled]):not([value=""])')) break;
+    }
+    await kid.selectOption('[data-lbb="time"]', await kid.$eval('[data-lbb="time"] option:not([disabled]):not([value=""])', o => o.value));
+    if (!(await kid.isVisible('[data-lbb="children"]'))) fail('ruta Chișinău → Iași ar trebui să aibă preț pentru copii');
+    const names = () => kid.$$eval('[data-lbb="names"] label.lbb-field', ls => ls.map(l => l.querySelector('span').textContent.trim() + '=' + l.querySelector('input').value).join(' | '));
+    await kid.fill('input[name="lbb_names[]"]', 'Ion Popescu');
+    await kid.selectOption('[data-lbb="adults"]', '2');
+    await kid.locator('input[name="lbb_names[]"]').nth(1).fill('Maria Popescu');
+    await kid.selectOption('[data-lbb="children"]', '1');
+    await kid.locator('input[name="lbb_names[]"]').nth(2).fill('Ana Popescu');
+    await kid.selectOption('[data-lbb="adults"]', '1');
+    const n1 = await names();
+    if (n1 !== 'Pasager 1=Ion Popescu | Pasager 2 (copil)=Ana Popescu') fail('după 2→1 adulți numele s-au mutat greșit: ' + n1);
+    await kid.selectOption('[data-lbb="adults"]', '2');
+    const n2 = await names();
+    if (n2 !== 'Pasager 1=Ion Popescu | Pasager 2= | Pasager 3 (copil)=Ana Popescu') fail('după 1→2 adulți copilul nu a rămas copil: ' + n2);
+    console.log('adulți/copii:', n1, '→', n2);
+    await kid.close();
+  }
   console.log(process.exitCode ? 'GUEST: PROBLEME' : 'GUEST: OK');
   await browser.close();
 })().catch(e => { console.error('FAIL', e); process.exit(1); });
