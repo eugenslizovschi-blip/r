@@ -423,6 +423,23 @@ foreach ( array_keys( LBB_Settings::defaults() ) as $k ) {
 lbb_t( 'Setări: salvarea fără modificări nu schimbă nicio setare', ! $changed, implode( ',', $changed ) );
 update_option( 'lbb_settings', $before );
 
+// Panoul „Gata de plăți?” avertizează dacă bannerul de cookies e oprit (Legea 195/2024).
+$cl_keep = LBB_Settings::all();
+$cl_item = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'cookies' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+$it = $cl_item();
+lbb_t( 'panou: bannerul de cookies pornit apare ca bifat', $it && true === $it['ok'], $it );
+update_option( 'lbb_settings', array_merge( $cl_keep, array( 'cookie_banner' => 0 ) ) );
+$it = $cl_item();
+lbb_t( 'panou: bannerul de cookies oprit apare ca problemă', $it && false === $it['ok'] && false !== strpos( $it['detail'], '195/2024' ), $it );
+update_option( 'lbb_settings', $cl_keep );
+
 // Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
 LBB_Frontend::register_assets();
 $js_ver = wp_scripts()->registered['lbb']->ver;

@@ -116,6 +116,12 @@ class LBB_Admin {
 		$company = LBB_Settings::get( 'company_name' ) && LBB_Settings::get( 'company_idno' ) && LBB_Settings::get( 'company_address' );
 		$add( 'company', (bool) $company, __( 'Datele firmei sunt completate', 'libertbus-bilete' ), __( 'Denumire, IDNO și adresă. Banca le verifică pe site.', 'libertbus-bilete' ), admin_url( 'admin.php?page=lbb-settings' ) );
 
+		$add( 'cookies', (bool) LBB_Settings::get( 'cookie_banner' ), __( 'Bannerul de cookies e pornit', 'libertbus-bilete' ),
+			LBB_Settings::get( 'cookie_banner' )
+				? __( 'Google Analytics și celelalte scripturi de statistică pornesc doar după acord.', 'libertbus-bilete' )
+				: __( 'E oprit: Google Analytics pune cookies fără acord, ceea ce Legea nr. 195/2024 nu permite. Porniți „Banner cookies” din Setări.', 'libertbus-bilete' ),
+			admin_url( 'admin.php?page=lbb-settings' ) );
+
 		$routes = array_filter( LBB_Routes::all( true ), function ( $r ) {
 			return $r['price'] > 0;
 		} );
