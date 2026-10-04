@@ -73,20 +73,38 @@ class LBB_Tickets {
 		$route   = LBB_Routes::get( $booking['route_id'] );
 		$name    = $route ? $route['origin'] . ' → ' . $route['destination'] : '';
 		$when    = wp_date( 'd.m.Y', strtotime( $booking['travel_date'] . ' 12:00' ) ) . ' ' . $booking['dep_time'];
-		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+		$office  = LBB_Settings::get( 'company_email' );
+		$office  = is_email( $office ) ? $office : get_option( 'admin_email' );
+		// Expeditor „LibertBus” (nu „WordPress”); răspunsul clientului ajunge la birou.
+		$headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header(), 'Reply-To: ' . $office );
 		$body    = '<p>' . esc_html__( 'Rezervarea dumneavoastră este confirmată. Plata se face la urcare, la șofer.', 'libertbus-bilete' ) . '</p>'
 			. self::html( $booking ) . self::notes_html();
 		if ( is_email( $booking['email'] ) ) {
 			/* translators: 1: ruta, 2: data și ora */
 			wp_mail( $booking['email'], sprintf( __( 'Rezervare %1$s, %2$s', 'libertbus-bilete' ), $name, $when ), $body, $headers );
 		}
-		$office = LBB_Settings::get( 'company_email' );
-		$office = is_email( $office ) ? $office : get_option( 'admin_email' );
 		$admin  = '<p>' . esc_html__( 'Rezervare nouă cu plata la urcare.', 'libertbus-bilete' ) . '</p>' . self::html( $booking )
 			. '<p>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': ' . esc_html( $booking['phone'] ) . '<br>Email: ' . esc_html( $booking['email'] ) . '</p>'
 			. '<p><a href="' . esc_url( admin_url( 'admin.php?page=lbb-bookings&status=reserved' ) ) . '">' . esc_html__( 'Vezi rezervările', 'libertbus-bilete' ) . '</a></p>';
 		/* translators: 1: cod, 2: ruta, 3: data și ora */
-		wp_mail( $office, sprintf( __( '[LibertBus] Rezervare %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $admin, $headers );
+		// Biroul răspunde direct clientului.
+		$office_headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header() );
+		if ( is_email( $booking['email'] ) ) {
+			$office_headers[] = 'Reply-To: ' . $booking['email'];
+		}
+		wp_mail( $office, sprintf( __( '[LibertBus] Rezervare %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $admin, $office_headers );
+	}
+
+	/**
+	 * „LibertBus <adresa obișnuită a site-ului>”: doar numele se schimbă, adresa rămâne cea a WordPress
+	 * (sau a unui plugin SMTP), ca emailurile să nu ajungă în spam.
+	 */
+	public static function from_header() {
+		$host = wp_parse_url( network_home_url(), PHP_URL_HOST );
+		$host = $host && 0 === strpos( $host, 'www.' ) ? substr( $host, 4 ) : $host;
+		$from = apply_filters( 'wp_mail_from', 'wordpress@' . $host );
+		$name = trim( preg_replace( '/[\r\n"<>]+/', ' ', (string) LBB_Settings::get( 'company_name' ) ) );
+		return ( '' !== $name ? $name : 'LibertBus' ) . ' <' . $from . '>';
 	}
 
 	/**

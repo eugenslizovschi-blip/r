@@ -268,6 +268,22 @@ lbb_t( 'emailul clientului are codul, suma la urcare și telefonul', $em && $to_
 	&& false !== strpos( $to_client[0]['message'], 'De achitat la urcare' )
 	&& false !== strpos( $to_client[0]['message'], 'href="tel:' ), $to_client ? substr( wp_strip_all_tags( $to_client[0]['message'] ), 0, 200 ) : 'lipsă' );
 lbb_t( 'emailurile de rezervare sunt HTML', $to_client && false !== strpos( implode( ' ', (array) $to_client[0]['headers'] ), 'text/html' ) );
+$to_office = array_values( array_filter( $lbb_mails, function ( $m ) {
+	return 'client-mail@example.com' !== $m['to'];
+} ) );
+$h_client = $to_client ? implode( "\n", (array) $to_client[0]['headers'] ) : '';
+$h_office = $to_office ? implode( "\n", (array) $to_office[0]['headers'] ) : '';
+$office   = is_email( LBB_Settings::get( 'company_email' ) ) ? LBB_Settings::get( 'company_email' ) : get_option( 'admin_email' );
+$from_name = LBB_Settings::get( 'company_name' ) ? LBB_Settings::get( 'company_name' ) : 'LibertBus';
+lbb_t( 'emailul clientului vine de la firmă (nu „WordPress”)', (bool) preg_match( '/^From: ' . preg_quote( $from_name, '/' ) . ' <[^>]+@[^>]+>$/m', $h_client ), $h_client );
+$keep_name = LBB_Settings::all();
+update_option( 'lbb_settings', array_merge( $keep_name, array( 'company_name' => '' ) ) );
+lbb_t( 'fără denumirea firmei, expeditorul e „LibertBus”', 0 === strpos( LBB_Tickets::from_header(), 'LibertBus <' ), LBB_Tickets::from_header() );
+update_option( 'lbb_settings', array_merge( $keep_name, array( 'company_name' => "Rău\r\nBcc: x@y.z" ) ) );
+lbb_t( 'denumirea firmei nu poate injecta antete în email', false === strpos( LBB_Tickets::from_header(), "\n" ), LBB_Tickets::from_header() );
+update_option( 'lbb_settings', $keep_name );
+lbb_t( 'răspunsul clientului ajunge la birou (Reply-To)', false !== strpos( $h_client, 'Reply-To: ' . $office ), $h_client );
+lbb_t( 'biroul răspunde direct clientului (Reply-To)', false !== strpos( $h_office, 'Reply-To: client-mail@example.com' ), $h_office );
 
 // Accesibilitate: prețul se anunță cititoarelor de ecran când se schimbă.
 lbb_t( 'rezumatul cu prețul e anunțat (aria-live)', (bool) preg_match( '/data-lbb="summary"[^>]*aria-live="polite"/', LBB_Frontend::shortcode( array() ) ) );
