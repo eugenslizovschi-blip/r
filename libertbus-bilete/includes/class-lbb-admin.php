@@ -116,6 +116,15 @@ class LBB_Admin {
 		$company = LBB_Settings::get( 'company_name' ) && LBB_Settings::get( 'company_idno' ) && LBB_Settings::get( 'company_address' );
 		$add( 'company', (bool) $company, __( 'Datele firmei sunt completate', 'libertbus-bilete' ), __( 'Denumire, IDNO și adresă. Banca le verifică pe site.', 'libertbus-bilete' ), admin_url( 'admin.php?page=lbb-settings' ) );
 
+		// Numărul apare în formular, pe bilet și în emailuri, ca link de apel: cu mai puțin de 8 cifre nu sună nicăieri.
+		$phone = trim( (string) LBB_Settings::get( 'support_phone' ) );
+		$add( 'phone', strlen( preg_replace( '/\D/', '', $phone ) ) >= 8, __( 'Telefonul pentru clienți e complet', 'libertbus-bilete' ),
+			'' === $phone
+				? __( 'Lipsește. Clienții îl văd în formular, pe bilet și în emailuri.', 'libertbus-bilete' )
+				/* translators: %s: numărul de telefon din setări */
+				: sprintf( __( 'Acum: %s. Clienții îl văd în formular, pe bilet și în emailuri, cu prefixul țării (ex. +373 691 84 111).', 'libertbus-bilete' ), $phone ),
+			admin_url( 'admin.php?page=lbb-settings' ) );
+
 		$add( 'cookies', (bool) LBB_Settings::get( 'cookie_banner' ), __( 'Bannerul de cookies e pornit', 'libertbus-bilete' ),
 			LBB_Settings::get( 'cookie_banner' )
 				? __( 'Google Analytics și celelalte scripturi de statistică pornesc doar după acord.', 'libertbus-bilete' )

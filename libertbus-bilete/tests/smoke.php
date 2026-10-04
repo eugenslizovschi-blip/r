@@ -444,6 +444,23 @@ lbb_t( 'panou: bannerul de cookies pornit apare ca bifat', $it && true === $it['
 update_option( 'lbb_settings', array_merge( $cl_keep, array( 'cookie_banner' => 0 ) ) );
 $it = $cl_item();
 lbb_t( 'panou: bannerul de cookies oprit apare ca problemă', $it && false === $it['ok'] && false !== strpos( $it['detail'], '195/2024' ), $it );
+// Telefonul pentru clienți apare în formular, pe bilet și în emailuri: un număr incomplet e semnalat.
+$ph_item = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'phone' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+update_option( 'lbb_settings', array_merge( $cl_keep, array( 'support_phone' => '+373 691 84 111' ) ) );
+$it = $ph_item();
+lbb_t( 'panou: un telefon complet apare ca bifat', $it && true === $it['ok'], $it );
+foreach ( array( '+373', '', '069 18' ) as $ph_bad ) {
+	update_option( 'lbb_settings', array_merge( $cl_keep, array( 'support_phone' => $ph_bad ) ) );
+	$it = $ph_item();
+	lbb_t( 'panou: telefonul „' . $ph_bad . '” apare ca problemă', $it && false === $it['ok'], $it );
+}
 update_option( 'lbb_settings', $cl_keep );
 
 // Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
