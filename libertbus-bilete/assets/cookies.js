@@ -82,7 +82,7 @@
 		var host = location.hostname.replace( /^www\./, '' );
 		document.cookie.split( '; ' ).forEach( function ( c ) {
 			var name = c.split( '=' )[ 0 ];
-			if ( /^(_ga|_gid|_gat|_gcl|sbjs_|_fbp|_hj|_clck|_clsk)/.test( name ) ) {
+			if ( /^(_ga|_gid|_gat|_gcl|sbjs_|_fbp|_fbc|_hj|_clck|_clsk|_ym|_ttp)/.test( name ) ) {
 				[ '', '; domain=' + host, '; domain=.' + host ].forEach( function ( d ) {
 					document.cookie = name + '=; path=/; max-age=0' + d;
 				} );

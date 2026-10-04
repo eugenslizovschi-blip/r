@@ -108,12 +108,14 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     if (await page.isVisible('#lbb-cc')) fail(vp.name + ': bannerul reapare după „Accept toate”');
     if (!ga) fail(vp.name + ': Google Analytics nu pornește la vizita următoare');
 
-    // Retragerea acordului șterge cookies de statistică.
-    await ctx.addCookies([{ name: '_ga', value: 'GA1.1.1.1', url: BASE }]);
+    // Retragerea acordului șterge cookies-urile tuturor serviciilor blocate de banner.
+    const blockedCookies = ['_ga', '_ga_TEST', '_gcl_au', '_fbp', '_fbc', '_ym_uid', '_ym_d', '_ttp', '_hjSessionUser_1', '_clck'];
+    await ctx.addCookies(blockedCookies.map(name => ({ name, value: '1', url: BASE })));
     await page.goto(BASE + '/politica-de-cookies/#lbb-cookies');
     await page.waitForSelector('#lbb-cc:not([hidden])');
     await Promise.all([page.waitForNavigation(), page.click('#lbb-cc [data-lbb-cc="necessary"]')]);
-    if ((await trackers()).length) fail(vp.name + ': cookies de statistică rămân după retragerea acordului: ' + (await trackers()).join(','));
+    const left = (await ctx.cookies()).map(c => c.name).filter(n => blockedCookies.includes(n) || /^sbjs_/.test(n));
+    if (left.length) fail(vp.name + ': cookies de statistică/marketing rămân după retragerea acordului: ' + left.join(','));
     if ((await consent() || {}).cats !== '') fail(vp.name + ': retragerea nu s-a salvat');
 
     // „Setări”: doar statistică → Google Analytics pornește fără reclame, sursa vizitei (marketing) nu.
