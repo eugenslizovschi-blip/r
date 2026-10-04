@@ -407,7 +407,7 @@ class LBB_Admin {
 		foreach ( $rows as $b ) {
 			$total += $b['seats'];
 			$order  = $b['order_id'] ? wc_get_order( $b['order_id'] ) : null;
-			echo '<tr><td><strong>' . esc_html( $b['dep_time'] ) . '</strong></td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '</td><td><a href="tel:' . esc_attr( $b['phone'] ) . '">' . esc_html( $b['phone'] ) . '</a></td><td>' . self::payment_label( $b, $due ) . '</td><td>';
+			echo '<tr><td><strong>' . esc_html( $b['dep_time'] ) . '</strong></td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '</td><td><a href="tel:' . esc_attr( $b['phone'] ) . '">' . esc_html( $b['phone'] ) . '</a></td><td>' . self::payment_label( $b, $due ) . '</td><td>';
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a>';
 			}
@@ -418,6 +418,13 @@ class LBB_Admin {
 			$due_text[] = LBB_WooCommerce::money( $sum, $cur );
 		}
 		echo '</tbody><tfoot><tr><th colspan="3">' . esc_html__( 'Total locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html( $total ) . '</th><td colspan="2"></td><th colspan="2">' . ( $due_text ? esc_html__( 'De încasat la urcare', 'libertbus-bilete' ) . ': ' . esc_html( implode( ' + ', $due_text ) ) : '' ) . '</th></tr></tfoot></table></div>';
+	}
+
+	/**
+	 * Codul biletului; rezervările fără cod (coș abandonat, anulate înainte de plată) arată „—”.
+	 */
+	private static function ticket_code_html( $code ) {
+		return '' === (string) $code ? '—' : '<code>' . esc_html( $code ) . '</code>';
 	}
 
 	/**
@@ -524,7 +531,7 @@ class LBB_Admin {
 		echo '<table class="widefat striped lbb-bookings-table"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
 		foreach ( LBB_Bookings::recent( 200, $status ) as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
-			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $labels[ $b['status'] ] ) ? $labels[ $b['status'] ] : $b['status'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . esc_html( $b['phone'] . ' ' . $b['email'] ) . '</td><td>';
+			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $labels[ $b['status'] ] ) ? $labels[ $b['status'] ] : $b['status'] ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . esc_html( $b['phone'] . ' ' . $b['email'] ) . '</td><td>';
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a> (' . esc_html( wc_get_order_status_name( $order->get_status() ) ) . ')';
 			}

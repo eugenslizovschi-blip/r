@@ -30,6 +30,11 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     if (/Fatal error|Warning:|Notice:|Deprecated:|critical error/i.test(body)) fail(slug + ': eroare PHP în pagină: ' + (body.match(/(Fatal error|Warning:|Notice:|Deprecated:)[^\n]{0,160}/) || [''])[0]);
   }
 
+  // Rezervările fără cod (coș abandonat, anulate) arată „—”, nu o căsuță de cod goală.
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&status=cancelled');
+  const emptyCodes = await page.$$eval('#wpbody-content table.widefat code', cs => cs.filter(c => !c.textContent.trim()).length);
+  if (emptyCodes) fail('Rezervări: ' + emptyCodes + ' căsuțe de cod goale');
+
   // Lista de pasageri se descarcă în CSV, cu antetul corect și BOM (diacritice corecte în Excel).
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest');
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('a.button:text-is("CSV")')]);
