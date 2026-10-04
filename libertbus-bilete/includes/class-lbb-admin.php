@@ -400,7 +400,8 @@ class LBB_Admin {
 			return;
 		}
 		$total = 0;
-		echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'Ora', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Pasageri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Plată', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th></tr></thead><tbody>';
+		self::stack_table_style( 'lbb-manifest-table', array( __( 'Ora', 'libertbus-bilete' ), __( 'Ruta', 'libertbus-bilete' ), __( 'Bilet', 'libertbus-bilete' ), __( 'Locuri', 'libertbus-bilete' ), __( 'Pasageri', 'libertbus-bilete' ), __( 'Telefon', 'libertbus-bilete' ), __( 'Plată', 'libertbus-bilete' ), __( 'Comanda', 'libertbus-bilete' ) ) );
+		echo '<table class="widefat striped lbb-manifest-table"><thead><tr><th>' . esc_html__( 'Ora', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Pasageri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Plată', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th></tr></thead><tbody>';
 		$due = array();
 		foreach ( $rows as $b ) {
 			$total += $b['seats'];
@@ -416,6 +417,27 @@ class LBB_Admin {
 			$due_text[] = LBB_WooCommerce::money( $sum, $cur );
 		}
 		echo '</tbody><tfoot><tr><th colspan="3">' . esc_html__( 'Total locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html( $total ) . '</th><th colspan="2"></th><th colspan="2">' . ( $due_text ? esc_html__( 'De încasat la urcare', 'libertbus-bilete' ) . ': ' . esc_html( implode( ' + ', $due_text ) ) : '' ) . '</th></tr></tfoot></table></div>';
+	}
+
+	/**
+	 * Pe telefon (șoferul, dispecerul) un tabel lat devine carduri: fiecare rând pe un bloc, cu eticheta
+	 * coloanei în fața valorii, fără derulare laterală. La printare rămâne tabel.
+	 */
+	private static function stack_table_style( $class, array $labels ) {
+		$t   = '.' . $class;
+		$css = $t . ' code{white-space:nowrap}@media screen and (max-width:782px){'
+			. $t . ' thead{display:none}'
+			. $t . ',' . $t . ' tbody,' . $t . ' tfoot,' . $t . ' tr,' . $t . ' td,' . $t . ' tfoot th{display:block;width:auto!important;box-sizing:border-box}'
+			. $t . ' tr{padding:8px 0;border-bottom:1px solid #dcdcde}'
+			. $t . ' td,' . $t . ' tfoot th{padding:3px 12px!important;text-align:left}'
+			. $t . ' td:empty,' . $t . ' tfoot th:empty{display:none}'
+			. $t . ' td::before{font-weight:600;color:#50575e;margin-right:4px}';
+		foreach ( array_values( $labels ) as $i => $label ) {
+			if ( '' !== $label ) {
+				$css .= $t . ' td:nth-child(' . ( $i + 1 ) . ')::before{content:"' . str_replace( array( '\\', '"', '<' ), array( '\\\\', '\\"', '' ), $label ) . ':"}';
+			}
+		}
+		echo '<style>' . $css . '}</style>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
 	/**
@@ -496,7 +518,8 @@ class LBB_Admin {
 			$links[] = '<li><a href="' . esc_url( admin_url( 'admin.php?page=lbb-bookings' . ( $key ? '&status=' . $key : '' ) ) ) . '"' . ( $status === $key ? ' class="current"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
 		}
 		echo implode( ' | ', $links ) . '</ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput
-		echo '<table class="widefat striped"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th></th></tr></thead><tbody>';
+		self::stack_table_style( 'lbb-bookings-table', array( '#', __( 'Cursa', 'libertbus-bilete' ), __( 'Locuri', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ), __( 'Bilet', 'libertbus-bilete' ), __( 'Client', 'libertbus-bilete' ), __( 'Comanda', 'libertbus-bilete' ), __( 'Creată', 'libertbus-bilete' ) ) );
+		echo '<table class="widefat striped lbb-bookings-table"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th></th></tr></thead><tbody>';
 		foreach ( LBB_Bookings::recent( 200, $status ) as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
 			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $labels[ $b['status'] ] ) ? $labels[ $b['status'] ] : $b['status'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . esc_html( $b['phone'] . ' ' . $b['email'] ) . '</td><td>';

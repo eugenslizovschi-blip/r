@@ -39,6 +39,25 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   if (!/^﻿?Data,Ora,Plecare,Destinatie,Bilet,Locuri,Pasageri,Telefon,Email,Plata,Comanda/.test(csv)) fail('antet CSV greșit: ' + csv.slice(0, 80));
   if (!/^pasageri-\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename())) fail('nume de fișier CSV greșit: ' + dl.suggestedFilename());
 
+  // Pe telefon (șoferul, dispecerul): lista de pasageri și rezervările încap pe ecran, fără derulare laterală,
+  // iar codul biletului rămâne pe un rând.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings');
+  const firstDate = await page.$$eval('#wpbody-content table.widefat tbody td', tds => { for (const td of tds) { const m = td.textContent.match(/(\d\d)\.(\d\d)\.(\d{4}) \d\d:\d\d/); if (m) return m[3] + '-' + m[2] + '-' + m[1]; } return ''; });
+  if (!firstDate) fail('nu am găsit o rezervare pentru testul pe telefon');
+  for (const url of ['/wp-admin/admin.php?page=lbb-bookings', '/wp-admin/admin.php?page=lbb-manifest&date=' + firstDate]) {
+    await page.goto(BASE + url);
+    const m = await page.evaluate(() => {
+      const codes = [...document.querySelectorAll('#wpbody-content table.widefat code')];
+      const lh = codes.length ? parseFloat(getComputedStyle(codes[0]).lineHeight) || 20 : 20;
+      return { sw: document.documentElement.scrollWidth, iw: window.innerWidth, codes: codes.length, broken: codes.filter(c => c.getBoundingClientRect().height > lh * 1.6).length, label: codes.length ? getComputedStyle(codes[0].closest('td'), '::before').content : '' };
+    });
+    if (m.sw > m.iw + 1) fail(url + ': pe telefon pagina se derulează în lateral (' + m.sw + ' > ' + m.iw + ')');
+    if (!m.codes || m.broken) fail(url + ': codul biletului se rupe pe mai multe rânduri pe telefon (' + m.broken + ' din ' + m.codes + ')');
+    if (!/Bilet/.test(m.label)) fail(url + ': pe telefon valorile nu au eticheta coloanei: ' + m.label);
+    await page.screenshot({ path: (process.env.OUT || '.') + '/admin-phone-' + (url.includes('manifest') ? 'manifest' : 'bookings') + '.png', fullPage: true });
+  }
+
   console.log(process.exitCode ? 'ADMIN: PROBLEME' : 'ADMIN: OK');
   await browser.close();
 })().catch(e => { console.error('FAIL', e); process.exit(1); });
