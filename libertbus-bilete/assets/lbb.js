@@ -109,6 +109,7 @@
 		var preset = cfg.preset || {};
 		var dateTouched = !! preset.date;
 		var skipped = 0;
+		var shownDate = ''; // Data pentru care s-au cerut orele afișate.
 
 		function option( value, label, disabled ) {
 			var o = document.createElement( 'option' );
@@ -360,6 +361,7 @@
 		function loadDepartures() {
 			var route = currentRoute();
 			syncCurrency();
+			shownDate = el.date.value;
 			departures = [];
 			el.time.innerHTML = '';
 			el.time.appendChild( option( '', t.chooseTime ) );
@@ -517,6 +519,21 @@
 				}
 				btn.classList.add( 'is-busy' );
 			}, 0 );
+		} );
+		// „Înapoi” din browser: din memorie (bfcache) pagina revine cu butoanele blocate de trimiterea de mai sus;
+		// la o reîncărcare browserul pune la loc data aleasă de client după ce s-au cerut orele pentru azi.
+		window.addEventListener( 'pageshow', function ( e ) {
+			if ( e.persisted ) {
+				for ( var b = 0; b < buttons.length; b++ ) {
+					buttons[ b ].classList.remove( 'is-busy' );
+				}
+				summary();
+			}
+			if ( el.date.value && el.date.value !== shownDate ) {
+				dateTouched = true;
+				skipped = 0;
+				loadDepartures();
+			}
 		} );
 	}
 

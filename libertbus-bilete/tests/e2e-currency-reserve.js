@@ -87,6 +87,25 @@ async function fillForm(page, phone) {
   if (forged.status() !== 404 || /lbb-ticket|Test Pasager/.test(fbody)) fail('un link fals arată rezervarea: ' + forged.status());
   await guest.waitForTimeout(500);
   await guest.screenshot({ path: (process.env.OUT || '.') + '/reservation.png', fullPage: true });
+  // „Înapoi” din browser: data aleasă revine în câmp, deci orele și locurile trebuie să fie pentru ea, nu pentru azi.
+  const asked = [];
+  guest.on('request', r => { const m = r.url().match(/[?&]date=(\d{4}-\d{2}-\d{2})/); if (m && /route_id=/.test(r.url())) asked.push(m[1]); });
+  await guest.goBack();
+  await guest.waitForSelector('[data-lbb-submit]');
+  await guest.waitForLoadState('networkidle');
+  const shown = await guest.inputValue('[data-lbb="date"]');
+  if (asked[asked.length - 1] !== shown) fail('după „Înapoi” data arătată e ' + shown + ', dar orele sunt pentru ' + asked.join(' → '));
+  console.log('după Înapoi: data', shown, '| ore cerute pentru', asked.join(' → '));
+  // Din memorie (bfcache, ex. Safari): butoanele blocate la trimitere se deblochează.
+  const unblocked = await guest.evaluate(() => {
+    const bs = [...document.querySelectorAll('[data-lbb-submit]')];
+    const t = document.querySelector('[data-lbb="time"] option:not([disabled]):not([value=""])');
+    if (t) { t.selected = true; t.parentNode.dispatchEvent(new Event('change')); }
+    bs.forEach(b => { b.disabled = true; b.classList.add('is-busy'); });
+    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+    return bs.map(b => b.value + ':' + (b.disabled ? 'blocat' : 'ok') + (b.classList.contains('is-busy') ? ':busy' : ''));
+  });
+  if (unblocked.some(x => !/:ok$/.test(x))) fail('revenit din bfcache, butoanele rămân blocate: ' + unblocked.join(', '));
   console.log(process.exitCode ? 'CURRENCY+RESERVE: PROBLEME' : 'CURRENCY+RESERVE: OK');
   await browser.close();
 })().catch(e => { console.error('FAIL', e); process.exit(1); });
