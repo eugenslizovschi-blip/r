@@ -9,9 +9,10 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   page.on('pageerror', e => fail('pageerror: ' + e.message));
   // Prima cerere pentru locuri primește pagina HTML a protecției hostingului: formularul trebuie să reîncerce.
-  let blocked = 0;
-  await page.route('**/lbb/v1/departures**', route => {
+  let blocked = 0, gate = null, release = null;
+  await page.route('**/lbb/v1/departures**', async route => {
     if (blocked++ === 0) return route.fulfill({ status: 200, contentType: 'text/html', body: '<!DOCTYPE html><title>One moment, please...</title>' });
+    if (gate) await gate; // orele „pe internet slab”: le eliberează testul
     return route.continue();
   });
   await page.goto(BASE + '/balti-iasi/');
@@ -39,6 +40,7 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await page.fill('input[name="lbb_phone"]', '+40712345678');
   await page.fill('input[name="lbb_email"]', 'guest@example.com');
   await page.$eval('input[name="lbb_names[]"]', i => { i.required = false; });
+  gate = new Promise(r => { release = r; }); // după reîncărcare orele întârzie până le eliberăm mai jos
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
   const alert = await page.$('.lbb-alert');
   if (!alert) fail('lipsește eroarea pentru numele pasagerului'); else console.log('eroare afișată:', (await alert.textContent()).trim());
@@ -52,8 +54,15 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   if (mark.inv !== 'true' || !mark.alertId || mark.desc !== mark.alertId) fail('numele lipsă nu e marcat ca greșit: ' + JSON.stringify(mark));
   if (!/rgb\(19[0-9], 4[0-9], 4[0-9]\)/.test(mark.border)) fail('câmpul greșit nu are contur roșu: ' + mark.border);
   if (await page.$eval('input[name="lbb_phone"]', i => i.hasAttribute('aria-invalid'))) fail('telefonul corect e marcat greșit');
-  await page.type('input[name="lbb_names[]"]', 'I');
+  await page.focus('input[name="lbb_names[]"]');
+  await page.keyboard.type('Io');
   if (await page.$eval('input[name="lbb_names[]"]', i => i.hasAttribute('aria-invalid'))) fail('marcajul rămâne după ce clientul scrie');
+  // Orele sosesc cât clientul scrie: câmpul de nume nu se reface sub degete (cursorul și textul rămân).
+  gate = null; release();
+  await page.waitForFunction(() => !document.querySelector('[data-lbb="time"]').disabled, null, { timeout: 15000 });
+  await page.waitForTimeout(300);
+  const typing = await page.evaluate(() => { const a = document.activeElement; return { name: a && a.name, value: a && a.value }; });
+  if (typing.name !== 'lbb_names[]' || typing.value !== 'Io') fail('câmpul de nume s-a refăcut cât clientul scria: ' + JSON.stringify(typing));
   await page.fill('input[name="lbb_names[]"]', '');
 
   // Formularul păstrează alegerile; completăm numele și trimitem.

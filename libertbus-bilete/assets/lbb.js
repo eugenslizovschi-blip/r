@@ -304,43 +304,47 @@
 			fillNames( adults, children );
 		}
 
+		// Câmpurile existente rămân pe loc (doar se adaugă sau se scot de la coadă): orele vin după o cerere,
+		// iar un câmp refăcut cât clientul scrie i-ar lua cursorul și i-ar închide tastatura pe telefon.
 		function fillNames( adults, children ) {
 			var total = adults + children;
-			var inputs = el.names.querySelectorAll( 'input' );
-			var values = [];
-			for ( var i = 0; i < inputs.length; i++ ) {
-				values.push( inputs[ i ].value );
-			}
-			if ( ! values.length && preset.names ) {
-				values = preset.names;
-			}
-			while ( el.names.children.length > 1 ) {
-				el.names.removeChild( el.names.lastChild );
-			}
+			var labels = el.names.querySelectorAll( 'label.lbb-field' );
+			var stored = ! labels.length && preset.names ? preset.names : [];
 			for ( var n = 0; n < total; n++ ) {
-				var label = document.createElement( 'label' );
-				label.className = 'lbb-field';
-				var span = document.createElement( 'span' );
-				span.textContent = t.passenger + ' ' + ( n + 1 ) + ( n >= adults ? ' (' + t.child + ')' : '' );
-				var input = document.createElement( 'input' );
-				input.type = 'text';
-				input.name = 'lbb_names[]';
-				input.placeholder = t.namePh;
-				input.autocomplete = n === 0 ? 'name' : 'off';
-				input.maxLength = 80;
-				input.required = cfg.requireNames;
-				input.value = values[ n ] || '';
-				input.addEventListener( 'input', checkName );
-				checkName.call( input );
-				if ( badField === 'names' && ( ! input.value.trim() || input.validity.customError ) ) {
-					markInvalid( input );
+				var label = labels[ n ];
+				if ( ! label ) {
+					label = nameField( n, stored[ n ] || '' );
+					el.names.appendChild( label );
 				}
-				label.appendChild( span );
-				label.appendChild( input );
-				el.names.appendChild( label );
+				label.querySelector( 'span' ).textContent = t.passenger + ' ' + ( n + 1 ) + ( n >= adults ? ' (' + t.child + ')' : '' );
+			}
+			for ( var r = labels.length - 1; r >= total; r-- ) {
+				el.names.removeChild( labels[ r ] );
 			}
 			el.names.hidden = total === 0;
 			summary();
+		}
+
+		function nameField( n, value ) {
+			var label = document.createElement( 'label' );
+			label.className = 'lbb-field';
+			var span = document.createElement( 'span' );
+			var input = document.createElement( 'input' );
+			input.type = 'text';
+			input.name = 'lbb_names[]';
+			input.placeholder = t.namePh;
+			input.autocomplete = n === 0 ? 'name' : 'off';
+			input.maxLength = 80;
+			input.required = cfg.requireNames;
+			input.value = value;
+			input.addEventListener( 'input', checkName );
+			checkName.call( input );
+			if ( badField === 'names' && ( ! input.value.trim() || input.validity.customError ) ) {
+				markInvalid( input );
+			}
+			label.appendChild( span );
+			label.appendChild( input );
+			return label;
 		}
 
 		// Ca pe server: un nume are cel puțin două litere (orice alfabet), altfel browserul oprește trimiterea.
