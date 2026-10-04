@@ -42,6 +42,15 @@ echo "$OUT_ADM" | grep -q "ADMIN: OK" && [ -z "$NEW_ERR" ] && echo "  ok" || { e
 echo "== Cookies: banner, Google Analytics blocat până la acord, paginile legale"
 OUT_CC=$(BASE="$BASE" OUT="${OUT:-.}" node "$DIR/tests/e2e-cookies.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_CC" | grep -q "COOKIES: OK" && echo "  ok" || { echo "$OUT_CC" | grep FAIL | head -5; echo "  PROBLEME"; FAIL=1; }
+echo "== Accesibilitate (axe-core): formular, banner cookies, pagina biletului"
+# AXE_JS = axe.min.js din pachetul axe-core (tests/setup-local.sh îl descarcă); fără el pasul se sare.
+AXE_JS="${AXE_JS:-$(dirname "$WP_PATH")/axe/package/axe.min.js}"
+if [ -f "$AXE_JS" ]; then
+  OUT_A11Y=$(AXE_JS="$AXE_JS" BASE="$BASE" node "$DIR/tests/e2e-a11y.js" 2>&1 | grep -v CERT_AUTHORITY)
+  echo "$OUT_A11Y" | grep -q "A11Y: OK" && echo "  ok" || { echo "$OUT_A11Y" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
+else
+  echo "  sărit (setați AXE_JS)"
+fi
 echo "== Dispozitive (iPhone SE … desktop 1920), 5 browsere în paralel"
 OUT_DEV=$(BASE="$BASE" OUT="${OUT:-.}" PARALLEL=5 node "$DIR/tests/e2e-devices.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_DEV" | grep -E '^✗|^    -|FAIL' ; echo "$OUT_DEV" | grep -c '^✓' | sed 's/^/  dispozitive OK: /'

@@ -83,6 +83,8 @@ if ( is_dir( $file ) && file_exists( $file . '/index.php' ) ) { $_SERVER['SCRIPT
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 require __DIR__ . '/wordpress/index.php';
 PHP
+# axe-core pentru testul de accesibilitate (tests/qa.sh îl găsește în $W/axe); fără internet pasul se sare.
+[ -f "$W/axe/package/axe.min.js" ] || { mkdir -p "$W/axe" && (cd "$W/axe" && npm pack axe-core@4 --silent >/dev/null 2>&1 && tar xzf axe-core-*.tgz) || true; }
 # Verificatorul de compatibilitate PHP 7.4 (folosit de tests/qa.sh prin PHPCS_DIR=$W/phpcs).
 if [ ! -x "$W/phpcs/vendor/bin/phpcs" ]; then
   mkdir -p "$W/phpcs" && cp "$PLUGIN/tests/compat/composer.json" "$W/phpcs/" && (cd "$W/phpcs" && COMPOSER_ALLOW_SUPERUSER=1 composer install --quiet --no-interaction >/dev/null 2>&1) || true
