@@ -70,6 +70,7 @@ async function fillForm(page, phone) {
   guest.on('pageerror', e => fail('pageerror: ' + e.message));
   await fillForm(guest, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
   await guest.screenshot({ path: (process.env.OUT || '.') + '/form-buttons.png', fullPage: true });
+  const chosenTime = await guest.inputValue('[data-lbb="time"]');
   await Promise.all([guest.waitForNavigation(), guest.click('[data-lbb-submit][value="reserve"]')]);
   if (!/lbb_bilet=/.test(guest.url())) fail('rezervarea nu duce la pagina rezervării: ' + guest.url());
   const state = (await guest.textContent('.state')).trim();
@@ -95,7 +96,13 @@ async function fillForm(page, phone) {
   await guest.waitForLoadState('networkidle');
   const shown = await guest.inputValue('[data-lbb="date"]');
   if (asked[asked.length - 1] !== shown) fail('după „Înapoi” data arătată e ' + shown + ', dar orele sunt pentru ' + asked.join(' → '));
-  console.log('după Înapoi: data', shown, '| ore cerute pentru', asked.join(' → '));
+  const backTime = await guest.inputValue('[data-lbb="time"]');
+  // Ora revine dacă mai are locuri (rezervarea de mai sus poate fi ocupat-o pe ultimul).
+  const stillOpen = await guest.$('[data-lbb="time"] option[value="' + chosenTime + '"]:not([disabled])');
+  if (stillOpen && backTime !== chosenTime) fail('după „Înapoi” ora aleasă (' + chosenTime + ') s-a pierdut: ' + JSON.stringify(backTime));
+  if (!stillOpen && backTime) fail('după „Înapoi” a revenit o oră fără locuri: ' + backTime);
+  if (stillOpen && await guest.$('[data-lbb-submit]:disabled')) fail('după „Înapoi”, cu data și ora la loc, butoanele trebuie să meargă');
+  console.log('după Înapoi: ora', backTime, '| data', shown, '| ore cerute pentru', asked.join(' → '));
   // Din memorie (bfcache, ex. Safari): butoanele blocate la trimitere se deblochează.
   const unblocked = await guest.evaluate(() => {
     const bs = [...document.querySelectorAll('[data-lbb-submit]')];

@@ -2,7 +2,7 @@
 ( function () {
 	'use strict';
 
-	function init( root ) {
+	function init( root, index ) {
 		var cfg = decodeConfig( root.getAttribute( 'data-lbb-config' ) );
 		var t = cfg.i18n;
 		var el = {};
@@ -110,6 +110,34 @@
 		var dateTouched = !! preset.date;
 		var skipped = 0;
 		var shownDate = ''; // Data pentru care s-au cerut orele afișate.
+		var memoKey = 'lbbTime' + ( index || 0 );
+
+		// Ora aleasă se ține în istoricul paginii: la „Înapoi” browserul pune la loc data și numele,
+		// dar lista orelor se construiește din nou și alegerea s-ar pierde.
+		function rememberTime() {
+			try {
+				var st = {};
+				var old = window.history.state;
+				if ( old && typeof old === 'object' ) {
+					for ( var k in old ) {
+						if ( Object.prototype.hasOwnProperty.call( old, k ) ) {
+							st[ k ] = old[ k ];
+						}
+					}
+				}
+				st[ memoKey ] = el.date.value + '|' + el.time.value;
+				window.history.replaceState( st, '' );
+			} catch ( x ) {}
+		}
+
+		function rememberedTime() {
+			try {
+				var v = String( ( window.history.state && window.history.state[ memoKey ] ) || '' ).split( '|' );
+				return v[ 0 ] && v[ 0 ] === el.date.value ? v[ 1 ] || '' : '';
+			} catch ( x ) {
+				return '';
+			}
+		}
 
 		function option( value, label, disabled ) {
 			var o = document.createElement( 'option' );
@@ -418,6 +446,9 @@
 						el.time.value = firstOpen[ 0 ].time;
 					}
 					preset.time = '';
+					if ( el.time.value ) {
+						rememberTime(); // Ora aleasă automat (o singură plecare sau din link) nu dă „change”.
+					}
 					el.time.disabled = ! departures.length;
 					fillCounts();
 				} )
@@ -475,7 +506,10 @@
 			dateTouched = true;
 			loadDepartures();
 		} );
-		el.time.addEventListener( 'change', fillCounts );
+		el.time.addEventListener( 'change', function () {
+			rememberTime();
+			fillCounts();
+		} );
 		el.adults.addEventListener( 'change', fillCounts );
 		if ( el.children ) {
 			el.children.addEventListener( 'change', fillCounts );
@@ -529,9 +563,13 @@
 				}
 				summary();
 			}
-			if ( el.date.value && el.date.value !== shownDate ) {
+			var keep = rememberedTime();
+			if ( ( el.date.value && el.date.value !== shownDate ) || ( keep && ! el.time.value ) ) {
 				dateTouched = true;
 				skipped = 0;
+				if ( keep ) {
+					preset.time = keep;
+				}
 				loadDepartures();
 			}
 		} );
@@ -558,7 +596,7 @@
 		var roots = document.querySelectorAll( '.lbb-booking[data-lbb-config]' );
 		for ( var i = 0; i < roots.length; i++ ) {
 			try {
-				init( roots[ i ] );
+				init( roots[ i ], i );
 			} catch ( e ) {
 				if ( window.console ) {
 					window.console.error( 'LibertBus:', e );
