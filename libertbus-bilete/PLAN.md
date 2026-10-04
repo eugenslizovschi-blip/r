@@ -1,6 +1,6 @@
 # Plan: plata cu cardul pe libertbus.md
 
-## Situația de azi (2 octombrie 2026)
+## Situația înainte de plugin (2 octombrie 2026)
 
 - WordPress 6.4.3, tema Betheme, Elementor, WooCommerce 8.7.3. Serverul rulează PHP 7.4, care nu mai primește actualizări de securitate.
 - Rezervarea se face prin formulare Contact Form 7, câte unul pe fiecare rută (aproximativ 45 de formulare). Ele trimit un email, fără plată și fără să verifice locurile libere.
@@ -16,6 +16,21 @@
 - Fusul orar e un decalaj fix UTC+2, care greșește cu o oră vara.
 - Contul `libertbus` are parola expusă în chat și trebuie schimbată.
 
+## Ce e deja pe site-ul live (4 octombrie 2026)
+
+- Plugin-ul LibertBus Bilete 1.4.1 e instalat și activ. Butonul „Achit online” e ascuns până porniți plata. Noul formular nu e încă pus în locul formularelor Contact Form 7.
+- Bannerul de cookies (Legea nr. 195/2024, aplicabilă din 23 august 2026, și GDPR):
+  - butoanele „Doar necesare”, „Setări” și „Accept toate”;
+  - Google Analytics pornește doar după acord.
+- Paginile „Politica de confidențialitate” și „Politica de cookies” sunt publicate. Linkurile lor și „Setări cookies” apar în subsol, sub „© 2026 Libertbus.md”.
+- Paginile de termeni, rambursare și plată sunt create ca ciorne. Le publicați după ce le verificați.
+- Îmbunătățirile făcute după 1.4.1 sunt pe acest branch, nu pe live. Le pun pe live doar cu acordul dumneavoastră:
+  - Google Tag Manager blocat până la acord;
+  - ștergerea tuturor cookies-urilor de urmărire la retragerea acordului;
+  - ziua de azi după ora Chișinăului;
+  - expeditorul corect în emailurile de rezervare;
+  - pagina biletului nu mai rămâne în cache.
+
 ## Ce face plugin-ul LibertBus Bilete (gata)
 
 Vezi `README.md`. Pe scurt:
@@ -29,14 +44,14 @@ Vezi `README.md`. Pe scurt:
 
 ### Ce faceți dumneavoastră
 1. **Contractul cu banca**: e-commerce acquiring cu Paynet, maib sau Victoriabank. Pentru plăți în RON prin BT iPay e nevoie de firmă în România.
-2. **Datele firmei** pentru LibertBus → Setări: denumire, IDNO, adresă.
+2. **Datele firmei** pentru LibertBus → Setări: denumire, IDNO, adresă. Apar în politica de confidențialitate, cerută de Legea nr. 195/2024. Confirmați și cât timp se păstrează datele: rezervările 3 ani, mesajele 1 an, jurnalele de securitate 90 de zile.
 3. **Regulile de anulare și rambursare**. Textul-model propune 100% / 50% / 0% în funcție de cât timp mai e până la plecare. Ajustați-l.
 4. **Câte locuri pe cursă** se vând online.
 
 ### Ce pot face eu, cu acordul dumneavoastră
-1. Instalarea și activarea plugin-ului pe site.
+1. ~~Instalarea și activarea plugin-ului pe site.~~ Făcut. Rămâne actualizarea la versiunea de pe branch.
 2. Fusul orar → Chișinău. Moneda WooCommerce → MDL.
-3. Paginile legale: create, completate și legate în footer.
+3. Paginile legale: confidențialitate și cookies sunt publicate și legate în subsol. Termenii, rambursarea și plata așteaptă verificarea dumneavoastră.
 4. Pagină nouă „Rezervă bilet” cu formularul. Pe paginile de rută, formularul de contact se înlocuiește cu `[libertbus_rezervare from=".." to=".."]`. Butoanele „Rezervă” din „Orar Curse” vor duce spre formular.
 5. Oprirea WooPayments, care nu funcționează în Moldova.
 6. Test complet cu plata de test, apoi cu modul de test al băncii.
