@@ -403,11 +403,11 @@
 					}
 				} );
 			}
-			var approxText = function ( factor ) {
+			var approxText = function () {
 				return approx.map( function ( c ) {
 					var q = route.prices[ c ];
 					var v = adults * q[ 0 ] + children * ( q[ 1 ] === null ? q[ 0 ] : q[ 1 ] );
-					return '≈\u00a0' + money( Math.round( factor ? q[ 0 ] : v ), c );
+					return '≈\u00a0' + money( Math.round( v ), c );
 				} ).join( ', ' );
 			};
 			el.summary.textContent = '';
@@ -420,12 +420,23 @@
 			if ( approx.length ) {
 				var eq = document.createElement( 'span' );
 				eq.className = 'lbb-summary-approx';
-				eq.textContent = ' (' + approxText( false ) + ')';
+				eq.textContent = ' (' + approxText() + ')';
 				price.appendChild( eq );
 			}
 			var note = document.createElement( 'div' );
 			note.className = 'lbb-summary-note';
-			note.textContent = money( p[ 0 ], cur ) + ' / ' + t.passenger.toLowerCase() + ( approx.length ? ' (' + approxText( true ) + ')' : '' ) + ( approx.length ? ' · ' + t.approxNote : '' );
+			// Prețul pe loc; cu copii la alt preț, ambele („250 MDL / adult · 150 MDL / copil”), ca să se vadă totalul.
+			var unit = function ( kid ) {
+				var own = kid && p[ 1 ] !== null ? p[ 1 ] : p[ 0 ];
+				var eqs = approx.map( function ( c ) {
+					var q = route.prices[ c ];
+					return '≈\u00a0' + money( Math.round( kid && q[ 1 ] !== null ? q[ 1 ] : q[ 0 ] ), c );
+				} ).join( ', ' );
+				return money( own, cur ) + ( eqs ? ' (' + eqs + ')' : '' );
+			};
+			note.textContent = ( children && childPrice !== p[ 0 ]
+				? unit( false ) + ' / ' + t.adult + ' · ' + unit( true ) + ' / ' + t.child
+				: unit( false ) + ' / ' + t.passenger.toLowerCase() ) + ( approx.length ? ' · ' + t.approxNote : '' );
 			el.summary.appendChild( line );
 			el.summary.appendChild( price );
 			el.summary.appendChild( note );

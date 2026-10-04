@@ -338,6 +338,7 @@ class LBB_Frontend {
 				'closed'      => __( 'vânzare închisă', 'libertbus-bilete' ),
 				'passenger'   => __( 'Pasager', 'libertbus-bilete' ),
 				'child'       => __( 'copil', 'libertbus-bilete' ),
+				'adult'       => __( 'adult', 'libertbus-bilete' ),
 				'nameInvalid' => __( 'Scrieți numele și prenumele ca în pașaport (cel puțin două litere).', 'libertbus-bilete' ),
 				'namePh'      => __( 'Nume și prenume', 'libertbus-bilete' ),
 				'error'       => __( 'Nu am putut verifica locurile. Încercați din nou.', 'libertbus-bilete' ),

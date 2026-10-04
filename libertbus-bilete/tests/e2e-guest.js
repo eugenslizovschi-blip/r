@@ -125,6 +125,13 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await kid.selectOption('[data-lbb="adults"]', '1');
     const n1 = await names();
     if (n1 !== 'Pasager 1=Ion Popescu | Pasager 2 (copil)=Ana Popescu') fail('după 2→1 adulți numele s-au mutat greșit: ' + n1);
+    // Cu un copil la alt preț, rezumatul arată ambele prețuri (altfel „250 MDL / pasager” nu se potrivește cu totalul).
+    const note = (await kid.textContent('.lbb-summary-note')).replace(/\s+/g, ' ');
+    const total = (await kid.textContent('.lbb-summary-total')).replace(/\s+/g, ' ');
+    const m = note.match(/^(\d+) MDL.*?\/ adult · (\d+) MDL.*?\/ copil/);
+    const t = total.match(/(\d+) MDL/);
+    if (!m || !t || +m[1] + +m[2] !== +t[1]) fail('rezumatul nu explică totalul cu adult + copil: „' + total + '” / „' + note + '”');
+    console.log('rezumat:', total, '|', note);
     await kid.selectOption('[data-lbb="adults"]', '2');
     const n2 = await names();
     if (n2 !== 'Pasager 1=Ion Popescu | Pasager 2= | Pasager 3 (copil)=Ana Popescu') fail('după 1→2 adulți copilul nu a rămas copil: ' + n2);
