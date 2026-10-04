@@ -50,6 +50,15 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     const sw = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
     if (sw[0] > sw[1] + 1) fail(slug + ': pe telefon pagina se derulează în lateral (' + sw[0] + ' > ' + sw[1] + ')');
   }
+  // Câmpurile de text din formularul de rută și din Setări au înălțimea obișnuită din WordPress pe telefon (ușor de atins).
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-routes');
+  const editUrl = await page.$eval('a[href*="page=lbb-routes&edit="]', a => a.href);
+  for (const slug of [editUrl, 'lbb-settings']) {
+    await page.goto(slug.startsWith('http') ? slug : BASE + '/wp-admin/admin.php?page=' + slug);
+    if (!(await page.$('#wpbody-content form input[name="' + (slug.startsWith('http') ? 'origin' : 'support_phone') + '"]'))) fail(slug + ': formularul nu s-a deschis');
+    const small = await page.$$eval('#wpbody-content form input:not([type]), #wpbody-content form input[type="text"]', ins => ins.filter(i => i.offsetParent && i.getBoundingClientRect().height < 36).map(i => i.name + '=' + Math.round(i.getBoundingClientRect().height)));
+    if (small.length) fail(slug + ': câmpuri prea mici pentru deget pe telefon: ' + small.join(', '));
+  }
   for (const url of ['/wp-admin/admin.php?page=lbb-bookings', '/wp-admin/admin.php?page=lbb-manifest&date=' + firstDate]) {
     await page.goto(BASE + url);
     const m = await page.evaluate(() => {

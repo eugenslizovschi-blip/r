@@ -326,9 +326,9 @@ class LBB_Admin {
 			<?php wp_nonce_field( 'lbb_save_route' ); ?>
 			<datalist id="lbb-cities"><?php foreach ( $cities as $c ) : ?><option value="<?php echo esc_attr( $c ); ?>"><?php endforeach; ?></datalist>
 			<table class="form-table">
-				<tr><th><label for="lbb-origin"><?php esc_html_e( 'Plecare', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-origin" name="origin" class="regular-text" list="lbb-cities" required value="<?php echo esc_attr( $route['origin'] ); ?>"></td></tr>
-				<tr><th><label for="lbb-dest"><?php esc_html_e( 'Destinație', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-dest" name="destination" class="regular-text" list="lbb-cities" required value="<?php echo esc_attr( $route['destination'] ); ?>"></td></tr>
-				<tr><th><label for="lbb-times"><?php esc_html_e( 'Ore de plecare', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-times" name="departures" class="regular-text" required value="<?php echo esc_attr( implode( ', ', LBB_Routes::parse_times( $route['departures'] ) ) ); ?>"><p class="description"><?php esc_html_e( 'Separate prin virgulă, ex. 08:45, 17:45', 'libertbus-bilete' ); ?></p></td></tr>
+				<tr><th><label for="lbb-origin"><?php esc_html_e( 'Plecare', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-origin" name="origin" class="regular-text" list="lbb-cities" required value="<?php echo esc_attr( $route['origin'] ); ?>"></td></tr>
+				<tr><th><label for="lbb-dest"><?php esc_html_e( 'Destinație', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-dest" name="destination" class="regular-text" list="lbb-cities" required value="<?php echo esc_attr( $route['destination'] ); ?>"></td></tr>
+				<tr><th><label for="lbb-times"><?php esc_html_e( 'Ore de plecare', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-times" name="departures" class="regular-text" required value="<?php echo esc_attr( implode( ', ', LBB_Routes::parse_times( $route['departures'] ) ) ); ?>"><p class="description"><?php esc_html_e( 'Separate prin virgulă, ex. 08:45, 17:45', 'libertbus-bilete' ); ?></p></td></tr>
 				<tr><th><?php esc_html_e( 'Zile', 'libertbus-bilete' ); ?></th><td class="lbb-days"><?php foreach ( self::day_names() as $n => $label ) : ?><label><input type="checkbox" name="days[]" value="<?php echo esc_attr( $n ); ?>" <?php checked( in_array( $n, $route['days'], true ) ); ?>> <?php echo esc_html( $label ); ?></label><?php endforeach; ?></td></tr>
 				<tr><th><label for="lbb-price"><?php esc_html_e( 'Preț adult', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-price" name="price" type="number" step="0.01" min="0" required value="<?php echo esc_attr( $route['price'] ); ?>">
 					<select name="currency"><?php foreach ( LBB_Settings::currencies() as $cur ) : ?><option <?php selected( $route['currency'], $cur ); ?>><?php echo esc_html( $cur ); ?></option><?php endforeach; ?></select>
@@ -550,7 +550,7 @@ class LBB_Admin {
 			echo '</td></tr>';
 		};
 		$text = function ( $key, $label, $help = '' ) use ( $s ) {
-			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" class="regular-text" value="' . esc_attr( $s[ $key ] ) . '">';
+			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input type="text" id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" class="regular-text" value="' . esc_attr( $s[ $key ] ) . '">';
 			if ( $help ) {
 				echo '<p class="description">' . esc_html( $help ) . '</p>';
 			}
