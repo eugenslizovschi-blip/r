@@ -45,6 +45,11 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings');
   const firstDate = await page.$$eval('#wpbody-content table.widefat tbody td', tds => { for (const td of tds) { const m = td.textContent.match(/(\d\d)\.(\d\d)\.(\d{4}) \d\d:\d\d/); if (m) return m[3] + '-' + m[2] + '-' + m[1]; } return ''; });
   if (!firstDate) fail('nu am găsit o rezervare pentru testul pe telefon');
+  for (const slug of ['lbb', 'lbb-routes', 'lbb-settings']) {
+    await page.goto(BASE + '/wp-admin/admin.php?page=' + slug);
+    const sw = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
+    if (sw[0] > sw[1] + 1) fail(slug + ': pe telefon pagina se derulează în lateral (' + sw[0] + ' > ' + sw[1] + ')');
+  }
   for (const url of ['/wp-admin/admin.php?page=lbb-bookings', '/wp-admin/admin.php?page=lbb-manifest&date=' + firstDate]) {
     await page.goto(BASE + url);
     const m = await page.evaluate(() => {
