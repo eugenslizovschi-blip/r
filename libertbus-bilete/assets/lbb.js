@@ -16,6 +16,24 @@
 		var nextWrap = root.querySelector( '[data-lbb="next-wrap"]' );
 		var nextBtn = root.querySelector( '[data-lbb="next"]' );
 		var backBtn = root.querySelector( '[data-lbb="back"]' );
+		// Eroare de la server: câmpul vizat (telefon, email, nume…) e marcat până când clientul îl schimbă.
+		var alertBox = root.querySelector( '[data-lbb="alert"]' );
+		var badField = alertBox ? alertBox.getAttribute( 'data-lbb-field' ) || '' : '';
+
+		function markInvalid( input ) {
+			input.setAttribute( 'aria-invalid', 'true' );
+			if ( alertBox.id ) {
+				input.setAttribute( 'aria-describedby', alertBox.id );
+			}
+			var clear = function () {
+				input.removeAttribute( 'aria-invalid' );
+				input.removeAttribute( 'aria-describedby' );
+				input.removeEventListener( 'input', clear );
+				input.removeEventListener( 'change', clear );
+			};
+			input.addEventListener( 'input', clear );
+			input.addEventListener( 'change', clear );
+		}
 
 		// Formular compact (în căsuțe mici, ex. pe homepage): pasul 1 = cursa, pasul 2 = datele și plata.
 		var overlay = null;
@@ -314,6 +332,9 @@
 				input.value = values[ n ] || '';
 				input.addEventListener( 'input', checkName );
 				checkName.call( input );
+				if ( badField === 'names' && ( ! input.value.trim() || input.validity.customError ) ) {
+					markInvalid( input );
+				}
 				label.appendChild( span );
 				label.appendChild( input );
 				el.names.appendChild( label );
@@ -463,8 +484,11 @@
 
 		// După o eroare de la server pagina se reîncarcă sus: ducem clientul la mesaj (important pe telefon).
 		// După showStep, pentru că mutarea formularului în fereastră ar pierde focusul.
-		var alertBox = root.querySelector( '[data-lbb="alert"]' );
 		if ( alertBox ) {
+			var badInput = /^(phone|email|date)$/.test( badField ) ? root.querySelector( '[name="lbb_' + badField + '"]' ) : null;
+			if ( badInput ) {
+				markInvalid( badInput );
+			}
 			alertBox.scrollIntoView( { block: 'center' } );
 			alertBox.focus( { preventScroll: true } );
 		}

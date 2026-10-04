@@ -36,6 +36,7 @@
 	margin: 0;
 }
 .lbb-booking select:focus, .lbb-booking input:focus { outline: 2px solid var(--lbb-accent); outline-offset: 1px; border-color: var(--lbb-accent); }
+.lbb-booking [aria-invalid="true"] { border-color: #c62828 !important; box-shadow: 0 0 0 1px #c62828; }
 .lbb-booking select, .lbb-booking input[type="text"], .lbb-booking input[type="tel"], .lbb-booking input[type="email"], .lbb-booking input[type="date"] { box-shadow: none !important; height: auto !important; font-size: 16px !important; color: #1d2733 !important; background-color: #fff !important; }
 .lbb-booking label, .lbb-booking legend { text-transform: none; letter-spacing: normal; }
 .lbb-booking select:disabled { background: var(--lbb-soft); color: var(--lbb-muted); }

@@ -25,9 +25,11 @@ echo "$OUT_FLOW" | grep -E 'ticket:|FAIL|ALERT|pageerror'
 echo "$OUT_FLOW" | grep -q 'ticket:' && ! echo "$OUT_FLOW" | grep -q 'FAIL' || FAIL=1
 [ -f "$WP_PATH/wp-content/debug.log" ] && grep -E "Fatal|Warning|Notice" "$WP_PATH/wp-content/debug.log" | grep -i lbb && FAIL=1
 echo "== Vizitator nelogat"
-BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY | grep -E 'GUEST|FAIL' | grep -q 'GUEST: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
+OUT_GUEST=$(BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY)
+echo "$OUT_GUEST" | grep -q 'GUEST: OK' && echo "  ok" || { echo "$OUT_GUEST" | grep -E 'FAIL|    at ' | head -5; echo "  PROBLEME"; FAIL=1; }
 echo "== Plată în RON + rezervare cu plata la urcare"
-BASE="$BASE" node "$DIR/tests/e2e-currency-reserve.js" 2>&1 | grep -v CERT_AUTHORITY | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
+OUT_CR=$(BASE="$BASE" node "$DIR/tests/e2e-currency-reserve.js" 2>&1 | grep -v CERT_AUTHORITY)
+echo "$OUT_CR" | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "$OUT_CR" | grep -E 'FAIL|    at ' | head -5; echo "  PROBLEME"; FAIL=1; }
 echo "== Previzualizare doar pentru admin (plata online oprită pentru clienți)"
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=0; update_option("lbb_settings",$s);')
 LBB_PREVIEW_TOKEN=$(cd "$WP_PATH" && $WP_CLI eval 'echo LBB_Settings::preview_token();' 2>/dev/null) BASE="$BASE" node "$DIR/tests/e2e-preview.js" 2>&1 | grep -v CERT_AUTHORITY | grep -q 'PREVIEW: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }

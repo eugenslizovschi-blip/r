@@ -46,6 +46,15 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   if (!inView) fail('mesajul de eroare nu e vizibil pe ecran după reîncărcare');
   if (!(await page.$eval('.lbb-alert', e => e === document.activeElement))) fail('mesajul de eroare nu primește focus');
   if (await page.inputValue('input[name="lbb_email"]') !== 'guest@example.com') fail('emailul nu s-a păstrat după eroare');
+  // Câmpul cu problema e marcat (contur roșu, aria-invalid legat de mesaj), iar marcajul dispare când clientul scrie.
+  await page.waitForFunction(() => document.querySelectorAll('input[name="lbb_names[]"]').length > 0);
+  const mark = await page.$eval('input[name="lbb_names[]"]', i => ({ inv: i.getAttribute('aria-invalid'), desc: i.getAttribute('aria-describedby'), alertId: document.querySelector('.lbb-alert').id, border: getComputedStyle(i).borderTopColor }));
+  if (mark.inv !== 'true' || !mark.alertId || mark.desc !== mark.alertId) fail('numele lipsă nu e marcat ca greșit: ' + JSON.stringify(mark));
+  if (!/rgb\(19[0-9], 4[0-9], 4[0-9]\)/.test(mark.border)) fail('câmpul greșit nu are contur roșu: ' + mark.border);
+  if (await page.$eval('input[name="lbb_phone"]', i => i.hasAttribute('aria-invalid'))) fail('telefonul corect e marcat greșit');
+  await page.type('input[name="lbb_names[]"]', 'I');
+  if (await page.$eval('input[name="lbb_names[]"]', i => i.hasAttribute('aria-invalid'))) fail('marcajul rămâne după ce clientul scrie');
+  await page.fill('input[name="lbb_names[]"]', '');
 
   // Formularul păstrează alegerile; completăm numele și trimitem.
   await page.waitForFunction(() => document.querySelectorAll('input[name="lbb_names[]"]').length > 0);
