@@ -282,7 +282,7 @@ class LBB_Admin {
 		echo '<p><a class="button button-primary" href="' . esc_url( admin_url( 'admin.php?page=lbb-routes&add=1' ) ) . '">' . esc_html__( 'Adaugă rută', 'libertbus-bilete' ) . '</a> ';
 		echo '<span class="description">' . esc_html( sprintf( __( 'Prețurile se încasează în %s; cele în altă monedă se convertesc după cursul din Setări.', 'libertbus-bilete' ), $currency ) ) . '</span></p>';
 		self::stack_table_style( 'lbb-routes-table', array( __( 'Ruta', 'libertbus-bilete' ), __( 'Ore', 'libertbus-bilete' ), __( 'Zile', 'libertbus-bilete' ), __( 'Preț', 'libertbus-bilete' ), __( 'Locuri/cursă', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ) ) );
-		echo '<table class="widefat striped lbb-routes-table"><thead><tr><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ore', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Zile', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Preț', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri/cursă', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th></th></tr></thead><tbody>';
+		echo '<table class="widefat striped lbb-routes-table"><thead><tr><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ore', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Zile', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Preț', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri/cursă', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
 		$day_names = self::day_names();
 		foreach ( LBB_Routes::all() as $r ) {
 			$days = 7 === count( $r['days'] ) ? __( 'zilnic', 'libertbus-bilete' ) : implode( ', ', array_map( function ( $d ) use ( $day_names ) {
@@ -331,7 +331,7 @@ class LBB_Admin {
 				<tr><th><label for="lbb-times"><?php esc_html_e( 'Ore de plecare', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-times" name="departures" class="regular-text" required value="<?php echo esc_attr( implode( ', ', LBB_Routes::parse_times( $route['departures'] ) ) ); ?>"><p class="description"><?php esc_html_e( 'Separate prin virgulă, ex. 08:45, 17:45', 'libertbus-bilete' ); ?></p></td></tr>
 				<tr><th><?php esc_html_e( 'Zile', 'libertbus-bilete' ); ?></th><td class="lbb-days"><?php foreach ( self::day_names() as $n => $label ) : ?><label><input type="checkbox" name="days[]" value="<?php echo esc_attr( $n ); ?>" <?php checked( in_array( $n, $route['days'], true ) ); ?>> <?php echo esc_html( $label ); ?></label><?php endforeach; ?></td></tr>
 				<tr><th><label for="lbb-price"><?php esc_html_e( 'Preț adult', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-price" name="price" type="number" step="0.01" min="0" required value="<?php echo esc_attr( $route['price'] ); ?>">
-					<select name="currency"><?php foreach ( LBB_Settings::currencies() as $cur ) : ?><option <?php selected( $route['currency'], $cur ); ?>><?php echo esc_html( $cur ); ?></option><?php endforeach; ?></select>
+					<select name="currency" aria-label="<?php esc_attr_e( 'Moneda prețului', 'libertbus-bilete' ); ?>"><?php foreach ( LBB_Settings::currencies() as $cur ) : ?><option <?php selected( $route['currency'], $cur ); ?>><?php echo esc_html( $cur ); ?></option><?php endforeach; ?></select>
 					<p class="description"><?php esc_html_e( 'Cu prețul 0 ruta nu se vinde online.', 'libertbus-bilete' ); ?></p></td></tr>
 				<tr><th><label for="lbb-child"><?php esc_html_e( 'Preț copil', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-child" name="child_price" type="number" step="0.01" min="0" value="<?php echo esc_attr( null === $route['child_price'] ? '' : $route['child_price'] ); ?>"><p class="description"><?php esc_html_e( 'Gol = copiii plătesc ca adulții.', 'libertbus-bilete' ); ?></p></td></tr>
 				<tr><th><label for="lbb-cap"><?php esc_html_e( 'Locuri de vândut online pe cursă', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-cap" name="capacity" type="number" min="0" value="<?php echo esc_attr( $route['capacity'] ); ?>"><p class="description"><?php echo esc_html( sprintf( __( '0 = valoarea implicită din Setări (%d).', 'libertbus-bilete' ), LBB_Settings::get( 'default_capacity' ) ) ); ?></p></td></tr>
@@ -386,8 +386,8 @@ class LBB_Admin {
 		?>
 		<form method="get" class="lbb-noprint" style="margin:12px 0">
 			<input type="hidden" name="page" value="lbb-manifest">
-			<input type="date" name="date" value="<?php echo esc_attr( $date ); ?>">
-			<select name="route"><option value="0"><?php esc_html_e( 'Toate rutele', 'libertbus-bilete' ); ?></option>
+			<input type="date" name="date" value="<?php echo esc_attr( $date ); ?>" aria-label="<?php esc_attr_e( 'Data cursei', 'libertbus-bilete' ); ?>">
+			<select name="route" aria-label="<?php esc_attr_e( 'Ruta', 'libertbus-bilete' ); ?>"><option value="0"><?php esc_html_e( 'Toate rutele', 'libertbus-bilete' ); ?></option>
 				<?php foreach ( LBB_Routes::all() as $r ) : ?><option value="<?php echo esc_attr( $r['id'] ); ?>" <?php selected( $route, $r['id'] ); ?>><?php echo esc_html( $r['origin'] . ' → ' . $r['destination'] ); ?></option><?php endforeach; ?>
 			</select>
 			<button class="button"><?php esc_html_e( 'Arată', 'libertbus-bilete' ); ?></button>
@@ -417,7 +417,7 @@ class LBB_Admin {
 		foreach ( $due as $cur => $sum ) {
 			$due_text[] = LBB_WooCommerce::money( $sum, $cur );
 		}
-		echo '</tbody><tfoot><tr><th colspan="3">' . esc_html__( 'Total locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html( $total ) . '</th><th colspan="2"></th><th colspan="2">' . ( $due_text ? esc_html__( 'De încasat la urcare', 'libertbus-bilete' ) . ': ' . esc_html( implode( ' + ', $due_text ) ) : '' ) . '</th></tr></tfoot></table></div>';
+		echo '</tbody><tfoot><tr><th colspan="3">' . esc_html__( 'Total locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html( $total ) . '</th><td colspan="2"></td><th colspan="2">' . ( $due_text ? esc_html__( 'De încasat la urcare', 'libertbus-bilete' ) . ': ' . esc_html( implode( ' + ', $due_text ) ) : '' ) . '</th></tr></tfoot></table></div>';
 	}
 
 	/**
@@ -426,7 +426,7 @@ class LBB_Admin {
 	 */
 	private static function stack_table_style( $class, array $labels ) {
 		$t   = '.' . $class;
-		$css = $t . ' code{white-space:nowrap}@media screen and (max-width:782px){'
+		$css = $t . ' code{white-space:nowrap}' . $t . ' td a{text-decoration:underline}@media screen and (max-width:782px){'
 			. $t . ' thead{display:none}'
 			. $t . ',' . $t . ' tbody,' . $t . ' tfoot,' . $t . ' tr,' . $t . ' td,' . $t . ' tfoot th{display:block;width:auto!important;box-sizing:border-box}'
 			. $t . ' tr{padding:8px 0;border-bottom:1px solid #dcdcde}'
@@ -516,11 +516,12 @@ class LBB_Admin {
 		echo '<ul class="subsubsub">';
 		$links = array();
 		foreach ( $labels as $key => $label ) {
-			$links[] = '<li><a href="' . esc_url( admin_url( 'admin.php?page=lbb-bookings' . ( $key ? '&status=' . $key : '' ) ) ) . '"' . ( $status === $key ? ' class="current"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
+			$links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=lbb-bookings' . ( $key ? '&status=' . $key : '' ) ) ) . '"' . ( $status === $key ? ' class="current"' : '' ) . '>' . esc_html( $label ) . '</a>';
 		}
-		echo implode( ' | ', $links ) . '</ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput
+		// Separatorul „|” în interiorul <li>, ca în listele WordPress (o listă nu poate avea text direct).
+		echo '<li>' . implode( ' |</li><li>', $links ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput
 		self::stack_table_style( 'lbb-bookings-table', array( '#', __( 'Cursa', 'libertbus-bilete' ), __( 'Locuri', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ), __( 'Bilet', 'libertbus-bilete' ), __( 'Client', 'libertbus-bilete' ), __( 'Comanda', 'libertbus-bilete' ), __( 'Creată', 'libertbus-bilete' ) ) );
-		echo '<table class="widefat striped lbb-bookings-table"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th></th></tr></thead><tbody>';
+		echo '<table class="widefat striped lbb-bookings-table"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
 		foreach ( LBB_Bookings::recent( 200, $status ) as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
 			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $labels[ $b['status'] ] ) ? $labels[ $b['status'] ] : $b['status'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . esc_html( $b['phone'] . ' ' . $b['email'] ) . '</td><td>';
@@ -583,7 +584,7 @@ class LBB_Admin {
 				$text( 'replace_cf7', __( 'Înlocuiește formularele Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'ID-urile formularelor de rezervare (ex. de pe pagina principală) care se afișează ca formularul de rezervare cu plată. Paginile nu se modifică; ștergeți ID-ul ca să reveniți.', 'libertbus-bilete' ) );
 				$text( 'preview_cf7', __( 'Previzualizare: formulare Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'În previzualizare (pagini private pentru admin sau linkul secret de mai jos) aceste formulare și cele de rută se înlocuiesc, cu butonul de plată vizibil. Ceilalți vizitatori nu văd nimic schimbat.', 'libertbus-bilete' ) );
 				$preview = LBB_Settings::preview_url();
-				echo '<tr><th>' . esc_html__( 'Link de previzualizare (fără login)', 'libertbus-bilete' ) . '</th><td><input type="text" class="large-text code" readonly onclick="this.select()" value="' . esc_attr( $preview ) . '"> <p class="description">' . esc_html__( 'Deschideți-l pe telefon sau trimiteți-l cuiva. Merge pe orice pagină: adăugați ?lbb_preview=… și la paginile de rută. Butonul de mai jos (sub formular) creează un link nou și îl anulează pe cel vechi.', 'libertbus-bilete' ) . ' <a href="' . esc_url( $preview ) . '" target="_blank" rel="noopener">' . esc_html__( 'Deschide', 'libertbus-bilete' ) . '</a></p></td></tr>';
+				echo '<tr><th>' . esc_html__( 'Link de previzualizare (fără login)', 'libertbus-bilete' ) . '</th><td><input type="text" class="large-text code" readonly onclick="this.select()" aria-label="' . esc_attr__( 'Link de previzualizare (fără login)', 'libertbus-bilete' ) . '" value="' . esc_attr( $preview ) . '"> <p class="description">' . esc_html__( 'Deschideți-l pe telefon sau trimiteți-l cuiva. Merge pe orice pagină: adăugați ?lbb_preview=… și la paginile de rută. Butonul de mai jos (sub formular) creează un link nou și îl anulează pe cel vechi.', 'libertbus-bilete' ) . ' <a href="' . esc_url( $preview ) . '" target="_blank" rel="noopener">' . esc_html__( 'Deschide', 'libertbus-bilete' ) . '</a></p></td></tr>';
 				$text( 'accent_color', __( 'Culoarea butoanelor', 'libertbus-bilete' ), __( 'Cod hex, ex. #00875a (verdele site-ului, mai închis ca textul alb să se citească bine).', 'libertbus-bilete' ) );
 				$check( 'replace_cf7_routes', __( 'Formularele de rută', 'libertbus-bilete' ), __( 'Formularele Contact Form 7 cu titlul „Oraș - Oraș” (ex. „Balti - Iasi”) devin formularul rutei respective, dacă ruta există.', 'libertbus-bilete' ) );
 				$check( 'show_approx', __( 'Echivalent în altă monedă', 'libertbus-bilete' ), __( 'Arată lângă preț „≈ 62 RON” (sau „≈ 234 MDL”), doar informativ.', 'libertbus-bilete' ) );

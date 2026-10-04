@@ -1,5 +1,6 @@
 // E2E: accesibilitate cu axe-core (etichete, contrast, roluri ARIA, text alternativ) pe telefon:
-// formularul de pe pagina rutei, bannerul de cookies cu „Setări” deschis și pagina biletului.
+// formularul de pe pagina rutei, bannerul de cookies cu „Setări” deschis și pagina biletului; apoi conținutul
+// paginilor LibertBus din admin (Panou, Rute și orar, o rută, Pasageri, Rezervări, Setări).
 // AXE_JS=/cale/axe.min.js BASE=http://127.0.0.1:8080 node tests/e2e-a11y.js
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const fs = require('fs');
@@ -45,6 +46,19 @@ async function scan(page, label, include) {
   if (!/lbb_bilet=/.test(page.url())) fail('rezervarea nu a dus la pagina biletului: ' + page.url());
   await page.waitForSelector('.lbb-ticket-qr img, .lbb-ticket-qr canvas', { state: 'attached' });
   await scan(page, 'pagina biletului', [['.lbb-ticket']]);
+
+  // Admin: doar conținutul nostru (.wrap), nu meniurile WordPress.
+  const admin = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+  await admin.goto(BASE + '/wp-login.php');
+  await admin.fill('#user_login', 'admin'); await admin.fill('#user_pass', 'admin');
+  await Promise.all([admin.waitForNavigation(), admin.click('#wp-submit')]);
+  if (/wp-login\.php/.test(admin.url())) { console.error('FAIL login admin eșuat'); process.exit(1); }
+  await admin.goto(BASE + '/wp-admin/admin.php?page=lbb-routes');
+  const editUrl = await admin.$eval('a[href*="page=lbb-routes&edit="]', a => a.href);
+  for (const u of ['lbb', 'lbb-routes', editUrl, 'lbb-manifest&date=' + day, 'lbb-bookings', 'lbb-settings']) {
+    await admin.goto(u.startsWith('http') ? u : BASE + '/wp-admin/admin.php?page=' + u);
+    await scan(admin, 'admin ' + u.replace(/^.*page=/, ''), [['#wpbody-content .wrap']]);
+  }
 
   console.log(process.exitCode ? 'A11Y: PROBLEME' : 'A11Y: OK');
   await browser.close();
