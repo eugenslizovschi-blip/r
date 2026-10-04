@@ -103,11 +103,11 @@ class LBB_WooCommerce {
 			__( 'Ora plecării', 'libertbus-bilete' ) => $booking['dep_time'],
 			__( 'Locuri', 'libertbus-bilete' )    => $booking['children']
 				/* translators: 1: total, 2: copii */
-				? sprintf( __( '%1$d (din care %2$d copii)', 'libertbus-bilete' ), $booking['seats'], $booking['children'] )
+				? sprintf( _n( '%1$d (din care %2$d copil)', '%1$d (din care %2$d copii)', (int) $booking['children'], 'libertbus-bilete' ), $booking['seats'], $booking['children'] )
 				: (string) $booking['seats'],
 		);
 		if ( $booking['passengers'] ) {
-			$lines[ __( 'Pasageri', 'libertbus-bilete' ) ] = implode( ', ', $booking['passengers'] );
+			$lines[ __( 'Pasageri', 'libertbus-bilete' ) ] = implode( ', ', LBB_Bookings::passenger_labels( $booking ) );
 		}
 		if ( in_array( $booking['status'], array( 'confirmed', 'reserved' ), true ) ) {
 			list( $amount, $cur ) = LBB_Bookings::pay_amount( $booking );

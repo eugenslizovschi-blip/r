@@ -405,7 +405,7 @@ class LBB_Admin {
 		foreach ( $rows as $b ) {
 			$total += $b['seats'];
 			$order  = $b['order_id'] ? wc_get_order( $b['order_id'] ) : null;
-			echo '<tr><td><strong>' . esc_html( $b['dep_time'] ) . '</strong></td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( implode( ', ', $b['passengers'] ) ) . '</td><td><a href="tel:' . esc_attr( $b['phone'] ) . '">' . esc_html( $b['phone'] ) . '</a></td><td>' . self::payment_label( $b, $due ) . '</td><td>';
+			echo '<tr><td><strong>' . esc_html( $b['dep_time'] ) . '</strong></td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '</td><td><a href="tel:' . esc_attr( $b['phone'] ) . '">' . esc_html( $b['phone'] ) . '</a></td><td>' . self::payment_label( $b, $due ) . '</td><td>';
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a>';
 			}
@@ -465,7 +465,7 @@ class LBB_Admin {
 		foreach ( LBB_Bookings::manifest( $date, $route ) as $b ) {
 			list( $amount, $cur ) = LBB_Bookings::pay_amount( $b );
 			$plata = 'reserved' === $b['status'] ? 'la urcare ' . $amount . ' ' . $cur : 'online';
-			fputcsv( $out, array_map( array( __CLASS__, 'csv_safe' ), array( $date, $b['dep_time'], $b['origin'], $b['destination'], $b['ticket_code'], $b['seats'], implode( '; ', $b['passengers'] ), $b['phone'], $b['email'], $plata, $b['order_id'] ) ), ',', '"', '' );
+			fputcsv( $out, array_map( array( __CLASS__, 'csv_safe' ), array( $date, $b['dep_time'], $b['origin'], $b['destination'], $b['ticket_code'], $b['seats'], implode( '; ', LBB_Bookings::passenger_labels( $b ) ), $b['phone'], $b['email'], $plata, $b['order_id'] ) ), ',', '"', '' );
 		}
 		fclose( $out );
 		exit;
@@ -499,7 +499,7 @@ class LBB_Admin {
 		echo '<table class="widefat striped"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th></th></tr></thead><tbody>';
 		foreach ( LBB_Bookings::recent( 200, $status ) as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
-			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $labels[ $b['status'] ] ) ? $labels[ $b['status'] ] : $b['status'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( implode( ', ', $b['passengers'] ) ) . '<br>' . esc_html( $b['phone'] . ' ' . $b['email'] ) . '</td><td>';
+			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $labels[ $b['status'] ] ) ? $labels[ $b['status'] ] : $b['status'] ) . '</td><td><code>' . esc_html( $b['ticket_code'] ) . '</code></td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . esc_html( $b['phone'] . ' ' . $b['email'] ) . '</td><td>';
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a> (' . esc_html( wc_get_order_status_name( $order->get_status() ) ) . ')';
 			}

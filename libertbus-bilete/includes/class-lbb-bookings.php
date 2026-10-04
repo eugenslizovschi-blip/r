@@ -261,6 +261,23 @@ class LBB_Bookings {
 	}
 
 	/**
+	 * Numele pasagerilor, cu „(copil)” la copii. Formularul îi pune pe copii la final; dacă nu sunt nume
+	 * pentru toate locurile, nu ghicim cine e copil.
+	 */
+	public static function passenger_labels( array $booking ) {
+		$names    = array_values( (array) $booking['passengers'] );
+		$children = (int) $booking['children'];
+		if ( $children <= 0 || count( $names ) !== (int) $booking['seats'] ) {
+			return $names;
+		}
+		for ( $i = count( $names ) - $children; $i < count( $names ); $i++ ) {
+			/* translators: %s: numele copilului */
+			$names[ $i ] = sprintf( __( '%s (copil)', 'libertbus-bilete' ), $names[ $i ] );
+		}
+		return $names;
+	}
+
+	/**
 	 * Suma de plată în moneda aleasă de client.
 	 */
 	public static function pay_amount( array $booking ) {

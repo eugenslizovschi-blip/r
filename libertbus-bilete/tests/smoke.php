@@ -465,6 +465,15 @@ foreach ( array( '+373', '', '069 18' ) as $ph_bad ) {
 }
 update_option( 'lbb_settings', $cl_keep );
 
+// Copiii sunt ultimii în lista de pasageri: pe bilet, în lista pentru șofer și în CSV se văd ca „(copil)”.
+$kids = array( 'passengers' => array( 'Ion Popescu', 'Maria Popescu', 'Ana Popescu' ), 'children' => 1, 'seats' => 3 );
+lbb_t( 'pasageri: copilul e marcat „(copil)”', array( 'Ion Popescu', 'Maria Popescu', 'Ana Popescu (copil)' ) === LBB_Bookings::passenger_labels( $kids ), LBB_Bookings::passenger_labels( $kids ) );
+lbb_t( 'pasageri: fără copii numele rămân la fel', array( 'Ion Popescu' ) === LBB_Bookings::passenger_labels( array( 'passengers' => array( 'Ion Popescu' ), 'children' => 0, 'seats' => 1 ) ) );
+lbb_t( 'pasageri: fără nume pentru toate locurile nu ghicim cine e copil', array( 'Ion Popescu' ) === LBB_Bookings::passenger_labels( array( 'passengers' => array( 'Ion Popescu' ), 'children' => 1, 'seats' => 2 ) ) );
+$kid_desc = LBB_WooCommerce::describe( array_merge( $rv, $kids, array( 'status' => 'confirmed' ) ) );
+lbb_t( 'biletul arată care pasager e copil', false !== strpos( $kid_desc['Pasageri'], 'Ana Popescu (copil)' ), $kid_desc );
+lbb_t( 'biletul scrie „1 copil”, nu „1 copii”', '3 (din care 1 copil)' === $kid_desc['Locuri'], $kid_desc['Locuri'] );
+
 // Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
 LBB_Frontend::register_assets();
 $js_ver = wp_scripts()->registered['lbb']->ver;
