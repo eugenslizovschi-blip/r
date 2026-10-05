@@ -16,7 +16,7 @@
 - Fusul orar e un decalaj fix UTC+2, care greșește cu o oră vara.
 - Contul `libertbus` are parola expusă în chat și trebuie schimbată.
 
-## Ce e deja pe site-ul live (4 octombrie 2026)
+## Ce e deja pe site-ul live (5 octombrie 2026)
 
 - Plugin-ul LibertBus Bilete 1.4.1 e instalat și activ. Butonul „Achit online” e ascuns până porniți plata. Noul formular nu e încă pus în locul formularelor Contact Form 7.
 - Bannerul de cookies (Legea nr. 195/2024, aplicabilă din 23 august 2026, și GDPR):
@@ -25,11 +25,26 @@
 - Paginile „Politica de confidențialitate” și „Politica de cookies” sunt publicate. Linkurile lor și „Setări cookies” apar în subsol, sub „© 2026 Libertbus.md”.
 - Paginile de termeni, rambursare și plată sunt create ca ciorne. Le publicați după ce le verificați.
 - Îmbunătățirile făcute după 1.4.1 sunt pe acest branch, nu pe live. Le pun pe live doar cu acordul dumneavoastră:
-  - Google Tag Manager blocat până la acord;
-  - ștergerea tuturor cookies-urilor de urmărire la retragerea acordului;
-  - ziua de azi după ora Chișinăului;
-  - expeditorul corect în emailurile de rezervare;
-  - pagina biletului nu mai rămâne în cache.
+  - **Cookies și lege:**
+    - Google Tag Manager blocat până la acord;
+    - toate cookies-urile de urmărire șterse la retragerea acordului;
+    - din tastatură, „Setări” duce direct la prima bifă.
+  - **Formularul de rezervare:**
+    - după „Înapoi” din plată rămân data, ora și locurile corecte, iar butoanele merg;
+    - câmpul cu eroarea de la server e marcat cu roșu;
+    - numele nu se mai pierd cât clientul scrie pe internet slab;
+    - adulții și copiii își păstrează numele când se schimbă numărul lor;
+    - rezumatul arată prețul de adult și de copil.
+  - **Bilet și liste:**
+    - copiii sunt marcați „(copil)” pe bilet, în lista pentru șofer și în CSV;
+    - codul QR are text pentru cititoarele de ecran;
+    - pagina biletului nu mai rămâne în cache.
+  - **Admin pe telefon:** listele Pasageri, Rezervări și Rute și orar devin carduri, iar câmpurile se ating ușor.
+  - **Panoul „Gata de plăți?”** avertizează dacă bannerul de cookies e oprit sau dacă telefonul pentru clienți e incomplet.
+  - **Altele:**
+    - ziua de azi după ora Chișinăului;
+    - expeditorul corect în emailurile de rezervare;
+    - accesibilitate verificată automat (axe-core).
 
 ## Ce face plugin-ul LibertBus Bilete (gata)
 
