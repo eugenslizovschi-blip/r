@@ -103,6 +103,36 @@ lbb_t( 'plata confirmă biletul și dă cod', 'confirmed' === $b['status'] && pr
 $order->update_status( 'cancelled' );
 lbb_t( 'anularea comenzii eliberează locurile', 'cancelled' === LBB_Bookings::get_by_token( $h3['token'] )['status'] );
 
+// Card refuzat la bancă (Paynet: comanda „failed”), clientul încearcă din nou și plătește; apoi rambursare.
+$fh  = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 1, 0, array( 'Refuz Card' ), '+37360000077', 'r@example.com' );
+$fo  = wc_create_order();
+$fi  = new WC_Order_Item_Product();
+$fi->set_product( wc_get_product( LBB_Install::product_id() ) );
+$fi->add_meta_data( '_lbb_token', $fh['token'], true );
+$fo->add_item( $fi );
+$fo->set_total( 120 );
+$fo->save();
+LBB_WooCommerce::attach_order( $fo );
+$free_at   = function () use ( $route, $tomorrow ) {
+	foreach ( LBB_Routes::departures_on( $route, $tomorrow ) as $d ) {
+		if ( '10:00' === $d['time'] ) {
+			return $d['free'];
+		}
+	}
+	return null;
+};
+$free_held = $free_at();
+$fo->update_status( 'failed' );
+lbb_t( 'card refuzat: locul se eliberează', 'cancelled' === LBB_Bookings::get_by_token( $fh['token'] )['status'] && $free_held + 1 === $free_at() );
+$fo->update_status( 'pending' );
+lbb_t( 'a doua încercare de plată: locul se ține din nou', 'pending' === LBB_Bookings::get_by_token( $fh['token'] )['status'] && $free_held === $free_at(), LBB_Bookings::get_by_token( $fh['token'] ) );
+$fo->update_status( 'processing' );
+$fb = LBB_Bookings::get_by_token( $fh['token'] );
+lbb_t( 'plata reușită după refuz emite biletul', 'confirmed' === $fb['status'] && preg_match( '/^LB-/', $fb['ticket_code'] ), $fb );
+$fo->update_status( 'refunded' );
+lbb_t( 'rambursarea anulează biletul și eliberează locul', 'cancelled' === LBB_Bookings::get_by_token( $fh['token'] )['status'] && $free_held + 1 === $free_at() );
+$fo->delete( true );
+
 // Plată întârziată: rezervarea expiră, altcineva ia locurile, apoi vine plata.
 $late = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 3, 0, array( 'K', 'L', 'M' ), '+37360000000', 'a@example.com' );
 $o2   = wc_create_order();
