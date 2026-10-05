@@ -206,7 +206,7 @@ class LBB_Admin {
 			$type = isset( $_GET['lbb_err'] ) ? 'error' : 'success'; // phpcs:ignore WordPress.Security.NonceVerification
 			echo '<div class="notice notice-' . esc_attr( $type ) . ' is-dismissible"><p>' . esc_html( $msg ) . '</p></div>';
 		}
-		echo '<style>.lbb-admin .lbb-check td{vertical-align:top}.lbb-ok{color:#16632f;font-weight:700}.lbb-warn{color:#996800;font-weight:700}.lbb-bad{color:#b32d2e;font-weight:700}.lbb-admin .lbb-cards{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}.lbb-admin .lbb-card{background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;min-width:150px}.lbb-admin .lbb-card b{display:block;font-size:22px}.lbb-admin .lbb-days label{margin-right:8px}@media print{#adminmenumain,#wpadminbar,.lbb-noprint,.notice{display:none!important}#wpcontent{margin:0!important}}</style>';
+		echo '<style>.lbb-admin .lbb-check td{vertical-align:top}.lbb-ok{color:#16632f;font-weight:700}.lbb-warn{color:#996800;font-weight:700}.lbb-bad{color:#b32d2e;font-weight:700}.lbb-admin .lbb-cards{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}.lbb-admin .lbb-card{background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;min-width:150px}.lbb-admin .lbb-card b{display:block;font-size:22px}.lbb-admin .lbb-days label{margin-right:8px}@media print{#adminmenumain,#wpadminbar,#wpfooter,.update-nag,.lbb-noprint,.notice{display:none!important}#wpcontent{margin:0!important}}</style>';
 	}
 
 	private static function redirect( $page, $msg, $error = false, $extra = array() ) {

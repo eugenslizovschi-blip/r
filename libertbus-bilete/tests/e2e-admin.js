@@ -35,6 +35,13 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const emptyCodes = await page.$$eval('#wpbody-content table.widefat code', cs => cs.filter(c => !c.textContent.trim()).length);
   if (emptyCodes) fail('Rezervări: ' + emptyCodes + ' căsuțe de cod goale');
 
+  // Foaia printată pentru șofer: doar titlul și tabelul, fără meniu, filtre sau subsolul WordPress.
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest');
+  await page.emulateMedia({ media: 'print' });
+  const printed = await page.evaluate(() => ['#adminmenumain', '#wpadminbar', '#wpfooter', '.lbb-noprint', '.update-nag', '.notice'].filter(sel => [...document.querySelectorAll(sel)].some(e => e.offsetParent !== null || getComputedStyle(e).display !== 'none' && e.getClientRects().length)));
+  if (printed.length) fail('pe foaia printată apar: ' + printed.join(', '));
+  await page.emulateMedia({ media: 'screen' });
+
   // Lista de pasageri se descarcă în CSV, cu antetul corect și BOM (diacritice corecte în Excel).
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest');
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('a.button:text-is("CSV")')]);
