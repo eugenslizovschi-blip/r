@@ -346,7 +346,7 @@ class LBB_Admin {
 				<input type="hidden" name="action" value="lbb_delete_route">
 				<input type="hidden" name="id" value="<?php echo esc_attr( $route['id'] ); ?>">
 				<?php wp_nonce_field( 'lbb_delete_route' ); ?>
-				<button class="button-link-delete" type="submit"><?php esc_html_e( 'Șterge ruta', 'libertbus-bilete' ); ?></button>
+				<button class="button-link button-link-delete" type="submit"><?php esc_html_e( 'Șterge ruta', 'libertbus-bilete' ); ?></button>
 			</form>
 			<p><?php esc_html_e( 'Formular doar pentru această rută:', 'libertbus-bilete' ); ?> <code>[libertbus_rezervare from="<?php echo esc_html( $route['origin'] ); ?>" to="<?php echo esc_html( $route['destination'] ); ?>"]</code></p>
 		<?php endif; ?>
