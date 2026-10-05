@@ -118,6 +118,31 @@ async function fillForm(page, phone) {
     return bs.map(b => b.value + ':' + (b.disabled ? 'blocat' : 'ok') + (b.classList.contains('is-busy') ? ':busy' : ''));
   });
   if (unblocked.some(x => !/:ok$/.test(x))) fail('revenit din bfcache, butoanele rămân blocate: ' + unblocked.join(', '));
+  // Ora aleasă s-a umplut cât clientul era pe altă pagină: după „Înapoi” nu trebuie să rămână selectată
+  // (Chrome pune la loc alegerea veche când formularul reface lista orelor, chiar dacă ora e acum plină).
+  {
+    const p2 = await guestCtx.newPage();
+    await fillForm(p2, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
+    const t = await p2.inputValue('[data-lbb="time"]');
+    await p2.goto(BASE + '/politica-de-cookies/');
+    await p2.route('**/lbb/v1/departures**', async route => {
+      const r = await route.fetch();
+      const j = await r.json();
+      (j.departures || []).forEach(d => { if (d.time === t) { d.bookable = false; d.reason = 'full'; d.free = 0; } });
+      await route.fulfill({ response: r, json: j });
+    });
+    let backRequests = 0;
+    p2.on('request', r => { if (/route_id=/.test(r.url())) backRequests++; });
+    await p2.goBack();
+    await p2.waitForLoadState('networkidle');
+    await p2.waitForTimeout(1500);
+    // Încărcarea paginii (azi) + data pusă la loc; o oră plină nu se mai cere de încă două ori.
+    if (backRequests > 3) fail('după „Înapoi” orele s-au cerut de ' + backRequests + ' ori');
+    const st = await p2.evaluate(() => { const s = document.querySelector('[data-lbb="time"]'); const o = s.options[s.selectedIndex]; return { v: s.value, disabled: !!(o && o.disabled), btn: document.querySelector('[data-lbb-submit]').disabled }; });
+    if (st.disabled || st.v === t) fail('după „Înapoi” a rămas selectată ora plină ' + t + ': ' + JSON.stringify(st));
+    if (!st.v && !st.btn) fail('fără oră aleasă butoanele trebuie să fie blocate');
+    await p2.close();
+  }
   console.log(process.exitCode ? 'CURRENCY+RESERVE: PROBLEME' : 'CURRENCY+RESERVE: OK');
   await browser.close();
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

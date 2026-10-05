@@ -56,6 +56,9 @@ add_filter( 'pre_wp_mail', function ( $null, $atts ) {
 	return true;
 }, 10, 2 );
 PHP
+# Rezervările rămase din rulările anterioare se șterg: altfel, după sute de rulări, cursele din următoarele
+# săptămâni se umplu și testele nu mai găsesc locuri (iar o oră „plină” apare din întâmplare, nu din test).
+$WP eval 'global $wpdb; $wpdb->query( "DELETE FROM " . LBB_Bookings::table() );' >/dev/null
 # Imită modulul „GA Google Analytics” de pe libertbus.md (același cod), plus scripturi care NU trebuie blocate.
 cat > wordpress/wp-content/mu-plugins/fake-analytics.php <<'PHP'
 <?php

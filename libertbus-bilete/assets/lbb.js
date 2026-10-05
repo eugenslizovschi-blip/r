@@ -621,13 +621,15 @@
 		} );
 		// „Înapoi” din browser: din memorie (bfcache) pagina revine cu butoanele blocate de trimiterea de mai sus;
 		// la o reîncărcare browserul pune la loc data aleasă de client după ce s-au cerut orele pentru azi.
+		var triedKeep = ''; // Ora ținută minte deja încercată (dacă s-a umplut, nu o mai cerem iar).
 		function syncRestored() {
 			var keep = rememberedTime();
-			if ( ( el.date.value && el.date.value !== shownDate ) || ( keep && ! el.time.value ) ) {
+			if ( ( el.date.value && el.date.value !== shownDate ) || ( keep && ! el.time.value && keep !== triedKeep ) ) {
 				dateTouched = true;
 				skipped = 0;
 				if ( keep ) {
 					preset.time = keep;
+					triedKeep = keep;
 				}
 				loadDepartures();
 			}
