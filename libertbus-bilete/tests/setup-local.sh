@@ -21,6 +21,14 @@ fi
 # Fără actualizări automate (altfel WordPress trece singur la ultima versiune), apoi versiunea cerută.
 $WP config set AUTOMATIC_UPDATER_DISABLED true --raw >/dev/null
 [ "$($WP core version)" = "$WP_VERSION" ] || $WP core update --version="$WP_VERSION" --force >/dev/null
+# Baza de date pe versiunea fișierelor (după o trecere 7.x → 6.4 adminul cere altfel „Database Update Required”).
+$WP --skip-themes --skip-plugins core update-db >/dev/null
+# Tema de test e mereu Twenty Twenty-Four: există în 6.4 și în 7.x. O instalare făcută cu fișierele 7.x
+# alege Twenty Twenty-Five, care pe 6.4 dă eroare fatală (cere funcții din WordPress 6.7).
+$WP --skip-themes --skip-plugins theme activate twentytwentyfour >/dev/null
+# Adresa site-ului mereu fixă (o reinstalare peste alte fișiere poate ghici „/wordpress” și strică toate linkurile).
+$WP --skip-themes --skip-plugins option update home http://127.0.0.1:8080 >/dev/null
+$WP --skip-themes --skip-plugins option update siteurl http://127.0.0.1:8080 >/dev/null
 # Parola admin-ului de test, mereu din nou: WordPress 7 o salvează în alt format (bcrypt), pe care 6.4 nu-l citește.
 $WP user update admin --user_pass=admin --skip-email >/dev/null
 ln -sfn "$PLUGIN" wordpress/wp-content/plugins/libertbus-bilete
@@ -75,6 +83,9 @@ add_action( 'wp_body_open', function () {
 } );
 PHP
 $WP eval 'LBB_Legal::create_missing();' >/dev/null
+# O rută cu preț pentru copii (testul pentru adulți și copii o caută: Chișinău → Iași).
+# (save refuză singur o rută care există deja.)
+$WP eval 'LBB_Routes::save( array( "origin" => "Chișinău", "destination" => "Iași", "departures" => "07:00, 15:30", "price" => 250, "child_price" => 150, "currency" => "MDL", "active" => 1 ) );' >/dev/null
 # Pagină cu un <footer> în conținut (semnătura unui citat): linkurile legale trebuie să ajungă în subsolul site-ului, nu aici.
 $WP post list --post_type=page --name=citat --format=ids | grep -q . || $WP post create --post_type=page --post_status=publish --post_title='Citat' --post_name=citat --post_content='<blockquote><p>Călătorie plăcută!</p><footer>— LibertBus</footer></blockquote>' >/dev/null
 cat > router.php <<'PHP'
