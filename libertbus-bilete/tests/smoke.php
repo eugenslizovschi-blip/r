@@ -474,6 +474,10 @@ $kid_desc = LBB_WooCommerce::describe( array_merge( $rv, $kids, array( 'status' 
 lbb_t( 'biletul arată care pasager e copil', false !== strpos( $kid_desc['Pasageri'], 'Ana Popescu (copil)' ), $kid_desc );
 lbb_t( 'biletul scrie „1 copil”, nu „1 copii”', '3 (din care 1 copil)' === $kid_desc['Locuri'], $kid_desc['Locuri'] );
 
+// Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
+$lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
+lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
+
 // Versiunea JS/CSS se schimbă odată cu fișierul, ca o actualizare să nu rămână cu JS vechi în cache.
 LBB_Frontend::register_assets();
 $js_ver = wp_scripts()->registered['lbb']->ver;

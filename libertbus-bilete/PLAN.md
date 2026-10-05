@@ -24,7 +24,7 @@
   - Google Analytics pornește doar după acord.
 - Paginile „Politica de confidențialitate” și „Politica de cookies” sunt publicate. Linkurile lor și „Setări cookies” apar în subsol, sub „© 2026 Libertbus.md”.
 - Paginile de termeni, rambursare și plată sunt create ca ciorne. Le publicați după ce le verificați.
-- Îmbunătățirile făcute după 1.4.1 sunt pe acest branch, nu pe live. Le pun pe live doar cu acordul dumneavoastră:
+- Versiunea 1.5.0, cu îmbunătățirile făcute după 1.4.1, e pe acest branch, nu pe live. O pun pe live doar cu acordul dumneavoastră:
   - **Cookies și lege:**
     - Google Tag Manager blocat până la acord;
     - toate cookies-urile de urmărire șterse la retragerea acordului;
