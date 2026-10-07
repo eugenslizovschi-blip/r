@@ -22,6 +22,15 @@ echo "$OUT_SMOKE" | grep -q " 0 eșuate" || FAIL=1
 # Încălzire: după repornirea containerului prima comandă WooCommerce poate dura peste 30 s (cache-uri reci)
 # și testele din browser ar pica din timeout, nu din cauza codului.
 for u in / /balti-iasi/ /checkout/ /wp-login.php; do curl -s -o /dev/null -m 60 "$BASE$u" || true; done
+# Și prima pagină din admin după pornire e lentă (verificări de actualizări etc.): o încărcăm o dată, autentificați.
+WARM_CJ="${TMPDIR:-/tmp}/lbb-warm-cookies"; rm -f "$WARM_CJ"
+curl -s -o /dev/null -m 60 -c "$WARM_CJ" -b "$WARM_CJ" "$BASE/wp-login.php" || true
+curl -s -o /dev/null -m 60 -c "$WARM_CJ" -b "$WARM_CJ" -d "log=admin&pwd=admin&wp-submit=1&testcookie=1" "$BASE/wp-login.php" || true
+for u in /wp-admin/ "/wp-admin/admin.php?page=lbb"; do
+  T=$(curl -s -o /dev/null -m 120 -b "$WARM_CJ" -w "%{time_total}" "$BASE$u" || echo "?")
+  echo "  încălzire $u: ${T}s"
+done
+rm -f "$WARM_CJ"
 echo "== Rezervare cap-coadă"
 OUT_FLOW=$(BASE="$BASE" node "$DIR/tests/e2e-flow.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_FLOW" | grep -E 'ticket:|FAIL|ALERT|pageerror'
