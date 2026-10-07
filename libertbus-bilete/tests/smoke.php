@@ -348,6 +348,23 @@ lbb_t( 'anularea din birou trimite un email clientului, cu codul, ruta și telef
 	&& false !== strpos( $cx['subject'], 'anulată ' . $em['ticket_code'] ) && false !== strpos( $cx['message'], 'a fost anulată' ) && false !== strpos( $cx['message'], 'href="tel:' ), array( $cx['subject'], wp_strip_all_tags( $cx['message'] ) ) );
 lbb_t( 'emailul de anulare vine de la firmă, cu răspuns spre birou', false !== strpos( implode( "\n", (array) $cx['headers'] ), 'Reply-To: ' . $office ) && (bool) preg_match( '/^From: ' . preg_quote( $from_name, '/' ) . ' </m', implode( "\n", (array) $cx['headers'] ) ) );
 
+// API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
+$api = function ( $params ) {
+	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
+	$req->set_query_params( $params );
+	return rest_do_request( $req );
+};
+$api_ok = $api( array( 'route_id' => $rid2, 'date' => $tomorrow ) );
+lbb_t( 'API: ruta activă întoarce plecările, fără cache', 200 === $api_ok->get_status() && ! empty( $api_ok->get_data()['departures'] ) && 'no-store' === ( $api_ok->get_headers()['Cache-Control'] ?? '' ), array( $api_ok->get_status(), $api_ok->get_headers() ) );
+lbb_t( 'API: data în alt format e refuzată (400)', 400 === $api( array( 'route_id' => $rid2, 'date' => '07.10.2026' ) )->get_status() );
+lbb_t( 'API: fără rută e refuzat (400)', 400 === $api( array( 'date' => $tomorrow ) )->get_status() );
+lbb_t( 'API: ruta inexistentă dă 404', 404 === $api( array( 'route_id' => 999999, 'date' => $tomorrow ) )->get_status() );
+lbb_t( 'API: o dată imposibilă (31 februarie) nu are plecări', 200 === ( $api_imp = $api( array( 'route_id' => $rid2, 'date' => ( (int) gmdate( 'Y' ) + 1 ) . '-02-31' ) ) )->get_status() && array() === array_filter( $api_imp->get_data()['departures'], function ( $d ) { return ! empty( $d['bookable'] ); } ), $api_imp->get_data() );
+$wpdb->update( LBB_Routes::table(), array( 'active' => 0 ), array( 'id' => $rid2 ) );
+$api_off = $api( array( 'route_id' => $rid2, 'date' => $tomorrow ) )->get_status();
+$wpdb->update( LBB_Routes::table(), array( 'active' => 1 ), array( 'id' => $rid2 ) );
+lbb_t( 'API: o rută dezactivată nu se mai arată (404)', 404 === $api_off && LBB_Routes::get( $rid2 )['active'], $api_off );
+
 // Accesibilitate: prețul se anunță cititoarelor de ecran când se schimbă.
 lbb_t( 'rezumatul cu prețul e anunțat (aria-live)', (bool) preg_match( '/data-lbb="summary"[^>]*aria-live="polite"/', LBB_Frontend::shortcode( array() ) ) );
 
