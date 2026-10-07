@@ -131,6 +131,10 @@ $fb = LBB_Bookings::get_by_token( $fh['token'] );
 lbb_t( 'plata reușită după refuz emite biletul', 'confirmed' === $fb['status'] && preg_match( '/^LB-/', $fb['ticket_code'] ), $fb );
 $fo->update_status( 'refunded' );
 lbb_t( 'rambursarea anulează biletul și eliberează locul', 'cancelled' === LBB_Bookings::get_by_token( $fh['token'] )['status'] && $free_held + 1 === $free_at() );
+$fo->update_status( 'pending' );
+$fr = LBB_Bookings::get_by_token( $fh['token'] );
+lbb_t( 'plata reluată după rambursare: biletul (cu cod) apare „neachitat”, nu „anulat”', 'pending' === $fr['status'] && $fr['ticket_code'] && 0 === strpos( LBB_Tickets::state( $fr )['text'], 'Plata nu e finalizată' ), $fr );
+$fo->update_status( 'cancelled' ); // eliberează locul ținut din nou, altfel testele de mai jos nu mai au locuri
 $fo->delete( true );
 
 // Plată întârziată: rezervarea expiră, altcineva ia locurile, apoi vine plata.
@@ -240,6 +244,7 @@ lbb_t( 'biletul unei curse de ieri: „Cursa a avut loc”, nu „valabil”', 2
 $wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $tk_b['travel_date'] ), array( 'id' => $tk_b['id'] ) );
 $tk_today = array( 'status' => 'confirmed', 'travel_date' => LBB_Settings::today() );
 lbb_t( 'în ziua cursei biletul rămâne valabil', 'ok' === LBB_Tickets::state( $tk_today )['class'] );
+lbb_t( 'biletul cu plata reluată (pending) nu apare „anulat”, ci neachitat', 'bad' === LBB_Tickets::state( array( 'status' => 'pending', 'travel_date' => LBB_Settings::today() ) )['class'] && 0 === strpos( LBB_Tickets::state( array( 'status' => 'pending', 'travel_date' => LBB_Settings::today() ) )['text'], 'Plata nu e finalizată' ) );
 lbb_t( 'un bilet anulat dintr-o zi trecută rămâne „anulat”', 'Bilet anulat' === LBB_Tickets::state( array( 'status' => 'cancelled', 'travel_date' => $tk_yday ) )['text'] );
 $res2 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002' ) ) );
 lbb_t( 'a doua rezervare neachitată pe același telefon e refuzată', is_wp_error( $res2 ) && 'lbb_limit' === $res2->get_error_code(), $res2 );

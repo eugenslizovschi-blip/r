@@ -186,6 +186,10 @@ class LBB_Tickets {
 	 * @return array{class:string,text:string}
 	 */
 	public static function state( array $booking ) {
+		if ( in_array( $booking['status'], array( 'hold', 'pending' ), true ) ) {
+			// Ex. card refuzat, apoi clientul reîncearcă plata: biletul are deja cod, dar nu e anulat.
+			return array( 'class' => 'bad', 'text' => __( 'Plata nu e finalizată — biletul nu e încă valabil', 'libertbus-bilete' ) );
+		}
 		if ( ! in_array( $booking['status'], array( 'confirmed', 'reserved' ), true ) ) {
 			return array( 'class' => 'bad', 'text' => __( 'Bilet anulat', 'libertbus-bilete' ) );
 		}
