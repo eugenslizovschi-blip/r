@@ -178,6 +178,28 @@ class LBB_Tickets {
 	/**
 	 * Pagina biletului: /?lbb_bilet=LB-XXXXXX&k=semnătură. Se poate printa sau arăta de pe telefon.
 	 */
+	/**
+	 * Starea arătată sus pe pagina biletului. Un bilet al unei curse dintr-o zi trecută nu mai apare verde
+	 * „valabil”: șoferul care scanează un bilet vechi vede imediat că acea cursă a avut loc. În ziua cursei
+	 * biletul rămâne valabil toată ziua (autocarul poate pleca cu întârziere).
+	 *
+	 * @return array{class:string,text:string}
+	 */
+	public static function state( array $booking ) {
+		if ( ! in_array( $booking['status'], array( 'confirmed', 'reserved' ), true ) ) {
+			return array( 'class' => 'bad', 'text' => __( 'Bilet anulat', 'libertbus-bilete' ) );
+		}
+		if ( $booking['travel_date'] < LBB_Settings::today() ) {
+			$date = DateTimeImmutable::createFromFormat( '!Y-m-d', $booking['travel_date'], LBB_Settings::tz() );
+			/* translators: %s: data cursei, ex. 05.10.2026 */
+			return array( 'class' => 'past', 'text' => sprintf( __( 'Cursa a avut loc pe %s', 'libertbus-bilete' ), $date ? $date->format( 'd.m.Y' ) : $booking['travel_date'] ) );
+		}
+		if ( 'reserved' === $booking['status'] ) {
+			return array( 'class' => 'ok', 'text' => __( 'Rezervare confirmată — achitați la urcare', 'libertbus-bilete' ) );
+		}
+		return array( 'class' => 'ok', 'text' => __( 'Bilet valabil — achitat', 'libertbus-bilete' ) );
+	}
+
 	public static function ticket_page() {
 		$code = get_query_var( 'lbb_bilet' );
 		if ( ! $code ) {
@@ -195,8 +217,7 @@ class LBB_Tickets {
 		header( 'Referrer-Policy: no-referrer' );
 		status_header( $booking ? 200 : 404 );
 
-		$valid    = $booking && in_array( $booking['status'], array( 'confirmed', 'reserved' ), true );
-		$reserved = $booking && 'reserved' === $booking['status'];
+		$state = $booking ? self::state( $booking ) : null;
 		?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -210,7 +231,7 @@ class LBB_Tickets {
 body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#1d2733}
 .wrap{max-width:560px;margin:0 auto}
 .state{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
-.ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}
+.ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}.past{background:#eceff3;color:#3a4552}
 .actions{display:flex;gap:8px;margin-top:8px}.actions button{flex:1;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer}
 @media print{.actions,.state{display:none}body{background:#fff}}
 </style>
@@ -221,17 +242,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 	<?php if ( ! $booking ) : ?>
 		<div class="state bad"><?php esc_html_e( 'Biletul nu a fost găsit. Verificați linkul din email.', 'libertbus-bilete' ); ?></div>
 	<?php else : ?>
-		<div class="state <?php echo $valid ? 'ok' : 'bad'; ?>">
-			<?php
-			if ( $reserved ) {
-				esc_html_e( 'Rezervare confirmată — achitați la urcare', 'libertbus-bilete' );
-			} elseif ( $valid ) {
-				esc_html_e( 'Bilet valabil — achitat', 'libertbus-bilete' );
-			} else {
-				esc_html_e( 'Bilet anulat', 'libertbus-bilete' );
-			}
-			?>
-		</div>
+		<div class="state <?php echo esc_attr( $state['class'] ); ?>"><?php echo esc_html( $state['text'] ); ?></div>
 		<?php echo self::html( $booking, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<?php echo self::notes_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<div class="actions"><button type="button" onclick="window.print()"><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button></div>

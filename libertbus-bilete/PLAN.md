@@ -38,7 +38,8 @@
   - **Bilet și liste:**
     - copiii sunt marcați „(copil)” pe bilet, în lista pentru șofer și în CSV;
     - codul QR are text pentru cititoarele de ecran;
-    - pagina biletului nu mai rămâne în cache.
+    - pagina biletului nu mai rămâne în cache;
+    - biletul unei curse din zi trecută apare gri „Cursa a avut loc pe …”, nu verde „valabil” (șoferul nu poate fi păcălit cu un bilet vechi).
   - **Admin pe telefon:** listele Pasageri, Rezervări și Rute și orar devin carduri, iar câmpurile se ating ușor.
   - **Panoul „Gata de plăți?”** avertizează dacă bannerul de cookies e oprit sau dacă telefonul pentru clienți e incomplet.
   - **Altele:**

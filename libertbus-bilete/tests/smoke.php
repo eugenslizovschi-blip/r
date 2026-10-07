@@ -224,6 +224,23 @@ $saved = get_option( 'lbb_settings', array() );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'reserve_limit' => 1, 'allow_reserve' => 1 ) ) );
 $res1 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002', 'lbb_currency' => 'MDL' ) ) );
 lbb_t( 'rezervarea din formular întoarce linkul biletului', is_string( $res1 ) && false !== strpos( $res1, 'lbb_bilet=' ), $res1 );
+// Pagina biletului: o cursă dintr-o zi trecută nu mai apare verde „valabil” (prin HTTP, pe biletul real).
+$tk_state = function ( $url ) {
+	$r = wp_remote_get( $url, array( 'timeout' => 20 ) );
+	return is_wp_error( $r ) ? array( 0, '' ) : array( wp_remote_retrieve_response_code( $r ), wp_remote_retrieve_body( $r ) );
+};
+parse_str( (string) wp_parse_url( (string) $res1, PHP_URL_QUERY ), $tk_q );
+$tk_b = LBB_Bookings::get_by_code( isset( $tk_q['lbb_bilet'] ) ? $tk_q['lbb_bilet'] : '' );
+list( $tk_code, $tk_html ) = $tk_state( $res1 );
+lbb_t( 'biletul de mâine: rezervare confirmată, verde', 200 === $tk_code && false !== strpos( $tk_html, 'class="state ok">Rezervare confirmată' ), $tk_code );
+$tk_yday = ( new DateTimeImmutable( 'yesterday', LBB_Settings::tz() ) )->format( 'Y-m-d' );
+$wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $tk_yday ), array( 'id' => $tk_b['id'] ) );
+list( $tk_code, $tk_html ) = $tk_state( $res1 );
+lbb_t( 'biletul unei curse de ieri: „Cursa a avut loc”, nu „valabil”', 200 === $tk_code && false !== strpos( $tk_html, 'class="state past">Cursa a avut loc pe ' . gmdate( 'd.m.Y', strtotime( $tk_yday ) ) ) && false === strpos( $tk_html, 'state ok' ), $tk_code );
+$wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $tk_b['travel_date'] ), array( 'id' => $tk_b['id'] ) );
+$tk_today = array( 'status' => 'confirmed', 'travel_date' => LBB_Settings::today() );
+lbb_t( 'în ziua cursei biletul rămâne valabil', 'ok' === LBB_Tickets::state( $tk_today )['class'] );
+lbb_t( 'un bilet anulat dintr-o zi trecută rămâne „anulat”', 'Bilet anulat' === LBB_Tickets::state( array( 'status' => 'cancelled', 'travel_date' => $tk_yday ) )['text'] );
 $res2 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002' ) ) );
 lbb_t( 'a doua rezervare neachitată pe același telefon e refuzată', is_wp_error( $res2 ) && 'lbb_limit' === $res2->get_error_code(), $res2 );
 $res2b = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '069 000 002' ) ) );
