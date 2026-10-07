@@ -67,6 +67,14 @@ PHP
 # Rezervările rămase din rulările anterioare se șterg: altfel, după sute de rulări, cursele din următoarele
 # săptămâni se umplu și testele nu mai găsesc locuri (iar o oră „plină” apare din întâmplare, nu din test).
 $WP eval 'global $wpdb; $wpdb->query( "DELETE FROM " . LBB_Bookings::table() );' >/dev/null
+# Stocarea comenzilor WooCommerce: pe rând HPOS (ore pare) și tabelele vechi „posts” (ore impare), ca rundele
+# automate să le acopere pe amândouă (libertbus.md, actualizat de-a lungul anilor, folosește probabil „posts”).
+# LBB_ORDER_STORAGE=hpos|posts o fixează. Comenzile de test se șterg întâi: WooCommerce nu schimbă stocarea
+# cât timp există comenzi nesincronizate.
+STORAGE="${LBB_ORDER_STORAGE:-$( [ $(( 10#$(date -u +%H) % 2 )) -eq 0 ] && echo hpos || echo posts )}"
+$WP eval 'foreach ( wc_get_orders( array( "limit" => -1, "return" => "ids", "status" => "any" ) ) as $id ) { $o = wc_get_order( $id ); if ( $o ) { $o->delete( true ); } }' >/dev/null 2>&1 || true
+$WP option update woocommerce_custom_orders_table_enabled "$( [ "$STORAGE" = hpos ] && echo yes || echo no )" >/dev/null
+echo "Comenzi WooCommerce stocate în: $STORAGE ($($WP eval 'echo WC_Data_Store::load( "order" )->get_current_class_name();' 2>/dev/null))"
 # Imită modulul „GA Google Analytics” de pe libertbus.md (același cod), plus scripturi care NU trebuie blocate.
 cat > wordpress/wp-content/mu-plugins/fake-analytics.php <<'PHP'
 <?php

@@ -4,6 +4,7 @@
 set -u
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FAIL=0
+echo "== Comenzi WooCommerce în: $(cd "$WP_PATH" && $WP_CLI eval 'echo WC_Data_Store::load( "order" )->get_current_class_name();' 2>/dev/null)"
 echo "== Sintaxă PHP"
 for f in $(find "$DIR" -name '*.php'); do php -l "$f" >/dev/null || { echo "  eroare: $f"; FAIL=1; }; done
 echo "== Compatibilitate PHP 7.4+ (PHPCompatibility)"
