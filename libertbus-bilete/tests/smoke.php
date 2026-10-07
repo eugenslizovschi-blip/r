@@ -395,6 +395,33 @@ $nolinks = $cc_page();
 lbb_t( 'linkuri în subsol oprite: lipsesc, bannerul rămâne', false === strpos( $nolinks, 'id="lbb-legal-links"' ) && false !== strpos( $nolinks, 'id="lbb-cc"' ), strlen( $nolinks ) );
 update_option( 'lbb_settings', $cc_keep );
 
+// Câmpul-capcană pentru roboți, prin HTTP ca un vizitator: completat → refuzat fără rezervare; gol → rezervarea trece.
+$hp_old = LBB_Routes::find( 'HpA', 'HpB' );
+if ( $hp_old ) {
+	LBB_Routes::delete( $hp_old['id'] );
+}
+$hp_rid  = LBB_Routes::save( array( 'origin' => 'HpA', 'destination' => 'HpB', 'departures' => '10:00', 'price' => 100, 'currency' => 'MDL', 'capacity' => 5, 'active' => 1 ) );
+$hp_page = wp_remote_retrieve_body( wp_remote_get( home_url( '/balti-iasi/' ), array( 'timeout' => 20 ) ) );
+preg_match( '/name="lbb_nonce" value="([^"]+)"/', $hp_page, $hp_nonce );
+preg_match( '/name="lbb_form" value="([^"]+)"/', $hp_page, $hp_form );
+$hp_post = function ( $trap ) use ( $hp_rid, $tomorrow, $hp_nonce, $hp_form ) {
+	$body = array(
+		'lbb_action' => 'book', 'lbb_mode' => 'reserve', 'lbb_nonce' => isset( $hp_nonce[1] ) ? $hp_nonce[1] : '', 'lbb_form' => isset( $hp_form[1] ) ? $hp_form[1] : '',
+		'lbb_website' => $trap, 'lbb_route' => $hp_rid, 'lbb_date' => $tomorrow, 'lbb_time' => '10:00', 'lbb_adults' => 1,
+		'lbb_names' => array( 'Ion Capcană' ), 'lbb_phone' => '+3736' . wp_rand( 1000000, 9999999 ), 'lbb_email' => 'hp@example.com', 'lbb_currency' => 'MDL',
+	);
+	return wp_remote_post( home_url( '/balti-iasi/' ), array( 'timeout' => 20, 'redirection' => 0, 'body' => $body ) );
+};
+$hp_count = function () use ( $wpdb, $hp_rid ) {
+	return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $hp_rid ) );
+};
+$hp_r = $hp_post( 'http://spam.example' );
+lbb_t( 'robot (câmpul-capcană completat): refuzat, fără rezervare', ! is_wp_error( $hp_r ) && 200 === wp_remote_retrieve_response_code( $hp_r ) && false !== strpos( wp_remote_retrieve_body( $hp_r ), 'Cererea nu a putut fi procesată' ) && 0 === $hp_count(), is_wp_error( $hp_r ) ? $hp_r : wp_remote_retrieve_response_code( $hp_r ) );
+$hp_r = $hp_post( '' );
+lbb_t( 'aceeași cerere fără capcană (om): rezervarea trece și duce la bilet', ! is_wp_error( $hp_r ) && 302 === wp_remote_retrieve_response_code( $hp_r ) && false !== strpos( (string) wp_remote_retrieve_header( $hp_r, 'location' ), 'lbb_bilet=' ) && 1 === $hp_count(), is_wp_error( $hp_r ) ? $hp_r : array( wp_remote_retrieve_response_code( $hp_r ), wp_remote_retrieve_header( $hp_r, 'location' ), substr( wp_strip_all_tags( wp_remote_retrieve_body( $hp_r ) ), 0, 300 ) ) );
+$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $hp_rid ) );
+LBB_Routes::delete( $hp_rid );
+
 // Nota de confidențialitate din formularul de rezervare (Legea 195/2024): doar cu politica publicată.
 $priv_id = LBB_Legal::page_id( 'privacy' );
 $form    = LBB_Frontend::shortcode( array() );
