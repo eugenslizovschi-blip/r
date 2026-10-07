@@ -4,6 +4,11 @@
 set -u
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FAIL=0
+# Coșurile WooCommerce rămase de la un test picat (coșul adminului se păstrează în contul lui) ar strica testele
+# următoare: un bilet cu 1 loc ar apărea în comanda altui test. Fiecare test din browser pornește cu coșuri goale.
+fresh_carts() {
+  (cd "$WP_PATH" && $WP_CLI eval 'global $wpdb; $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_sessions" ); $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE \"_woocommerce_persistent_cart_%\"" );' >/dev/null 2>&1) || true
+}
 echo "== Comenzi WooCommerce în: $(cd "$WP_PATH" && $WP_CLI eval 'echo WC_Data_Store::load( "order" )->get_current_class_name();' 2>/dev/null)"
 echo "== Sintaxă PHP"
 for f in $(find "$DIR" -name '*.php'); do php -l "$f" >/dev/null || { echo "  eroare: $f"; FAIL=1; }; done
@@ -32,22 +37,27 @@ for u in /wp-admin/ "/wp-admin/admin.php?page=lbb"; do
   echo "  încălzire $u: ${T}s"
 done
 rm -f "$WARM_CJ"
+fresh_carts
 echo "== Rezervare cap-coadă"
 OUT_FLOW=$(BASE="$BASE" node "$DIR/tests/e2e-flow.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_FLOW" | grep -E 'ticket:|FAIL|ALERT|pageerror'
 echo "$OUT_FLOW" | grep -q 'ticket:' && ! echo "$OUT_FLOW" | grep -q 'FAIL' || FAIL=1
 [ -f "$WP_PATH/wp-content/debug.log" ] && grep -E "Fatal|Warning|Notice" "$WP_PATH/wp-content/debug.log" | grep -i lbb && FAIL=1
+fresh_carts
 echo "== Vizitator nelogat"
 OUT_GUEST=$(BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_GUEST" | grep -q 'GUEST: OK' && echo "  ok" || { echo "$OUT_GUEST" | grep -E 'FAIL|    at ' | head -5; echo "  PROBLEME"; FAIL=1; }
+fresh_carts
 echo "== Plată în RON + rezervare cu plata la urcare"
 OUT_CR=$(BASE="$BASE" node "$DIR/tests/e2e-currency-reserve.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_CR" | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "$OUT_CR" | grep -E 'FAIL|    at ' | head -5; echo "  PROBLEME"; FAIL=1; }
+fresh_carts
 echo "== Previzualizare doar pentru admin (plata online oprită pentru clienți)"
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=0; update_option("lbb_settings",$s);')
 LBB_PREVIEW_TOKEN=$(cd "$WP_PATH" && $WP_CLI eval 'echo LBB_Settings::preview_token();' 2>/dev/null) BASE="$BASE" node "$DIR/tests/e2e-preview.js" 2>&1 | grep -v CERT_AUTHORITY > "${TMPDIR:-/tmp}/lbb-preview.out"
 grep -q 'PREVIEW: OK' "${TMPDIR:-/tmp}/lbb-preview.out" && echo "  ok" || { grep -E 'FAIL|    at ' "${TMPDIR:-/tmp}/lbb-preview.out" | head -5; echo "  PROBLEME"; FAIL=1; }
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=1; update_option("lbb_settings",$s);')
+fresh_carts
 echo "== Paginile de admin (Panou, Rute, Pasageri, Rezervări, Setări) și CSV-ul cu pasageri"
 LOG="$WP_PATH/wp-content/debug.log"; BEFORE=$( [ -f "$LOG" ] && wc -l < "$LOG" || echo 0 )
 OUT_ADM=$(BASE="$BASE" node "$DIR/tests/e2e-admin.js" 2>&1 | grep -v CERT_AUTHORITY)
