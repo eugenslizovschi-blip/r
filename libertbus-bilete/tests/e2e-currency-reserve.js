@@ -143,6 +143,25 @@ async function fillForm(page, phone) {
     if (!st.v && !st.btn) fail('fără oră aleasă butoanele trebuie să fie blocate');
     await p2.close();
   }
+  // Telefon greșit, prins doar de server: după reîncărcare clientul nu reia totul de la capăt —
+  // numele pasagerului, data, ora și emailul rămân, iar telefonul e marcat ca greșit.
+  {
+    const p3 = await guestCtx.newPage();
+    await fillForm(p3, '123');
+    const want = { day: await p3.inputValue('[data-lbb="date"]'), time: await p3.inputValue('[data-lbb="time"]') };
+    await Promise.all([p3.waitForNavigation(), p3.click('[data-lbb-submit][value="reserve"]')]);
+    if (/lbb_bilet=/.test(p3.url()) || !(await p3.$('.lbb-alert'))) fail('telefonul „123” a trecut de server: ' + p3.url());
+    await p3.waitForFunction(t => document.querySelector('[data-lbb="time"]').value === t && document.querySelectorAll('input[name="lbb_names[]"]').length > 0, want.time, { timeout: 10000 }).catch(() => {});
+    const kept = await p3.evaluate(() => ({
+      names: [...document.querySelectorAll('input[name="lbb_names[]"]')].map(i => i.value),
+      day: document.querySelector('[data-lbb="date"]').value,
+      time: document.querySelector('[data-lbb="time"]').value,
+      email: document.querySelector('input[name="lbb_email"]').value,
+      phoneBad: document.querySelector('input[name="lbb_phone"]').getAttribute('aria-invalid'),
+    }));
+    if (kept.names[0] !== 'Test Pasager' || kept.day !== want.day || kept.time !== want.time || kept.email !== 'test@example.com' || kept.phoneBad !== 'true') fail('după eroarea de telefon s-au pierdut date din formular: ' + JSON.stringify({ want, kept }));
+    await p3.close();
+  }
   console.log(process.exitCode ? 'CURRENCY+RESERVE: PROBLEME' : 'CURRENCY+RESERVE: OK');
   await browser.close();
 })().catch(e => { console.error('FAIL', e); process.exit(1); });
