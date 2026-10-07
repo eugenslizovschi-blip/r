@@ -19,6 +19,9 @@ echo "== Teste automate"
 OUT_SMOKE=$(cd "$WP_PATH" && $WP_CLI eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
 echo "$OUT_SMOKE" | grep -E "FAIL|eșuate|Fatal"
 echo "$OUT_SMOKE" | grep -q " 0 eșuate" || FAIL=1
+# Încălzire: după repornirea containerului prima comandă WooCommerce poate dura peste 30 s (cache-uri reci)
+# și testele din browser ar pica din timeout, nu din cauza codului.
+for u in / /balti-iasi/ /checkout/ /wp-login.php; do curl -s -o /dev/null -m 60 "$BASE$u" || true; done
 echo "== Rezervare cap-coadă"
 OUT_FLOW=$(BASE="$BASE" node "$DIR/tests/e2e-flow.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_FLOW" | grep -E 'ticket:|FAIL|ALERT|pageerror'
@@ -32,7 +35,8 @@ OUT_CR=$(BASE="$BASE" node "$DIR/tests/e2e-currency-reserve.js" 2>&1 | grep -v C
 echo "$OUT_CR" | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "$OUT_CR" | grep -E 'FAIL|    at ' | head -5; echo "  PROBLEME"; FAIL=1; }
 echo "== Previzualizare doar pentru admin (plata online oprită pentru clienți)"
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=0; update_option("lbb_settings",$s);')
-LBB_PREVIEW_TOKEN=$(cd "$WP_PATH" && $WP_CLI eval 'echo LBB_Settings::preview_token();' 2>/dev/null) BASE="$BASE" node "$DIR/tests/e2e-preview.js" 2>&1 | grep -v CERT_AUTHORITY | grep -q 'PREVIEW: OK' && echo "  ok" || { echo "  PROBLEME"; FAIL=1; }
+LBB_PREVIEW_TOKEN=$(cd "$WP_PATH" && $WP_CLI eval 'echo LBB_Settings::preview_token();' 2>/dev/null) BASE="$BASE" node "$DIR/tests/e2e-preview.js" 2>&1 | grep -v CERT_AUTHORITY > "${TMPDIR:-/tmp}/lbb-preview.out"
+grep -q 'PREVIEW: OK' "${TMPDIR:-/tmp}/lbb-preview.out" && echo "  ok" || { grep -E 'FAIL|    at ' "${TMPDIR:-/tmp}/lbb-preview.out" | head -5; echo "  PROBLEME"; FAIL=1; }
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=1; update_option("lbb_settings",$s);')
 echo "== Paginile de admin (Panou, Rute, Pasageri, Rezervări, Setări) și CSV-ul cu pasageri"
 LOG="$WP_PATH/wp-content/debug.log"; BEFORE=$( [ -f "$LOG" ] && wc -l < "$LOG" || echo 0 )
