@@ -35,6 +35,20 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const emptyCodes = await page.$$eval('#wpbody-content table.widefat code', cs => cs.filter(c => !c.textContent.trim()).length);
   if (emptyCodes) fail('Rezervări: ' + emptyCodes + ' căsuțe de cod goale');
 
+  // Căutarea în Rezervări: după codul unui bilet existent îl găsește; o căutare fără rezultat o spune clar.
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings');
+  const someCode = await page.$$eval('#wpbody-content table.widefat code', cs => (cs.map(c => c.textContent.trim()).find(t => /^LB-/.test(t)) || ''));
+  if (someCode) {
+    await page.fill('#lbb-q', someCode.toLowerCase());
+    await Promise.all([page.waitForNavigation(), page.click('.lbb-search button')]);
+    const found = await page.$$eval('#wpbody-content table.widefat tbody tr', rs => rs.map(r => r.textContent));
+    if (found.length !== 1 || !found[0].includes(someCode)) fail('căutarea după cod ' + someCode + ' a dat ' + found.length + ' rânduri');
+    if (await page.inputValue('#lbb-q') !== someCode.toLowerCase()) fail('căutarea nu rămâne în câmp după căutare');
+  } else fail('nu am găsit un bilet pentru testul de căutare');
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');
+  const none = await page.textContent('#wpbody-content table.widefat tbody');
+  if (!/Nicio rezervare găsită/.test(none)) fail('căutarea fără rezultat nu spune nimic: ' + none.trim().slice(0, 80));
+
   // Foaia printată pentru șofer: doar titlul și tabelul, fără meniu, filtre sau subsolul WordPress.
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest');
   await page.emulateMedia({ media: 'print' });
@@ -71,6 +85,11 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     const small = await page.$$eval('#wpbody-content form input:not([type]), #wpbody-content form input[type="text"]', ins => ins.filter(i => i.offsetParent && i.getBoundingClientRect().height < 36).map(i => i.name + '=' + Math.round(i.getBoundingClientRect().height)));
     if (small.length) fail(slug + ': câmpuri prea mici pentru deget pe telefon: ' + small.join(', '));
   }
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');
+  const emptyLabel = await page.$eval('#wpbody-content table.widefat tbody td[colspan]', td => getComputedStyle(td, '::before').content);
+  if (emptyLabel !== 'none' && emptyLabel !== 'normal') fail('pe telefon, rândul „nicio rezervare” are eticheta ' + emptyLabel);
+  const searchFits = await page.$eval('#lbb-q', i => { const r = i.getBoundingClientRect(); return r.right <= window.innerWidth && r.height >= 36; });
+  if (!searchFits) fail('pe telefon câmpul de căutare iese din ecran sau e prea mic');
   for (const url of ['/wp-admin/admin.php?page=lbb-bookings', '/wp-admin/admin.php?page=lbb-manifest&date=' + firstDate]) {
     await page.goto(BASE + url);
     const m = await page.evaluate(() => {

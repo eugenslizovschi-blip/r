@@ -377,9 +377,26 @@ class LBB_Bookings {
 		return array_map( array( __CLASS__, 'hydrate' ), (array) $rows );
 	}
 
-	public static function recent( $limit = 50, $status = '' ) {
+	/**
+	 * Ultimele rezervări, opțional filtrate după stare și căutate după cod de bilet, telefon, email sau nume
+	 * (ex. clientul sună: „am codul LB-…” sau „am rezervat pe 069…”).
+	 */
+	public static function recent( $limit = 50, $status = '', $search = '' ) {
 		global $wpdb;
-		$where = $status ? $wpdb->prepare( 'WHERE b.status = %s', $status ) : "WHERE b.status <> 'hold'";
+		$where  = $status ? $wpdb->prepare( 'WHERE b.status = %s', $status ) : "WHERE b.status <> 'hold'";
+		$search = trim( (string) $search );
+		if ( '' !== $search ) {
+			$like = '%' . $wpdb->esc_like( $search ) . '%';
+			// Numele sunt în JSON, unde diacriticele apar ca \u021a…: căutăm și forma aceasta.
+			$json = '%' . $wpdb->esc_like( trim( wp_json_encode( $search ), '"' ) ) . '%';
+			$or   = $wpdb->prepare( 'b.ticket_code LIKE %s OR b.email LIKE %s OR b.passengers LIKE %s OR b.passengers LIKE %s', $like, $like, $like, $json );
+			// Telefonul e salvat ca +373…/+40…: „069 184 111” se găsește după cifrele fără 0-ul de la început.
+			$digits = ltrim( preg_replace( '/\D/', '', $search ), '0' );
+			if ( strlen( $digits ) >= 4 ) {
+				$or .= $wpdb->prepare( ' OR b.phone LIKE %s', '%' . $wpdb->esc_like( $digits ) . '%' );
+			}
+			$where .= " AND ( $or )";
+		}
 		$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT b.*, r.origin, r.destination FROM ' . self::table() . ' b LEFT JOIN ' . LBB_Routes::table() . " r ON r.id = b.route_id $where ORDER BY b.id DESC LIMIT %d", $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return array_map( array( __CLASS__, 'hydrate' ), (array) $rows );
 	}

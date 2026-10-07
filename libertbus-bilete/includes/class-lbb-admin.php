@@ -445,6 +445,7 @@ class LBB_Admin {
 				$css .= $t . ' td:nth-child(' . ( $i + 1 ) . ')::before{content:"' . str_replace( array( '\\', '"', '<' ), array( '\\\\', '\\"', '' ), $label ) . ':"}';
 			}
 		}
+		$css .= $t . ' td[colspan]::before{content:none}'; // rândul „nicio rezervare” nu e o coloană
 		echo '<style>' . $css . '}</style>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
@@ -511,6 +512,7 @@ class LBB_Admin {
 
 	public static function page_bookings() {
 		$status = isset( $_GET['status'] ) ? sanitize_key( $_GET['status'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+		$search = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
 		self::header( __( 'Rezervări', 'libertbus-bilete' ) );
 		$labels = array(
 			''          => __( 'Toate', 'libertbus-bilete' ),
@@ -526,10 +528,23 @@ class LBB_Admin {
 			$links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=lbb-bookings' . ( $key ? '&status=' . $key : '' ) ) ) . '"' . ( $status === $key ? ' class="current"' : '' ) . '>' . esc_html( $label ) . '</a>';
 		}
 		// Separatorul „|” în interiorul <li>, ca în listele WordPress (o listă nu poate avea text direct).
-		echo '<li>' . implode( ' |</li><li>', $links ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput
+		echo '<li>' . implode( ' |</li><li>', $links ) . '</li></ul>'; // phpcs:ignore WordPress.Security.EscapeOutput
+		// Căutare pentru telefon: clientul sună cu codul biletului, numărul de telefon sau numele.
+		echo '<style>.lbb-search{float:right;margin:8px 0}@media screen and (max-width:782px){.lbb-search{float:none;clear:both;display:flex;gap:6px;width:100%;margin:8px 0 12px}.lbb-search input[type=search]{flex:1;min-width:0}}</style>';
+		echo '<form method="get" class="lbb-search"><input type="hidden" name="page" value="lbb-bookings">';
+		if ( $status ) {
+			echo '<input type="hidden" name="status" value="' . esc_attr( $status ) . '">';
+		}
+		echo '<label class="screen-reader-text" for="lbb-q">' . esc_html__( 'Caută după cod, telefon, nume sau email', 'libertbus-bilete' ) . '</label>'
+			. '<input type="search" id="lbb-q" name="q" value="' . esc_attr( $search ) . '" placeholder="' . esc_attr__( 'Cod, telefon, nume, email', 'libertbus-bilete' ) . '"> '
+			. '<button class="button">' . esc_html__( 'Caută', 'libertbus-bilete' ) . '</button></form><br class="clear">';
+		$rows = LBB_Bookings::recent( 200, $status, $search );
 		self::stack_table_style( 'lbb-bookings-table', array( '#', __( 'Cursa', 'libertbus-bilete' ), __( 'Locuri', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ), __( 'Bilet', 'libertbus-bilete' ), __( 'Client', 'libertbus-bilete' ), __( 'Comanda', 'libertbus-bilete' ), __( 'Creată', 'libertbus-bilete' ) ) );
 		echo '<table class="widefat striped lbb-bookings-table"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
-		foreach ( LBB_Bookings::recent( 200, $status ) as $b ) {
+		if ( ! $rows ) {
+			echo '<tr><td colspan="9">' . esc_html( '' !== $search ? __( 'Nicio rezervare găsită pentru această căutare.', 'libertbus-bilete' ) : __( 'Nicio rezervare.', 'libertbus-bilete' ) ) . '</td></tr>';
+		}
+		foreach ( $rows as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
 			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( $b['origin'] . ' → ' . $b['destination'] ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $labels[ $b['status'] ] ) ? $labels[ $b['status'] ] : $b['status'] ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . esc_html( $b['phone'] . ' ' . $b['email'] ) . '</td><td>';
 			if ( $order ) {

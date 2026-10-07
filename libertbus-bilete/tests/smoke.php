@@ -419,6 +419,19 @@ $hp_r = $hp_post( 'http://spam.example' );
 lbb_t( 'robot (câmpul-capcană completat): refuzat, fără rezervare', ! is_wp_error( $hp_r ) && 200 === wp_remote_retrieve_response_code( $hp_r ) && false !== strpos( wp_remote_retrieve_body( $hp_r ), 'Cererea nu a putut fi procesată' ) && 0 === $hp_count(), is_wp_error( $hp_r ) ? $hp_r : wp_remote_retrieve_response_code( $hp_r ) );
 $hp_r = $hp_post( '' );
 lbb_t( 'aceeași cerere fără capcană (om): rezervarea trece și duce la bilet', ! is_wp_error( $hp_r ) && 302 === wp_remote_retrieve_response_code( $hp_r ) && false !== strpos( (string) wp_remote_retrieve_header( $hp_r, 'location' ), 'lbb_bilet=' ) && 1 === $hp_count(), is_wp_error( $hp_r ) ? $hp_r : array( wp_remote_retrieve_response_code( $hp_r ), wp_remote_retrieve_header( $hp_r, 'location' ), substr( wp_strip_all_tags( wp_remote_retrieve_body( $hp_r ) ), 0, 300 ) ) );
+// Căutarea din „Rezervări” (clientul sună cu codul, telefonul sau numele).
+$sr_b   = LBB_Bookings::get( (int) $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $hp_rid ) ) );
+$sr_ids = function ( $q, $status = '' ) {
+	return wp_list_pluck( LBB_Bookings::recent( 200, $status, $q ), 'id' );
+};
+$sr_local = '0' . substr( $sr_b['phone'], 4, 2 ) . ' ' . substr( $sr_b['phone'], 6 ); // +3736xxxxxxx → „06x xxxxxx”
+lbb_t( 'căutare după codul biletului', array( $sr_b['id'] ) === $sr_ids( strtolower( $sr_b['ticket_code'] ) ), $sr_b['ticket_code'] );
+lbb_t( 'căutare după telefon scris local, cu spații', in_array( $sr_b['id'], $sr_ids( $sr_local ), true ), $sr_local );
+lbb_t( 'căutare după email', in_array( $sr_b['id'], $sr_ids( 'hp@example.com' ), true ) );
+lbb_t( 'căutare fără rezultat', array() === $sr_ids( 'zzqq-nimic' ) );
+$sr_h = LBB_Bookings::create_hold( LBB_Routes::get( $hp_rid ), $tomorrow, '10:00', 1, 0, array( 'Țîrdea Ștefan' ), '+37369555444', 'x@example.com' );
+lbb_t( 'căutare după nume cu diacritice', ! is_wp_error( $sr_h ) && in_array( (int) $sr_h['id'], $sr_ids( 'Țîrdea', 'hold' ), true ), $sr_h );
+lbb_t( 'căutarea păstrează filtrul de stare', ! is_wp_error( $sr_h ) && ! in_array( (int) $sr_h['id'], $sr_ids( 'Țîrdea', 'confirmed' ), true ) );
 $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $hp_rid ) );
 LBB_Routes::delete( $hp_rid );
 
