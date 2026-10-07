@@ -165,6 +165,21 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await ctx.close();
   }
 
+  // Acord dat pe alt text al politicii („v0|…”): bannerul reapare și Google Analytics nu pornește până la o nouă alegere.
+  {
+    const ctx = await browser.newContext();
+    await offline(ctx);
+    await ctx.addCookies([{ name: 'lbb_cookie_consent', value: encodeURIComponent('v0|statistics,marketing|20250101'), url: BASE }]);
+    const page = await ctx.newPage();
+    let ga = 0;
+    page.on('request', r => { if (/googletagmanager\.com/.test(r.url())) ga++; });
+    await page.goto(BASE + '/balti-iasi/');
+    await page.waitForTimeout(800);
+    if (!(await page.isVisible('#lbb-cc'))) fail('acord pe altă versiune a textului: bannerul nu reapare');
+    if (ga) fail('acord pe altă versiune a textului: Google Analytics pornește fără acord nou');
+    await ctx.close();
+  }
+
   // Un <footer> din conținut (semnătura unui citat) nu trebuie să primească linkurile legale.
   {
     const ctx = await browser.newContext();

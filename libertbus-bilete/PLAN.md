@@ -28,7 +28,8 @@
   - **Cookies și lege:**
     - Google Tag Manager blocat până la acord;
     - toate cookies-urile de urmărire șterse la retragerea acordului;
-    - din tastatură, „Setări” duce direct la prima bifă.
+    - din tastatură, „Setări” duce direct la prima bifă;
+    - un acord dat pe un text mai vechi al politicii nu mai contează: bannerul reapare.
   - **Formularul de rezervare:**
     - după „Înapoi” din plată rămân data, ora și locurile corecte, iar butoanele merg;
     - câmpul cu eroarea de la server e marcat cu roșu;

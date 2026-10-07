@@ -23,6 +23,11 @@
 			return [];
 		}
 		var parts = v.split( '|' );
+		// Alt text al politicii (ex. „v0” sau, după o schimbare de scopuri, VERSION nou): acordul vechi nu mai e valabil,
+		// așa că bannerul reapare și nimic de statistică/marketing nu pornește până la o nouă alegere.
+		if ( parts.length > 1 && parts[ 0 ] !== VERSION ) {
+			return null;
+		}
 		return parts.length > 1 && parts[ 1 ] ? parts[ 1 ].split( ',' ).filter( function ( c ) {
 			return CATS.indexOf( c ) > -1;
 		} ) : [];
