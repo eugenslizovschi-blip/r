@@ -38,6 +38,7 @@
   - **Bilet și liste:**
     - copiii sunt marcați „(copil)” pe bilet, în lista pentru șofer și în CSV;
     - codul QR are text pentru cititoarele de ecran;
+    - ziua săptămânii de pe bilet e mereu în română (nu „Tuesday” când biroul confirmă comanda cu adminul în engleză);
     - pagina biletului nu mai rămâne în cache;
     - biletul unei curse din zi trecută apare gri „Cursa a avut loc pe …”, nu verde „valabil” (șoferul nu poate fi păcălit cu un bilet vechi);
     - dacă plata unui bilet e reluată (ex. după un card refuzat), pagina lui spune „Plata nu e finalizată”, nu „Bilet anulat”.

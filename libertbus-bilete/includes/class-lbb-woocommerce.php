@@ -95,11 +95,32 @@ class LBB_WooCommerce {
 	/**
 	 * Descrierea biletului: ruta, data, ora, pasagerii.
 	 */
+	/**
+	 * „06.10.2026 (marți)”. Ziua e în română fix, nu după limba curentă: când biroul confirmă comanda din
+	 * admin cu profilul în engleză, biletul clientului nu trebuie să apară cu „(Tuesday)”.
+	 */
+	public static function date_with_day( $ymd ) {
+		$d = DateTimeImmutable::createFromFormat( '!Y-m-d', (string) $ymd, new DateTimeZone( 'UTC' ) );
+		if ( ! $d ) {
+			return (string) $ymd;
+		}
+		$days = array(
+			1 => __( 'luni', 'libertbus-bilete' ),
+			2 => __( 'marți', 'libertbus-bilete' ),
+			3 => __( 'miercuri', 'libertbus-bilete' ),
+			4 => __( 'joi', 'libertbus-bilete' ),
+			5 => __( 'vineri', 'libertbus-bilete' ),
+			6 => __( 'sâmbătă', 'libertbus-bilete' ),
+			7 => __( 'duminică', 'libertbus-bilete' ),
+		);
+		return $d->format( 'd.m.Y' ) . ' (' . $days[ (int) $d->format( 'N' ) ] . ')';
+	}
+
 	public static function describe( array $booking ) {
 		$route = LBB_Routes::get( $booking['route_id'] );
 		$lines = array(
 			__( 'Ruta', 'libertbus-bilete' )      => $route ? $route['origin'] . ' → ' . $route['destination'] : '#' . $booking['route_id'],
-			__( 'Data', 'libertbus-bilete' )      => wp_date( 'd.m.Y (l)', strtotime( $booking['travel_date'] . ' 12:00:00' ) ),
+			__( 'Data', 'libertbus-bilete' )      => self::date_with_day( $booking['travel_date'] ),
 			__( 'Ora plecării', 'libertbus-bilete' ) => $booking['dep_time'],
 			__( 'Locuri', 'libertbus-bilete' )    => $booking['children']
 				/* translators: 1: total, 2: copii */

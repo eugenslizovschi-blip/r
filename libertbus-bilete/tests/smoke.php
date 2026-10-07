@@ -365,6 +365,14 @@ $api_off = $api( array( 'route_id' => $rid2, 'date' => $tomorrow ) )->get_status
 $wpdb->update( LBB_Routes::table(), array( 'active' => 1 ), array( 'id' => $rid2 ) );
 lbb_t( 'API: o rută dezactivată nu se mai arată (404)', 404 === $api_off && LBB_Routes::get( $rid2 )['active'], $api_off );
 
+// Pe bilet ziua săptămânii e în română și când administratorul lucrează în engleză.
+switch_to_locale( 'en_US' );
+$dw_tue = LBB_WooCommerce::date_with_day( '2026-10-06' );
+$dw_sun = LBB_WooCommerce::date_with_day( '2026-10-11' );
+restore_previous_locale();
+lbb_t( 'biletul arată ziua în română, oricare ar fi limba adminului', '06.10.2026 (marți)' === $dw_tue && '11.10.2026 (duminică)' === $dw_sun, array( $dw_tue, $dw_sun ) );
+lbb_t( 'o dată invalidă rămâne cum e, fără eroare', 'x' === LBB_WooCommerce::date_with_day( 'x' ) );
+
 // Accesibilitate: prețul se anunță cititoarelor de ecran când se schimbă.
 lbb_t( 'rezumatul cu prețul e anunțat (aria-live)', (bool) preg_match( '/data-lbb="summary"[^>]*aria-live="polite"/', LBB_Frontend::shortcode( array() ) ) );
 
