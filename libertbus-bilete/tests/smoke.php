@@ -337,6 +337,17 @@ update_option( 'lbb_settings', $keep_name );
 lbb_t( 'răspunsul clientului ajunge la birou (Reply-To)', false !== strpos( $h_client, 'Reply-To: ' . $office ), $h_client );
 lbb_t( 'biroul răspunde direct clientului (Reply-To)', false !== strpos( $h_office, 'Reply-To: client-mail@example.com' ), $h_office );
 
+// Biroul anulează rezervarea: clientul primește un email (să nu vină degeaba la autocar).
+$lbb_mails = array();
+add_filter( 'pre_wp_mail', $lbb_catch, 1, 2 );
+$cx_sent = $em && LBB_Bookings::cancel( $em['id'] ) && LBB_Tickets::send_cancellation_email( LBB_Bookings::get( $em['id'] ) );
+lbb_t( 'fără email valid nu se trimite nimic la anulare', false === LBB_Tickets::send_cancellation_email( array_merge( (array) $em, array( 'email' => '' ) ) ) );
+remove_filter( 'pre_wp_mail', $lbb_catch, 1 );
+$cx = $lbb_mails ? $lbb_mails[0] : array( 'to' => '', 'subject' => '', 'message' => '', 'headers' => array() );
+lbb_t( 'anularea din birou trimite un email clientului, cu codul, ruta și telefonul', $cx_sent && 1 === count( $lbb_mails ) && 'client-mail@example.com' === $cx['to']
+	&& false !== strpos( $cx['subject'], 'anulată ' . $em['ticket_code'] ) && false !== strpos( $cx['message'], 'a fost anulată' ) && false !== strpos( $cx['message'], 'href="tel:' ), array( $cx['subject'], wp_strip_all_tags( $cx['message'] ) ) );
+lbb_t( 'emailul de anulare vine de la firmă, cu răspuns spre birou', false !== strpos( implode( "\n", (array) $cx['headers'] ), 'Reply-To: ' . $office ) && (bool) preg_match( '/^From: ' . preg_quote( $from_name, '/' ) . ' </m', implode( "\n", (array) $cx['headers'] ) ) );
+
 // Accesibilitate: prețul se anunță cititoarelor de ecran când se schimbă.
 lbb_t( 'rezumatul cu prețul e anunțat (aria-live)', (bool) preg_match( '/data-lbb="summary"[^>]*aria-live="polite"/', LBB_Frontend::shortcode( array() ) ) );
 

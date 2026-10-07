@@ -96,6 +96,34 @@ class LBB_Tickets {
 	}
 
 	/**
+	 * Biroul a anulat o rezervare cu plata la urcare: clientul află, ca să nu vină degeaba la autocar.
+	 */
+	public static function send_cancellation_email( array $booking ) {
+		if ( ! is_email( $booking['email'] ) ) {
+			return false;
+		}
+		$route  = LBB_Routes::get( $booking['route_id'] );
+		$name   = $route ? $route['origin'] . ' → ' . $route['destination'] : '';
+		$when   = wp_date( 'd.m.Y', strtotime( $booking['travel_date'] . ' 12:00' ) ) . ' ' . $booking['dep_time'];
+		$office = LBB_Settings::get( 'company_email' );
+		$office = is_email( $office ) ? $office : get_option( 'admin_email' );
+		$body   = '<p>' . sprintf(
+			/* translators: 1: codul rezervării, 2: ruta, 3: data și ora */
+			esc_html__( 'Rezervarea %1$s pentru %2$s, %3$s a fost anulată. Locurile nu mai sunt păstrate.', 'libertbus-bilete' ),
+			'<strong>' . esc_html( $booking['ticket_code'] ) . '</strong>',
+			esc_html( $name ),
+			esc_html( $when )
+		) . '</p>';
+		if ( trim( (string) LBB_Settings::get( 'support_phone' ) ) ) {
+			/* translators: %s: telefon */
+			$body .= '<p>' . sprintf( esc_html__( 'Pentru o rezervare nouă sau întrebări sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_link() ) . '</p>';
+		}
+		$headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header(), 'Reply-To: ' . $office );
+		/* translators: 1: codul rezervării, 2: ruta, 3: data și ora */
+		return wp_mail( $booking['email'], sprintf( __( 'Rezervare anulată %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $body, $headers );
+	}
+
+	/**
 	 * „LibertBus <adresa obișnuită a site-ului>”: doar numele se schimbă, adresa rămâne cea a WordPress
 	 * (sau a unui plugin SMTP), ca emailurile să nu ajungă în spam.
 	 */

@@ -475,7 +475,8 @@ class LBB_Admin {
 			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
 		}
 		$ok = LBB_Bookings::cancel( $id );
-		self::redirect( 'lbb-bookings', $ok ? __( 'Rezervarea a fost anulată, locurile sunt libere.', 'libertbus-bilete' ) : __( 'Rezervarea nu a putut fi anulată (poate e deja plătită sau anulată).', 'libertbus-bilete' ), ! $ok, array( 'status' => 'reserved' ) );
+		$sent = $ok && LBB_Tickets::send_cancellation_email( LBB_Bookings::get( $id ) );
+		self::redirect( 'lbb-bookings', $ok ? __( 'Rezervarea a fost anulată, locurile sunt libere.', 'libertbus-bilete' ) . ( $sent ? ' ' . __( 'Clientul a fost anunțat prin email.', 'libertbus-bilete' ) : '' ) : __( 'Rezervarea nu a putut fi anulată (poate e deja plătită sau anulată).', 'libertbus-bilete' ), ! $ok, array( 'status' => 'reserved' ) );
 	}
 
 	public static function manifest_csv() {
