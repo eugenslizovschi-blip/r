@@ -81,7 +81,7 @@ class LBB_Tickets {
 			. self::html( $booking ) . self::notes_html();
 		if ( is_email( $booking['email'] ) ) {
 			/* translators: 1: ruta, 2: data și ora */
-			wp_mail( $booking['email'], sprintf( __( 'Rezervare %1$s, %2$s', 'libertbus-bilete' ), $name, $when ), $body, $headers );
+			self::mail_html( $booking['email'], sprintf( __( 'Rezervare %1$s, %2$s', 'libertbus-bilete' ), $name, $when ), $body, $headers );
 		}
 		$admin  = '<p>' . esc_html__( 'Rezervare nouă cu plata la urcare.', 'libertbus-bilete' ) . '</p>' . self::html( $booking )
 			. '<p>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': ' . esc_html( $booking['phone'] ) . '<br>Email: ' . esc_html( $booking['email'] ) . '</p>'
@@ -93,7 +93,7 @@ class LBB_Tickets {
 		if ( is_email( $booking['email'] ) ) {
 			$office_headers[] = 'Reply-To: ' . $booking['email'];
 		}
-		wp_mail( $office, sprintf( __( '[LibertBus] Rezervare %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $admin, $office_headers );
+		self::mail_html( $office, sprintf( __( '[LibertBus] Rezervare %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $admin, $office_headers );
 	}
 
 	/**
@@ -121,7 +121,38 @@ class LBB_Tickets {
 		}
 		$headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header(), 'Reply-To: ' . $office );
 		/* translators: 1: codul rezervării, 2: ruta, 3: data și ora */
-		return wp_mail( $booking['email'], sprintf( __( 'Rezervare anulată %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $body, $headers );
+		return self::mail_html( $booking['email'], sprintf( __( 'Rezervare anulată %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $body, $headers );
+	}
+
+	/**
+	 * Email HTML cu varianta text alăturată (multipart/alternative): unele servicii de email privesc cu
+	 * suspiciune mesajele doar HTML, iar unele aplicații de pe telefon le arată prost.
+	 */
+	public static function mail_html( $to, $subject, $html, $headers ) {
+		$text = self::plain_text( $html );
+		$alt  = function ( $mailer ) use ( $text ) {
+			$mailer->AltBody = $text; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		};
+		add_action( 'phpmailer_init', $alt );
+		$sent = wp_mail( $to, $subject, $html, $headers );
+		remove_action( 'phpmailer_init', $alt );
+		return $sent;
+	}
+
+	/**
+	 * Textul unui email HTML: rânduri păstrate, „etichetă valoare” din tabele, linkurile ca „text (adresă)”.
+	 */
+	public static function plain_text( $html ) {
+		$text = preg_replace_callback( '#<a\s[^>]*href=(["\'])(.*?)\1[^>]*>(.*?)</a>#is', function ( $m ) {
+			$label = trim( wp_strip_all_tags( $m[3] ) );
+			$url   = html_entity_decode( $m[2], ENT_QUOTES, 'UTF-8' );
+			return ( 0 === strpos( $url, 'tel:' ) || $label === $url ) ? $label : $label . ' (' . $url . ')';
+		}, preg_replace( '/\s+/u', ' ', (string) $html ) );
+		$text = preg_replace( '#<(br|/p|/div|/tr|/h[1-6]|/li)\b[^>]*>#i', "$0\n", $text );
+		$text = preg_replace( '#</t[hd]>#i', '$0 ', $text );
+		$text = html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES, 'UTF-8' );
+		$text = preg_replace( array( '/[ \t]+/', '/ *\n */', '/\n{3,}/' ), array( ' ', "\n", "\n\n" ), $text );
+		return trim( $text );
 	}
 
 	/**

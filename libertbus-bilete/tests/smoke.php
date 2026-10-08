@@ -351,6 +351,32 @@ lbb_t( 'anularea din birou trimite un email clientului, cu codul, ruta și telef
 	&& false !== strpos( $cx['subject'], 'anulată ' . $em['ticket_code'] ) && false !== strpos( $cx['message'], 'a fost anulată' ) && false !== strpos( $cx['message'], 'href="tel:' ), array( $cx['subject'], wp_strip_all_tags( $cx['message'] ) ) );
 lbb_t( 'emailul de anulare vine de la firmă, cu răspuns spre birou', false !== strpos( implode( "\n", (array) $cx['headers'] ), 'Reply-To: ' . $office ) && (bool) preg_match( '/^From: ' . preg_quote( $from_name, '/' ) . ' </m', implode( "\n", (array) $cx['headers'] ) ) );
 
+// Emailurile au și variantă text (multipart/alternative), lizibilă: cod, rută, link spre bilet, fără HTML.
+$plain = $em ? LBB_Tickets::plain_text( LBB_Tickets::html( $em ) ) : '';
+lbb_t( 'varianta text a biletului: cod, „Ruta …”, linkul biletului, fără etichete HTML', $em && false !== strpos( $plain, $em['ticket_code'] )
+	&& (bool) preg_match( '/^Ruta .+→/mu', $plain ) && false !== strpos( $plain, '(' . LBB_Tickets::url( $em['ticket_code'] ) . ')' ) && false === strpos( $plain, '<' ), $plain );
+// Pe site-ul de test emailurile sunt oprite înainte de PHPMailer (pre_wp_mail): aici le lăsăm să ajungă la el,
+// citim varianta text și trimiterea eșuează imediat (SMTP pe un port închis).
+$lbb_alt   = null;
+$lbb_saved = isset( $GLOBALS['wp_filter']['pre_wp_mail'] ) ? $GLOBALS['wp_filter']['pre_wp_mail'] : null;
+remove_all_filters( 'pre_wp_mail' );
+$lbb_spy = function ( $mailer ) use ( &$lbb_alt ) {
+	$lbb_alt = $mailer->AltBody; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+	$mailer->isSMTP();
+	$mailer->Host    = '127.0.0.1'; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+	$mailer->Port    = 9; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+	$mailer->Timeout = 2; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+};
+add_action( 'phpmailer_init', $lbb_spy, 1000 );
+if ( $em ) {
+	LBB_Tickets::send_cancellation_email( LBB_Bookings::get( $em['id'] ) );
+}
+remove_action( 'phpmailer_init', $lbb_spy, 1000 );
+if ( $lbb_saved ) {
+	$GLOBALS['wp_filter']['pre_wp_mail'] = $lbb_saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+}
+lbb_t( 'emailul de anulare pleacă și cu varianta text', is_string( $lbb_alt ) && false !== strpos( $lbb_alt, 'a fost anulată' ) && false === strpos( $lbb_alt, '<' ), $lbb_alt );
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );

@@ -48,6 +48,7 @@
     - un link de bilet stricat sau incomplet arată „Biletul nu a fost găsit” cu telefonul firmei, ca clientul să poată suna;
     - la printare, starea biletului rămâne pe foaie: un bilet anulat, neplătit sau dintr-o cursă trecută nu mai arată pe hârtie ca unul valabil.
   - **Admin pe telefon:** listele Pasageri, Rezervări și Rute și orar devin carduri, iar câmpurile se ating ușor.
+  - **Emailurile de rezervare și anulare** pleacă și cu o variantă text (nu doar HTML): ajung mai rar în spam și se citesc bine în orice aplicație.
   - **Anulare din birou:** când biroul anulează o rezervare cu plata la urcare, clientul primește un email (cu codul, ruta, ora și telefonul), ca să nu vină degeaba la autocar; după anulare, lista rămâne pe aceeași căutare și același filtru (ex. telefonul clientului care a sunat).
   - **Căutare în Rezervări:** când sună un client, rezervarea se găsește după codul biletului, telefon (și scris 069…), nume sau email, nu doar printre ultimele 200; filtrele de stare („Anulate”, „Plătite”…) păstrează căutarea.
   - **Emailul către birou** la o rezervare nouă are linkul „Deschide rezervarea în admin”, care o arată direct, căutată după cod.
