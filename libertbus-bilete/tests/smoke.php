@@ -393,6 +393,19 @@ if ( $lbb_saved ) {
 }
 lbb_t( 'emailul de anulare pleacă și cu varianta text', is_string( $lbb_alt ) && false !== strpos( $lbb_alt, 'a fost anulată' ) && false === strpos( $lbb_alt, '<' ), $lbb_alt );
 
+// Curățenia zilnică: coșurile abandonate dispar, dar o rezervare anulată de birou rămâne (are cod de bilet).
+$cl_res  = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Curat Rezervat' ), '+37369000088', 'cl@example.com', 'MDL' );
+$cl_res  = is_array( $cl_res ) ? LBB_Bookings::reserve( $cl_res['token'] ) : null;
+$cl_hold = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Curat Cos' ), '+37369000089', 'cl2@example.com', 'MDL' );
+if ( $cl_res && is_array( $cl_hold ) ) {
+	LBB_Bookings::cancel( $cl_res['id'] );
+	LBB_Bookings::cancel( $cl_hold['id'] );
+	$wpdb->query( $wpdb->prepare( 'UPDATE ' . LBB_Bookings::table() . ' SET updated_at = %s WHERE id IN (%d, %d)', gmdate( 'Y-m-d H:i:s', time() - 2 * DAY_IN_SECONDS ), $cl_res['id'], $cl_hold['id'] ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	LBB_Bookings::cleanup();
+}
+$cl_kept = $cl_res ? LBB_Bookings::get( $cl_res['id'] ) : null;
+lbb_t( 'curățenia păstrează rezervarea anulată de birou și șterge coșul abandonat', $cl_kept && 'cancelled' === $cl_kept['status'] && is_array( $cl_hold ) && ! LBB_Bookings::get( $cl_hold['id'] ) );
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );

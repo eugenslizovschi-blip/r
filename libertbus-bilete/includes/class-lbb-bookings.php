@@ -402,10 +402,11 @@ class LBB_Bookings {
 	}
 
 	/**
-	 * Cron orar: șterge coșurile abandonate mai vechi de o zi.
+	 * Cron orar: șterge coșurile abandonate mai vechi de o zi. O rezervare care a avut cod de bilet (ex. cu
+	 * plata la urcare, anulată de birou) rămâne: apare la „Anulate”, iar linkul clientului spune „Bilet anulat”.
 	 */
 	public static function cleanup() {
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::table() . " WHERE status IN ('hold','cancelled') AND order_id = 0 AND updated_at < %s", gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::table() . " WHERE status IN ('hold','cancelled') AND order_id = 0 AND ticket_code = '' AND updated_at < %s", gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 }
