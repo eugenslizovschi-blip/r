@@ -579,7 +579,7 @@ class LBB_Admin {
 			}
 			echo '</td><td>' . esc_html( get_date_from_gmt( $b['created_at'], 'd.m.Y H:i' ) ) . '</td><td>';
 			if ( 'reserved' === $b['status'] ) {
-				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'' . esc_js( __( 'Anulați rezervarea? Locurile devin libere.', 'libertbus-bilete' ) ) . '\');"><input type="hidden" name="action" value="lbb_cancel_booking"><input type="hidden" name="id" value="' . esc_attr( $b['id'] ) . '">'
+				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'' . esc_js( is_email( $b['email'] ) ? __( 'Anulați rezervarea? Locurile devin libere, iar clientul primește un email că rezervarea e anulată.', 'libertbus-bilete' ) : __( 'Anulați rezervarea? Locurile devin libere. Clientul nu are email: anunțați-l la telefon.', 'libertbus-bilete' ) ) . '\');"><input type="hidden" name="action" value="lbb_cancel_booking"><input type="hidden" name="id" value="' . esc_attr( $b['id'] ) . '">'
 					. '<input type="hidden" name="back_status" value="' . esc_attr( $status ) . '"><input type="hidden" name="back_q" value="' . esc_attr( $search ) . '">';
 				wp_nonce_field( 'lbb_cancel_booking_' . $b['id'] );
 				echo '<button class="button button-small">' . esc_html__( 'Anulează', 'libertbus-bilete' ) . '</button></form>';

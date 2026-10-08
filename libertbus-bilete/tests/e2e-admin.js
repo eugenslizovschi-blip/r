@@ -58,8 +58,11 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (resCode) await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=' + encodeURIComponent(resCode));
   const cancelBtn = resCode ? await page.$('.lbb-bookings-table form button') : null;
   if (cancelBtn) {
-    page.once('dialog', d => d.accept());
+    let askText = '';
+    page.once('dialog', d => { askText = d.message(); d.accept(); });
     await Promise.all([page.waitForNavigation(), cancelBtn.click()]);
+    // Confirmarea spune biroului ce urmează: locurile se eliberează și clientul primește email.
+    if (!/clientul primește un email/.test(askText)) fail('confirmarea anulării nu spune că pleacă un email: ' + askText);
     const notice = await page.$$eval('#wpbody-content .notice', ns => ns.map(n => n.textContent).join(' | '));
     if (!/Rezervarea a fost anulată/.test(notice)) fail('anularea din Rezervări nu a mers: ' + notice.trim().slice(0, 120));
     const after = new URL(page.url());
