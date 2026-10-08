@@ -498,8 +498,15 @@ class LBB_Admin {
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
 			wp_die( 'Data invalidă' );
 		}
+		// Cu ruta aleasă, numele fișierului o spune (ex. pasageri-2026-10-21-balti-iasi.csv): listele mai multor
+		// rute din aceeași zi nu se mai confundă în „Descărcări”.
+		$name = 'pasageri-' . $date;
+		$r    = $route ? LBB_Routes::get( $route ) : null;
+		if ( $r ) {
+			$name .= '-' . sanitize_title( remove_accents( $r['origin'] . ' ' . $r['destination'] ) );
+		}
 		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename="pasageri-' . $date . '.csv"' );
+		header( 'Content-Disposition: attachment; filename="' . $name . '.csv"' );
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" );
 		// Separator, ghilimele și fără caracter de escape (RFC 4180), explicit: implicitul se schimbă în PHP 8.4+.

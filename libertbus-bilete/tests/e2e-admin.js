@@ -84,6 +84,11 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (csv.charCodeAt(0) !== 0xFEFF) fail('CSV fără BOM: diacriticele se strică în Excel');
   if (!/^﻿?Data,Ora,Plecare,Destinatie,Bilet,Locuri,Pasageri,Telefon,Email,Plata,Comanda/.test(csv)) fail('antet CSV greșit: ' + csv.slice(0, 80));
   if (!/^pasageri-\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename())) fail('nume de fișier CSV greșit: ' + dl.suggestedFilename());
+  // Cu o rută aleasă, numele fișierului o conține (listele mai multor rute din aceeași zi nu se confundă).
+  const rid = await page.$eval('select[name="route"] option:nth-child(2)', o => ({ id: o.value, text: o.textContent }));
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&route=' + rid.id);
+  const [dl2] = await Promise.all([page.waitForEvent('download'), page.click('a.button:text-is("CSV")')]);
+  if (!/^pasageri-\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)+\.csv$/.test(dl2.suggestedFilename())) fail('CSV pe o rută (' + rid.text + '): nume fără rută: ' + dl2.suggestedFilename());
 
   // Pe telefon (șoferul, dispecerul): lista de pasageri și rezervările încap pe ecran, fără derulare laterală,
   // iar codul biletului rămâne pe un rând.
