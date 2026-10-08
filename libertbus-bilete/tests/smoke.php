@@ -330,6 +330,7 @@ lbb_t( 'emailul clientului are codul, suma la urcare și telefonul', $em && $to_
 	&& false !== strpos( $to_client[0]['message'], $em['ticket_code'] )
 	&& false !== strpos( $to_client[0]['message'], 'De achitat la urcare' )
 	&& false !== strpos( $to_client[0]['message'], 'href="tel:' ), $to_client ? substr( wp_strip_all_tags( $to_client[0]['message'] ), 0, 200 ) : 'lipsă' );
+lbb_t( 'subiectul emailului clientului are codul rezervării', $em && $to_client && false !== strpos( $to_client[0]['subject'], $em['ticket_code'] ), $to_client ? $to_client[0]['subject'] : 'lipsă' );
 lbb_t( 'emailurile de rezervare sunt HTML', $to_client && false !== strpos( implode( ' ', (array) $to_client[0]['headers'] ), 'text/html' ) );
 $to_office = array_values( array_filter( $lbb_mails, function ( $m ) {
 	return 'client-mail@example.com' !== $m['to'];

@@ -80,8 +80,9 @@ class LBB_Tickets {
 		$body    = '<p>' . esc_html__( 'Rezervarea dumneavoastră este confirmată. Plata se face la urcare, la șofer.', 'libertbus-bilete' ) . '</p>'
 			. self::html( $booking ) . self::notes_html();
 		if ( is_email( $booking['email'] ) ) {
-			/* translators: 1: ruta, 2: data și ora */
-			self::mail_html( $booking['email'], sprintf( __( 'Rezervare %1$s, %2$s', 'libertbus-bilete' ), $name, $when ), $body, $headers );
+			// Codul în subiect: clientul îl găsește direct în lista de emailuri când sună la birou.
+			/* translators: 1: codul rezervării, 2: ruta, 3: data și ora */
+			self::mail_html( $booking['email'], sprintf( __( 'Rezervare %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $body, $headers );
 		}
 		$admin  = '<p>' . esc_html__( 'Rezervare nouă cu plata la urcare.', 'libertbus-bilete' ) . '</p>' . self::html( $booking )
 			. '<p>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': ' . esc_html( $booking['phone'] ) . '<br>Email: ' . esc_html( $booking['email'] ) . '</p>'
