@@ -102,6 +102,8 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const forged = await guest.request.get(guest.url().replace(/([?&]k=)[^&]+/, '$1' + '0'.repeat(20)));
   const fbody = await forged.text();
   if (forged.status() !== 404 || /lbb-ticket|Test Pasager/.test(fbody)) fail('un link fals arată rezervarea: ' + forged.status());
+  // Clientul cu un link stricat are măcar telefonul firmei.
+  if (!/Biletul nu a fost găsit/.test(fbody) || !/href="tel:\+?\d{6,}"/.test(fbody)) fail('pagina „bilet negăsit” nu are telefonul firmei');
   await guest.waitForTimeout(500);
   await guest.screenshot({ path: (process.env.OUT || '.') + '/reservation.png', fullPage: true });
   // „Înapoi” din browser: data aleasă revine în câmp, deci orele și locurile trebuie să fie pentru ea, nu pentru azi.

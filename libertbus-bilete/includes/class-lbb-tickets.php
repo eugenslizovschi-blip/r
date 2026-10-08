@@ -275,6 +275,8 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 	<p><strong><?php echo esc_html( get_bloginfo( 'name' ) ); ?></strong></p>
 	<?php if ( ! $booking ) : ?>
 		<div class="state bad"><?php esc_html_e( 'Biletul nu a fost găsit. Verificați linkul din email.', 'libertbus-bilete' ); ?></div>
+		<?php /* translators: %s: telefonul pentru clienți */ ?>
+		<p><?php echo sprintf( esc_html__( 'Dacă nu găsiți emailul, sunați-ne la %s și vă ajutăm după numele sau telefonul de la rezervare.', 'libertbus-bilete' ), LBB_Settings::phone_link() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
 	<?php else : ?>
 		<div class="state <?php echo esc_attr( $state['class'] ); ?>"><?php echo esc_html( $state['text'] ); ?></div>
 		<?php echo self::html( $booking, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
