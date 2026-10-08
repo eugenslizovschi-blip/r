@@ -75,6 +75,8 @@ PHP
 # Rezervările rămase din rulările anterioare se șterg: altfel, după sute de rulări, cursele din următoarele
 # săptămâni se umplu și testele nu mai găsesc locuri (iar o oră „plină” apare din întâmplare, nu din test).
 $WP eval 'global $wpdb; $wpdb->query( "DELETE FROM " . LBB_Bookings::table() );' >/dev/null
+# Jurnalul de erori pornește gol la fiecare pregătire: QA caută în el doar erorile rulării curente.
+: > wordpress/wp-content/debug.log
 # Textul din ghidul de confidențialitate WordPress se salvează la prima vizită: îl ștergem, ca testul să vadă codul actual.
 $WP eval 'global $wpdb; $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = \"_wp_suggested_privacy_policy_content\" AND meta_value LIKE \"%LibertBus Bilete%\"" );' >/dev/null
 # Stocarea comenzilor WooCommerce: pe rând HPOS (ore pare) și tabelele vechi „posts” (ore impare), ca rundele

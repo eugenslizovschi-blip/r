@@ -460,6 +460,54 @@ $wa_b = is_array( $wa_h ) ? LBB_Bookings::get( $wa_h['id'] ) : null;
 lbb_t( 'anonimizarea WooCommerce șterge numele de pe comandă și din rezervare', '' === $wa_meta && $wa_b && '' === $wa_b['email'] && ! array_filter( (array) $wa_b['passengers'] ), array( $wa_meta, $wa_b ) );
 $wa_o->delete( true );
 
+// Același lucru pentru rezervările cu comandă: ștergerea la cererea clientului și curățenia de 3 ani curăță și comanda.
+// Prima cursă cu locuri libere (testul poate rula de mai multe ori pe aceeași bază fără ca o cursă să se umple).
+$oe_slot = function () use ( $rid2 ) {
+	$route = LBB_Routes::get( $rid2 );
+	for ( $d = 1; $d <= 30; $d++ ) {
+		$day = gmdate( 'Y-m-d', time() + $d * DAY_IN_SECONDS );
+		foreach ( LBB_Routes::departures_on( $route, $day ) as $dep ) {
+			if ( $dep['free'] > 0 && '' === $dep['reason'] ) {
+				return array( $route, $day, $dep['time'] );
+			}
+		}
+	}
+	return array( $route, gmdate( 'Y-m-d', time() + DAY_IN_SECONDS ), '10:00' );
+};
+$oe_make = function ( $name, $email ) use ( $oe_slot ) {
+	list( $route, $day, $time ) = $oe_slot();
+	$h = LBB_Bookings::create_hold( $route, $day, $time, 1, 0, array( $name ), '+37369000095', $email, 'MDL' );
+	$o = wc_create_order();
+	$i = new WC_Order_Item_Product();
+	$i->set_product( wc_get_product( LBB_Install::product_id() ) );
+	$i->add_meta_data( '_lbb_token', is_array( $h ) ? $h['token'] : '', true );
+	$i->add_meta_data( 'Pasageri', $name, true );
+	$o->add_item( $i );
+	$o->save();
+	LBB_WooCommerce::attach_order( $o );
+	return array( $h, $o->get_id() );
+};
+$oe_names = function ( $order_id ) {
+	$out = '';
+	foreach ( wc_get_order( $order_id )->get_items() as $it ) {
+		$out .= (string) $it->get_meta( 'Pasageri' );
+	}
+	return $out;
+};
+list( $oe_h1, $oe_o1 ) = $oe_make( 'Sters La Cerere', 'erase-order@example.com' );
+list( $oe_h2, $oe_o2 ) = $oe_make( 'Sters Dupa Trei Ani', 'old-order@example.com' );
+$oe_past = gmdate( 'Y-m-d', time() - 30 * DAY_IN_SECONDS );
+$oe_old  = ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '-3 years -2 days' )->format( 'Y-m-d' );
+$wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $oe_past ), array( 'id' => is_array( $oe_h1 ) ? $oe_h1['id'] : 0 ) );
+$wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $oe_old ), array( 'id' => is_array( $oe_h2 ) ? $oe_h2['id'] : 0 ) );
+$pv_er = apply_filters( 'wp_privacy_personal_data_erasers', array() );
+call_user_func( $pv_er['libertbus-bilete']['callback'], 'erase-order@example.com', 1 );
+LBB_Bookings::cleanup();
+$oe_notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $oe_o1 ) ), 'content' );
+lbb_t( 'ștergerea la cerere și curățenia de 3 ani șterg și numele de pe comandă (cu notă în comandă)', is_array( $oe_h1 ) && is_array( $oe_h2 ) && '' === $oe_names( $oe_o1 ) && '' === $oe_names( $oe_o2 ) && (bool) preg_grep( '/Numele pasagerilor au fost șterse/u', $oe_notes ), array( $oe_names( $oe_o1 ), $oe_names( $oe_o2 ), $oe_notes ) );
+wc_get_order( $oe_o1 )->delete( true );
+wc_get_order( $oe_o2 )->delete( true );
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
