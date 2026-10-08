@@ -156,6 +156,16 @@ lbb_t( 'plata întârziată: biletul se emite', 'confirmed' === LBB_Bookings::ge
 lbb_t( 'plata întârziată: notă de avertizare', (bool) preg_grep( '/ATENȚIE/u', $notes ), $notes );
 lbb_t( 'comanda doar cu bilete se finalizează automat', 'completed' === $o2->get_status(), $o2->get_status() );
 
+// Emailul text al comenzii (clienți cu emailuri „doar text”): numele cu apostrof rămâne întreg după
+// curățarea făcută de WooCommerce, iar titlul e cu majuscule corecte.
+$wpdb->update( LBB_Bookings::table(), array( 'passengers' => wp_json_encode( array( "Ana D'Angelo", 'L', 'M' ) ) ), array( 'id' => $late['id'] ) );
+ob_start();
+LBB_Tickets::email( $o2, false, true );
+$lbb_plain = ob_get_clean();
+$lbb_wce   = new WC_Email();
+$lbb_plain = preg_replace( $lbb_wce->plain_search, $lbb_wce->plain_replace, wp_strip_all_tags( $lbb_plain ) );
+lbb_t( 'emailul text: „Ana D\'Angelo” rămâne întreg, titlul „BILETELE DUMNEAVOASTRĂ”', false !== strpos( $lbb_plain, "Ana D'Angelo" ) && false !== strpos( $lbb_plain, 'BILETELE DUMNEAVOASTRĂ' ), $lbb_plain );
+
 // Pagina biletului: semnătura.
 $code = LBB_Bookings::get_by_token( $late['token'] )['ticket_code'];
 lbb_t( 'linkul biletului e semnat', false !== strpos( LBB_Tickets::url( $code ), 'k=' . LBB_Tickets::signature( $code ) ) );

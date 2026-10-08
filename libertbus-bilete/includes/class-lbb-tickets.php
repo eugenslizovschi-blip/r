@@ -189,15 +189,18 @@ class LBB_Tickets {
 			return;
 		}
 		if ( $plain_text ) {
-			echo "\n" . esc_html( strtoupper( __( 'Biletele dumneavoastră', 'libertbus-bilete' ) ) ) . "\n\n";
+			// Email text, nu HTML: fără entități (WooCommerce șterge „&#039;”, deci „D'Angelo” ar deveni „DAngelo”),
+			// iar majusculele țin cont de diacritice („DUMNEAVOASTRĂ”, nu „DUMNEAVOASTRă”).
+			$title = __( 'Biletele dumneavoastră', 'libertbus-bilete' );
+			echo "\n" . wp_strip_all_tags( function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $title, 'UTF-8' ) : strtoupper( $title ) ) . "\n\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 			foreach ( $tickets as $booking ) {
-				echo esc_html( $booking['ticket_code'] ) . "\n";
+				echo wp_strip_all_tags( $booking['ticket_code'] ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 				foreach ( LBB_WooCommerce::describe( $booking ) as $label => $value ) {
-					echo esc_html( $label . ': ' . $value ) . "\n";
+					echo wp_strip_all_tags( $label . ': ' . $value ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 				}
 				echo esc_url_raw( self::url( $booking['ticket_code'] ) ) . "\n\n";
 			}
-			echo esc_html( LBB_Settings::get( 'ticket_notes' ) ) . "\n\n";
+			echo wp_strip_all_tags( (string) LBB_Settings::get( 'ticket_notes' ) ) . "\n\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 			return;
 		}
 		echo '<h2>' . esc_html__( 'Biletele dumneavoastră', 'libertbus-bilete' ) . '</h2>';
