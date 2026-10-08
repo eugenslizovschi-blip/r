@@ -93,8 +93,14 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   // Pe telefon (șoferul, dispecerul): lista de pasageri și rezervările încap pe ecran, fără derulare laterală,
   // iar codul biletului rămâne pe un rând.
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings');
-  const firstDate = await page.$$eval('#wpbody-content table.widefat tbody td', tds => { for (const td of tds) { const m = td.textContent.match(/(\d\d)\.(\d\d)\.(\d{4}) \d\d:\d\d/); if (m) return m[3] + '-' + m[2] + '-' + m[1]; } return ''; });
+  // Data pentru lista șoferului: de la o rezervare care apare în ea (plătită sau cu plata la urcare), nu de la
+  // una anulată sau rămasă în coș (altfel lista e goală și testul depinde de ce au lăsat testele de dinainte).
+  let firstDate = '';
+  for (const st of ['confirmed', 'reserved']) {
+    if (firstDate) break;
+    await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&status=' + st);
+    firstDate = await page.$$eval('#wpbody-content table.widefat tbody td', tds => { for (const td of tds) { const m = td.textContent.match(/(\d\d)\.(\d\d)\.(\d{4}) \d\d:\d\d/); if (m) return m[3] + '-' + m[2] + '-' + m[1]; } return ''; });
+  }
   if (!firstDate) fail('nu am găsit o rezervare pentru testul pe telefon');
   for (const slug of ['lbb', 'lbb-routes', 'lbb-settings']) {
     await page.goto(BASE + '/wp-admin/admin.php?page=' + slug);
