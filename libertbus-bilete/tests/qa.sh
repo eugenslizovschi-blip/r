@@ -46,16 +46,16 @@ echo "$OUT_FLOW" | grep -q 'ticket:' && ! echo "$OUT_FLOW" | grep -q 'FAIL' || F
 fresh_carts
 echo "== Vizitator nelogat"
 OUT_GUEST=$(BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY)
-echo "$OUT_GUEST" | grep -q 'GUEST: OK' && echo "  ok" || { echo "$OUT_GUEST" | grep -E 'FAIL|    at ' | head -5; echo "  PROBLEME"; FAIL=1; }
+echo "$OUT_GUEST" | grep -q 'GUEST: OK' && echo "  ok" || { echo "$OUT_GUEST" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
 fresh_carts
 echo "== Plată în RON + rezervare cu plata la urcare"
 OUT_CR=$(BASE="$BASE" node "$DIR/tests/e2e-currency-reserve.js" 2>&1 | grep -v CERT_AUTHORITY)
-echo "$OUT_CR" | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "$OUT_CR" | grep -E 'FAIL|    at ' | head -5; echo "  PROBLEME"; FAIL=1; }
+echo "$OUT_CR" | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "$OUT_CR" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
 fresh_carts
 echo "== Previzualizare doar pentru admin (plata online oprită pentru clienți)"
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=0; update_option("lbb_settings",$s);')
 LBB_PREVIEW_TOKEN=$(cd "$WP_PATH" && $WP_CLI eval 'echo LBB_Settings::preview_token();' 2>/dev/null) BASE="$BASE" node "$DIR/tests/e2e-preview.js" 2>&1 | grep -v CERT_AUTHORITY > "${TMPDIR:-/tmp}/lbb-preview.out"
-grep -q 'PREVIEW: OK' "${TMPDIR:-/tmp}/lbb-preview.out" && echo "  ok" || { grep -E 'FAIL|    at ' "${TMPDIR:-/tmp}/lbb-preview.out" | head -5; echo "  PROBLEME"; FAIL=1; }
+grep -q 'PREVIEW: OK' "${TMPDIR:-/tmp}/lbb-preview.out" && echo "  ok" || { grep -E 'FAIL|    at ' "${TMPDIR:-/tmp}/lbb-preview.out" | head -8; echo "  PROBLEME"; FAIL=1; }
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=1; update_option("lbb_settings",$s);')
 fresh_carts
 echo "== Paginile de admin (Panou, Rute, Pasageri, Rezervări, Setări) și CSV-ul cu pasageri"

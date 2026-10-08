@@ -5,8 +5,9 @@
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
 const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
+let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
 (async () => {
-  const browser = await chromium.launch();
+  const browser = BROWSER = await chromium.launch();
   // Vizitator: pagina privată nu există, iar pe pagina publică rămâne formularul vechi chiar și cu ?lbb_preview=1.
   const guest = await (await browser.newContext()).newPage();
   const r = await guest.goto(BASE + '/previzualizare-bilete/');
@@ -136,4 +137,4 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   console.log('bilet de test:', ticket.slice(0, 120));
   console.log(process.exitCode ? 'PREVIEW: PROBLEME' : 'PREVIEW: OK');
   await browser.close();
-})().catch(e => { console.error('FAIL', e); process.exit(1); });
+})().catch(require('./crash')('preview', () => BROWSER));

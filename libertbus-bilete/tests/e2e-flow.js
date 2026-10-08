@@ -2,8 +2,9 @@
 // BASE=http://127.0.0.1:8080 node tests/e2e-flow.js (user/parolă admin/admin)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
+let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
 (async () => {
-  const browser = await chromium.launch();
+  const browser = BROWSER = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   // Testul nu e despre cookies: vizitatorul și-a ales deja preferința (bannerul e testat în e2e-cookies.js).
   await page.context().addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
@@ -62,4 +63,4 @@ const BASE = process.env.BASE || 'http://127.0.0.1:8080';
   await page.screenshot({ path: (process.env.OUT || '.') + '/ticketpage.png', fullPage: true });
   console.log('JS errors:', errors.length ? errors : 'none');
   await browser.close();
-})().catch(e => { console.error('FAIL', e); process.exit(1); });
+})().catch(require('./crash')('flow', () => BROWSER));

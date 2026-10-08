@@ -4,8 +4,9 @@
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
 const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
+let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
 (async () => {
-  const browser = await chromium.launch();
+  const browser = BROWSER = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   page.on('pageerror', e => fail('pageerror: ' + e.message));
   // Prima cerere pentru locuri primește pagina HTML a protecției hostingului: formularul trebuie să reîncerce.
@@ -144,4 +145,4 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   }
   console.log(process.exitCode ? 'GUEST: PROBLEME' : 'GUEST: OK');
   await browser.close();
-})().catch(e => { console.error('FAIL', e); process.exit(1); });
+})().catch(require('./crash')('guest', () => BROWSER));

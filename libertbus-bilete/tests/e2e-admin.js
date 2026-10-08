@@ -4,8 +4,9 @@
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
 const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
+let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
 (async () => {
-  const browser = await chromium.launch();
+  const browser = BROWSER = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true });
   const page = await ctx.newPage();
   page.on('pageerror', e => fail('pageerror pe ' + page.url() + ': ' + e.message));
@@ -117,4 +118,4 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
 
   console.log(process.exitCode ? 'ADMIN: PROBLEME' : 'ADMIN: OK');
   await browser.close();
-})().catch(e => { console.error('FAIL', e); process.exit(1); });
+})().catch(require('./crash')('admin', () => BROWSER));

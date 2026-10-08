@@ -19,8 +19,9 @@ async function fillForm(page, phone) {
   await page.fill('input[name="lbb_email"]', 'test@example.com');
 }
 
+let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
 (async () => {
-  const browser = await browser_launch();
+  const browser = BROWSER = await browser_launch();
   // 1) Plată în RON ca admin.
   const admin = await browser.newPage({ viewport: { width: 390, height: 844 } });
   // Testul nu e despre cookies: vizitatorul și-a ales deja preferința (bannerul e testat în e2e-cookies.js).
@@ -164,6 +165,6 @@ async function fillForm(page, phone) {
   }
   console.log(process.exitCode ? 'CURRENCY+RESERVE: PROBLEME' : 'CURRENCY+RESERVE: OK');
   await browser.close();
-})().catch(e => { console.error('FAIL', e); process.exit(1); });
+})().catch(require('./crash')('currency-reserve', () => BROWSER));
 
 function browser_launch() { return chromium.launch(); }
