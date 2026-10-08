@@ -47,6 +47,7 @@
   - **Admin pe telefon:** listele Pasageri, Rezervări și Rute și orar devin carduri, iar câmpurile se ating ușor.
   - **Anulare din birou:** când biroul anulează o rezervare cu plata la urcare, clientul primește un email (cu codul, ruta, ora și telefonul), ca să nu vină degeaba la autocar.
   - **Căutare în Rezervări:** când sună un client, rezervarea se găsește după codul biletului, telefon (și scris 069…), nume sau email, nu doar printre ultimele 200.
+  - **Emailul către birou** la o rezervare nouă are linkul „Deschide rezervarea în admin”, care o arată direct, căutată după cod.
   - **Panoul „Gata de plăți?”** avertizează dacă bannerul de cookies e oprit sau dacă telefonul pentru clienți e incomplet.
   - **Altele:**
     - ziua de azi după ora Chișinăului;

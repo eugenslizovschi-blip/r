@@ -85,7 +85,8 @@ class LBB_Tickets {
 		}
 		$admin  = '<p>' . esc_html__( 'Rezervare nouă cu plata la urcare.', 'libertbus-bilete' ) . '</p>' . self::html( $booking )
 			. '<p>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': ' . esc_html( $booking['phone'] ) . '<br>Email: ' . esc_html( $booking['email'] ) . '</p>'
-			. '<p><a href="' . esc_url( admin_url( 'admin.php?page=lbb-bookings&status=reserved' ) ) . '">' . esc_html__( 'Vezi rezervările', 'libertbus-bilete' ) . '</a></p>';
+			// Linkul deschide direct rezervarea aceasta (căutare după cod), nu lista cu ultimele 200.
+			. '<p><a href="' . esc_url( add_query_arg( array( 'page' => 'lbb-bookings', 'q' => rawurlencode( $booking['ticket_code'] ) ), admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Deschide rezervarea în admin', 'libertbus-bilete' ) . '</a></p>';
 		/* translators: 1: cod, 2: ruta, 3: data și ora */
 		// Biroul răspunde direct clientului.
 		$office_headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header() );

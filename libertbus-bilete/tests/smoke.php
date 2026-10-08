@@ -323,6 +323,8 @@ lbb_t( 'emailurile de rezervare sunt HTML', $to_client && false !== strpos( impl
 $to_office = array_values( array_filter( $lbb_mails, function ( $m ) {
 	return 'client-mail@example.com' !== $m['to'];
 } ) );
+lbb_t( 'emailul biroului duce direct la rezervare (căutare după cod)', $em && $to_office
+	&& false !== strpos( $to_office[0]['message'], 'page=lbb-bookings&#038;q=' . $em['ticket_code'] ), $to_office ? substr( $to_office[0]['message'], -300 ) : 'lipsă' );
 $h_client = $to_client ? implode( "\n", (array) $to_client[0]['headers'] ) : '';
 $h_office = $to_office ? implode( "\n", (array) $to_office[0]['headers'] ) : '';
 $office   = is_email( LBB_Settings::get( 'company_email' ) ) ? LBB_Settings::get( 'company_email' ) : get_option( 'admin_email' );
