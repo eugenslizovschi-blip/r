@@ -2,6 +2,7 @@
 // BASE=https://libertbus.md WP_USER=... WP_PASS=... PARALLEL=2 node tests/e2e-devices.js
 // Rulează mai multe dispozitive în paralel (implicit 5) cu o singură autentificare comună.
 const { chromium, devices } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const login = require('./login');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
 const PAGE = process.env.PAGE || '/previzualizare-bilete/';
 const OUT = process.env.OUT || 'devices';
@@ -90,12 +91,7 @@ async function check(browser, state, [name, dev]) {
   const browser = await chromium.launch(proxy);
   // O singură autentificare, sesiunea e împărțită de toate dispozitivele.
   const lctx = await browser.newContext(); const lp = await lctx.newPage();
-  await lp.goto(BASE + '/wp-login.php', { waitUntil: 'domcontentloaded', timeout: 150000 });
-  await lp.waitForSelector('#user_login', { timeout: 150000 });
-  await lp.fill('#user_login', process.env.WP_USER || 'admin'); await lp.fill('#user_pass', process.env.WP_PASS || 'admin');
-  await Promise.all([lp.waitForNavigation({ timeout: 150000 }), lp.click('#wp-submit')]);
-  // Login eșuat (ex. parolă în format nou după o actualizare WordPress): oprim clar, nu așteptăm la nesfârșit.
-  if (/wp-login\.php/.test(lp.url())) { console.error('FAIL login admin eșuat: ' + lp.url()); process.exit(1); }
+  await login(lp, BASE, { timeout: 150000 });
   const state = await lctx.storageState(); await lctx.close();
   const results = []; const queue = LIST.slice(); const N = parseInt(process.env.PARALLEL || '5', 10);
   await Promise.all(Array.from({ length: N }, async () => { while (queue.length) results.push(await check(browser, state, queue.shift())); }));

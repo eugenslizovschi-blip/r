@@ -3,6 +3,7 @@
 // 2) vizitator apasă „Rezerv, achit la urcare” → pagina rezervării, fără plată.
 // BASE=http://127.0.0.1:8080 node tests/e2e-currency-reserve.js
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const login = require('./login');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
 const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
 
@@ -27,11 +28,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   // Testul nu e despre cookies: vizitatorul și-a ales deja preferința (bannerul e testat în e2e-cookies.js).
   await admin.context().addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
   admin.on('pageerror', e => fail('pageerror: ' + e.message));
-  await admin.goto(BASE + '/wp-login.php');
-  await admin.fill('#user_login', 'admin'); await admin.fill('#user_pass', 'admin');
-  await Promise.all([admin.waitForNavigation(), admin.click('#wp-submit')]);
-  // Login eșuat (ex. parolă în format nou după o actualizare WordPress): oprim clar, nu așteptăm la nesfârșit.
-  if (/wp-login\.php/.test(admin.url())) { console.error('FAIL login admin eșuat: ' + admin.url()); process.exit(1); }
+  await login(admin, BASE);
   await fillForm(admin, '+37369111111');
   const def = await admin.$eval('[data-lbb="currency"]:checked', r => r.value);
   if (def !== 'MDL') fail('moneda implicită pentru Bălți→Iași ar trebui să fie MDL, e ' + def);

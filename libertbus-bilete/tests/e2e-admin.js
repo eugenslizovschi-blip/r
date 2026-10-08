@@ -2,6 +2,7 @@
 // iar lista de pasageri se descarcă în CSV.
 // BASE=http://127.0.0.1:8080 node tests/e2e-admin.js
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const login = require('./login');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
 const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
 let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
@@ -10,10 +11,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true });
   const page = await ctx.newPage();
   page.on('pageerror', e => fail('pageerror pe ' + page.url() + ': ' + e.message));
-  await page.goto(BASE + '/wp-login.php');
-  await page.fill('#user_login', 'admin'); await page.fill('#user_pass', 'admin');
-  await Promise.all([page.waitForNavigation(), page.click('#wp-submit')]);
-  if (/wp-login\.php/.test(page.url())) { console.error('FAIL login admin eșuat: ' + page.url()); process.exit(1); }
+  await login(page, BASE);
 
   const pages = [
     ['lbb', /gata de plăți/i],

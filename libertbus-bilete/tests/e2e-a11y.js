@@ -3,6 +3,7 @@
 // paginilor LibertBus din admin (Panou, Rute și orar, o rută, Pasageri, Rezervări, Setări).
 // AXE_JS=/cale/axe.min.js BASE=http://127.0.0.1:8080 node tests/e2e-a11y.js
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const login = require('./login');
 const fs = require('fs');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
 const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
@@ -49,10 +50,7 @@ async function scan(page, label, include) {
 
   // Admin: doar conținutul nostru (.wrap), nu meniurile WordPress.
   const admin = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
-  await admin.goto(BASE + '/wp-login.php');
-  await admin.fill('#user_login', 'admin'); await admin.fill('#user_pass', 'admin');
-  await Promise.all([admin.waitForNavigation(), admin.click('#wp-submit')]);
-  if (/wp-login\.php/.test(admin.url())) { console.error('FAIL login admin eșuat'); process.exit(1); }
+  await login(admin, BASE);
   await admin.goto(BASE + '/wp-admin/admin.php?page=lbb-routes');
   const editUrl = await admin.$eval('a[href*="page=lbb-routes&edit="]', a => a.href);
   for (const u of ['lbb', 'lbb-routes', editUrl, 'lbb-manifest&date=' + day, 'lbb-bookings', 'lbb-settings']) {
