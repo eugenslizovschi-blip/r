@@ -34,6 +34,11 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const emptyCodes = await page.$$eval('#wpbody-content table.widefat code', cs => cs.filter(c => !c.textContent.trim()).length);
   if (emptyCodes) fail('Rezervări: ' + emptyCodes + ' căsuțe de cod goale');
 
+  // Setări → Confidențialitate → Ghid: plugin-ul spune ce date despre călători prelucrează și cât le păstrează.
+  await page.goto(BASE + '/wp-admin/privacy-policy-guide.php');
+  const guide = (await page.textContent('#wpbody-content')).replace(/\s+/g, ' ');
+  if (!/LibertBus Bilete/.test(guide) || !/3 ani după data cursei/.test(guide)) fail('ghidul de confidențialitate WordPress nu are textul LibertBus');
+
   // Căutarea în Rezervări: după codul unui bilet existent îl găsește; o căutare fără rezultat o spune clar.
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings');
   const someCode = await page.$$eval('#wpbody-content table.widefat code', cs => (cs.map(c => c.textContent.trim()).find(t => /^LB-/.test(t)) || ''));

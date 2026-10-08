@@ -19,6 +19,25 @@ class LBB_Legal {
 		add_shortcode( 'lbb_firma_date', array( __CLASS__, 'company_block' ) );
 		add_action( 'admin_post_lbb_create_legal', array( __CLASS__, 'create' ) );
 		add_action( 'transition_post_status', array( __CLASS__, 'link_terms' ), 10, 3 );
+		add_action( 'admin_init', array( __CLASS__, 'policy_guide' ) );
+	}
+
+	/**
+	 * Setări → Confidențialitate → Ghid: ce date despre călători prelucrează plugin-ul (pentru cine scrie politica).
+	 */
+	public static function policy_guide() {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$id   = self::page_id( 'privacy' );
+		$text = '<p>' . esc_html__( 'Rezervarea și biletul: numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri și codul biletului. Scop: rezervarea locului, emiterea biletului și lista de îmbarcare. Temei: executarea contractului de transport.', 'libertbus-bilete' ) . '</p>'
+			. '<p>' . esc_html__( 'Păstrare: la 3 ani după data cursei, numele, telefonul și emailul se șterg automat din rezervare. La cererea clientului, datele se exportă sau se șterg din Unelte → Exportă / Șterge datele personale; un bilet valabil pentru o cursă viitoare se păstrează până după cursă.', 'libertbus-bilete' ) . '</p>'
+			. '<p>' . esc_html__( 'Datele cardului nu ajung pe site: se introduc doar pe pagina procesatorului de plăți.', 'libertbus-bilete' ) . '</p>';
+		if ( $id ) {
+			/* translators: %s: link spre politica de confidențialitate */
+			$text .= '<p>' . sprintf( esc_html__( 'Textul complet, cu datele firmei: %s.', 'libertbus-bilete' ), '<a href="' . esc_url( get_permalink( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a>' ) . '</p>';
+		}
+		wp_add_privacy_policy_content( 'LibertBus Bilete', wp_kses_post( $text ) );
 	}
 
 	public static function pages() {
