@@ -49,13 +49,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (!/Nicio rezervare găsită/.test(none)) fail('căutarea fără rezultat nu spune nimic: ' + none.trim().slice(0, 80));
 
   // „Anulează” pe o rezervare cu plata la urcare: rezervarea se anulează (și clientul e anunțat prin email).
+  // Biroul a căutat clientul după cod: după anulare rămâne pe aceeași căutare și vede rezervarea „Anulate”.
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&status=reserved');
-  const cancelBtn = await page.$('.lbb-bookings-table form button');
+  const resCode = await page.$eval('.lbb-bookings-table tbody tr:has(form) td:nth-child(5)', td => (td.textContent.match(/LB-[A-Z0-9]+/) || [''])[0]).catch(() => '');
+  if (resCode) await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=' + encodeURIComponent(resCode));
+  const cancelBtn = resCode ? await page.$('.lbb-bookings-table form button') : null;
   if (cancelBtn) {
     page.once('dialog', d => d.accept());
     await Promise.all([page.waitForNavigation(), cancelBtn.click()]);
     const notice = await page.$$eval('#wpbody-content .notice', ns => ns.map(n => n.textContent).join(' | '));
     if (!/Rezervarea a fost anulată/.test(notice)) fail('anularea din Rezervări nu a mers: ' + notice.trim().slice(0, 120));
+    const after = new URL(page.url());
+    const row = (await page.textContent('.lbb-bookings-table tbody')).replace(/\s+/g, ' ');
+    if (after.searchParams.get('q') !== resCode || !row.includes(resCode) || !/Anulate/.test(row)) fail('după anulare s-a pierdut căutarea: ' + page.url() + ' | ' + row.slice(0, 120));
     const body = await page.textContent('body');
     if (/Fatal error|Warning:|Notice:/i.test(body)) fail('eroare PHP după anulare');
   } else fail('nu am găsit o rezervare cu plata la urcare pentru testul de anulare');

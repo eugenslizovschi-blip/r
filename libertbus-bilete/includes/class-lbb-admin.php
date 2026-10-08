@@ -476,7 +476,17 @@ class LBB_Admin {
 		}
 		$ok = LBB_Bookings::cancel( $id );
 		$sent = $ok && LBB_Tickets::send_cancellation_email( LBB_Bookings::get( $id ) );
-		self::redirect( 'lbb-bookings', $ok ? __( 'Rezervarea a fost anulată, locurile sunt libere.', 'libertbus-bilete' ) . ( $sent ? ' ' . __( 'Clientul a fost anunțat prin email.', 'libertbus-bilete' ) : '' ) : __( 'Rezervarea nu a putut fi anulată (poate e deja plătită sau anulată).', 'libertbus-bilete' ), ! $ok, array( 'status' => 'reserved' ) );
+		// Înapoi unde era biroul: același filtru și aceeași căutare (ex. după telefonul clientului care a sunat).
+		$back_status = isset( $_POST['back_status'] ) ? sanitize_key( wp_unslash( $_POST['back_status'] ) ) : 'reserved';
+		$back_q      = isset( $_POST['back_q'] ) ? sanitize_text_field( wp_unslash( $_POST['back_q'] ) ) : '';
+		$back        = array();
+		if ( in_array( $back_status, array( 'confirmed', 'reserved', 'pending', 'cancelled', 'hold' ), true ) ) {
+			$back['status'] = $back_status;
+		}
+		if ( '' !== $back_q ) {
+			$back['q'] = rawurlencode( $back_q );
+		}
+		self::redirect( 'lbb-bookings', $ok ? __( 'Rezervarea a fost anulată, locurile sunt libere.', 'libertbus-bilete' ) . ( $sent ? ' ' . __( 'Clientul a fost anunțat prin email.', 'libertbus-bilete' ) : '' ) : __( 'Rezervarea nu a putut fi anulată (poate e deja plătită sau anulată).', 'libertbus-bilete' ), ! $ok, $back );
 	}
 
 	public static function manifest_csv() {
@@ -554,7 +564,8 @@ class LBB_Admin {
 			}
 			echo '</td><td>' . esc_html( get_date_from_gmt( $b['created_at'], 'd.m.Y H:i' ) ) . '</td><td>';
 			if ( 'reserved' === $b['status'] ) {
-				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'' . esc_js( __( 'Anulați rezervarea? Locurile devin libere.', 'libertbus-bilete' ) ) . '\');"><input type="hidden" name="action" value="lbb_cancel_booking"><input type="hidden" name="id" value="' . esc_attr( $b['id'] ) . '">';
+				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'' . esc_js( __( 'Anulați rezervarea? Locurile devin libere.', 'libertbus-bilete' ) ) . '\');"><input type="hidden" name="action" value="lbb_cancel_booking"><input type="hidden" name="id" value="' . esc_attr( $b['id'] ) . '">'
+					. '<input type="hidden" name="back_status" value="' . esc_attr( $status ) . '"><input type="hidden" name="back_q" value="' . esc_attr( $search ) . '">';
 				wp_nonce_field( 'lbb_cancel_booking_' . $b['id'] );
 				echo '<button class="button button-small">' . esc_html__( 'Anulează', 'libertbus-bilete' ) . '</button></form>';
 			}
