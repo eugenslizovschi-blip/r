@@ -647,6 +647,23 @@ lbb_t( 'panou: bannerul de cookies pornit apare ca bifat', $it && true === $it['
 update_option( 'lbb_settings', array_merge( $cl_keep, array( 'cookie_banner' => 0 ) ) );
 $it = $cl_item();
 lbb_t( 'panou: bannerul de cookies oprit apare ca problemă', $it && false === $it['ok'] && false !== strpos( $it['detail'], '195/2024' ), $it );
+// Panoul arată dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani).
+$or_keep = get_option( 'woocommerce_anonymize_completed_orders' );
+$or_item = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'order_retention' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+update_option( 'woocommerce_anonymize_completed_orders', array( 'number' => '', 'unit' => 'months' ) );
+$it = $or_item();
+lbb_t( 'panou: comenzile finalizate păstrate la nesfârșit apar ca avertisment', $it && 'warn' === $it['ok'] && false !== strpos( $it['detail'], '3 ani' ), $it );
+update_option( 'woocommerce_anonymize_completed_orders', array( 'number' => 3, 'unit' => 'years' ) );
+$it = $or_item();
+lbb_t( 'panou: anonimizarea după 3 ani apare bifată', $it && true === $it['ok'] && false !== strpos( $it['detail'], '3 ani' ), $it );
+update_option( 'woocommerce_anonymize_completed_orders', $or_keep );
 // Telefonul pentru clienți apare în formular, pe bilet și în emailuri: un număr incomplet e semnalat.
 $ph_item = function () {
 	foreach ( LBB_Admin::checklist() as $it ) {

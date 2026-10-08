@@ -131,6 +131,20 @@ class LBB_Admin {
 				: __( 'E oprit: Google Analytics pune cookies fără acord, ceea ce Legea nr. 195/2024 nu permite. Porniți „Banner cookies” din Setări.', 'libertbus-bilete' ),
 			admin_url( 'admin.php?page=lbb-settings' ) );
 
+		// Rezervările plugin-ului se anonimizează singure după 3 ani; comenzile WooCommerce (cu datele de facturare)
+		// doar dacă e setat în WooCommerce. Politica de confidențialitate promite 3 ani.
+		if ( $wc && function_exists( 'wc_parse_relative_date_option' ) ) {
+			$anon  = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
+			$units = array( 'days' => __( 'zile', 'libertbus-bilete' ), 'weeks' => __( 'săptămâni', 'libertbus-bilete' ), 'months' => __( 'luni', 'libertbus-bilete' ), 'years' => __( 'ani', 'libertbus-bilete' ) );
+			$set   = ! empty( $anon['number'] );
+			$add( 'order_retention', $set ? true : 'warn', __( 'Comenzile finalizate se anonimizează automat', 'libertbus-bilete' ),
+				$set
+					/* translators: 1: număr, 2: unitate (ani, luni…) */
+					? sprintf( __( 'După %1$d %2$s.', 'libertbus-bilete' ), (int) $anon['number'], isset( $units[ $anon['unit'] ] ) ? $units[ $anon['unit'] ] : $anon['unit'] )
+					: __( 'Acum: niciodată. Politica de confidențialitate promite păstrarea datelor 3 ani: în WooCommerce → Setări → Conturi și confidențialitate, la „Comenzi finalizate”, alegeți 3 ani.', 'libertbus-bilete' ),
+				admin_url( 'admin.php?page=wc-settings&tab=account' ) );
+		}
+
 		$routes = array_filter( LBB_Routes::all( true ), function ( $r ) {
 			return $r['price'] > 0;
 		} );
