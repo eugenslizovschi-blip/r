@@ -346,6 +346,8 @@ class LBB_Frontend {
 				'approxNote'  => __( 'echivalent orientativ, plata se face în moneda afișată', 'libertbus-bilete' ),
 				'payBoard'    => __( 'Se achită la urcare', 'libertbus-bilete' ),
 				'dialogLabel' => __( 'Datele pasagerilor și plata', 'libertbus-bilete' ),
+				'sendingPay'  => __( 'Vă ducem la plată… Nu închideți pagina.', 'libertbus-bilete' ),
+				'sendingRes'  => __( 'Se trimite rezervarea… Nu închideți pagina.', 'libertbus-bilete' ),
 			),
 		);
 
@@ -449,6 +451,7 @@ class LBB_Frontend {
 						<button type="submit" value="reserve" class="lbb-submit lbb-submit-alt" data-lbb-submit disabled><?php esc_html_e( 'Rezerv, achit la urcare', 'libertbus-bilete' ); ?></button>
 					<?php endif; ?>
 				</div>
+				<p class="lbb-sending" data-lbb="sending" role="status" aria-live="polite"></p>
 				<p class="lbb-note">
 					<?php
 					if ( $can_pay ) {

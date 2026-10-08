@@ -69,7 +69,15 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   await fillForm(guest, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
   await guest.screenshot({ path: (process.env.OUT || '.') + '/form-buttons.png', fullPage: true });
   const chosenTime = await guest.inputValue('[data-lbb="time"]');
+  // Internet lent: cât serverul nu a răspuns, sub butoane scrie ce se întâmplă (anunțat și cititoarelor de ecran).
+  // Citim mesajul chiar când pagina pleacă (pagehide) și îl păstrăm în sessionStorage pentru verificare.
+  await guest.evaluate(() => window.addEventListener('pagehide', () => {
+    const e = document.querySelector('[data-lbb="sending"]');
+    sessionStorage.setItem('lbbSending', JSON.stringify(e ? { text: e.textContent, role: e.getAttribute('role'), shown: e.getClientRects().length > 0 } : { missing: true }));
+  }));
   await Promise.all([guest.waitForNavigation(), guest.click('[data-lbb-submit][value="reserve"]')]);
+  const sending = JSON.parse(await guest.evaluate(() => sessionStorage.getItem('lbbSending')) || '{}');
+  if (!/Se trimite rezervarea/.test(sending.text || '') || sending.role !== 'status' || !sending.shown) fail('la trimitere lipsește mesajul „Se trimite…”: ' + JSON.stringify(sending));
   if (!/lbb_bilet=/.test(guest.url())) fail('rezervarea nu duce la pagina rezervării: ' + guest.url());
   const state = (await guest.textContent('.state')).trim();
   if (!/achitați la urcare/.test(state)) fail('starea rezervării e greșită: ' + state);

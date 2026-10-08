@@ -6,7 +6,7 @@
 		var cfg = decodeConfig( root.getAttribute( 'data-lbb-config' ) );
 		var t = cfg.i18n;
 		var el = {};
-		[ 'from', 'route', 'date', 'time', 'status', 'adults', 'children', 'names', 'summary', 'mode' ].forEach( function ( k ) {
+		[ 'from', 'route', 'date', 'time', 'status', 'adults', 'children', 'names', 'summary', 'mode', 'sending' ].forEach( function ( k ) {
 			el[ k ] = root.querySelector( '[data-lbb="' + k + '"]' );
 		} );
 		var buttons = root.querySelectorAll( '[data-lbb-submit]' );
@@ -617,6 +617,10 @@
 					buttons[ b ].disabled = true;
 				}
 				btn.classList.add( 'is-busy' );
+				// Pe internet lent butonul estompat nu spune nimic: scriem ce se întâmplă (și pentru cititoarele de ecran).
+				if ( el.sending ) {
+					el.sending.textContent = 'pay' === btn.value ? t.sendingPay : t.sendingRes;
+				}
 			}, 0 );
 		} );
 		// „Înapoi” din browser: din memorie (bfcache) pagina revine cu butoanele blocate de trimiterea de mai sus;
@@ -638,6 +642,9 @@
 			if ( e.persisted ) {
 				for ( var b = 0; b < buttons.length; b++ ) {
 					buttons[ b ].classList.remove( 'is-busy' );
+				}
+				if ( el.sending ) {
+					el.sending.textContent = '';
 				}
 				summary();
 			}

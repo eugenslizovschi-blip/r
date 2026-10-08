@@ -35,7 +35,8 @@
     - câmpul cu eroarea de la server e marcat cu roșu;
     - numele nu se mai pierd cât clientul scrie pe internet slab;
     - adulții și copiii își păstrează numele când se schimbă numărul lor;
-    - rezumatul arată prețul de adult și de copil.
+    - rezumatul arată prețul de adult și de copil;
+    - după apăsarea butonului, sub el scrie „Vă ducem la plată…” / „Se trimite rezervarea…” (pe internet lent clientul nu mai apasă de două ori și nu închide pagina).
   - **Bilet și liste:**
     - copiii sunt marcați „(copil)” pe bilet, în lista pentru șofer și în CSV;
     - CSV-ul cu pasageri nu mai lasă să treacă un „nume” pe care Excel l-ar executa ca formulă (ex. „+1+cmd|…”); telefoanele rămân la fel;
