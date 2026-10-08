@@ -85,6 +85,11 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const tr = await guest.request.get(guest.url());
   const h = tr.headers();
   if (!/no-store/.test(h['cache-control'] || '') || !/noindex/.test(h['x-robots-tag'] || '') || h['referrer-policy'] !== 'no-referrer') fail('pagina biletului: antete greșite ' + JSON.stringify({ cc: h['cache-control'], robots: h['x-robots-tag'], ref: h['referrer-policy'] }));
+  // Pe hârtie starea rămâne vizibilă (un bilet anulat printat nu trebuie să pară valabil); butonul „Printează” nu.
+  await guest.emulateMedia({ media: 'print' });
+  const printed = await guest.evaluate(() => ({ state: getComputedStyle(document.querySelector('.state')).display, actions: getComputedStyle(document.querySelector('.actions')).display }));
+  await guest.emulateMedia({ media: 'screen' });
+  if (printed.state === 'none' || printed.actions !== 'none') fail('pagina biletului printată: ' + JSON.stringify(printed));
   // Un link cu cheia greșită nu arată nimic din rezervare.
   const forged = await guest.request.get(guest.url().replace(/([?&]k=)[^&]+/, '$1' + '0'.repeat(20)));
   const fbody = await forged.text();
