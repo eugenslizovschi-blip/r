@@ -56,6 +56,14 @@ if [ "$($WP post list --post_type=page --post_status=private --name=previzualiza
   $WP eval "\$s=get_option('lbb_settings',array()); \$s['preview_cf7']='$F1'; update_option('lbb_settings',\$s);"
 fi
 mkdir -p wordpress/wp-content/mu-plugins
+# Doar pe site-ul de test: fără „async runner” al Action Scheduler (WooCommerce). Acesta pornește sarcinile în fundal
+# printr-o cerere către admin-ajax cu cookie-urile vizitatorului curent; imediat după setup (comenzi de test șterse,
+# importul Analytics de rulat) cererea încărca în paralel același coș și îl putea salva gol peste coșul abia completat:
+# „Sorry, your session has expired” la plată, din când în când. Sarcinile rulează în continuare prin WP-Cron.
+cat > wordpress/wp-content/mu-plugins/no-async-runner.php <<'PHP'
+<?php
+add_filter( 'action_scheduler_allow_async_request_runner', '__return_false' );
+PHP
 cat > wordpress/wp-content/mu-plugins/mail-dump.php <<'PHP'
 <?php
 add_filter( 'pre_wp_mail', function ( $null, $atts ) {
