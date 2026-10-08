@@ -505,10 +505,11 @@ class LBB_Admin {
 
 	/**
 	 * Previne formulele în Excel când un client își scrie numele „=…”.
+	 * Un „+” la început rămâne doar la un telefon curat (+373 69 …); „+1+cmd|…” e tot formulă.
 	 */
 	public static function csv_safe( $value ) {
 		$value = (string) $value;
-		return preg_match( '/^[=+\-@\t\r]/', $value ) && ! preg_match( '/^\+\d/', $value ) ? "'" . $value : $value;
+		return preg_match( '/^[=+\-@\t\r]/', $value ) && ! preg_match( '/^\+[\d\s().\-]+$/', $value ) ? "'" . $value : $value;
 	}
 
 	public static function page_bookings() {

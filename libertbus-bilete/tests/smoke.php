@@ -199,6 +199,7 @@ $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_time' => '12:34' ) ) );
 lbb_t( 'oră greșită respinsă', is_wp_error( $r ) && 'lbb_time' === $r->get_error_code(), $r );
 lbb_t( 'orașe fără diacritice se potrivesc', 'Bălți' === LBB_Frontend::match_city( 'balti', array( 'Bălți', 'Iași' ) ) && 'Târgu Mureș' === LBB_Frontend::match_city( 'Targu-Mures', array( 'Târgu Mureș' ) ) );
 lbb_t( 'CSV fără formule', "'=SUM(A1)" === LBB_Admin::csv_safe( '=SUM(A1)' ) && '+37369184111' === LBB_Admin::csv_safe( '+37369184111' ) );
+lbb_t( 'CSV: „+cifră” urmat de formulă e neutralizat, telefonul cu spații rămâne', "'+1+cmd|' /C calc'!A0" === LBB_Admin::csv_safe( "+1+cmd|' /C calc'!A0" ) && '+373 (69) 184-111' === LBB_Admin::csv_safe( '+373 (69) 184-111' ) && "'+1+2" === LBB_Admin::csv_safe( '+1+2' ) );
 
 // Rezervare fără plată (achitare la urcare), pe o rută proaspătă.
 $old2 = LBB_Routes::find( 'TestA', 'TestC' );

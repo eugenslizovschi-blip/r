@@ -38,6 +38,7 @@
     - rezumatul arată prețul de adult și de copil.
   - **Bilet și liste:**
     - copiii sunt marcați „(copil)” pe bilet, în lista pentru șofer și în CSV;
+    - CSV-ul cu pasageri nu mai lasă să treacă un „nume” pe care Excel l-ar executa ca formulă (ex. „+1+cmd|…”); telefoanele rămân la fel;
     - codul QR are text pentru cititoarele de ecran;
     - ziua săptămânii de pe bilet e mereu în română (nu „Tuesday” când biroul confirmă comanda cu adminul în engleză);
     - pagina biletului nu mai rămâne în cache;
