@@ -390,7 +390,7 @@ class LBB_Frontend {
 						<select name="lbb_route" data-lbb="route" required></select>
 					</label>
 					<label class="lbb-field"><span><?php esc_html_e( 'Data plecării', 'libertbus-bilete' ); ?></span>
-						<input type="date" name="lbb_date" data-lbb="date" required>
+						<input type="date" name="lbb_date" data-lbb="date" required min="<?php echo esc_attr( $config['today'] ); ?>" max="<?php echo esc_attr( $config['maxDate'] ); ?>">
 					</label>
 					<label class="lbb-field"><span><?php esc_html_e( 'Ora plecării', 'libertbus-bilete' ); ?></span>
 						<select name="lbb_time" data-lbb="time" required></select>

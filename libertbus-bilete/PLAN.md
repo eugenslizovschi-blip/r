@@ -33,6 +33,7 @@
   - **Formularul de rezervare:**
     - după „Înapoi” din plată rămân data, ora și locurile corecte, iar butoanele merg;
     - câmpul cu eroarea de la server e marcat cu roșu;
+    - calendarul nu lasă alegerea unei zile din trecut sau de după perioada de vânzare nici dacă JavaScript se încarcă greu;
     - numele nu se mai pierd cât clientul scrie pe internet slab;
     - adulții și copiii își păstrează numele când se schimbă numărul lor;
     - rezumatul arată prețul de adult și de copil;

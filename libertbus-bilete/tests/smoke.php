@@ -170,6 +170,11 @@ lbb_t( 'emailul text: „Ana D\'Angelo” rămâne întreg, titlul „BILETELE D
 $code = LBB_Bookings::get_by_token( $late['token'] )['ticket_code'];
 lbb_t( 'linkul biletului e semnat', false !== strpos( LBB_Tickets::url( $code ), 'k=' . LBB_Tickets::signature( $code ) ) );
 
+// Calendarul din formular are limitele și fără JavaScript (telefon cu JS lent sau blocat).
+$lbb_form_html = do_shortcode( '[libertbus_rezervare]' );
+$lbb_today     = LBB_Settings::today();
+lbb_t( 'câmpul de dată are min = azi și max = ultima zi de vânzare din HTML', (bool) preg_match( '/<input type="date" name="lbb_date"[^>]*min="' . preg_quote( $lbb_today, '/' ) . '"[^>]*max="(\d{4}-\d{2}-\d{2})"/', $lbb_form_html, $lbb_mm ) && $lbb_mm[1] > $lbb_today, isset( $lbb_mm[1] ) ? $lbb_mm[1] : substr( $lbb_form_html, 0, 0 ) );
+
 // Validarea formularului.
 $base = array( 'lbb_route' => $rid, 'lbb_date' => $tomorrow, 'lbb_time' => '23:59', 'lbb_adults' => 1, 'lbb_names' => array( 'Ion' ), 'lbb_phone' => '+37369184111', 'lbb_email' => 'ion@example.com' );
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_names' => array() ) ) );
