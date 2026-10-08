@@ -35,6 +35,15 @@ class LBB_Install {
 			add_action( 'init', array( __CLASS__, 'ensure_product' ), 20 );
 		}
 		add_action( 'lbb_cleanup', array( 'LBB_Bookings', 'cleanup' ) );
+		// Unelte → Exportă / Șterge datele personale (cererile clienților, Legea 195/2024 și GDPR).
+		add_filter( 'wp_privacy_personal_data_exporters', function ( $exporters ) {
+			$exporters['libertbus-bilete'] = array( 'exporter_friendly_name' => __( 'Rezervări LibertBus', 'libertbus-bilete' ), 'callback' => array( 'LBB_Bookings', 'privacy_export' ) );
+			return $exporters;
+		} );
+		add_filter( 'wp_privacy_personal_data_erasers', function ( $erasers ) {
+			$erasers['libertbus-bilete'] = array( 'eraser_friendly_name' => __( 'Rezervări LibertBus', 'libertbus-bilete' ), 'callback' => array( 'LBB_Bookings', 'privacy_erase' ) );
+			return $erasers;
+		} );
 	}
 
 	public static function create_tables() {

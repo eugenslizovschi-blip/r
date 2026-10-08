@@ -402,6 +402,70 @@ class LBB_Bookings {
 	}
 
 	/**
+	 * Rezervările unui client după email (pentru exportul și ștergerea datelor personale).
+	 */
+	private static function by_email( $email ) {
+		global $wpdb;
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT b.*, r.origin, r.destination FROM ' . self::table() . ' b LEFT JOIN ' . LBB_Routes::table() . " r ON r.id = b.route_id WHERE b.email = %s AND b.status <> 'hold' ORDER BY b.id", $email ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return array_map( array( __CLASS__, 'hydrate' ), $rows ? $rows : array() );
+	}
+
+	/**
+	 * Unelte → Exportă datele personale: rezervările făcute cu adresa de email a clientului.
+	 */
+	public static function privacy_export( $email, $page = 1 ) {
+		$items  = array();
+		$states = array(
+			'confirmed' => __( 'Plătită', 'libertbus-bilete' ),
+			'reserved'  => __( 'Rezervată, cu plata la urcare', 'libertbus-bilete' ),
+			'pending'   => __( 'Așteaptă plata', 'libertbus-bilete' ),
+			'cancelled' => __( 'Anulată', 'libertbus-bilete' ),
+		);
+		foreach ( self::by_email( $email ) as $b ) {
+			$items[] = array(
+				'group_id'    => 'libertbus-bookings',
+				'group_label' => __( 'Rezervări LibertBus', 'libertbus-bilete' ),
+				'item_id'     => 'libertbus-booking-' . $b['id'],
+				'data'        => array(
+					array( 'name' => __( 'Cod', 'libertbus-bilete' ), 'value' => $b['ticket_code'] ),
+					array( 'name' => __( 'Ruta', 'libertbus-bilete' ), 'value' => trim( $b['origin'] . ' → ' . $b['destination'], ' →' ) ),
+					array( 'name' => __( 'Data și ora', 'libertbus-bilete' ), 'value' => $b['travel_date'] . ' ' . $b['dep_time'] ),
+					array( 'name' => __( 'Pasageri', 'libertbus-bilete' ), 'value' => implode( ', ', self::passenger_labels( $b ) ) ),
+					array( 'name' => __( 'Telefon', 'libertbus-bilete' ), 'value' => $b['phone'] ),
+					array( 'name' => 'Email', 'value' => $b['email'] ),
+					array( 'name' => __( 'Stare', 'libertbus-bilete' ), 'value' => isset( $states[ $b['status'] ] ) ? $states[ $b['status'] ] : $b['status'] ),
+				),
+			);
+		}
+		return array( 'data' => $items, 'done' => true );
+	}
+
+	/**
+	 * Unelte → Șterge datele personale: numele, telefonul și emailul dispar din rezervări. Un bilet valabil
+	 * pentru o cursă care n-a avut loc încă rămâne (altfel clientul n-ar mai putea călători); se șterge după cursă.
+	 */
+	public static function privacy_erase( $email, $page = 1 ) {
+		global $wpdb;
+		$removed  = false;
+		$retained = false;
+		$today    = LBB_Settings::today();
+		foreach ( self::by_email( $email ) as $b ) {
+			if ( in_array( $b['status'], array( 'confirmed', 'reserved', 'pending' ), true ) && $b['travel_date'] >= $today ) {
+				$retained = true;
+				continue;
+			}
+			$wpdb->update( self::table(), array( 'passengers' => '[]', 'phone' => '', 'email' => '', 'updated_at' => self::now_utc() ), array( 'id' => $b['id'] ) );
+			$removed = true;
+		}
+		return array(
+			'items_removed'  => $removed,
+			'items_retained' => $retained,
+			'messages'       => $retained ? array( __( 'Rezervările LibertBus pentru curse viitoare au fost păstrate până după cursă (biletul trebuie să rămână valabil).', 'libertbus-bilete' ) ) : array(),
+			'done'           => true,
+		);
+	}
+
+	/**
 	 * Cron orar: șterge coșurile abandonate mai vechi de o zi. O rezervare care a avut cod de bilet (ex. cu
 	 * plata la urcare, anulată de birou) rămâne: apare la „Anulate”, iar linkul clientului spune „Bilet anulat”.
 	 */

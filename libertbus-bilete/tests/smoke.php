@@ -421,6 +421,25 @@ lbb_t( 'după 3 ani de la cursă datele personale se șterg, codul rămâne; o c
 	&& $rt_n && 'recent@example.com' === $rt_n['email'] && array( 'Recent Pasager' ) === array_values( (array) $rt_n['passengers'] ), array( $rt_o, $rt_n ) );
 lbb_t( 'curățenia păstrează rezervarea anulată de birou și șterge coșul abandonat', $cl_kept && 'cancelled' === $cl_kept['status'] && is_array( $cl_hold ) && ! LBB_Bookings::get( $cl_hold['id'] ) );
 
+// Unelte → Exportă / Șterge datele personale: rezervările clientului apar și se șterg; biletul viitor rămâne.
+$pv_ex  = apply_filters( 'wp_privacy_personal_data_exporters', array() );
+$pv_er  = apply_filters( 'wp_privacy_personal_data_erasers', array() );
+$pv_old = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Gdpr Vechi' ), '+37369000092', 'gdpr@example.com', 'MDL' );
+$pv_new = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Gdpr Viitor' ), '+37369000093', 'gdpr@example.com', 'MDL' );
+$pv_old = is_array( $pv_old ) ? LBB_Bookings::reserve( $pv_old['token'] ) : null;
+$pv_new = is_array( $pv_new ) ? LBB_Bookings::reserve( $pv_new['token'] ) : null;
+if ( $pv_old ) {
+	$wpdb->update( LBB_Bookings::table(), array( 'travel_date' => gmdate( 'Y-m-d', time() - 30 * DAY_IN_SECONDS ) ), array( 'id' => $pv_old['id'] ) );
+}
+$pv_exp = isset( $pv_ex['libertbus-bilete'] ) ? call_user_func( $pv_ex['libertbus-bilete']['callback'], 'gdpr@example.com', 1 ) : array( 'data' => array() );
+$pv_txt = wp_json_encode( $pv_exp['data'] );
+lbb_t( 'export date personale: ambele rezervări ale clientului, cu nume, telefon și cod', 2 === count( $pv_exp['data'] ) && false !== strpos( $pv_txt, 'Gdpr Vechi' ) && false !== strpos( $pv_txt, '+37369000093' ) && false !== strpos( $pv_txt, 'plata la urcare' ) && $pv_new && false !== strpos( $pv_txt, $pv_new['ticket_code'] ), $pv_txt );
+$pv_res = isset( $pv_er['libertbus-bilete'] ) ? call_user_func( $pv_er['libertbus-bilete']['callback'], 'gdpr@example.com', 1 ) : array();
+$pv_o   = $pv_old ? LBB_Bookings::get( $pv_old['id'] ) : null;
+$pv_n   = $pv_new ? LBB_Bookings::get( $pv_new['id'] ) : null;
+lbb_t( 'ștergere date personale: cursa trecută anonimizată, biletul pentru cursa viitoare păstrat cu mesaj', ! empty( $pv_res['items_removed'] ) && ! empty( $pv_res['items_retained'] ) && ! empty( $pv_res['messages'] )
+	&& $pv_o && '' === $pv_o['email'] && '' === $pv_o['phone'] && ! array_filter( (array) $pv_o['passengers'] ) && $pv_n && 'gdpr@example.com' === $pv_n['email'], array( $pv_res, $pv_o, $pv_n ) );
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
