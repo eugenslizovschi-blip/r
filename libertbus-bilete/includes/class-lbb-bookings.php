@@ -408,5 +408,10 @@ class LBB_Bookings {
 	public static function cleanup() {
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::table() . " WHERE status IN ('hold','cancelled') AND order_id = 0 AND ticket_code = '' AND updated_at < %s", gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// Politica de confidențialitate: datele pasagerilor se păstrează 3 ani de la data călătoriei. După aceea rămân
+		// doar codul, ruta, data și locurile (pentru statistici); numele, telefonul și emailul se șterg.
+		$years = max( 1, (int) apply_filters( 'lbb_retention_years', 3 ) );
+		$until = ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '-' . $years . ' years' )->format( 'Y-m-d' );
+		$wpdb->query( $wpdb->prepare( 'UPDATE ' . self::table() . " SET passengers = '[]', phone = '', email = '' WHERE travel_date < %s AND ( phone <> '' OR email <> '' OR passengers IS NULL OR passengers <> '[]' )", $until ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 }

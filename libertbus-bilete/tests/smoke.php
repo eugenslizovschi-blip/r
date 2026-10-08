@@ -404,6 +404,21 @@ if ( $cl_res && is_array( $cl_hold ) ) {
 	LBB_Bookings::cleanup();
 }
 $cl_kept = $cl_res ? LBB_Bookings::get( $cl_res['id'] ) : null;
+// După 3 ani de la cursă (politica de confidențialitate) dispar numele, telefonul și emailul; codul rămâne.
+$rt_old = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Vechi Pasager' ), '+37369000090', 'vechi@example.com', 'MDL' );
+$rt_new = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Recent Pasager' ), '+37369000091', 'recent@example.com', 'MDL' );
+$rt_old = is_array( $rt_old ) ? LBB_Bookings::reserve( $rt_old['token'] ) : null;
+$rt_new = is_array( $rt_new ) ? LBB_Bookings::reserve( $rt_new['token'] ) : null;
+if ( $rt_old && $rt_new ) {
+	$rt_day = new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() );
+	$wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $rt_day->modify( '-3 years -2 days' )->format( 'Y-m-d' ) ), array( 'id' => $rt_old['id'] ) );
+	$wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $rt_day->modify( '-2 years' )->format( 'Y-m-d' ) ), array( 'id' => $rt_new['id'] ) );
+	LBB_Bookings::cleanup();
+}
+$rt_o = $rt_old ? LBB_Bookings::get( $rt_old['id'] ) : null;
+$rt_n = $rt_new ? LBB_Bookings::get( $rt_new['id'] ) : null;
+lbb_t( 'după 3 ani de la cursă datele personale se șterg, codul rămâne; o cursă de acum 2 ani rămâne neatinsă', $rt_o && '' === $rt_o['phone'] && '' === $rt_o['email'] && ! array_filter( (array) $rt_o['passengers'] ) && $rt_o['ticket_code'] === $rt_old['ticket_code']
+	&& $rt_n && 'recent@example.com' === $rt_n['email'] && array( 'Recent Pasager' ) === array_values( (array) $rt_n['passengers'] ), array( $rt_o, $rt_n ) );
 lbb_t( 'curățenia păstrează rezervarea anulată de birou și șterge coșul abandonat', $cl_kept && 'cancelled' === $cl_kept['status'] && is_array( $cl_hold ) && ! LBB_Bookings::get( $cl_hold['id'] ) );
 
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
