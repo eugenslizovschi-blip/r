@@ -402,6 +402,45 @@ class LBB_Bookings {
 	}
 
 	/**
+	 * Numele pasagerilor copiate pe rândurile comenzii WooCommerce („Pasageri”) se șterg: nici ștergerea, nici
+	 * anonimizarea făcută de WooCommerce nu le ating, pentru că sunt câmpuri ale plugin-ului.
+	 */
+	public static function erase_order_passengers( $order ) {
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+		$labels  = array_unique( array( 'Pasageri', __( 'Pasageri', 'libertbus-bilete' ) ) );
+		$changed = false;
+		foreach ( $order->get_items() as $item ) {
+			if ( ! $item->get_meta( '_lbb_token' ) ) {
+				continue;
+			}
+			foreach ( $labels as $label ) {
+				if ( '' !== (string) $item->get_meta( $label ) ) {
+					$item->delete_meta_data( $label );
+					$item->save();
+					$changed = true;
+				}
+			}
+		}
+		if ( $changed ) {
+			$order->add_order_note( __( 'Numele pasagerilor au fost șterse din comandă (date personale).', 'libertbus-bilete' ) );
+		}
+	}
+
+	/**
+	 * WooCommerce a anonimizat o comandă (la cererea clientului sau după perioada setată): la fel și rezervările ei.
+	 */
+	public static function on_order_anonymized( $order ) {
+		global $wpdb;
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+		self::erase_order_passengers( $order );
+		$wpdb->update( self::table(), array( 'passengers' => '[]', 'phone' => '', 'email' => '', 'updated_at' => self::now_utc() ), array( 'order_id' => $order->get_id() ) );
+	}
+
+	/**
 	 * Rezervările unui client după email (pentru exportul și ștergerea datelor personale).
 	 */
 	private static function by_email( $email ) {
@@ -455,6 +494,9 @@ class LBB_Bookings {
 				continue;
 			}
 			$wpdb->update( self::table(), array( 'passengers' => '[]', 'phone' => '', 'email' => '', 'updated_at' => self::now_utc() ), array( 'id' => $b['id'] ) );
+			if ( $b['order_id'] && function_exists( 'wc_get_order' ) ) {
+				self::erase_order_passengers( wc_get_order( $b['order_id'] ) );
+			}
 			$removed = true;
 		}
 		return array(
@@ -476,6 +518,16 @@ class LBB_Bookings {
 		// doar codul, ruta, data și locurile (pentru statistici); numele, telefonul și emailul se șterg.
 		$years = max( 1, (int) apply_filters( 'lbb_retention_years', 3 ) );
 		$until = ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '-' . $years . ' years' )->format( 'Y-m-d' );
-		$wpdb->query( $wpdb->prepare( 'UPDATE ' . self::table() . " SET passengers = '[]', phone = '', email = '' WHERE travel_date < %s AND ( phone <> '' OR email <> '' OR passengers IS NULL OR passengers <> '[]' )", $until ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$todo  = " AND ( phone <> '' OR email <> '' OR passengers IS NULL OR passengers <> '[]' )";
+		// Cu comandă: întâi numele de pe comandă (câte 50 pe rulare), apoi rezervarea; restul rămân pentru rularea următoare.
+		$done  = array( 0 );
+		if ( function_exists( 'wc_get_order' ) ) {
+			$orders = $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT order_id FROM ' . self::table() . ' WHERE order_id > 0 AND travel_date < %s' . $todo . ' LIMIT 50', $until ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			foreach ( $orders as $order_id ) {
+				self::erase_order_passengers( wc_get_order( (int) $order_id ) );
+				$done[] = (int) $order_id;
+			}
+		}
+		$wpdb->query( $wpdb->prepare( 'UPDATE ' . self::table() . " SET passengers = '[]', phone = '', email = '' WHERE travel_date < %s" . $todo . ' AND order_id IN (' . implode( ',', array_map( 'intval', $done ) ) . ')', $until ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 }

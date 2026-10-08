@@ -40,6 +40,7 @@ class LBB_Install {
 			$exporters['libertbus-bilete'] = array( 'exporter_friendly_name' => __( 'Rezervări LibertBus', 'libertbus-bilete' ), 'callback' => array( 'LBB_Bookings', 'privacy_export' ) );
 			return $exporters;
 		} );
+		add_action( 'woocommerce_privacy_remove_order_personal_data', array( 'LBB_Bookings', 'on_order_anonymized' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', function ( $erasers ) {
 			$erasers['libertbus-bilete'] = array( 'eraser_friendly_name' => __( 'Rezervări LibertBus', 'libertbus-bilete' ), 'callback' => array( 'LBB_Bookings', 'privacy_erase' ) );
 			return $erasers;

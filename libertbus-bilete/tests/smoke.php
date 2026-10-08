@@ -440,6 +440,26 @@ $pv_n   = $pv_new ? LBB_Bookings::get( $pv_new['id'] ) : null;
 lbb_t( 'ștergere date personale: cursa trecută anonimizată, biletul pentru cursa viitoare păstrat cu mesaj', ! empty( $pv_res['items_removed'] ) && ! empty( $pv_res['items_retained'] ) && ! empty( $pv_res['messages'] )
 	&& $pv_o && '' === $pv_o['email'] && '' === $pv_o['phone'] && ! array_filter( (array) $pv_o['passengers'] ) && $pv_n && 'gdpr@example.com' === $pv_n['email'], array( $pv_res, $pv_o, $pv_n ) );
 
+// WooCommerce anonimizează o comandă (la cerere sau după perioada setată): dispar și numele de pe rândul comenzii și din rezervare.
+$wa_h = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Anonim Comanda' ), '+37369000094', 'wa@example.com', 'MDL' );
+$wa_o = wc_create_order();
+$wa_i = new WC_Order_Item_Product();
+$wa_i->set_product( wc_get_product( LBB_Install::product_id() ) );
+$wa_i->add_meta_data( '_lbb_token', is_array( $wa_h ) ? $wa_h['token'] : '', true );
+$wa_i->add_meta_data( 'Pasageri', 'Anonim Comanda', true );
+$wa_o->add_item( $wa_i );
+$wa_o->save();
+LBB_WooCommerce::attach_order( $wa_o );
+WC_Privacy_Erasers::remove_order_personal_data( wc_get_order( $wa_o->get_id() ) );
+$wa_o    = wc_get_order( $wa_o->get_id() );
+$wa_meta = '';
+foreach ( $wa_o->get_items() as $wa_it ) {
+	$wa_meta .= (string) $wa_it->get_meta( 'Pasageri' );
+}
+$wa_b = is_array( $wa_h ) ? LBB_Bookings::get( $wa_h['id'] ) : null;
+lbb_t( 'anonimizarea WooCommerce șterge numele de pe comandă și din rezervare', '' === $wa_meta && $wa_b && '' === $wa_b['email'] && ! array_filter( (array) $wa_b['passengers'] ), array( $wa_meta, $wa_b ) );
+$wa_o->delete( true );
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
