@@ -43,6 +43,9 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const found = await page.$$eval('#wpbody-content table.widefat tbody tr', rs => rs.map(r => r.textContent));
     if (found.length !== 1 || !found[0].includes(someCode)) fail('căutarea după cod ' + someCode + ' a dat ' + found.length + ' rânduri');
     if (await page.inputValue('#lbb-q') !== someCode.toLowerCase()) fail('căutarea nu rămâne în câmp după căutare');
+    // Filtrele de stare („Toate”, „Anulate”…) păstrează căutarea.
+    const lost = await page.$$eval('.subsubsub a', (as, q) => as.filter(a => new URL(a.href).searchParams.get('q') !== q).map(a => a.textContent), someCode.toLowerCase());
+    if (lost.length) fail('filtrele de stare pierd căutarea: ' + lost.join(', '));
   } else fail('nu am găsit un bilet pentru testul de căutare');
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');
   const none = await page.textContent('#wpbody-content table.widefat tbody');

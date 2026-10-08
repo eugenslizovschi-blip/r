@@ -537,7 +537,15 @@ class LBB_Admin {
 		echo '<ul class="subsubsub">';
 		$links = array();
 		foreach ( $labels as $key => $label ) {
-			$links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=lbb-bookings' . ( $key ? '&status=' . $key : '' ) ) ) . '"' . ( $status === $key ? ' class="current"' : '' ) . '>' . esc_html( $label ) . '</a>';
+			// Filtrul păstrează căutarea: „Anulate” după ce ai căutat un telefon arată anulările acelui client.
+			$args = array( 'page' => 'lbb-bookings' );
+			if ( $key ) {
+				$args['status'] = $key;
+			}
+			if ( '' !== $search ) {
+				$args['q'] = rawurlencode( $search );
+			}
+			$links[] = '<a href="' . esc_url( add_query_arg( $args, admin_url( 'admin.php' ) ) ) . '"' . ( $status === $key ? ' class="current"' : '' ) . '>' . esc_html( $label ) . '</a>';
 		}
 		// Separatorul „|” în interiorul <li>, ca în listele WordPress (o listă nu poate avea text direct).
 		echo '<li>' . implode( ' |</li><li>', $links ) . '</li></ul>'; // phpcs:ignore WordPress.Security.EscapeOutput
