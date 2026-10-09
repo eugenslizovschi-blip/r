@@ -219,7 +219,9 @@ class LBB_Tickets {
 		wp_enqueue_style( 'lbb' );
 		$tickets = self::confirmed( $order );
 		if ( ! $tickets ) {
-			echo '<div class="woocommerce-info">' . esc_html__( 'Biletele se emit imediat după confirmarea plății și vă vin pe email.', 'libertbus-bilete' ) . '</div>';
+			// Confirmarea băncii poate veni la câteva secunde după revenirea pe site: clientul are ce apăsa.
+			echo '<div class="woocommerce-info lbb-awaiting">' . esc_html__( 'Biletele se emit imediat după confirmarea plății și vă vin pe email. De obicei durează câteva secunde.', 'libertbus-bilete' )
+				. ' <a class="button" href="' . esc_url( $order->get_checkout_order_received_url() ) . '">' . esc_html__( 'Verifică din nou', 'libertbus-bilete' ) . '</a></div>';
 			return;
 		}
 		echo '<h2>' . esc_html__( 'Biletele dumneavoastră', 'libertbus-bilete' ) . '</h2>';

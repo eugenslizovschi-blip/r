@@ -522,6 +522,21 @@ $un_miss = array_values( array_filter( $un_opts, function ( $o ) use ( $un_file 
 } ) );
 lbb_t( 'dezinstalarea șterge toate opțiunile plugin-ului (' . count( $un_opts ) . ')', count( $un_opts ) >= 6 && ! $un_miss, $un_miss );
 
+// Pagina „comandă primită” înainte de confirmarea băncii: mesaj cu „Verifică din nou” spre aceeași pagină.
+$ty_h = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), gmdate( 'Y-m-d', time() + 5 * DAY_IN_SECONDS ), '10:00', 1, 0, array( 'Asteapta Banca' ), '+37369000096', 'ty@example.com', 'MDL' );
+$ty_o = wc_create_order();
+$ty_i = new WC_Order_Item_Product();
+$ty_i->set_product( wc_get_product( LBB_Install::product_id() ) );
+$ty_i->add_meta_data( '_lbb_token', is_array( $ty_h ) ? $ty_h['token'] : '', true );
+$ty_o->add_item( $ty_i );
+$ty_o->save();
+LBB_WooCommerce::attach_order( $ty_o );
+ob_start();
+LBB_Tickets::thankyou( $ty_o->get_id() );
+$ty_html = ob_get_clean();
+lbb_t( 'comandă neconfirmată încă: „Verifică din nou” duce la aceeași pagină de comandă', false !== strpos( $ty_html, 'Verifică din nou' ) && false !== strpos( $ty_html, esc_url( $ty_o->get_checkout_order_received_url() ) ), $ty_html );
+$ty_o->delete( true );
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
