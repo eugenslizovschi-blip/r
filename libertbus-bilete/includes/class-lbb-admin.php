@@ -398,7 +398,18 @@ class LBB_Admin {
 			/* translators: %s: orele neînțelese, separate prin virgulă */
 			$msg .= ' ' . sprintf( __( 'Atenție: aceste ore nu au fost înțelese și nu s-au salvat: %s. Scrieți-le ca 08:45.', 'libertbus-bilete' ), implode( ', ', $bad ) );
 		}
-		self::redirect( 'lbb-routes', $msg, (bool) $bad, $bad ? array( 'edit' => $result ) : array() );
+		$route    = LBB_Routes::get( $result );
+		$stranded = $route ? LBB_Routes::stranded_bookings( $route ) : array();
+		if ( $stranded ) {
+			$list = array();
+			foreach ( $stranded as $when => $n ) {
+				$list[] = $when . ' (' . $n . ')';
+			}
+			/* translators: %s: cursele scoase din orar care au bilete, ex. „12.10.2026 08:45 (2)” */
+			$msg .= ' ' . sprintf( __( 'Atenție: aceste curse nu mai sunt în orar, dar au bilete sau rezervări: %s. Anunțați pasagerii sau puneți ora și ziua la loc.', 'libertbus-bilete' ), implode( ', ', $list ) );
+		}
+		$warn = $bad || $stranded;
+		self::redirect( 'lbb-routes', $msg, $warn, $warn ? array( 'edit' => $result ) : array() );
 	}
 
 	public static function delete_route() {

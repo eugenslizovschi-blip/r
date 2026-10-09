@@ -45,9 +45,6 @@ class LBB_Routes {
 	}
 
 	/**
-	 * „08:45, 9:30 17:45” → ['08:45','09:30','17:45'], sortate și fără duplicate.
-	 */
-	/**
 	 * Bucățile din câmpul „Ore de plecare” care nu sunt o oră validă (ex. „25:00”, „8-45”): se ignoră la
 	 * salvare, deci biroul trebuie să afle, altfel cursa lipsește fără să știe nimeni.
 	 */
@@ -61,6 +58,9 @@ class LBB_Routes {
 		return $bad;
 	}
 
+	/**
+	 * „08:45, 9:30 17:45” → ['08:45','09:30','17:45'], sortate și fără duplicate.
+	 */
 	public static function parse_times( $text ) {
 		preg_match_all( '/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/', (string) $text, $m, PREG_SET_ORDER );
 		$times = array();
@@ -145,6 +145,24 @@ class LBB_Routes {
 	public static function upcoming_bookings( $id ) {
 		global $wpdb;
 		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . LBB_Bookings::table() . " WHERE route_id = %d AND travel_date >= %s AND status IN ('confirmed','reserved','pending')", $id, LBB_Settings::today() ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Cursele viitoare cu bilete sau rezervări care nu mai sunt în orarul rutei (ora sau ziua săptămânii a fost
+	 * scoasă la editare): [ 'zz.ll.aaaa HH:MM' => câte ]. Rezervările rămân valabile, dar cursa nu mai apare în
+	 * vânzare, deci biroul trebuie să afle și să anunțe pasagerii (sau să pună ora la loc).
+	 */
+	public static function stranded_bookings( array $route ) {
+		global $wpdb;
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT travel_date, dep_time, COUNT(*) AS n FROM ' . LBB_Bookings::table() . " WHERE route_id = %d AND travel_date >= %s AND status IN ('confirmed','reserved','pending') GROUP BY travel_date, dep_time ORDER BY travel_date, dep_time", $route['id'], LBB_Settings::today() ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$out  = array();
+		foreach ( (array) $rows as $row ) {
+			$day = (int) gmdate( 'N', strtotime( $row['travel_date'] . ' 12:00 UTC' ) );
+			if ( ! in_array( $row['dep_time'], $route['times'], true ) || ! in_array( $day, $route['days'], true ) ) {
+				$out[ gmdate( 'd.m.Y', strtotime( $row['travel_date'] . ' 12:00 UTC' ) ) . ' ' . $row['dep_time'] ] = (int) $row['n'];
+			}
+		}
+		return $out;
 	}
 
 	public static function delete( $id ) {

@@ -581,6 +581,31 @@ if ( is_int( $ud_r ) ) {
 	LBB_Routes::delete( $ud_r );
 }
 
+// O oră sau o zi scoasă din orarul unei rute care are deja rezervări pe ea: adminul primește cursele afectate.
+$sb_base = array( 'origin' => 'OrarA', 'destination' => 'OrarB', 'price' => 50, 'currency' => 'MDL', 'capacity' => 5, 'active' => 1 );
+$sb_r    = LBB_Routes::save( $sb_base + array( 'departures' => '10:00, 14:00' ) );
+$sb_h    = is_int( $sb_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $sb_r ), $tomorrow, '10:00', 1, 0, array( 'Orar Schimbat' ), '+37369000096', 'sb@example.com', 'MDL' ) : null;
+$sb_b    = is_array( $sb_h ) ? LBB_Bookings::reserve( $sb_h['token'] ) : null;
+$sb_key  = gmdate( 'd.m.Y', strtotime( $tomorrow . ' 12:00 UTC' ) ) . ' 10:00';
+$sb_same = is_int( $sb_r ) ? LBB_Routes::stranded_bookings( LBB_Routes::get( $sb_r ) ) : null;
+if ( is_int( $sb_r ) ) {
+	LBB_Routes::save( $sb_base + array( 'departures' => '14:00' ), $sb_r );
+}
+$sb_time = is_int( $sb_r ) ? LBB_Routes::stranded_bookings( LBB_Routes::get( $sb_r ) ) : null;
+$sb_days = array_values( array_diff( array( 1, 2, 3, 4, 5, 6, 7 ), array( (int) gmdate( 'N', strtotime( $tomorrow . ' 12:00 UTC' ) ) ) ) );
+if ( is_int( $sb_r ) ) {
+	LBB_Routes::save( $sb_base + array( 'departures' => '10:00, 14:00', 'days' => $sb_days ), $sb_r );
+}
+$sb_day = is_int( $sb_r ) ? LBB_Routes::stranded_bookings( LBB_Routes::get( $sb_r ) ) : null;
+if ( $sb_b ) {
+	LBB_Bookings::cancel( $sb_b['id'] );
+}
+$sb_gone = is_int( $sb_r ) ? LBB_Routes::stranded_bookings( LBB_Routes::get( $sb_r ) ) : null;
+lbb_t( 'ora sau ziua scoasă din orar, cu o rezervare pe ea, e semnalată; orarul neschimbat sau rezervarea anulată nu', array() === $sb_same && array( $sb_key => 1 ) === $sb_time && array( $sb_key => 1 ) === $sb_day && array() === $sb_gone, array( $sb_same, $sb_time, $sb_day, $sb_gone ) );
+if ( is_int( $sb_r ) ) {
+	LBB_Routes::delete( $sb_r );
+}
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
