@@ -99,13 +99,13 @@ class LBB_Settings {
 			$clean[ $key ] = $value;
 		}
 		$clean['rate_MDL'] = 1;
-		// „Locuri online pe cursă” golit din greșeală sau 0 ar opri vânzarea pe toate rutele fără număr propriu
-		// de locuri (toate cursele „complet”): rămâne numărul de dinainte.
-		if ( $clean['default_capacity'] < 1 ) {
-			$clean['default_capacity'] = (int) self::get( 'default_capacity' ) > 0 ? (int) self::get( 'default_capacity' ) : $defaults['default_capacity'];
+		// Un număr golit din greșeală sau 0 rămâne cel de dinainte: „Locuri online pe cursă” 0 ar face toate cursele
+		// „complet”, iar „Zile înainte” sau „Pasageri pe rezervare” 1 ar limita vânzarea la o zi sau un pasager.
+		foreach ( array( 'default_capacity', 'max_passengers', 'max_days_ahead', 'cart_hold_minutes', 'payment_minutes' ) as $key ) {
+			if ( $clean[ $key ] < 1 ) {
+				$clean[ $key ] = (int) self::get( $key ) > 0 ? (int) self::get( $key ) : $defaults[ $key ];
+			}
 		}
-		$clean['max_passengers'] = max( 1, $clean['max_passengers'] );
-		$clean['max_days_ahead'] = max( 1, $clean['max_days_ahead'] );
 		$clean['cart_hold_minutes'] = max( 5, $clean['cart_hold_minutes'] );
 		$clean['payment_minutes'] = max( 10, $clean['payment_minutes'] );
 		update_option( self::OPTION, $clean );

@@ -289,6 +289,13 @@ LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'default_capacity' 
 $dc_zero = LBB_Settings::get( 'default_capacity' );
 LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'default_capacity' => '25' ) ) );
 lbb_t( 'locurile implicite goale sau 0 păstrează valoarea anterioară; 25 se salvează', 18 === (int) $dc_empty && 18 === (int) $dc_zero && 25 === (int) LBB_Settings::get( 'default_capacity' ), array( $dc_empty, $dc_zero, LBB_Settings::get( 'default_capacity' ) ) );
+// La fel pentru zilele de vânzare înainte și pasagerii pe rezervare (altfel devin 1: o zi, un pasager).
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'max_days_ahead' => 60, 'max_passengers' => 6 ) ) );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'max_days_ahead' => '', 'max_passengers' => '0' ) ) );
+$md_blank = array( LBB_Settings::get( 'max_days_ahead' ), LBB_Settings::get( 'max_passengers' ) );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'max_days_ahead' => '30', 'max_passengers' => '4' ) ) );
+$md_set = array( LBB_Settings::get( 'max_days_ahead' ), LBB_Settings::get( 'max_passengers' ) );
+lbb_t( 'zilele înainte și pasagerii pe rezervare goi sau 0 păstrează valoarea anterioară; 30 și 4 se salvează', array( 60, 6 ) === array_map( 'intval', $md_blank ) && array( 30, 4 ) === array_map( 'intval', $md_set ), array( $md_blank, $md_set ) );
 update_option( 'lbb_settings', $rt_keep );
 
 // Monede de plată.
