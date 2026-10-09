@@ -606,6 +606,22 @@ if ( is_int( $sb_r ) ) {
 	LBB_Routes::delete( $sb_r );
 }
 
+// O zi în care ruta nu circulă: serverul (și formularul fără JavaScript) spune zilele de circulație.
+$rd_route = array( 'days' => array( 1, 4 ) );
+$rd_note  = LBB_Routes::running_days_note( $rd_route, '2026-10-13' ); // marți
+$rd_on    = LBB_Routes::running_days_note( $rd_route, '2026-10-15' ); // joi
+$rd_daily = LBB_Routes::running_days_note( array( 'days' => array( 1, 2, 3, 4, 5, 6, 7 ) ), '2026-10-13' );
+$rd_r     = LBB_Routes::save( array( 'origin' => 'ZileA', 'destination' => 'ZileB', 'departures' => '10:00', 'days' => array( 1, 4 ), 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$rd_tue   = new DateTime( $tomorrow . ' 12:00' );
+while ( '2' !== $rd_tue->format( 'N' ) ) {
+	$rd_tue->modify( '+1 day' );
+}
+$rd_hold = is_int( $rd_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $rd_r ), $rd_tue->format( 'Y-m-d' ), '10:00', 1, 0, array( 'Zi Gresita' ), '+37369000095', 'rd@example.com', 'MDL' ) : null;
+if ( is_int( $rd_r ) ) {
+	LBB_Routes::delete( $rd_r );
+}
+lbb_t( 'zi în care ruta nu circulă: mesajul spune „Ruta circulă doar: luni, joi.”', 'Ruta circulă doar: luni, joi.' === $rd_note && '' === $rd_on && '' === $rd_daily && is_wp_error( $rd_hold ) && false !== strpos( $rd_hold->get_error_message(), 'Ruta circulă doar: luni, joi.' ), array( $rd_note, $rd_on, $rd_daily, is_wp_error( $rd_hold ) ? $rd_hold->get_error_message() : $rd_hold ) );
+
 // În lista de rute, „oprită” spune și de ce: debifată sau fără preț.
 $rs_ok   = LBB_Admin::route_state( array( 'active' => 1, 'price' => 240.0 ) );
 $rs_off  = LBB_Admin::route_state( array( 'active' => 0, 'price' => 240.0 ) );

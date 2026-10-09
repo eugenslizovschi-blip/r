@@ -38,7 +38,7 @@
     - adulții și copiii își păstrează numele când se schimbă numărul lor;
     - rezumatul arată prețul de adult și de copil;
     - după apăsarea butonului, sub el scrie „Vă ducem la plată…” / „Se trimite rezervarea…” (pe internet lent clientul nu mai apasă de două ori și nu închide pagina);
-    - pentru o rută care nu circulă zilnic, într-o zi fără curse mesajul spune și zilele de circulație („Ruta circulă doar: luni, joi.”).
+    - pentru o rută care nu circulă zilnic, într-o zi fără curse mesajul spune și zilele de circulație („Ruta circulă doar: luni, joi.”), inclusiv în eroarea de la server (telefoane vechi, fără JavaScript).
   - **Bilet și liste:**
     - copiii sunt marcați „(copil)” pe bilet, în lista pentru șofer și în CSV;
     - CSV-ul cu pasageri pentru o singură rută are ruta în numele fișierului (ex. pasageri-2026-10-21-balti-iasi.csv);

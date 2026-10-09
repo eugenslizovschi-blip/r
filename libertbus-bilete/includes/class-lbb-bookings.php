@@ -98,7 +98,7 @@ class LBB_Bookings {
 				}
 			}
 			if ( ! $departure ) {
-				return new WP_Error( 'lbb_departure', __( 'Nu există plecare la ora aleasă în ziua aceasta.', 'libertbus-bilete' ) );
+				return new WP_Error( 'lbb_departure', trim( __( 'Nu există plecare la ora aleasă în ziua aceasta.', 'libertbus-bilete' ) . ' ' . LBB_Routes::running_days_note( $route, $date ) ) );
 			}
 			if ( 'closed' === $departure['reason'] ) {
 				/* translators: %s: telefonul de suport */

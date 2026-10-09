@@ -165,6 +165,30 @@ class LBB_Routes {
 		return $out;
 	}
 
+	/**
+	 * Zilele săptămânii, 1 = luni … 7 = duminică (ca date( 'N' )).
+	 */
+	public static function day_names() {
+		return array( 1 => __( 'luni', 'libertbus-bilete' ), 2 => __( 'marți', 'libertbus-bilete' ), 3 => __( 'miercuri', 'libertbus-bilete' ), 4 => __( 'joi', 'libertbus-bilete' ), 5 => __( 'vineri', 'libertbus-bilete' ), 6 => __( 'sâmbătă', 'libertbus-bilete' ), 7 => __( 'duminică', 'libertbus-bilete' ) );
+	}
+
+	/**
+	 * „Ruta circulă doar: luni, joi.” când ruta nu circulă în ziua săptămânii a datei Y-m-d; altfel ''.
+	 */
+	public static function running_days_note( array $route, $date ) {
+		$names = self::day_names();
+		$time  = preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $date ) ? strtotime( $date . ' 12:00 UTC' ) : false;
+		if ( ! $time || count( $route['days'] ) >= 7 || in_array( (int) gmdate( 'N', $time ), $route['days'], true ) ) {
+			return '';
+		}
+		$list = array();
+		foreach ( $route['days'] as $d ) {
+			$list[] = $names[ $d ];
+		}
+		/* translators: %s: zilele săptămânii în care circulă ruta, ex. „luni, joi” */
+		return sprintf( __( 'Ruta circulă doar: %s.', 'libertbus-bilete' ), implode( ', ', $list ) );
+	}
+
 	public static function delete( $id ) {
 		global $wpdb;
 		$wpdb->delete( self::table(), array( 'id' => (int) $id ) );
