@@ -370,6 +370,10 @@
 			input.name = 'lbb_names[]';
 			input.placeholder = t.namePh;
 			input.autocomplete = n === 0 ? 'name' : 'off';
+			// Pe telefon: majusculă la fiecare nume, fără corectarea automată care schimbă numele de familie („Rusu” → „Rush”).
+			input.setAttribute( 'autocapitalize', 'words' );
+			input.setAttribute( 'autocorrect', 'off' );
+			input.spellcheck = false;
 			input.maxLength = 80;
 			input.required = cfg.requireNames;
 			input.value = value;

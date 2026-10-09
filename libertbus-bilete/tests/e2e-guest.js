@@ -57,6 +57,9 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const freeBefore = await (await page.request.get(`${BASE}/wp-json/lbb/v1/departures?route_id=${routeId}&date=${day}`)).json();
   const before = freeBefore.departures.find(d => d.time === time).free;
 
+  // Numele pe telefon: majusculă la fiecare cuvânt, fără corectare automată (iOS schimbă numele de familie).
+  const nameAttrs = await page.$eval('input[name="lbb_names[]"]', i => [i.getAttribute('autocapitalize'), i.getAttribute('autocorrect'), i.getAttribute('spellcheck')].join(','));
+  if (nameAttrs !== 'words,off,false') fail('câmpul de nume nu oprește corectarea automată pe telefon: ' + nameAttrs);
   // Fără nume: butonul e activ, dar serverul trebuie să refuze.
   await page.fill('input[name="lbb_phone"]', '+40712345678');
   await page.fill('input[name="lbb_email"]', 'guest@example.com');
