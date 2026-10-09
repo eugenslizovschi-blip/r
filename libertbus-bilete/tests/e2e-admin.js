@@ -141,6 +141,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await Promise.all([page.waitForNavigation(), page.click('#wpbody-content button.button-link-delete')]);
     const delMsg = await page.$$eval('#wpbody-content .notice', ns => ns.map(n => n.textContent).join(' | '));
     if (!/nu se poate șterge/.test(delMsg)) fail('ruta cu bilete viitoare s-a putut șterge: ' + delMsg.trim().slice(0, 160));
+    // Orele cu bilete scoase din orar: la salvare, biroul vede cursele afectate. Apoi punem orele la loc.
+    const busyTimes = await page.inputValue('#lbb-times');
+    await page.fill('#lbb-times', '05:55');
+    await Promise.all([page.waitForNavigation(), page.click('#wpbody-content form:has(#lbb-times) #submit')]);
+    const strandMsg = await page.$$eval('#wpbody-content .notice', ns => ns.map(n => n.textContent).join(' | '));
+    const strandOpen = !!(await page.$('#lbb-times'));
+    if (!strandOpen) await page.goto(busyEdit);
+    await page.fill('#lbb-times', busyTimes);
+    await Promise.all([page.waitForNavigation(), page.click('#wpbody-content form:has(#lbb-times) #submit')]);
+    const backMsg = await page.$$eval('#wpbody-content .notice', ns => ns.map(n => n.textContent).join(' | '));
+    if (!/nu mai sunt în orar[^|]*\d\d\.\d\d\.\d{4} \d\d:\d\d \(\d+\)/.test(strandMsg)) fail('orele cu bilete scoase din orar nu sunt semnalate: ' + strandMsg.trim().slice(0, 200));
+    if (!strandOpen) fail('după scoaterea orelor cu bilete, formularul rutei nu a rămas deschis');
+    if (/nu mai sunt în orar/.test(backMsg)) fail('după ce orele au fost puse la loc, avertismentul a rămas: ' + backMsg.trim().slice(0, 200));
   } else fail('nu am găsit ruta Bălți → Iași în Rute și orar');
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');
   const emptyLabel = await page.$eval('#wpbody-content table.widefat tbody td[colspan]', td => getComputedStyle(td, '::before').content);
