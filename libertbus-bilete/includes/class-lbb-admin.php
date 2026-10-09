@@ -322,7 +322,8 @@ class LBB_Admin {
 			echo '<tr><td><a href="' . esc_url( $edit ) . '"><strong>' . esc_html( $r['origin'] . ' → ' . $r['destination'] ) . '</strong></a></td>';
 			echo '<td>' . esc_html( implode( ', ', $r['times'] ) ) . '</td><td>' . esc_html( $days ) . '</td><td>' . esc_html( $price ) . '</td>';
 			echo '<td>' . esc_html( LBB_Routes::capacity( $r ) . ( $r['capacity'] ? '' : ' ' . __( '(implicit)', 'libertbus-bilete' ) ) ) . '</td>';
-			echo '<td>' . ( $r['active'] && $r['price'] > 0 ? '<span class="lbb-ok">' . esc_html__( 'se vinde', 'libertbus-bilete' ) . '</span>' : '<span class="lbb-warn">' . esc_html__( 'oprită', 'libertbus-bilete' ) . '</span>' ) . '</td>';
+			$state = self::route_state( $r );
+			echo '<td><span class="' . ( $state[0] ? 'lbb-ok' : 'lbb-warn' ) . '">' . esc_html( $state[1] ) . '</span></td>';
 			echo '<td><a href="' . esc_url( $edit ) . '">' . esc_html__( 'Editează', 'libertbus-bilete' ) . '</a></td></tr>';
 		}
 		echo '</tbody></table></div>';
@@ -379,6 +380,20 @@ class LBB_Admin {
 		<?php endif; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Starea rutei în listă: [ se vinde?, text ]. Când nu se vinde, textul spune de ce (debifată sau fără
+	 * preț), ca biroul să știe ce să corecteze.
+	 */
+	public static function route_state( array $r ) {
+		if ( $r['active'] && $r['price'] > 0 ) {
+			return array( true, __( 'se vinde', 'libertbus-bilete' ) );
+		}
+		if ( ! $r['active'] ) {
+			return array( false, __( 'oprită: inactivă', 'libertbus-bilete' ) );
+		}
+		return array( false, __( 'oprită: fără preț', 'libertbus-bilete' ) );
 	}
 
 	public static function save_route() {

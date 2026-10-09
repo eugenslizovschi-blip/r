@@ -606,6 +606,12 @@ if ( is_int( $sb_r ) ) {
 	LBB_Routes::delete( $sb_r );
 }
 
+// În lista de rute, „oprită” spune și de ce: debifată sau fără preț.
+$rs_ok   = LBB_Admin::route_state( array( 'active' => 1, 'price' => 240.0 ) );
+$rs_off  = LBB_Admin::route_state( array( 'active' => 0, 'price' => 240.0 ) );
+$rs_free = LBB_Admin::route_state( array( 'active' => 1, 'price' => 0.0 ) );
+lbb_t( 'lista de rute arată de ce o rută e oprită (inactivă / fără preț)', true === $rs_ok[0] && false === $rs_off[0] && false !== strpos( $rs_off[1], 'inactivă' ) && false === $rs_free[0] && false !== strpos( $rs_free[1], 'fără preț' ), array( $rs_ok, $rs_off, $rs_free ) );
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
