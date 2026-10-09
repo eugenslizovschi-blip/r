@@ -104,6 +104,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (forged.status() !== 404 || /lbb-ticket|Test Pasager/.test(fbody)) fail('un link fals arată rezervarea: ' + forged.status());
   // Clientul cu un link stricat are măcar telefonul firmei.
   if (!/Biletul nu a fost găsit/.test(fbody) || !/href="tel:\+?\d{6,}"/.test(fbody)) fail('pagina „bilet negăsit” nu are telefonul firmei');
+  // „Adaugă în calendar”: butonul de pe bilet și linkul din emailul primit de client descarcă un .ics al cursei.
+  const calHref = await guest.$eval('.actions a.cal', a => a.href).catch(() => '');
+  const cal = calHref ? await guest.request.get(calHref) : null;
+  const calBody = cal ? await cal.text() : '';
+  if (!cal || !/^text\/calendar/.test(cal.headers()['content-type'] || '') || !/^BEGIN:VCALENDAR\r\n/.test(calBody) || !calBody.includes('UID:' + code + '@') || !/DTSTART:\d{8}T\d{6}Z/.test(calBody)) fail('„Adaugă în calendar” de pe bilet nu dă un .ics valid: ' + calHref + ' ' + calBody.slice(0, 120));
+  if (process.env.WP_PATH) {
+    const fs = require('fs'), dir = process.env.WP_PATH + '/wp-content/mail';
+    const mail = fs.existsSync(dir) ? fs.readdirSync(dir).sort().reverse().map(f => fs.readFileSync(dir + '/' + f, 'utf8')).find(m => m.includes(code) && /^TO: [^\n]*test@example\.com/m.test(m)) : '';
+    // În HTML, esc_url scrie „&” ca &#038; (sau &amp;).
+    const mailCal = mail ? ((mail.match(/href="([^"]*[?&;]ics=1[^"]*)"/) || [])[1] || '').replace(/&#038;|&amp;/g, '&') : '';
+    if (!mailCal) fail('emailul rezervării nu are „Adaugă în calendar”' + (mail ? '' : ' (emailul clientului nu a fost găsit)'));
+    else if (!/^BEGIN:VCALENDAR/.test(await (await guest.request.get(mailCal)).text())) fail('linkul de calendar din email nu dă un .ics: ' + mailCal);
+  }
   await guest.waitForTimeout(500);
   await guest.screenshot({ path: (process.env.OUT || '.') + '/reservation.png', fullPage: true });
   // „Înapoi” din browser: data aleasă revine în câmp, deci orele și locurile trebuie să fie pentru ea, nu pentru azi.
