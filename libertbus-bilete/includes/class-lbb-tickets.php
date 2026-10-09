@@ -94,6 +94,7 @@ class LBB_Tickets {
 		if ( is_email( $booking['email'] ) ) {
 			$office_headers[] = 'Reply-To: ' . $booking['email'];
 		}
+		/* translators: 1: codul rezervării, 2: ruta, 3: data și ora */
 		self::mail_html( $office, sprintf( __( '[LibertBus] Rezervare %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $admin, $office_headers );
 	}
 

@@ -172,6 +172,7 @@ class LBB_WooCommerce {
 		}
 		$booking = self::booking( $item['lbb']['token'] );
 		$route   = $booking ? LBB_Routes::get( $booking['route_id'] ) : null;
+		/* translators: 1: oraș de plecare, 2: destinație */
 		return $route ? esc_html( sprintf( __( 'Bilet %1$s → %2$s', 'libertbus-bilete' ), $route['origin'], $route['destination'] ) ) : $name;
 	}
 
@@ -281,6 +282,7 @@ class LBB_WooCommerce {
 		}
 		$over  = LBB_Bookings::confirm_order( $order->get_id() );
 		$codes = wp_list_pluck( LBB_Bookings::by_order( $order->get_id() ), 'ticket_code' );
+		/* translators: %s: codurile biletelor, separate prin virgulă */
 		$order->add_order_note( sprintf( __( 'LibertBus: bilete emise: %s', 'libertbus-bilete' ), implode( ', ', array_filter( $codes ) ) ) );
 		if ( $over ) {
 			$msg = __( 'ATENȚIE: plata a sosit după expirarea rezervării și cursa a depășit numărul de locuri. Verificați lista de pasageri și contactați clientul.', 'libertbus-bilete' );

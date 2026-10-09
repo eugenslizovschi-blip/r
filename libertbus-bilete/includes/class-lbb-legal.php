@@ -153,6 +153,7 @@ class LBB_Legal {
 		$created = self::create_missing();
 		wp_safe_redirect( add_query_arg( array(
 			'page'    => 'lbb-settings',
+			/* translators: %d: numărul de pagini create */
 			'lbb_msg' => rawurlencode( sprintf( __( 'Pagini create: %d (confidențialitate și cookies publicate, celelalte ciorne).', 'libertbus-bilete' ), $created ) ),
 		), admin_url( 'admin.php' ) ) . '#legal' );
 		exit;

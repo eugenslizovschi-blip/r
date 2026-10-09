@@ -64,6 +64,7 @@ class LBB_Admin {
 		if ( $wc ) {
 			$currency = get_woocommerce_currency();
 			$add( 'currency', 'MDL' === $currency ? true : 'warn', __( 'Moneda magazinului', 'libertbus-bilete' ),
+				/* translators: %s: moneda actuală a magazinului (ex. RON) */
 				'MDL' === $currency ? 'MDL' : sprintf( __( 'Acum: %s. Băncile din Moldova (Paynet, MAIB, Victoriabank) încasează de regulă în MDL. Prețurile în RON se convertesc automat după cursul din Setări.', 'libertbus-bilete' ), $currency ),
 				admin_url( 'admin.php?page=wc-settings&tab=general' ) );
 
@@ -108,6 +109,7 @@ class LBB_Admin {
 			}
 			$id = LBB_Legal::page_id( $key );
 			$ok = $id && 'publish' === get_post_status( $id );
+			/* translators: %s: titlul paginii (ex. Termeni și condiții) */
 			$add( 'legal_' . $key, $ok ? true : ( $id ? 'warn' : false ), sprintf( __( 'Pagina „%s” e publicată', 'libertbus-bilete' ), $page['title'] ),
 				$ok ? '' : ( $id ? __( 'Există ca ciornă: completați datele firmei și publicați-o.', 'libertbus-bilete' ) : __( 'Creați-o din Setări → Pagini legale.', 'libertbus-bilete' ) ),
 				$id ? get_edit_post_link( $id, 'raw' ) : admin_url( 'admin.php?page=lbb-settings#legal' ) );
@@ -148,6 +150,7 @@ class LBB_Admin {
 		$routes = array_filter( LBB_Routes::all( true ), function ( $r ) {
 			return $r['price'] > 0;
 		} );
+		/* translators: %d: numărul de rute active */
 		$add( 'routes', count( $routes ) > 0, __( 'Există rute active cu preț', 'libertbus-bilete' ), sprintf( __( '%d rute active', 'libertbus-bilete' ), count( $routes ) ), admin_url( 'admin.php?page=lbb-routes' ) );
 
 		$form_pages = self::pages_with_form();
@@ -294,6 +297,7 @@ class LBB_Admin {
 		self::header( __( 'Rute și orar', 'libertbus-bilete' ) );
 		$currency = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'MDL';
 		echo '<p><a class="button button-primary" href="' . esc_url( admin_url( 'admin.php?page=lbb-routes&add=1' ) ) . '">' . esc_html__( 'Adaugă rută', 'libertbus-bilete' ) . '</a> ';
+		/* translators: %s: moneda magazinului */
 		echo '<span class="description">' . esc_html( sprintf( __( 'Prețurile se încasează în %s; cele în altă monedă se convertesc după cursul din Setări.', 'libertbus-bilete' ), $currency ) ) . '</span></p>';
 		self::stack_table_style( 'lbb-routes-table', array( __( 'Ruta', 'libertbus-bilete' ), __( 'Ore', 'libertbus-bilete' ), __( 'Zile', 'libertbus-bilete' ), __( 'Preț', 'libertbus-bilete' ), __( 'Locuri/cursă', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ) ) );
 		echo '<table class="widefat striped lbb-routes-table"><thead><tr><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ore', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Zile', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Preț', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri/cursă', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
@@ -348,6 +352,7 @@ class LBB_Admin {
 					<select name="currency" aria-label="<?php esc_attr_e( 'Moneda prețului', 'libertbus-bilete' ); ?>"><?php foreach ( LBB_Settings::currencies() as $cur ) : ?><option <?php selected( $route['currency'], $cur ); ?>><?php echo esc_html( $cur ); ?></option><?php endforeach; ?></select>
 					<p class="description"><?php esc_html_e( 'Cu prețul 0 ruta nu se vinde online.', 'libertbus-bilete' ); ?></p></td></tr>
 				<tr><th><label for="lbb-child"><?php esc_html_e( 'Preț copil', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-child" name="child_price" type="number" step="0.01" min="0" value="<?php echo esc_attr( null === $route['child_price'] ? '' : $route['child_price'] ); ?>"><p class="description"><?php esc_html_e( 'Gol = copiii plătesc ca adulții.', 'libertbus-bilete' ); ?></p></td></tr>
+				<?php /* translators: %s: moneda magazinului */ ?>
 				<tr><th><label for="lbb-cap"><?php esc_html_e( 'Locuri de vândut online pe cursă', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-cap" name="capacity" type="number" min="0" value="<?php echo esc_attr( $route['capacity'] ); ?>"><p class="description"><?php echo esc_html( sprintf( __( '0 = valoarea implicită din Setări (%d).', 'libertbus-bilete' ), LBB_Settings::get( 'default_capacity' ) ) ); ?></p></td></tr>
 				<tr><th><?php esc_html_e( 'Activă', 'libertbus-bilete' ); ?></th><td><label><input type="checkbox" name="active" value="1" <?php checked( $route['active'] ); ?>> <?php esc_html_e( 'Se vinde online', 'libertbus-bilete' ); ?></label></td></tr>
 				<tr><th><label for="lbb-url"><?php esc_html_e( 'Pagina rutei', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-url" name="page_url" type="url" class="regular-text" value="<?php echo esc_attr( $route['page_url'] ); ?>"></td></tr>
@@ -396,6 +401,7 @@ class LBB_Admin {
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
 			$date = LBB_Settings::today();
 		}
+		/* translators: %s: data cursei (zz.ll.aaaa) */
 		self::header( sprintf( __( 'Pasageri — %s', 'libertbus-bilete' ), wp_date( 'd.m.Y', strtotime( $date . ' 12:00' ) ) ) );
 		?>
 		<form method="get" class="lbb-noprint" style="margin:12px 0">
@@ -472,6 +478,7 @@ class LBB_Admin {
 		}
 		list( $amount, $cur ) = LBB_Bookings::pay_amount( $b );
 		$due[ $cur ] = ( isset( $due[ $cur ] ) ? $due[ $cur ] : 0 ) + $amount;
+		/* translators: %s: suma de încasat la urcare, cu moneda */
 		return '<span class="lbb-warn">' . esc_html( sprintf( __( 'la urcare: %s', 'libertbus-bilete' ), LBB_WooCommerce::money( $amount, $cur ) ) ) . '</span>';
 	}
 
@@ -661,6 +668,7 @@ class LBB_Admin {
 				?>
 			</table>
 			<h2><?php esc_html_e( 'Cursuri valutare', 'libertbus-bilete' ); ?></h2>
+			<?php /* translators: %s: moneda magazinului */ ?>
 			<p class="description"><?php echo esc_html( sprintf( __( 'Câți lei moldovenești (MDL) valorează 1 unitate. Moneda de încasare a magazinului: %s.', 'libertbus-bilete' ), $currency ) ); ?></p>
 			<table class="form-table">
 				<?php
