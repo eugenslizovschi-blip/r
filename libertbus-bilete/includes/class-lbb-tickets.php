@@ -248,9 +248,6 @@ class LBB_Tickets {
 	}
 
 	/**
-	 * Pagina biletului: /?lbb_bilet=LB-XXXXXX&k=semnătură. Se poate printa sau arăta de pe telefon.
-	 */
-	/**
 	 * Starea arătată sus pe pagina biletului. Un bilet al unei curse dintr-o zi trecută nu mai apare verde
 	 * „valabil”: șoferul care scanează un bilet vechi vede imediat că acea cursă a avut loc. În ziua cursei
 	 * biletul rămâne valabil toată ziua (autocarul poate pleca cu întârziere).
@@ -276,6 +273,67 @@ class LBB_Tickets {
 		return array( 'class' => 'ok', 'text' => __( 'Bilet valabil — achitat', 'libertbus-bilete' ) );
 	}
 
+	/**
+	 * Fișierul de calendar (.ics) al cursei: ora plecării și un memento cu 2 ore înainte. Pe telefon, clientul
+	 * îl deschide de pe bilet și cursa intră în calendar.
+	 */
+	public static function ics( array $booking ) {
+		$route = LBB_Routes::get( $booking['route_id'] );
+		$start = DateTimeImmutable::createFromFormat( '!Y-m-d H:i', $booking['travel_date'] . ' ' . $booking['dep_time'], LBB_Settings::tz() );
+		if ( ! $route || ! $start ) {
+			return '';
+		}
+		$esc   = function ( $text ) {
+			return str_replace( array( '\\', ';', ',', "\n" ), array( '\\\\', '\\;', '\\,', '\\n' ), $text );
+		};
+		$utc   = new DateTimeZone( 'UTC' );
+		$name  = $route['origin'] . ' → ' . $route['destination'];
+		$url   = self::url( $booking['ticket_code'] );
+		/* translators: 1: codul biletului, 2: numărul de locuri, 3: linkul biletului */
+		$desc  = sprintf( __( 'Bilet %1$s, locuri: %2$d. Biletul cu cod QR: %3$s', 'libertbus-bilete' ), $booking['ticket_code'], (int) $booking['seats'], $url );
+		$lines = array(
+			'BEGIN:VCALENDAR',
+			'VERSION:2.0',
+			'PRODID:-//LibertBus Bilete//RO',
+			'CALSCALE:GREGORIAN',
+			'METHOD:PUBLISH',
+			'BEGIN:VEVENT',
+			'UID:' . $booking['ticket_code'] . '@' . wp_parse_url( home_url(), PHP_URL_HOST ),
+			'DTSTAMP:' . gmdate( 'Ymd\THis\Z' ),
+			'DTSTART:' . $start->setTimezone( $utc )->format( 'Ymd\THis\Z' ),
+			'DTEND:' . $start->modify( '+30 minutes' )->setTimezone( $utc )->format( 'Ymd\THis\Z' ),
+			/* translators: 1: ruta, ex. Bălți → Iași, 2: codul biletului */
+			'SUMMARY:' . $esc( sprintf( __( 'Autocar %1$s (%2$s)', 'libertbus-bilete' ), $name, $booking['ticket_code'] ) ),
+			'LOCATION:' . $esc( $route['origin'] ),
+			'DESCRIPTION:' . $esc( $desc ),
+			'URL:' . $url,
+			'BEGIN:VALARM',
+			'ACTION:DISPLAY',
+			'TRIGGER:-PT2H',
+			'DESCRIPTION:' . $esc( $name ),
+			'END:VALARM',
+			'END:VEVENT',
+			'END:VCALENDAR',
+		);
+		// Rândurile mai lungi de 75 de octeți se împart (RFC 5545), fără a tăia o literă cu diacritice.
+		$out = '';
+		foreach ( $lines as $line ) {
+			while ( strlen( $line ) > 75 ) {
+				$cut = 75;
+				while ( $cut > 0 && ( ord( $line[ $cut ] ) & 0xC0 ) === 0x80 ) {
+					$cut--;
+				}
+				$out .= substr( $line, 0, $cut ) . "\r\n";
+				$line = ' ' . substr( $line, $cut );
+			}
+			$out .= $line . "\r\n";
+		}
+		return $out;
+	}
+
+	/**
+	 * Pagina biletului: /?lbb_bilet=LB-XXXXXX&k=semnătură. Se poate printa sau arăta de pe telefon.
+	 */
 	public static function ticket_page() {
 		$code = get_query_var( 'lbb_bilet' );
 		if ( ! $code ) {
@@ -294,6 +352,16 @@ class LBB_Tickets {
 		status_header( $booking ? 200 : 404 );
 
 		$state = $booking ? self::state( $booking ) : null;
+		// &ics=1: cursa în calendarul telefonului, doar pentru un bilet valabil al unei curse care urmează.
+		if ( $booking && 'ok' === $state['class'] && isset( $_GET['ics'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$ics = self::ics( $booking );
+			if ( $ics ) {
+				header( 'Content-Type: text/calendar; charset=utf-8' );
+				header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $booking['ticket_code'] ) . '.ics"' );
+				echo $ics; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- text/calendar, nu HTML.
+				exit;
+			}
+		}
 		?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -309,7 +377,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 .wrap{max-width:560px;margin:0 auto}
 .state{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
 .ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}.past{background:#eceff3;color:#3a4552}
-.actions{display:flex;gap:8px;margin-top:8px}.actions button{flex:1;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer}
+.actions{display:flex;gap:8px;margin-top:8px}.actions button,.actions .cal{flex:1;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
 @media print{.actions{display:none}body{background:#fff}.state{border:2px solid currentColor}}
 </style>
 </head>
@@ -324,7 +392,8 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<div class="state <?php echo esc_attr( $state['class'] ); ?>"><?php echo esc_html( $state['text'] ); ?></div>
 		<?php echo self::html( $booking, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<?php echo self::notes_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-		<div class="actions"><button type="button" onclick="window.print()"><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button></div>
+		<div class="actions"><button type="button" onclick="window.print()"><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button>
+			<?php if ( 'ok' === $state['class'] ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?></div>
 		<script src="<?php echo esc_url( LBB_URL . 'assets/qrcode.min.js?ver=1.0.0' ); ?>"></script>
 		<script>
 		document.querySelectorAll('[data-qr]').forEach(function(el){

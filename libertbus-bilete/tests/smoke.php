@@ -659,6 +659,29 @@ if ( is_int( $dt_r ) ) {
 }
 lbb_t( 'lista pentru șofer arată locurile pe fiecare cursă din zi', array( '07:00 CurseA → CurseB' => 3, '19:00 CurseA → CurseB' => 1 ) === $dt_tot && false !== strpos( $dt_html, '07:00 CurseA → CurseB: 3 locuri · 19:00 CurseA → CurseB: 1 loc' ), array( $dt_tot, substr( wp_strip_all_tags( $dt_html ), 0, 300 ) ) );
 
+// Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
+$ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$ic_h = is_int( $ic_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $ic_r ), $tomorrow, '10:15', 2, 0, array( 'Calendar Unu', 'Calendar Doi' ), '+37369000093', 'ic@example.com', 'MDL' ) : null;
+$ic_b = is_array( $ic_h ) ? LBB_Bookings::reserve( $ic_h['token'] ) : null;
+$ic   = $ic_b ? LBB_Tickets::ics( LBB_Bookings::get_by_code( $ic_b['ticket_code'] ) ) : '';
+$ic_s = ( new DateTimeImmutable( $tomorrow . ' 10:15', LBB_Settings::tz() ) )->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Ymd\THis\Z' );
+$ic_l = $ic ? explode( "\r\n", rtrim( $ic, "\r\n" ) ) : array();
+$ic_long = array_filter( $ic_l, function ( $l ) {
+	return strlen( $l ) > 75 || ! mb_check_encoding( $l, 'UTF-8' );
+} );
+$ic_flat = str_replace( "\r\n ", '', $ic );
+$ic_http = $ic_b ? wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $ic_b['ticket_code'] ) ), array( 'timeout' => 20 ) ) : null;
+$ic_type = is_array( $ic_http ) ? wp_remote_retrieve_header( $ic_http, 'content-type' ) : '';
+$ic_page = $ic_b ? wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $ic_b['ticket_code'] ), array( 'timeout' => 20 ) ) ) : '';
+if ( $ic_b ) {
+	LBB_Bookings::cancel( $ic_b['id'] );
+}
+$ic_gone = $ic_b ? wp_remote_retrieve_header( wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $ic_b['ticket_code'] ) ), array( 'timeout' => 20 ) ), 'content-type' ) : '';
+if ( is_int( $ic_r ) ) {
+	LBB_Routes::delete( $ic_r );
+}
+lbb_t( 'bilet: .ics cu plecarea în UTC, memento cu 2 ore înainte, virgule escapate, rânduri ≤75 octeți; linkul apare doar pe biletul valabil', $ic && 0 === strpos( $ic, "BEGIN:VCALENDAR\r\n" ) && false !== strpos( $ic, 'DTSTART:' . $ic_s . "\r\n" ) && false !== strpos( $ic, 'TRIGGER:-PT2H' ) && false !== strpos( $ic_flat, 'LOCATION:Fălești\\, centru' ) && false !== strpos( $ic_flat, 'Fălești\\, centru → Târgu Mureș' ) && ! $ic_long && 0 === strpos( (string) $ic_type, 'text/calendar' ) && false !== strpos( $ic_page, 'Adaugă în calendar' ) && 0 !== strpos( (string) $ic_gone, 'text/calendar' ), array( $ic_type, $ic_gone, array_values( $ic_long ), substr( $ic, 0, 400 ) ) );
+
 // În lista de rute, „oprită” spune și de ce: debifată sau fără preț.
 $rs_ok   = LBB_Admin::route_state( array( 'active' => 1, 'price' => 240.0 ) );
 $rs_off  = LBB_Admin::route_state( array( 'active' => 0, 'price' => 240.0 ) );
