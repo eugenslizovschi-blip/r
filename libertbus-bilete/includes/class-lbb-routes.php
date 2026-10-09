@@ -23,7 +23,7 @@ class LBB_Routes {
 	public static function all( $only_active = false ) {
 		global $wpdb;
 		$where = $only_active ? 'WHERE active = 1' : '';
-		$rows  = $wpdb->get_results( 'SELECT * FROM ' . self::table() . " $where ORDER BY origin, destination", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows  = $wpdb->get_results( 'SELECT * FROM ' . self::table() . " $where ORDER BY origin, destination", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL -- $where e o constantă din cod.
 		return array_map( array( __CLASS__, 'hydrate' ), $rows ? $rows : array() );
 	}
 

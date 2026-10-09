@@ -36,6 +36,7 @@ class LBB_Bookings {
 	public static function taken_by_time( $route_id, $date, $exclude_id = 0 ) {
 		global $wpdb;
 		$rows = $wpdb->get_results( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- numele tabelului e fix (self::table()).
 			'SELECT dep_time, SUM(seats) AS taken FROM ' . self::table() . "
 			WHERE route_id = %d AND travel_date = %s AND id <> %d
 			AND ( status IN ('confirmed','reserved') OR ( status IN ('hold','pending') AND expires_at > %s ) )
@@ -397,7 +398,7 @@ class LBB_Bookings {
 			}
 			$where .= " AND ( $or )";
 		}
-		$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT b.*, r.origin, r.destination FROM ' . self::table() . ' b LEFT JOIN ' . LBB_Routes::table() . " r ON r.id = b.route_id $where ORDER BY b.id DESC LIMIT %d", $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT b.*, r.origin, r.destination FROM ' . self::table() . ' b LEFT JOIN ' . LBB_Routes::table() . " r ON r.id = b.route_id $where ORDER BY b.id DESC LIMIT %d", $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL -- $where e construit cu $wpdb->prepare() mai sus.
 		return array_map( array( __CLASS__, 'hydrate' ), (array) $rows );
 	}
 

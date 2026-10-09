@@ -1,0 +1,11 @@
+{
+    "description": "Controalele de securitate WordPress (escaparea afișării, SQL pregătit, nonce, date de intrare curățate) pentru tests/qa.sh.",
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^3.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

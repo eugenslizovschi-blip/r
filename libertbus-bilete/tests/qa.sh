@@ -21,6 +21,15 @@ if [ -x "$PHPCS_DIR/vendor/bin/phpcs" ]; then
 else
   echo "  sărit (setați PHPCS_DIR)"
 fi
+echo "== Securitate WordPress (escapare, SQL pregătit, nonce, date de intrare)"
+# WPCS_DIR = un director cu tests/wpcs/composer.json instalat (composer install); fără el pasul se sare.
+WPCS_DIR="${WPCS_DIR:-$(dirname "$WP_PATH")/wpcs}"
+if [ -x "$WPCS_DIR/vendor/bin/phpcs" ]; then
+  OUT_SEC=$("$WPCS_DIR/vendor/bin/phpcs" -q --standard=WordPress-Extra --sniffs=WordPress.Security.EscapeOutput,WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput,WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders --extensions=php --ignore='*/tests/*' "$DIR" 2>&1)
+  if [ -n "$OUT_SEC" ]; then echo "$OUT_SEC" | head -30; FAIL=1; else echo "  ok"; fi
+else
+  echo "  sărit (setați WPCS_DIR)"
+fi
 echo "== Teste automate"
 OUT_SMOKE=$(cd "$WP_PATH" && $WP_CLI eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
 echo "$OUT_SMOKE" | grep -E "FAIL|eșuate|Fatal"

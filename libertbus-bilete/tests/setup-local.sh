@@ -124,6 +124,11 @@ if [ ! -x "$W/phpcs/vendor/bin/phpcs" ]; then
   mkdir -p "$W/phpcs" && cp "$PLUGIN/tests/compat/composer.json" "$W/phpcs/" && (cd "$W/phpcs" && COMPOSER_ALLOW_SUPERUSER=1 composer install --quiet --no-interaction >/dev/null 2>&1) || true
 fi
 [ -x "$W/phpcs/vendor/bin/phpcs" ] && "$W/phpcs/vendor/bin/phpcs" --config-set installed_paths "$W/phpcs/vendor/phpcompatibility/php-compatibility,$W/phpcs/vendor/phpcsstandards/phpcsutils" >/dev/null 2>&1 || true
+# Controalele de securitate WordPress (folosite de tests/qa.sh prin WPCS_DIR=$W/wpcs).
+if [ ! -x "$W/wpcs/vendor/bin/phpcs" ]; then
+  mkdir -p "$W/wpcs" && cp "$PLUGIN/tests/wpcs/composer.json" "$W/wpcs/" && (cd "$W/wpcs" && COMPOSER_ALLOW_SUPERUSER=1 composer install --quiet --no-interaction >/dev/null 2>&1) || true
+fi
+[ -x "$W/wpcs/vendor/bin/phpcs" ] && "$W/wpcs/vendor/bin/phpcs" --config-set installed_paths "$W/wpcs/vendor/wp-coding-standards/wpcs,$W/wpcs/vendor/phpcsstandards/phpcsutils,$W/wpcs/vendor/phpcsstandards/phpcsextra" >/dev/null 2>&1 || true
 # Serverul de test pornește mereu din nou, cu 4 procese: cu unul singur, o cerere lentă (ex. cron-ul WordPress)
 # le blochează pe celelalte și testele din browser expiră din când în când.
 pkill -f "[p]hp -S 127\.0\.0\.1:8080" 2>/dev/null || true; sleep 1
