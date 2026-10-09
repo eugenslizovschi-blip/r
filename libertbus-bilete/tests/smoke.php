@@ -281,6 +281,14 @@ $rt_zero = LBB_Settings::get( 'rate_RON' );
 LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'rate_RON' => '4,1' ) ) );
 $rt_comma = LBB_Settings::get( 'rate_RON' );
 lbb_t( 'curs valutar gol sau 0 păstrează cursul anterior; „4,1” se salvează 4.1', 3.9 === (float) $rt_empty && 3.9 === (float) $rt_zero && 4.1 === (float) $rt_comma, array( $rt_empty, $rt_zero, $rt_comma ) );
+// La fel pentru „Locuri online pe cursă (implicit)”: gol sau 0 ar face toate cursele „complet”.
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'default_capacity' => 18 ) ) );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'default_capacity' => '' ) ) );
+$dc_empty = LBB_Settings::get( 'default_capacity' );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'default_capacity' => '0' ) ) );
+$dc_zero = LBB_Settings::get( 'default_capacity' );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'default_capacity' => '25' ) ) );
+lbb_t( 'locurile implicite goale sau 0 păstrează valoarea anterioară; 25 se salvează', 18 === (int) $dc_empty && 18 === (int) $dc_zero && 25 === (int) LBB_Settings::get( 'default_capacity' ), array( $dc_empty, $dc_zero, LBB_Settings::get( 'default_capacity' ) ) );
 update_option( 'lbb_settings', $rt_keep );
 
 // Monede de plată.
