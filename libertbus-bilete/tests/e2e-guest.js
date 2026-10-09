@@ -26,6 +26,26 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const timeOff = await page.$eval('[data-lbb="time"]', s => s.disabled);
     if (!/Online se poate rezerva de azi până pe \d\d\.\d\d\.\d{4}/.test(st) || !timeOff) fail('data în afara intervalului: „' + st + '”');
   }
+  // Ruta care circulă doar luni și joi (din setup-local.sh): într-o marți, mesajul spune zilele de circulație.
+  {
+    const p2 = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    p2.on('pageerror', e => fail('pageerror: ' + e.message));
+    await p2.goto(BASE + '/balti-iasi/');
+    await p2.selectOption('[data-lbb="from"]', 'Chișinău');
+    const sucId = await p2.$$eval('[data-lbb="route"] option', os => { const o = os.find(x => x.textContent.trim() === 'Suceava'); return o ? o.value : ''; });
+    if (!sucId) fail('ruta de test Chișinău → Suceava lipsește din formular');
+    else {
+      await p2.selectOption('[data-lbb="route"]', sucId);
+      const tue = new Date(Date.now() + 86400000 * 7);
+      tue.setUTCDate(tue.getUTCDate() + ((2 - tue.getUTCDay() + 7) % 7));
+      await p2.fill('[data-lbb="date"]', tue.toISOString().slice(0, 10));
+      await p2.dispatchEvent('[data-lbb="date"]', 'change');
+      await p2.waitForFunction(() => /plecări/.test(document.querySelector('[data-lbb="status"]').textContent), null, { timeout: 15000 }).catch(() => {});
+      const st = await p2.textContent('[data-lbb="status"]');
+      if (!/nu sunt plecări[\s\S]*Ruta circulă doar: luni, joi\./.test(st)) fail('ruta care nu circulă zilnic nu spune zilele: „' + st + '”');
+    }
+    await p2.close();
+  }
   const day = new Date(Date.now() + 86400000 * (21 + Math.floor(Math.random() * 20))).toISOString().slice(0, 10);
   await page.fill('[data-lbb="date"]', day);
   await page.dispatchEvent('[data-lbb="date"]', 'change');

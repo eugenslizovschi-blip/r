@@ -194,6 +194,16 @@
 			}
 		}
 
+		// Ruta nu circulă zilnic: spunem în ce zile, ca clientul să nu caute dată cu dată.
+		function runsOn( route ) {
+			if ( ! route.days || ! route.days.length || route.days.length >= 7 ) {
+				return '';
+			}
+			return ' ' + t.runsOn.replace( '%s', route.days.map( function ( d ) {
+				return t.dayNames[ d ];
+			} ).join( ', ' ) );
+		}
+
 		function currentRoute() {
 			var list = cfg.map[ el.from.value ] || [];
 			for ( var i = 0; i < list.length; i++ ) {
@@ -489,7 +499,7 @@
 						loadDepartures();
 						return;
 					}
-					el.status.textContent = departures.length ? ( open.length ? '' : t.noneOpen ) : t.noDeparture;
+					el.status.textContent = departures.length ? ( open.length ? '' : t.noneOpen ) : t.noDeparture + runsOn( route );
 					departures.forEach( function ( d ) {
 						// În formularul compact lista e îngustă: doar ora; locurile libere apar sub câmpuri.
 						var label = compact

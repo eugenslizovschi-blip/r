@@ -329,6 +329,9 @@ class LBB_Frontend {
 				'chooseTime'  => __( 'Alegeți ora', 'libertbus-bilete' ),
 				'loading'     => __( 'Se verifică locurile…', 'libertbus-bilete' ),
 				'noDeparture' => __( 'În ziua aleasă nu sunt plecări pe această rută. Alegeți altă dată.', 'libertbus-bilete' ),
+				/* translators: %s: zilele săptămânii în care circulă ruta, ex. „luni, joi” */
+				'runsOn'      => __( 'Ruta circulă doar: %s.', 'libertbus-bilete' ),
+				'dayNames'    => array( '', __( 'luni', 'libertbus-bilete' ), __( 'marți', 'libertbus-bilete' ), __( 'miercuri', 'libertbus-bilete' ), __( 'joi', 'libertbus-bilete' ), __( 'vineri', 'libertbus-bilete' ), __( 'sâmbătă', 'libertbus-bilete' ), __( 'duminică', 'libertbus-bilete' ) ),
 				/* translators: %s: ultima dată la care se poate rezerva online. */
 				'dateRange'   => sprintf( __( 'Online se poate rezerva de azi până pe %s. Alegeți o dată din acest interval.', 'libertbus-bilete' ), $today->modify( '+' . (int) LBB_Settings::get( 'max_days_ahead' ) . ' days' )->format( 'd.m.Y' ) ),
 				/* translators: %s: telefonul de suport */

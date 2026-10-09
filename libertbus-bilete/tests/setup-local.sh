@@ -108,6 +108,8 @@ $WP eval 'foreach ( include LBB_DIR . "data/routes-seed.php" as $r ) { LBB_Route
 # O rută cu preț pentru copii (testul pentru adulți și copii o caută: Chișinău → Iași).
 # (save refuză singur o rută care există deja.)
 $WP eval 'LBB_Routes::save( array( "origin" => "Chișinău", "destination" => "Iași", "departures" => "07:00, 15:30", "price" => 250, "child_price" => 150, "currency" => "MDL", "active" => 1 ) );' >/dev/null
+# O rută care nu circulă zilnic (doar luni și joi): formularul trebuie să spună zilele când alegi altă zi.
+$WP eval 'LBB_Routes::save( array( "origin" => "Chișinău", "destination" => "Suceava", "departures" => "10:00", "days" => array( 1, 4 ), "price" => 300, "currency" => "MDL", "active" => 1 ) );' >/dev/null
 # Pagină cu un <footer> în conținut (semnătura unui citat): linkurile legale trebuie să ajungă în subsolul site-ului, nu aici.
 $WP post list --post_type=page --name=citat --format=ids | grep -q . || $WP post create --post_type=page --post_status=publish --post_title='Citat' --post_name=citat --post_content='<blockquote><p>Călătorie plăcută!</p><footer>— LibertBus</footer></blockquote>' >/dev/null
 cat > router.php <<'PHP'
