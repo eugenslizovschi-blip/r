@@ -99,6 +99,15 @@ class LBB_Admin {
 			$add( 'terms', $terms && 'publish' === get_post_status( $terms ), __( 'Pagina „Termeni și condiții” e publicată și setată în WooCommerce', 'libertbus-bilete' ),
 				__( 'WooCommerce → Setări → Avansat → Pagina de termeni.', 'libertbus-bilete' ), admin_url( 'admin.php?page=wc-settings&tab=advanced' ) );
 
+			// Blocul „Checkout” arată doar metodele de plată care au și varianta pentru blocuri; multe module ale
+			// băncilor din Moldova o au doar pe cea clasică, iar atunci clientul nu are cu ce plăti.
+			$checkout   = (int) wc_get_page_id( 'checkout' );
+			$checkout_p = $checkout > 0 && 'publish' === get_post_status( $checkout );
+			$checkout_b = $checkout_p && has_block( 'woocommerce/checkout', (string) get_post_field( 'post_content', $checkout ) );
+			$add( 'checkout_page', $checkout_p ? ( $checkout_b ? 'warn' : true ) : false, __( 'Pagina de finalizare a comenzii e publicată', 'libertbus-bilete' ),
+				$checkout_b ? __( 'Folosește blocul „Checkout”, unde apar doar metodele de plată compatibile cu blocurile. Faceți o comandă de probă și verificați că plata cu cardul a băncii apare; dacă nu, înlocuiți conținutul paginii cu [woocommerce_checkout].', 'libertbus-bilete' ) : '',
+				$checkout_p ? get_edit_post_link( $checkout, 'raw' ) : admin_url( 'admin.php?page=wc-settings&tab=advanced' ) );
+
 			$product = wc_get_product( LBB_Install::product_id() );
 			$add( 'product', $product && 'publish' === $product->get_status(), __( 'Produsul intern „Bilet autocar” există', 'libertbus-bilete' ), __( 'Se recreează automat dacă lipsește.', 'libertbus-bilete' ) );
 		}

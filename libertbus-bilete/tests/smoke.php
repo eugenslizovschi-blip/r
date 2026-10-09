@@ -900,6 +900,22 @@ update_option( 'lbb_settings', array_merge( $co_keep, array( 'company_name' => '
 $co_good = $co_item();
 update_option( 'lbb_settings', $co_keep );
 lbb_t( 'panou: IDNO cu alt număr de cifre decât 13 e semnalat, cel corect trece', $co_bad && false === $co_bad['ok'] && false !== strpos( $co_bad['detail'], '13 cifre' ) && $co_good && true === $co_good['ok'], array( $co_bad, $co_good ) );
+// Panoul avertizează când finalizarea comenzii folosește blocul „Checkout” (unde lipsesc plățile doar clasice).
+$cb_item = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'checkout_page' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+$cb_page    = wc_get_page_id( 'checkout' );
+$cb_keep    = get_post_field( 'post_content', $cb_page );
+$cb_classic = $cb_item();
+wp_update_post( array( 'ID' => $cb_page, 'post_content' => '<!-- wp:woocommerce/checkout --><div class="wp-block-woocommerce-checkout"></div><!-- /wp:woocommerce/checkout -->' ) );
+$cb_block = $cb_item();
+wp_update_post( array( 'ID' => $cb_page, 'post_content' => $cb_keep ) );
+lbb_t( 'panou: pagina de finalizare cu blocul „Checkout” e semnalată, cea clasică trece', $cb_classic && true === $cb_classic['ok'] && $cb_block && 'warn' === $cb_block['ok'] && false !== strpos( $cb_block['detail'], '[woocommerce_checkout]' ) && $cb_keep === get_post_field( 'post_content', $cb_page ), array( $cb_classic, $cb_block ) );
 // Panoul arată dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani).
 $or_keep = get_option( 'woocommerce_anonymize_completed_orders' );
 $or_item = function () {
