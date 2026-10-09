@@ -15,7 +15,7 @@ if ( empty( $lbb_settings['delete_on_uninstall'] ) ) {
 global $wpdb;
 $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}lbb_bookings" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}lbb_routes" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-foreach ( array( 'lbb_settings', 'lbb_db_version', 'lbb_legal_pages', 'lbb_needs_product' ) as $lbb_option ) {
+foreach ( array( 'lbb_settings', 'lbb_db_version', 'lbb_legal_pages', 'lbb_needs_product', 'lbb_preview_token' ) as $lbb_option ) {
 	delete_option( $lbb_option );
 }
 $lbb_product = (int) get_option( 'lbb_ticket_product_id' );

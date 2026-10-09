@@ -61,6 +61,7 @@
   - **Emailul către birou** la o rezervare nouă are linkul „Deschide rezervarea în admin”, care o arată direct, căutată după cod.
   - **Panoul „Gata de plăți?”** avertizează dacă bannerul de cookies e oprit sau dacă telefonul pentru clienți e incomplet; arată și dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani), cu link direct la setare.
   - **Altele:**
+    - dezinstalarea cu setarea „Șterge datele” bifată șterge și linkul secret de previzualizare (rămânea în baza de date);
     - ziua de azi după ora Chișinăului;
     - expeditorul corect în emailurile de rezervare;
     - accesibilitate verificată automat (axe-core).

@@ -508,6 +508,20 @@ lbb_t( 'ștergerea la cerere și curățenia de 3 ani șterg și numele de pe co
 wc_get_order( $oe_o1 )->delete( true );
 wc_get_order( $oe_o2 )->delete( true );
 
+// Dezinstalarea cu „șterge datele” nu lasă opțiuni în urmă: fiecare opțiune folosită în cod apare în uninstall.php.
+$un_src  = '';
+foreach ( array_merge( array( LBB_DIR . 'libertbus-bilete.php' ), glob( LBB_DIR . 'includes/*.php' ) ) as $un_f ) {
+	$un_src .= file_get_contents( $un_f ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+}
+preg_match_all( "/_option\\(\\s*'(lbb_[a-z_]+)'/", $un_src, $un_m );
+preg_match_all( "/const\\s+[A-Z_]*OPTION\\s*=\\s*'(lbb_[a-z_]+)'/", $un_src, $un_c );
+$un_opts = array_unique( array_merge( $un_m[1], $un_c[1] ) );
+$un_file = file_get_contents( LBB_DIR . 'uninstall.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+$un_miss = array_values( array_filter( $un_opts, function ( $o ) use ( $un_file ) {
+	return false === strpos( $un_file, "'" . $o . "'" );
+} ) );
+lbb_t( 'dezinstalarea șterge toate opțiunile plugin-ului (' . count( $un_opts ) . ')', count( $un_opts ) >= 6 && ! $un_miss, $un_miss );
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
