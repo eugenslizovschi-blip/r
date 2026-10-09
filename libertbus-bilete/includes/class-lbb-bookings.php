@@ -379,6 +379,18 @@ class LBB_Bookings {
 	}
 
 	/**
+	 * Locurile pe fiecare cursă din lista pentru șofer: [ 'HH:MM Plecare → Destinație' => locuri ], în ordinea listei.
+	 */
+	public static function departure_totals( array $rows ) {
+		$out = array();
+		foreach ( $rows as $b ) {
+			$key         = $b['dep_time'] . ' ' . $b['origin'] . ' → ' . $b['destination'];
+			$out[ $key ] = ( isset( $out[ $key ] ) ? $out[ $key ] : 0 ) + (int) $b['seats'];
+		}
+		return $out;
+	}
+
+	/**
 	 * Ultimele rezervări, opțional filtrate după stare și căutate după cod de bilet, telefon, email sau nume
 	 * (ex. clientul sună: „am codul LB-…” sau „am rezervat pe 069…”).
 	 */

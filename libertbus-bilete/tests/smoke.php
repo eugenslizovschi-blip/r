@@ -629,6 +629,29 @@ $cp_eq  = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price
 $cp_non = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price' => null, 'currency' => 'MDL' ) );
 lbb_t( 'prețul de copil mai mare decât cel de adult e semnalat; egal, mai mic sau gol nu', false !== strpos( $cp_hi, '2400' ) && false !== strpos( $cp_hi, '240' ) && '' === $cp_ok && '' === $cp_eq && '' === $cp_non, array( $cp_hi, $cp_ok, $cp_eq, $cp_non ) );
 
+// Lista pentru șofer cu mai multe curse în aceeași zi: deasupra tabelului, locurile pe fiecare cursă.
+$dt_r = LBB_Routes::save( array( 'origin' => 'CurseA', 'destination' => 'CurseB', 'departures' => '07:00, 19:00', 'price' => 50, 'currency' => 'MDL', 'capacity' => 9, 'active' => 1 ) );
+$dt_b = array();
+foreach ( array( array( '07:00', 2 ), array( '19:00', 1 ), array( '07:00', 1 ) ) as $dt_x ) {
+	$dt_h = is_int( $dt_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $dt_r ), $tomorrow, $dt_x[0], $dt_x[1], 0, array_fill( 0, $dt_x[1], 'Curse Test' ), '+37369000094', 'dt@example.com', 'MDL' ) : null;
+	$dt_b[] = is_array( $dt_h ) ? LBB_Bookings::reserve( $dt_h['token'] ) : null;
+}
+$dt_tot = is_int( $dt_r ) ? LBB_Bookings::departure_totals( LBB_Bookings::manifest( $tomorrow, $dt_r ) ) : null;
+$_GET   = array( 'page' => 'lbb-manifest', 'date' => $tomorrow, 'route' => $dt_r );
+ob_start();
+LBB_Admin::page_manifest();
+$dt_html = ob_get_clean();
+$_GET    = array();
+foreach ( $dt_b as $dt_x ) {
+	if ( $dt_x ) {
+		LBB_Bookings::cancel( $dt_x['id'] );
+	}
+}
+if ( is_int( $dt_r ) ) {
+	LBB_Routes::delete( $dt_r );
+}
+lbb_t( 'lista pentru șofer arată locurile pe fiecare cursă din zi', array( '07:00 CurseA → CurseB' => 3, '19:00 CurseA → CurseB' => 1 ) === $dt_tot && false !== strpos( $dt_html, '07:00 CurseA → CurseB: 3 locuri · 19:00 CurseA → CurseB: 1 loc' ), array( $dt_tot, substr( wp_strip_all_tags( $dt_html ), 0, 300 ) ) );
+
 // În lista de rute, „oprită” spune și de ce: debifată sau fără preț.
 $rs_ok   = LBB_Admin::route_state( array( 'active' => 1, 'price' => 240.0 ) );
 $rs_off  = LBB_Admin::route_state( array( 'active' => 0, 'price' => 240.0 ) );
