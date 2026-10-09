@@ -405,7 +405,13 @@ class LBB_Admin {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_delete_route' ) ) {
 			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
 		}
-		LBB_Routes::delete( isset( $_POST['id'] ) ? (int) $_POST['id'] : 0 );
+		$id      = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
+		$waiting = LBB_Routes::upcoming_bookings( $id );
+		if ( $waiting ) {
+			/* translators: %d: numărul de bilete și rezervări pentru curse viitoare */
+			self::redirect( 'lbb-routes', sprintf( _n( 'Ruta are %d bilet sau rezervare pentru o cursă viitoare și nu se poate șterge. Debifați „Activă” ca să opriți vânzarea; ștergeți-o după ultima cursă.', 'Ruta are %d bilete sau rezervări pentru curse viitoare și nu se poate șterge. Debifați „Activă” ca să opriți vânzarea; ștergeți-o după ultima cursă.', $waiting, 'libertbus-bilete' ), $waiting ), true, array( 'edit' => $id ) );
+		}
+		LBB_Routes::delete( $id );
 		self::redirect( 'lbb-routes', __( 'Ruta a fost ștearsă.', 'libertbus-bilete' ) );
 	}
 

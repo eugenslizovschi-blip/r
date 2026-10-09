@@ -132,6 +132,16 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const timeWarn = await page.$$eval('#wpbody-content .notice', ns => ns.map(n => n.textContent).join(' | '));
   if (!/nu au fost înțelese[^|]*25:00/.test(timeWarn)) fail('ora greșită la rută nu e semnalată: ' + timeWarn.trim().slice(0, 160));
   if (!(await page.$('#lbb-times')) || await page.inputValue('#lbb-times') !== origTimes) fail('după avertisment, formularul rutei nu arată orele salvate');
+  // O rută cu bilete pentru curse viitoare (Bălți → Iași, din testele de plată) nu se poate șterge din greșeală.
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-routes');
+  const busyEdit = await page.$$eval('#wpbody-content table tbody tr', rs => { const r = rs.find(x => /Bălți\s*→\s*Iași/.test(x.textContent)); const a = r && r.querySelector('a[href*="edit="]'); return a ? a.href : ''; });
+  if (busyEdit) {
+    await page.goto(busyEdit);
+    page.once('dialog', d => d.accept());
+    await Promise.all([page.waitForNavigation(), page.click('#wpbody-content button.button-link-delete')]);
+    const delMsg = await page.$$eval('#wpbody-content .notice', ns => ns.map(n => n.textContent).join(' | '));
+    if (!/nu se poate șterge/.test(delMsg)) fail('ruta cu bilete viitoare s-a putut șterge: ' + delMsg.trim().slice(0, 160));
+  } else fail('nu am găsit ruta Bălți → Iași în Rute și orar');
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');
   const emptyLabel = await page.$eval('#wpbody-content table.widefat tbody td[colspan]', td => getComputedStyle(td, '::before').content);
   if (emptyLabel !== 'none' && emptyLabel !== 'normal') fail('pe telefon, rândul „nicio rezervare” are eticheta ' + emptyLabel);

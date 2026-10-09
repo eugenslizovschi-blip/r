@@ -138,6 +138,15 @@ class LBB_Routes {
 		return $wpdb->get_row( $wpdb->prepare( 'SELECT id FROM ' . self::table() . ' WHERE origin = %s AND destination = %s', $origin, $destination ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
+	/**
+	 * Câte bilete și rezervări valabile are ruta pentru azi și zilele următoare. O rută cu călători așteptați nu
+	 * se șterge (ar rămâne fără rută în lista pentru șofer și pe bilet): i se oprește vânzarea.
+	 */
+	public static function upcoming_bookings( $id ) {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . LBB_Bookings::table() . " WHERE route_id = %d AND travel_date >= %s AND status IN ('confirmed','reserved','pending')", $id, LBB_Settings::today() ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
 	public static function delete( $id ) {
 		global $wpdb;
 		$wpdb->delete( self::table(), array( 'id' => (int) $id ) );

@@ -103,6 +103,8 @@ add_action( 'wp_body_open', function () {
 } );
 PHP
 $WP eval 'LBB_Legal::create_missing();' >/dev/null
+# Rutele din orarul inițial care lipsesc (ex. șterse de un test rulat pe cod vechi) se adaugă la loc.
+$WP eval 'foreach ( include LBB_DIR . "data/routes-seed.php" as $r ) { LBB_Routes::save( array( "origin" => $r[0], "destination" => $r[1], "departures" => implode( ",", $r[2] ), "price" => $r[3], "currency" => $r[4], "page_url" => $r[5], "active" => 1 ) ); }' >/dev/null
 # O rută cu preț pentru copii (testul pentru adulți și copii o caută: Chișinău → Iași).
 # (save refuză singur o rută care există deja.)
 $WP eval 'LBB_Routes::save( array( "origin" => "Chișinău", "destination" => "Iași", "departures" => "07:00, 15:30", "price" => 250, "child_price" => 150, "currency" => "MDL", "active" => 1 ) );' >/dev/null

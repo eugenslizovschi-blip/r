@@ -566,6 +566,21 @@ $ty_o->delete( true );
 // Ore de plecare scrise greșit la o rută: le numim, ca biroul să afle că acea cursă n-a fost salvată.
 lbb_t( 'orele neînțelese la o rută sunt semnalate (25:00, 8-45), cele bune nu', array( '25:00', '8-45' ) === LBB_Routes::unrecognized_times( "08:45, 25:00\n13.30; 8-45 17:05" ) && array() === LBB_Routes::unrecognized_times( '06:00, 7.15' ), LBB_Routes::unrecognized_times( "08:45, 25:00\n13.30; 8-45 17:05" ) );
 
+// O rută cu bilete sau rezervări pentru curse viitoare nu se șterge (doar i se oprește vânzarea).
+$ud_r = LBB_Routes::save( array( 'origin' => 'StergeA', 'destination' => 'StergeB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'capacity' => 5, 'active' => 1 ) );
+$ud_before = is_int( $ud_r ) ? LBB_Routes::upcoming_bookings( $ud_r ) : -1;
+$ud_h = is_int( $ud_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $ud_r ), $tomorrow, '10:00', 1, 0, array( 'Sterge Ruta' ), '+37369000097', 'ud@example.com', 'MDL' ) : null;
+$ud_b = is_array( $ud_h ) ? LBB_Bookings::reserve( $ud_h['token'] ) : null;
+$ud_after = is_int( $ud_r ) ? LBB_Routes::upcoming_bookings( $ud_r ) : -1;
+if ( $ud_b ) {
+	LBB_Bookings::cancel( $ud_b['id'] );
+}
+$ud_cancel = is_int( $ud_r ) ? LBB_Routes::upcoming_bookings( $ud_r ) : -1;
+lbb_t( 'ruta cu o rezervare viitoare e blocată la ștergere; după anulare se poate șterge', 0 === $ud_before && 1 === $ud_after && 0 === $ud_cancel, array( $ud_before, $ud_after, $ud_cancel ) );
+if ( is_int( $ud_r ) ) {
+	LBB_Routes::delete( $ud_r );
+}
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
