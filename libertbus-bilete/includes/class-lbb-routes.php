@@ -47,6 +47,20 @@ class LBB_Routes {
 	/**
 	 * „08:45, 9:30 17:45” → ['08:45','09:30','17:45'], sortate și fără duplicate.
 	 */
+	/**
+	 * Bucățile din câmpul „Ore de plecare” care nu sunt o oră validă (ex. „25:00”, „8-45”): se ignoră la
+	 * salvare, deci biroul trebuie să afle, altfel cursa lipsește fără să știe nimeni.
+	 */
+	public static function unrecognized_times( $text ) {
+		$bad = array();
+		foreach ( preg_split( '/[\s,;]+/', (string) $text, -1, PREG_SPLIT_NO_EMPTY ) as $part ) {
+			if ( ! self::parse_times( $part ) ) {
+				$bad[] = $part;
+			}
+		}
+		return $bad;
+	}
+
 	public static function parse_times( $text ) {
 		preg_match_all( '/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/', (string) $text, $m, PREG_SET_ORDER );
 		$times = array();

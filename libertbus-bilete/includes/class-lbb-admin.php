@@ -384,7 +384,13 @@ class LBB_Admin {
 		if ( is_wp_error( $result ) ) {
 			self::redirect( 'lbb-routes', $result->get_error_message(), true, $id ? array( 'edit' => $id ) : array( 'add' => 1 ) );
 		}
-		self::redirect( 'lbb-routes', __( 'Ruta a fost salvată.', 'libertbus-bilete' ) );
+		$bad = LBB_Routes::unrecognized_times( isset( $data['departures'] ) ? $data['departures'] : '' );
+		$msg = __( 'Ruta a fost salvată.', 'libertbus-bilete' );
+		if ( $bad ) {
+			/* translators: %s: orele neînțelese, separate prin virgulă */
+			$msg .= ' ' . sprintf( __( 'Atenție: aceste ore nu au fost înțelese și nu s-au salvat: %s. Scrieți-le ca 08:45.', 'libertbus-bilete' ), implode( ', ', $bad ) );
+		}
+		self::redirect( 'lbb-routes', $msg, (bool) $bad, $bad ? array( 'edit' => $result ) : array() );
 	}
 
 	public static function delete_route() {

@@ -124,6 +124,14 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const small = await page.$$eval('#wpbody-content form input:not([type]), #wpbody-content form input[type="text"]', ins => ins.filter(i => i.offsetParent && i.getBoundingClientRect().height < 36).map(i => i.name + '=' + Math.round(i.getBoundingClientRect().height)));
     if (small.length) fail(slug + ': câmpuri prea mici pentru deget pe telefon: ' + small.join(', '));
   }
+  // Oră de plecare scrisă greșit: ruta se salvează, iar biroul vede exact ce oră n-a fost înțeleasă (nu dispare pe tăcute).
+  await page.goto(editUrl);
+  const origTimes = await page.inputValue('#lbb-times');
+  await page.fill('#lbb-times', origTimes + ', 25:00');
+  await Promise.all([page.waitForNavigation(), page.click('#wpbody-content form:has(#lbb-times) #submit')]);
+  const timeWarn = await page.$$eval('#wpbody-content .notice', ns => ns.map(n => n.textContent).join(' | '));
+  if (!/nu au fost înțelese[^|]*25:00/.test(timeWarn)) fail('ora greșită la rută nu e semnalată: ' + timeWarn.trim().slice(0, 160));
+  if (!(await page.$('#lbb-times')) || await page.inputValue('#lbb-times') !== origTimes) fail('după avertisment, formularul rutei nu arată orele salvate');
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');
   const emptyLabel = await page.$eval('#wpbody-content table.widefat tbody td[colspan]', td => getComputedStyle(td, '::before').content);
   if (emptyLabel !== 'none' && emptyLabel !== 'normal') fail('pe telefon, rândul „nicio rezervare” are eticheta ' + emptyLabel);

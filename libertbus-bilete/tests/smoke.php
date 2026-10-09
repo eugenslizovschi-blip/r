@@ -543,6 +543,9 @@ $ty_fail = ob_get_clean();
 lbb_t( 'plată refuzată: pe pagina comenzii nu apare „biletele vin imediat”', false === strpos( $ty_fail, 'Biletele se emit' ) && false === strpos( $ty_fail, 'Verifică din nou' ), $ty_fail );
 $ty_o->delete( true );
 
+// Ore de plecare scrise greșit la o rută: le numim, ca biroul să afle că acea cursă n-a fost salvată.
+lbb_t( 'orele neînțelese la o rută sunt semnalate (25:00, 8-45), cele bune nu', array( '25:00', '8-45' ) === LBB_Routes::unrecognized_times( "08:45, 25:00\n13.30; 8-45 17:05" ) && array() === LBB_Routes::unrecognized_times( '06:00, 7.15' ), LBB_Routes::unrecognized_times( "08:45, 25:00\n13.30; 8-45 17:05" ) );
+
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.
 $api = function ( $params ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
