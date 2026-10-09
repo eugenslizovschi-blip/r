@@ -535,6 +535,12 @@ ob_start();
 LBB_Tickets::thankyou( $ty_o->get_id() );
 $ty_html = ob_get_clean();
 lbb_t( 'comandă neconfirmată încă: „Verifică din nou” duce la aceeași pagină de comandă', false !== strpos( $ty_html, 'Verifică din nou' ) && false !== strpos( $ty_html, esc_url( $ty_o->get_checkout_order_received_url() ) ), $ty_html );
+// Plata refuzată: pagina nu mai promite bilete (WooCommerce arată deja „plata nu a reușit”).
+$ty_o->update_status( 'failed' );
+ob_start();
+LBB_Tickets::thankyou( $ty_o->get_id() );
+$ty_fail = ob_get_clean();
+lbb_t( 'plată refuzată: pe pagina comenzii nu apare „biletele vin imediat”', false === strpos( $ty_fail, 'Biletele se emit' ) && false === strpos( $ty_fail, 'Verifică din nou' ), $ty_fail );
 $ty_o->delete( true );
 
 // API-ul public pentru ore și locuri (singurul fără autentificare): validează intrarea, nu arată rute inactive, nu se pune în cache.

@@ -48,7 +48,7 @@
     - biletul unei curse din zi trecută apare gri „Cursa a avut loc pe …”, nu verde „valabil” (șoferul nu poate fi păcălit cu un bilet vechi);
     - dacă plata unui bilet e reluată (ex. după un card refuzat), pagina lui spune „Plata nu e finalizată”, nu „Bilet anulat”.
     - un link de bilet stricat sau incomplet arată „Biletul nu a fost găsit” cu telefonul firmei, ca clientul să poată suna;
-    - pe pagina de după plată, dacă banca n-a confirmat încă plata, clientul vede „De obicei durează câteva secunde” și un buton „Verifică din nou”;
+    - pe pagina de după plată, dacă banca n-a confirmat încă plata, clientul vede „De obicei durează câteva secunde” și un buton „Verifică din nou” (nu și la plata refuzată, unde WooCommerce oferă „Plătește din nou”);
     - la printare, starea biletului rămâne pe foaie: un bilet anulat, neplătit sau dintr-o cursă trecută nu mai arată pe hârtie ca unul valabil.
   - **Admin pe telefon:** listele Pasageri, Rezervări și Rute și orar devin carduri, iar câmpurile se ating ușor.
   - **Emailurile de rezervare și anulare** pleacă și cu o variantă text (nu doar HTML): ajung mai rar în spam și se citesc bine în orice aplicație; subiectul emailului de rezervare are codul (ex. „Rezervare LB-AB12CD — Bălți → Iași, 20.10.2026 08:45”).

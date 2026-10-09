@@ -219,6 +219,11 @@ class LBB_Tickets {
 		wp_enqueue_style( 'lbb' );
 		$tickets = self::confirmed( $order );
 		if ( ! $tickets ) {
+			// Plată refuzată sau comandă anulată: WooCommerce spune deja „plata nu a reușit” și oferă „Plătește din nou”;
+			// „biletele vin imediat” l-ar contrazice.
+			if ( $order->has_status( array( 'failed', 'cancelled', 'refunded' ) ) ) {
+				return;
+			}
 			// Confirmarea băncii poate veni la câteva secunde după revenirea pe site: clientul are ce apăsa.
 			echo '<div class="woocommerce-info lbb-awaiting">' . esc_html__( 'Biletele se emit imediat după confirmarea plății și vă vin pe email. De obicei durează câteva secunde.', 'libertbus-bilete' )
 				. ' <a class="button" href="' . esc_url( $order->get_checkout_order_received_url() ) . '">' . esc_html__( 'Verifică din nou', 'libertbus-bilete' ) . '</a></div>';
