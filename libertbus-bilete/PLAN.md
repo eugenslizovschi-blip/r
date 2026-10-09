@@ -63,7 +63,7 @@
   - **Anulare din birou:** când biroul anulează o rezervare cu plata la urcare, clientul primește un email (cu codul, ruta, ora și telefonul), ca să nu vină degeaba la autocar; după anulare, lista rămâne pe aceeași căutare și același filtru (ex. telefonul clientului care a sunat); confirmarea „Anulați rezervarea?” spune dinainte că clientul primește email (sau, fără email, că trebuie sunat).
   - **Căutare în Rezervări:** când sună un client, rezervarea se găsește după codul biletului, telefon (și scris 069…), nume sau email, nu doar printre ultimele 200; filtrele de stare („Anulate”, „Plătite”…) păstrează căutarea.
   - **Emailul către birou** la o rezervare nouă are linkul „Deschide rezervarea în admin”, care o arată direct, căutată după cod.
-  - **Panoul „Gata de plăți?”** avertizează dacă bannerul de cookies e oprit sau dacă telefonul pentru clienți e incomplet; arată și dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani), cu link direct la setare.
+  - **Panoul „Gata de plăți?”** avertizează dacă bannerul de cookies e oprit sau dacă telefonul pentru clienți e incomplet; arată și dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani), cu link direct la setare; verifică și că IDNO-ul firmei are 13 cifre (banca îl compară cu cel de pe site).
   - **Altele:**
     - dezinstalarea cu setarea „Șterge datele” bifată șterge și linkul secret de previzualizare (rămânea în baza de date);
     - ziua de azi după ora Chișinăului;

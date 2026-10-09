@@ -792,6 +792,22 @@ lbb_t( 'panou: bannerul de cookies pornit apare ca bifat', $it && true === $it['
 update_option( 'lbb_settings', array_merge( $cl_keep, array( 'cookie_banner' => 0 ) ) );
 $it = $cl_item();
 lbb_t( 'panou: bannerul de cookies oprit apare ca problemă', $it && false === $it['ok'] && false !== strpos( $it['detail'], '195/2024' ), $it );
+// Panoul verifică și IDNO-ul firmei: 13 cifre (spațiile nu contează).
+$co_keep = LBB_Settings::all();
+$co_item = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'company' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+update_option( 'lbb_settings', array_merge( $co_keep, array( 'company_name' => 'SRL Test', 'company_address' => 'Bălți', 'company_idno' => '100360004' ) ) );
+$co_bad = $co_item();
+update_option( 'lbb_settings', array_merge( $co_keep, array( 'company_name' => 'SRL Test', 'company_address' => 'Bălți', 'company_idno' => '1003 6000 41234' ) ) );
+$co_good = $co_item();
+update_option( 'lbb_settings', $co_keep );
+lbb_t( 'panou: IDNO cu alt număr de cifre decât 13 e semnalat, cel corect trece', $co_bad && false === $co_bad['ok'] && false !== strpos( $co_bad['detail'], '13 cifre' ) && $co_good && true === $co_good['ok'], array( $co_bad, $co_good ) );
 // Panoul arată dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani).
 $or_keep = get_option( 'woocommerce_anonymize_completed_orders' );
 $or_item = function () {

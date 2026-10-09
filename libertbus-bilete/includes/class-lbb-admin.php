@@ -115,8 +115,16 @@ class LBB_Admin {
 				$id ? get_edit_post_link( $id, 'raw' ) : admin_url( 'admin.php?page=lbb-settings#legal' ) );
 		}
 
-		$company = LBB_Settings::get( 'company_name' ) && LBB_Settings::get( 'company_idno' ) && LBB_Settings::get( 'company_address' );
-		$add( 'company', (bool) $company, __( 'Datele firmei sunt completate', 'libertbus-bilete' ), __( 'Denumire, IDNO și adresă. Banca le verifică pe site.', 'libertbus-bilete' ), admin_url( 'admin.php?page=lbb-settings' ) );
+		$idno    = preg_replace( '/\s+/', '', (string) LBB_Settings::get( 'company_idno' ) );
+		$company = LBB_Settings::get( 'company_name' ) && '' !== $idno && LBB_Settings::get( 'company_address' );
+		// IDNO-ul din Moldova are 13 cifre; o cifră lipsă sau în plus o vede banca la verificarea site-ului.
+		$idno_ok = (bool) preg_match( '/^\d{13}$/', $idno );
+		$add( 'company', $company && $idno_ok, __( 'Datele firmei sunt completate', 'libertbus-bilete' ),
+			$company && ! $idno_ok
+				/* translators: %s: IDNO-ul introdus */
+				? sprintf( __( 'IDNO-ul „%s” nu are 13 cifre. Verificați-l în extrasul din registru: banca îl compară cu cel de pe site.', 'libertbus-bilete' ), $idno )
+				: __( 'Denumire, IDNO și adresă. Banca le verifică pe site.', 'libertbus-bilete' ),
+			admin_url( 'admin.php?page=lbb-settings' ) );
 
 		// Numărul apare în formular, pe bilet și în emailuri, ca link de apel: cu mai puțin de 8 cifre nu sună nicăieri.
 		$phone = trim( (string) LBB_Settings::get( 'support_phone' ) );
