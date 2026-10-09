@@ -41,7 +41,8 @@ class LBB_Tickets {
 	 * Un bilet ca tabel HTML simplu, cu stiluri inline ca să arate bine și în email.
 	 */
 	public static function html( array $booking, $with_qr = false ) {
-		$rows = LBB_WooCommerce::describe( $booking );
+		$rows  = LBB_WooCommerce::describe( $booking );
+		$state = self::state( $booking );
 		ob_start();
 		?>
 		<div class="lbb-ticket" style="border:2px dashed #c9ced6;border-radius:12px;padding:16px;margin:0 0 16px;background:#fff;color:#1d2733;">
@@ -59,7 +60,8 @@ class LBB_Tickets {
 				<?php endforeach; ?>
 			</table>
 			<?php if ( ! $with_qr ) : ?>
-				<p style="margin:10px 0 0;"><a href="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php echo 'reserved' === $booking['status'] ? esc_html__( 'Deschide rezervarea cu cod QR', 'libertbus-bilete' ) : esc_html__( 'Deschide biletul cu cod QR', 'libertbus-bilete' ); ?></a></p>
+				<p style="margin:10px 0 0;"><a href="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php echo 'reserved' === $booking['status'] ? esc_html__( 'Deschide rezervarea cu cod QR', 'libertbus-bilete' ) : esc_html__( 'Deschide biletul cu cod QR', 'libertbus-bilete' ); ?></a>
+				<?php if ( 'ok' === $state['class'] ) : ?> · <a href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?></p>
 			<?php endif; ?>
 		</div>
 		<?php

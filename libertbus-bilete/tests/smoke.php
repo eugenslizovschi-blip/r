@@ -673,9 +673,12 @@ $ic_flat = str_replace( "\r\n ", '', $ic );
 $ic_http = $ic_b ? wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $ic_b['ticket_code'] ) ), array( 'timeout' => 20 ) ) : null;
 $ic_type = is_array( $ic_http ) ? wp_remote_retrieve_header( $ic_http, 'content-type' ) : '';
 $ic_page = $ic_b ? wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $ic_b['ticket_code'] ), array( 'timeout' => 20 ) ) ) : '';
+$ic_mail = $ic_b ? LBB_Tickets::html( LBB_Bookings::get_by_code( $ic_b['ticket_code'] ) ) : '';
 if ( $ic_b ) {
 	LBB_Bookings::cancel( $ic_b['id'] );
 }
+$ic_mail_x = $ic_b ? LBB_Tickets::html( LBB_Bookings::get_by_code( $ic_b['ticket_code'] ) ) : '';
+lbb_t( 'emailul cu biletul valabil are și „Adaugă în calendar”; după anulare nu', false !== strpos( $ic_mail, 'Adaugă în calendar' ) && false !== strpos( $ic_mail, 'ics=1' ) && false === strpos( $ic_mail_x, 'Adaugă în calendar' ), array( substr( wp_strip_all_tags( $ic_mail ), -160 ), substr( wp_strip_all_tags( $ic_mail_x ), -160 ) ) );
 $ic_gone = $ic_b ? wp_remote_retrieve_header( wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $ic_b['ticket_code'] ) ), array( 'timeout' => 20 ) ), 'content-type' ) : '';
 if ( is_int( $ic_r ) ) {
 	LBB_Routes::delete( $ic_r );
