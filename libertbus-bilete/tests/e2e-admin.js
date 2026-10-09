@@ -155,6 +155,20 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (!strandOpen) fail('după scoaterea orelor cu bilete, formularul rutei nu a rămas deschis');
     if (/nu mai sunt în orar/.test(backMsg)) fail('după ce orele au fost puse la loc, avertismentul a rămas: ' + backMsg.trim().slice(0, 200));
   } else fail('nu am găsit ruta Bălți → Iași în Rute și orar');
+  // Preț de copil mai mare decât cel de adult (greșeală de tastare): avertisment la salvare. Prețul se pune la loc.
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-routes');
+  const kidEdit = await page.$$eval('#wpbody-content table tbody tr', rs => { const r = rs.find(x => /Chișinău\s*→\s*Iași/.test(x.textContent)); const a = r && r.querySelector('a[href*="edit="]'); return a ? a.href : ''; });
+  if (kidEdit) {
+    await page.goto(kidEdit);
+    const kidOrig = await page.inputValue('#lbb-child');
+    await page.fill('#lbb-child', '2500');
+    await Promise.all([page.waitForNavigation(), page.click('#wpbody-content form:has(#lbb-times) #submit')]);
+    const kidMsg = await page.$$eval('#wpbody-content .notice', ns => ns.map(n => n.textContent).join(' | '));
+    if (!(await page.$('#lbb-child'))) await page.goto(kidEdit);
+    await page.fill('#lbb-child', kidOrig);
+    await Promise.all([page.waitForNavigation(), page.click('#wpbody-content form:has(#lbb-times) #submit')]);
+    if (!/prețul pentru copii \(2500[^|]*mai mare/.test(kidMsg)) fail('prețul de copil mai mare decât cel de adult nu e semnalat: ' + kidMsg.trim().slice(0, 200));
+  } else fail('nu am găsit ruta Chișinău → Iași în Rute și orar');
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');
   const emptyLabel = await page.$eval('#wpbody-content table.widefat tbody td[colspan]', td => getComputedStyle(td, '::before').content);
   if (emptyLabel !== 'none' && emptyLabel !== 'normal') fail('pe telefon, rândul „nicio rezervare” are eticheta ' + emptyLabel);

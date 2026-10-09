@@ -622,6 +622,13 @@ if ( is_int( $rd_r ) ) {
 }
 lbb_t( 'zi în care ruta nu circulă: mesajul spune „Ruta circulă doar: luni, joi.”', 'Ruta circulă doar: luni, joi.' === $rd_note && '' === $rd_on && '' === $rd_daily && is_wp_error( $rd_hold ) && false !== strpos( $rd_hold->get_error_message(), 'Ruta circulă doar: luni, joi.' ), array( $rd_note, $rd_on, $rd_daily, is_wp_error( $rd_hold ) ? $rd_hold->get_error_message() : $rd_hold ) );
 
+// Preț pentru copii mai mare decât pentru adulți (greșeală de tastare): biroul e avertizat la salvare.
+$cp_hi  = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price' => 2400.0, 'currency' => 'MDL' ) );
+$cp_ok  = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price' => 150.0, 'currency' => 'MDL' ) );
+$cp_eq  = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price' => 240.0, 'currency' => 'MDL' ) );
+$cp_non = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price' => null, 'currency' => 'MDL' ) );
+lbb_t( 'prețul de copil mai mare decât cel de adult e semnalat; egal, mai mic sau gol nu', false !== strpos( $cp_hi, '2400' ) && false !== strpos( $cp_hi, '240' ) && '' === $cp_ok && '' === $cp_eq && '' === $cp_non, array( $cp_hi, $cp_ok, $cp_eq, $cp_non ) );
+
 // În lista de rute, „oprită” spune și de ce: debifată sau fără preț.
 $rs_ok   = LBB_Admin::route_state( array( 'active' => 1, 'price' => 240.0 ) );
 $rs_off  = LBB_Admin::route_state( array( 'active' => 0, 'price' => 240.0 ) );

@@ -166,6 +166,18 @@ class LBB_Routes {
 	}
 
 	/**
+	 * Prețul pentru copii mai mare decât cel pentru adulți e aproape sigur o greșeală de tastare (ex. 2400 în loc
+	 * de 240): mesajul pentru birou, sau '' când prețurile arată normal.
+	 */
+	public static function child_price_warning( array $route ) {
+		if ( null === $route['child_price'] || $route['child_price'] <= $route['price'] ) {
+			return '';
+		}
+		/* translators: 1: prețul pentru copii, 2: prețul pentru adulți, 3: moneda */
+		return sprintf( __( 'Atenție: prețul pentru copii (%1$s %3$s) e mai mare decât cel pentru adulți (%2$s %3$s). Verificați prețurile.', 'libertbus-bilete' ), wc_format_decimal( $route['child_price'], 2 ), wc_format_decimal( $route['price'], 2 ), $route['currency'] );
+	}
+
+	/**
 	 * Zilele săptămânii, 1 = luni … 7 = duminică (ca date( 'N' )).
 	 */
 	public static function day_names() {

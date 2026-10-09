@@ -423,7 +423,11 @@ class LBB_Admin {
 			/* translators: %s: cursele scoase din orar care au bilete, ex. „12.10.2026 08:45 (2)” */
 			$msg .= ' ' . sprintf( __( 'Atenție: aceste curse nu mai sunt în orar, dar au bilete sau rezervări: %s. Anunțați pasagerii sau puneți ora și ziua la loc.', 'libertbus-bilete' ), implode( ', ', $list ) );
 		}
-		$warn = $bad || $stranded;
+		$child_warn = $route ? LBB_Routes::child_price_warning( $route ) : '';
+		if ( $child_warn ) {
+			$msg .= ' ' . $child_warn;
+		}
+		$warn = $bad || $stranded || $child_warn;
 		self::redirect( 'lbb-routes', $msg, $warn, $warn ? array( 'edit' => $result ) : array() );
 	}
 
