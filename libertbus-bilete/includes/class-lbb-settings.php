@@ -81,7 +81,12 @@ class LBB_Settings {
 			} elseif ( 'replace_cf7' === $key || 'preview_cf7' === $key ) {
 				$value = implode( ',', array_filter( array_map( 'absint', preg_split( '/[\s,;]+/', (string) $value ) ) ) );
 			} elseif ( 0 === strpos( $key, 'rate_' ) ) {
-				$value = max( 0.0001, (float) str_replace( ',', '.', $value ) );
+				// Un câmp golit din greșeală sau 0 nu devine curs 0,0001 (un bilet de 60 RON ar costa 0,01 MDL):
+				// rămâne cursul de dinainte.
+				$value = (float) str_replace( ',', '.', (string) $value );
+				if ( $value <= 0 ) {
+					$value = (float) self::get( $key ) > 0 ? (float) self::get( $key ) : $default;
+				}
 			} elseif ( is_int( $default ) ) {
 				$value = max( 0, (int) $value );
 			} elseif ( 'ticket_notes' === $key || 'company_address' === $key ) {

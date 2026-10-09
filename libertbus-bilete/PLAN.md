@@ -50,6 +50,7 @@
     - un link de bilet stricat sau incomplet arată „Biletul nu a fost găsit” cu telefonul firmei, ca clientul să poată suna;
     - pe pagina de după plată, dacă banca n-a confirmat încă plata, clientul vede „De obicei durează câteva secunde” și un buton „Verifică din nou” (nu și la plata refuzată, unde WooCommerce oferă „Plătește din nou”);
     - la printare, starea biletului rămâne pe foaie: un bilet anulat, neplătit sau dintr-o cursă trecută nu mai arată pe hârtie ca unul valabil.
+  - **Cursuri valutare în Setări:** un câmp golit din greșeală sau 0 păstrează cursul de dinainte (înainte devenea 0,0001, iar un bilet de 60 RON ar fi costat 0,01 MDL la plata în MDL).
   - **Rute și orar:** dacă o oră de plecare e scrisă greșit (ex. „25:00” sau „8-45”), la salvare apare „Atenție: aceste ore nu au fost înțelese și nu s-au salvat”, cu orele respective (înainte cursa dispărea fără niciun mesaj).
   - **Admin pe telefon:** listele Pasageri, Rezervări și Rute și orar devin carduri, iar câmpurile se ating ușor.
   - **Emailurile de rezervare și anulare** pleacă și cu o variantă text (nu doar HTML): ajung mai rar în spam și se citesc bine în orice aplicație; subiectul emailului de rezervare are codul (ex. „Rezervare LB-AB12CD — Bălți → Iași, 20.10.2026 08:45”).

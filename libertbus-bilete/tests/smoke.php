@@ -271,6 +271,18 @@ $res3 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 
 lbb_t( 'rezervarea oprită din setări e refuzată', is_wp_error( $res3 ) && 'lbb_mode' === $res3->get_error_code(), $res3 );
 update_option( 'lbb_settings', $saved );
 
+// Cursul valutar golit din greșeală sau 0 păstrează cursul de dinainte (altfel 60 RON ar deveni 0,01 MDL); „4,1” e 4.1.
+$rt_keep = get_option( 'lbb_settings' );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'rate_RON' => 3.9 ) ) );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'rate_RON' => '' ) ) );
+$rt_empty = LBB_Settings::get( 'rate_RON' );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'rate_RON' => '0' ) ) );
+$rt_zero = LBB_Settings::get( 'rate_RON' );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'rate_RON' => '4,1' ) ) );
+$rt_comma = LBB_Settings::get( 'rate_RON' );
+lbb_t( 'curs valutar gol sau 0 păstrează cursul anterior; „4,1” se salvează 4.1', 3.9 === (float) $rt_empty && 3.9 === (float) $rt_zero && 4.1 === (float) $rt_comma, array( $rt_empty, $rt_zero, $rt_comma ) );
+update_option( 'lbb_settings', $rt_keep );
+
 // Monede de plată.
 LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'pay_currencies' => array( '', 'RON', 'XXX' ) ) ) );
 lbb_t( 'setarea monedelor filtrează valorile invalide', array( 'RON' ) === LBB_Settings::pay_currencies(), LBB_Settings::pay_currencies() );
