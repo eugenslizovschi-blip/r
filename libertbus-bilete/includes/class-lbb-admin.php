@@ -683,8 +683,11 @@ class LBB_Admin {
 		self::header( __( 'Setări LibertBus', 'libertbus-bilete' ) );
 		$s = LBB_Settings::all();
 		$currency = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'MDL';
-		$num = function ( $key, $label, $help = '', $step = '1' ) use ( $s ) {
-			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="number" min="0" step="' . esc_attr( $step ) . '" value="' . esc_attr( $s[ $key ] ) . '">';
+		// Minimul din formular e cel aplicat la salvare (LBB_Settings::save), ca browserul să-l spună direct pe câmp.
+		$mins = array( 'default_capacity' => 1, 'max_passengers' => 1, 'max_days_ahead' => 1, 'cart_hold_minutes' => 5, 'payment_minutes' => 10 );
+		$num  = function ( $key, $label, $help = '', $step = '1' ) use ( $s, $mins ) {
+			$min = isset( $mins[ $key ] ) ? $mins[ $key ] : 0;
+			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="number" min="' . esc_attr( $min ) . '" step="' . esc_attr( $step ) . '" value="' . esc_attr( $s[ $key ] ) . '"' . ( $min ? ' required' : '' ) . '>';
 			if ( $help ) {
 				echo '<p class="description">' . esc_html( $help ) . '</p>';
 			}

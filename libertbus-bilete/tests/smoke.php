@@ -875,6 +875,14 @@ foreach ( array_keys( LBB_Settings::defaults() ) as $k ) {
 }
 lbb_t( 'Setări: salvarea fără modificări nu schimbă nicio setare', ! $changed, implode( ',', $changed ) );
 update_option( 'lbb_settings', $before );
+// Minimele din formular sunt cele aplicate la salvare (altfel câmpul acceptă 3 minute, iar serverul pune 5 pe tăcute).
+$mn_found = array();
+$mn_xpath = new DOMXPath( $dom );
+foreach ( array( 'default_capacity', 'max_passengers', 'max_days_ahead', 'cart_hold_minutes', 'payment_minutes', 'cutoff_minutes', 'reserve_limit' ) as $mn_key ) {
+	$mn_el                = $mn_xpath->query( '//input[@name="' . $mn_key . '"]' )->item( 0 );
+	$mn_found[ $mn_key ] = $mn_el ? $mn_el->getAttribute( 'min' ) . ( $mn_el->hasAttribute( 'required' ) ? '!' : '' ) : null;
+}
+lbb_t( 'Setări: câmpurile numerice au minimul real (1 loc/pasager/zi, 5 și 10 minute), 0 permis la închidere și limită', array( 'default_capacity' => '1!', 'max_passengers' => '1!', 'max_days_ahead' => '1!', 'cart_hold_minutes' => '5!', 'payment_minutes' => '10!', 'cutoff_minutes' => '0', 'reserve_limit' => '0' ) === $mn_found, $mn_found );
 
 // Panoul „Gata de plăți?” avertizează dacă bannerul de cookies e oprit (Legea 195/2024).
 $cl_keep = LBB_Settings::all();
