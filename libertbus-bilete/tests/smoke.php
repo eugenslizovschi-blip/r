@@ -433,7 +433,8 @@ if ( $em && $cx_r ) {
 }
 remove_filter( 'pre_wp_mail', $lbb_catch, 1 );
 $cx_link = $lbb_mails ? $lbb_mails[0]['message'] : '';
-lbb_t( 'emailul de anulare are „Rezervați din nou online” spre pagina rutei (și nu îl are o rută fără pagină)', $cx_r && false !== strpos( $cx_link, 'href="' . esc_url( $cx_r['page_url'] ) . '">Rezervați din nou online' ) && false === strpos( $cx['message'], 'Rezervați din nou online' ), substr( wp_strip_all_tags( $cx_link ), 0, 300 ) );
+$cx_form = LBB_Admin::pages_with_form();
+lbb_t( 'emailul de anulare are „Rezervați din nou online” spre pagina rutei; o rută fără pagină duce la pagina cu formularul', $cx_r && $cx_form && false !== strpos( $cx_link, 'href="' . esc_url( $cx_r['page_url'] ) . '">Rezervați din nou online' ) && false !== strpos( $cx['message'], 'href="' . esc_url( get_permalink( $cx_form[0]->ID ) ) . '">Rezervați din nou online' ), array( substr( wp_strip_all_tags( $cx_link ), 0, 200 ), substr( $cx['message'], 0, 400 ) ) );
 lbb_t( 'emailul de anulare vine de la firmă, cu răspuns spre birou', false !== strpos( implode( "\n", (array) $cx['headers'] ), 'Reply-To: ' . $office ) && (bool) preg_match( '/^From: ' . preg_quote( $from_name, '/' ) . ' </m', implode( "\n", (array) $cx['headers'] ) ) );
 
 // Emailurile au și variantă text (multipart/alternative), lizibilă: cod, rută, link spre bilet, fără HTML.
