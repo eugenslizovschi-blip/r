@@ -696,6 +696,24 @@ $dst_ics = function ( $date ) use ( $dst_r ) {
 $dst_got = $dst_r ? array( $dst_ics( '2026-10-24' ), $dst_ics( '2026-10-26' ), $dst_ics( '2027-01-15' ), $dst_ics( '2027-07-15' ) ) : array();
 lbb_t( 'calendar: ora plecării în UTC respectă ora de vară și de iarnă (Europe/Chisinau)', array( '20261024T054500Z', '20261026T064500Z', '20270115T064500Z', '20270715T054500Z' ) === $dst_got, $dst_got );
 
+// Lista Rezervări are o limită: când e atinsă, sub tabel scrie că se văd doar ultimele și cum le găsiți pe celelalte.
+$bl_page = function ( $limit ) {
+	$f = function () use ( $limit ) {
+		return $limit;
+	};
+	add_filter( 'lbb_bookings_list_limit', $f );
+	$_GET = array( 'page' => 'lbb-bookings' );
+	ob_start();
+	LBB_Admin::page_bookings();
+	$html = ob_get_clean();
+	$_GET = array();
+	remove_filter( 'lbb_bookings_list_limit', $f );
+	return $html;
+};
+$bl_small = $bl_page( 1 );
+$bl_big   = $bl_page( 100000 );
+lbb_t( 'Rezervări: la limita listei apare „Se arată doar ultimele…”, sub limită nu', false !== strpos( $bl_small, 'Se arată doar ultimele 1.' ) && false === strpos( $bl_big, 'Se arată doar ultimele' ), substr( wp_strip_all_tags( $bl_small ), -200 ) );
+
 // În lista de rute, „oprită” spune și de ce: debifată sau fără preț.
 $rs_ok   = LBB_Admin::route_state( array( 'active' => 1, 'price' => 240.0 ) );
 $rs_off  = LBB_Admin::route_state( array( 'active' => 0, 'price' => 240.0 ) );

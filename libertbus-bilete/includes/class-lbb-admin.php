@@ -655,7 +655,8 @@ class LBB_Admin {
 		echo '<label class="screen-reader-text" for="lbb-q">' . esc_html__( 'Caută după cod, telefon, nume sau email', 'libertbus-bilete' ) . '</label>'
 			. '<input type="search" id="lbb-q" name="q" value="' . esc_attr( $search ) . '" placeholder="' . esc_attr__( 'Cod, telefon, nume, email', 'libertbus-bilete' ) . '"> '
 			. '<button class="button">' . esc_html__( 'Caută', 'libertbus-bilete' ) . '</button></form><br class="clear">';
-		$rows = LBB_Bookings::recent( 200, $status, $search );
+		$limit = max( 1, (int) apply_filters( 'lbb_bookings_list_limit', 200 ) );
+		$rows  = LBB_Bookings::recent( $limit, $status, $search );
 		self::stack_table_style( 'lbb-bookings-table', array( '#', __( 'Cursa', 'libertbus-bilete' ), __( 'Locuri', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ), __( 'Bilet', 'libertbus-bilete' ), __( 'Client', 'libertbus-bilete' ), __( 'Comanda', 'libertbus-bilete' ), __( 'Creată', 'libertbus-bilete' ) ) );
 		echo '<table class="widefat striped lbb-bookings-table"><thead><tr><th>#</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
 		if ( ! $rows ) {
@@ -676,7 +677,13 @@ class LBB_Admin {
 			}
 			echo '</td></tr>';
 		}
-		echo '</tbody></table></div>';
+		echo '</tbody></table>';
+		// Lista are o limită: biroul trebuie să știe că rezervările mai vechi există și cum le găsește.
+		if ( count( $rows ) >= $limit ) {
+			/* translators: %d: câte rezervări arată lista */
+			echo '<p class="description lbb-list-limit">' . esc_html( sprintf( __( 'Se arată doar ultimele %d. Pentru o rezervare mai veche, căutați după cod, telefon, nume sau email.', 'libertbus-bilete' ), $limit ) ) . '</p>';
+		}
+		echo '</div>';
 	}
 
 	public static function page_settings() {
