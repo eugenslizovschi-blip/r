@@ -250,6 +250,13 @@ lbb_t( 'câmpul de email are limită de lungime', false !== strpos( LBB_Frontend
 lbb_t( 'câmpul de telefon are limită de lungime', false !== strpos( LBB_Frontend::shortcode( array() ), 'name="lbb_phone" required autocomplete="tel" inputmode="tel" maxlength="30"' ) );
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_email' => 'nu-e-email' ) ) );
 lbb_t( 'email greșit respins', is_wp_error( $r ) && 'lbb_email' === $r->get_error_code(), $r );
+// O greșeală știută în domeniu („gmail.con”) e oprită cu adresa corectă propusă; domeniile corecte și cele necunoscute trec.
+$r = LBB_Frontend::book( array_merge( $base, array( 'lbb_email' => 'Ion.Rusu@GMAIL.CON' ) ) );
+$et_ok = array();
+foreach ( array( 'a@gmail.com', 'a@yahoo.com', 'a@mail.ru', 'a@gmail.co.uk', 'a@firma.md', 'a@gmail.con.md' ) as $et_e ) {
+	$et_ok[ $et_e ] = LBB_Frontend::email_typo( $et_e );
+}
+lbb_t( 'email cu domeniu greșit („gmail.con”, „gmial.com”, „mail.r”) oprit cu adresa corectă propusă; adresele corecte trec', is_wp_error( $r ) && 'lbb_email' === $r->get_error_code() && false !== strpos( $r->get_error_message(), 'Ion.Rusu@gmail.com' ) && 'x@gmail.com' === LBB_Frontend::email_typo( 'x@gmial.com' ) && 'x@mail.ru' === LBB_Frontend::email_typo( 'x@mail.r' ) && 'x@hotmail.com' === LBB_Frontend::email_typo( 'x@hotmial.com' ) && ! array_filter( $et_ok ), array( $r, $et_ok ) );
 $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_time' => '12:34' ) ) );
 lbb_t( 'oră greșită respinsă', is_wp_error( $r ) && 'lbb_time' === $r->get_error_code(), $r );
 lbb_t( 'orașe fără diacritice se potrivesc', 'Bălți' === LBB_Frontend::match_city( 'balti', array( 'Bălți', 'Iași' ) ) && 'Târgu Mureș' === LBB_Frontend::match_city( 'Targu-Mures', array( 'Târgu Mureș' ) ) );

@@ -184,6 +184,29 @@ class LBB_Frontend {
 	}
 
 	/**
+	 * Greșelile de tastare cunoscute la domeniile de email folosite des („gmail.con”, „gmial.com”): pe astfel de
+	 * adrese biletul nu ajunge niciodată. Întoarce adresa corectată sau '' dacă domeniul nu e o greșeală știută.
+	 */
+	public static function email_typo( $email ) {
+		$typos = array(
+			'gmail'   => array( 'gmail.con', 'gmail.cm', 'gmail.om', 'gmail.cim', 'gmail.comm', 'gmial.com', 'gmai.com', 'gamil.com', 'gnail.com', 'gmaill.com', 'gmali.com', 'gmeil.com' ),
+			'yahoo'   => array( 'yahoo.con', 'yahoo.cm', 'yaho.com', 'yahooo.com', 'yhoo.com' ),
+			'hotmail' => array( 'hotmail.con', 'hotmail.cm', 'hotmial.com', 'hotmai.com', 'hotmal.com' ),
+			'outlook' => array( 'outlook.con', 'outlok.com', 'outllok.com' ),
+			'icloud'  => array( 'icloud.con', 'iclod.com', 'icoud.com' ),
+			'mail.ru' => array( 'mail.r', 'mail.ry', 'mail.rus', 'mai.ru' ),
+		);
+		$at     = strrpos( $email, '@' );
+		$domain = false === $at ? '' : strtolower( substr( $email, $at + 1 ) );
+		foreach ( $typos as $right => $wrong ) {
+			if ( in_array( $domain, $wrong, true ) ) {
+				return substr( $email, 0, $at + 1 ) . ( false === strpos( $right, '.' ) ? $right . '.com' : $right );
+			}
+		}
+		return '';
+	}
+
+	/**
 	 * Validează datele, ține locurile și adaugă biletul în coș.
 	 *
 	 * Cu lbb_mode=reserve locurile se rezervă fără plată și se întoarce linkul rezervării.
@@ -231,6 +254,11 @@ class LBB_Frontend {
 		// Coloana din baza de date are 190 de caractere; peste ar da „nu s-a putut salva” la nesfârșit.
 		if ( ! is_email( $email ) || strlen( $email ) > 190 ) {
 			return new WP_Error( 'lbb_email', __( 'Introduceți o adresă de email validă. Acolo primiți biletul.', 'libertbus-bilete' ) );
+		}
+		$fixed = self::email_typo( $email );
+		if ( $fixed ) {
+			/* translators: %s: adresa corectată, ex. ion@gmail.com */
+			return new WP_Error( 'lbb_email', sprintf( __( 'Verificați adresa de email: ați vrut să scrieți %s? Acolo primiți biletul.', 'libertbus-bilete' ), $fixed ) );
 		}
 
 		$currency = isset( $data['lbb_currency'] ) ? strtoupper( sanitize_text_field( $data['lbb_currency'] ) ) : '';
