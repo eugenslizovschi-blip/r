@@ -1062,6 +1062,15 @@ $js_ver = wp_scripts()->registered['lbb']->ver;
 $css_ver = wp_styles()->registered['lbb']->ver;
 lbb_t( 'versiunea lbb.js conține data fișierului', LBB_VERSION . '.' . filemtime( LBB_DIR . 'assets/lbb.js' ) === $js_ver, $js_ver );
 lbb_t( 'versiunea lbb.css conține data fișierului', LBB_VERSION . '.' . filemtime( LBB_DIR . 'assets/lbb.css' ) === $css_ver, $css_ver );
+// Și biblioteca pentru codul QR de pe pagina biletului (nu o versiune fixă, care rămânea în cache după înlocuire).
+$qr_r    = LBB_Routes::find( 'Bălți', 'Iași' );
+$qr_h    = $qr_r ? LBB_Bookings::create_hold( $qr_r, $tomorrow, $qr_r['times'][0], 1, 0, array( 'Cod Qr' ), '+37369000089', 'qr@example.com', 'MDL' ) : null;
+$qr_b    = is_array( $qr_h ) ? LBB_Bookings::reserve( $qr_h['token'] ) : null;
+$qr_page = $qr_b ? wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $qr_b['ticket_code'] ), array( 'timeout' => 20 ) ) ) : '';
+if ( $qr_b ) {
+	LBB_Bookings::cancel( $qr_b['id'] );
+}
+lbb_t( 'versiunea qrcode.min.js pe pagina biletului conține data fișierului', false !== strpos( $qr_page, 'qrcode.min.js?ver=' . LBB_VERSION . '.' . filemtime( LBB_DIR . 'assets/qrcode.min.js' ) ), $qr_b ? '' : 'fără rezervare' );
 
 echo "\n" . $GLOBALS['lbb_ok'] . ' ok, ' . $GLOBALS['lbb_fail'] . " eșuate\n";
 if ( $GLOBALS['lbb_fail'] ) {
