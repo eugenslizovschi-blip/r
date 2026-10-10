@@ -30,6 +30,9 @@ if [ -x "$WPCS_DIR/vendor/bin/phpcs" ]; then
 else
   echo "  sărit (setați WPCS_DIR)"
 fi
+# Pe site-ul de test toate emailurile se opresc înainte de trimitere (mu-plugin mail-dump). Pornim fără eroare
+# de email salvată: la final, una nouă înseamnă că un test sau codul a încercat să trimită un email real.
+(cd "$WP_PATH" && $WP_CLI option delete lbb_mail_failed >/dev/null 2>&1) || true
 echo "== Teste automate"
 OUT_SMOKE=$(cd "$WP_PATH" && $WP_CLI eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
 echo "$OUT_SMOKE" | grep -E "FAIL|eșuate|Fatal"
@@ -88,5 +91,7 @@ echo "== Dispozitive (iPhone SE … desktop 1920), 5 browsere în paralel"
 OUT_DEV=$(BASE="$BASE" OUT="${OUT:-.}" PARALLEL=5 node "$DIR/tests/e2e-devices.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_DEV" | grep -E '^✗|^    -|FAIL' ; echo "$OUT_DEV" | grep -c '^✓' | sed 's/^/  dispozitive OK: /'
 echo "$OUT_DEV" | grep -qE '^✗|FAIL' && FAIL=1
+MAIL_FAILED=$(cd "$WP_PATH" && $WP_CLI eval '$f = get_option( "lbb_mail_failed" ); echo is_array( $f ) ? $f["message"] : "";' 2>/dev/null)
+if [ -n "$MAIL_FAILED" ]; then echo "== Emailuri: un test a încercat o trimitere reală (eșuată): $MAIL_FAILED"; FAIL=1; fi
 echo "== Rezultat: $([ $FAIL = 0 ] && echo OK || echo PROBLEME)"
 exit $FAIL
