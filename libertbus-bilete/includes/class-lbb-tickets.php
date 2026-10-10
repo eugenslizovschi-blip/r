@@ -121,6 +121,10 @@ class LBB_Tickets {
 			esc_html( $name ),
 			esc_html( $when )
 		) . '</p>';
+		// Clientul poate rezerva din nou singur, de pe pagina rutei, nu doar la telefon.
+		if ( $route && ! empty( $route['page_url'] ) ) {
+			$body .= '<p><a href="' . esc_url( $route['page_url'] ) . '">' . esc_html__( 'Rezervați din nou online', 'libertbus-bilete' ) . '</a></p>';
+		}
 		if ( trim( (string) LBB_Settings::get( 'support_phone' ) ) ) {
 			/* translators: %s: telefon */
 			$body .= '<p>' . sprintf( esc_html__( 'Pentru o rezervare nouă sau întrebări sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_link() ) . '</p>';
