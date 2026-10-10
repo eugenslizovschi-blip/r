@@ -422,7 +422,10 @@ lbb_t( 'varianta text a biletului: cod, „Ruta …”, linkul biletului, fără
 // Pe site-ul de test emailurile sunt oprite înainte de PHPMailer (pre_wp_mail): aici le lăsăm să ajungă la el,
 // citim varianta text și trimiterea eșuează imediat (SMTP pe un port închis).
 $lbb_alt   = null;
-$lbb_saved = isset( $GLOBALS['wp_filter']['pre_wp_mail'] ) ? $GLOBALS['wp_filter']['pre_wp_mail'] : null;
+$lbb_mf    = get_option( 'lbb_mail_failed' ); // eșecul provocat aici nu e o problemă reală: nu rămâne în panou
+// Copie, nu același obiect: remove_all_filters() golește obiectul WP_Hook, iar „restaurarea” lui ar lăsa
+// restul testelor fără filtru (emailurile ar încerca să plece cu adevărat).
+$lbb_saved = isset( $GLOBALS['wp_filter']['pre_wp_mail'] ) ? clone $GLOBALS['wp_filter']['pre_wp_mail'] : null;
 remove_all_filters( 'pre_wp_mail' );
 $lbb_spy = function ( $mailer ) use ( &$lbb_alt ) {
 	$lbb_alt = $mailer->AltBody; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -439,6 +442,8 @@ remove_action( 'phpmailer_init', $lbb_spy, 1000 );
 if ( $lbb_saved ) {
 	$GLOBALS['wp_filter']['pre_wp_mail'] = $lbb_saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 }
+false === $lbb_mf ? delete_option( 'lbb_mail_failed' ) : update_option( 'lbb_mail_failed', $lbb_mf, false );
+lbb_t( 'după testul cu PHPMailer real, emailurile de test sunt din nou oprite înainte de trimitere', (bool) has_filter( 'pre_wp_mail' ) );
 lbb_t( 'emailul de anulare pleacă și cu varianta text', is_string( $lbb_alt ) && false !== strpos( $lbb_alt, 'a fost anulată' ) && false === strpos( $lbb_alt, '<' ), $lbb_alt );
 
 // Curățenia zilnică: coșurile abandonate dispar, dar o rezervare anulată de birou rămâne (are cod de bilet).
@@ -1025,6 +1030,7 @@ $mf_pii = get_option( 'lbb_mail_failed' );
 update_option( 'lbb_mail_failed', array( 'time' => time() - 8 * DAY_IN_SECONDS, 'message' => 'veche' ), false );
 $mf_old = $mf_item();
 false === $mf_keep ? delete_option( 'lbb_mail_failed' ) : update_option( 'lbb_mail_failed', $mf_keep, false );
+lbb_t( 'testele nu lasă în panou erori de email false (cele provocate intenționat sunt șterse)', false === $mf_keep, $mf_keep );
 lbb_t( 'eroarea de email salvată nu păstrează adresa clientului', is_array( $mf_pii ) && false === strpos( $mf_pii['message'], 'ion.popescu' ) && false !== strpos( $mf_pii['message'], 'recipients failed: [email]' ), $mf_pii );
 lbb_t( 'panou: un email eșuat recent apare ca avertisment cu mesajul, unul mai vechi de 7 zile nu', $mf_none && true === $mf_none['ok'] && $mf_now && 'warn' === $mf_now['ok'] && false !== strpos( $mf_now['detail'], 'Could not instantiate mail function' ) && $mf_old && true === $mf_old['ok'], array( $mf_none, $mf_now, $mf_old ) );
 // Panoul arată dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani).
