@@ -188,6 +188,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (kept.names[0] !== 'Test Pasager' || kept.day !== want.day || kept.time !== want.time || kept.email !== 'test@example.com' || kept.phoneBad !== 'true') fail('după eroarea de telefon s-au pierdut date din formular: ' + JSON.stringify({ want, kept }));
     await p3.close();
   }
+  // Email cu o greșeală știută în domeniu („gmail.con”): mesajul propune adresa corectă, câmpul e marcat și
+  // păstrează ce a scris clientul, ca să poată corecta doar domeniul.
+  {
+    const p4 = await guestCtx.newPage();
+    await fillForm(p4, '+37369184111');
+    await p4.fill('input[name="lbb_email"]', 'test@gmail.con');
+    await Promise.all([p4.waitForNavigation(), p4.click('[data-lbb-submit][value="reserve"]')]);
+    const alert = await p4.$('.lbb-alert');
+    const msg = alert ? await alert.innerText() : '';
+    const field = await p4.$eval('input[name="lbb_email"]', i => ({ value: i.value, bad: i.getAttribute('aria-invalid') }));
+    if (/lbb_bilet=/.test(p4.url()) || !/test@gmail\.com/.test(msg) || field.value !== 'test@gmail.con' || field.bad !== 'true') fail('emailul „gmail.con” nu e semnalat corect: ' + JSON.stringify({ url: p4.url(), msg, field }));
+    await p4.close();
+  }
   console.log(process.exitCode ? 'CURRENCY+RESERVE: PROBLEME' : 'CURRENCY+RESERVE: OK');
   await browser.close();
 })().catch(require('./crash')('currency-reserve', () => BROWSER));
