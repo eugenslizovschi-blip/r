@@ -46,7 +46,8 @@ async function scan(page, label, include) {
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="reserve"]')]);
   if (!/lbb_bilet=/.test(page.url())) fail('rezervarea nu a dus la pagina biletului: ' + page.url());
   await page.waitForSelector('.lbb-ticket-qr img, .lbb-ticket-qr canvas', { state: 'attached' });
-  await scan(page, 'pagina biletului', [['.lbb-ticket']]);
+  // Pagina biletului e în întregime a plugin-ului: o verificăm toată (repere, titlu), nu doar biletul.
+  await scan(page, 'pagina biletului', [['body']]);
 
   // Admin: doar conținutul nostru (.wrap), nu meniurile WordPress.
   const admin = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();

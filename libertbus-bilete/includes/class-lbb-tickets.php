@@ -394,7 +394,7 @@ class LBB_Tickets {
 <style>
 /* La printare starea rămâne: un bilet anulat, neplătit sau expirat nu trebuie să arate pe hârtie ca unul valabil. */
 body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#1d2733}
-.wrap{max-width:560px;margin:0 auto}
+.wrap{max-width:560px;margin:0 auto}.site{font-size:1em;margin:0 0 1em}
 .state{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
 .ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}.past{background:#eceff3;color:#3a4552}
 .actions{display:flex;gap:8px;margin-top:8px}.actions button,.actions .cal{flex:1;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
@@ -402,8 +402,8 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 </style>
 </head>
 <body>
-<div class="wrap">
-	<p><strong><?php echo esc_html( get_bloginfo( 'name' ) ); ?></strong></p>
+<main class="wrap">
+	<h1 class="site"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></h1>
 	<?php if ( ! $booking ) : ?>
 		<div class="state bad"><?php esc_html_e( 'Biletul nu a fost găsit. Verificați linkul din email.', 'libertbus-bilete' ); ?></div>
 		<?php /* translators: %s: telefonul pentru clienți */ ?>
@@ -424,7 +424,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		});
 		</script>
 	<?php endif; ?>
-</div>
+</main>
 </body>
 </html>
 		<?php
