@@ -139,8 +139,40 @@ class LBB_Routes {
 	 * Cheia de comparare a unui oraș: fără majuscule și fără diacritice („Chisinau” = „Chișinău”).
 	 */
 	private static function city_key( $city ) {
-		$city = remove_accents( $city );
-		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $city, 'UTF-8' ) : strtolower( $city );
+		return self::lower( remove_accents( $city ) );
+	}
+
+	/**
+	 * Ordinea alfabetică a orașelor ca în română: „Bălți” după „Bacău”, nu după „Buzău” (sortarea pe octeți
+	 * pune literele cu diacritice la urmă). Același rezultat pe orice server, cu sau fără extensia intl.
+	 */
+	public static function compare_cities( $a, $b ) {
+		$cmp = strcmp( self::sort_key( $a ), self::sort_key( $b ) );
+		return 0 !== $cmp ? $cmp : strcmp( $a, $b );
+	}
+
+	/**
+	 * Cheia de sortare: fiecare literă + rangul ei în alfabetul românesc (a < ă < â, i < î, s < ș, t < ț).
+	 */
+	private static function sort_key( $city ) {
+		$ro  = array(
+			'ă' => 'a1',
+			'â' => 'a2',
+			'î' => 'i1',
+			'ș' => 's1',
+			'ş' => 's1',
+			'ț' => 't1',
+			'ţ' => 't1',
+		);
+		$key = '';
+		foreach ( (array) preg_split( '//u', self::lower( $city ), -1, PREG_SPLIT_NO_EMPTY ) as $char ) {
+			$key .= isset( $ro[ $char ] ) ? $ro[ $char ] : remove_accents( $char ) . '0';
+		}
+		return $key;
+	}
+
+	private static function lower( $text ) {
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $text, 'UTF-8' ) : strtolower( $text );
 	}
 
 	/**
@@ -300,7 +332,15 @@ class LBB_Routes {
 				'days'        => $route['days'],
 			);
 		}
-		ksort( $map );
+		uksort( $map, array( __CLASS__, 'compare_cities' ) );
+		foreach ( $map as $origin => $list ) {
+			usort(
+				$map[ $origin ],
+				function ( $a, $b ) {
+					return self::compare_cities( $a['to'], $b['to'] );
+				}
+			);
+		}
 		return $map;
 	}
 }

@@ -361,7 +361,7 @@ class LBB_Admin {
 			$cities[] = $r['destination'];
 		}
 		$cities = array_unique( $cities );
-		sort( $cities );
+		usort( $cities, array( 'LBB_Routes', 'compare_cities' ) );
 		?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="lbb_save_route">

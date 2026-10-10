@@ -346,6 +346,22 @@ lbb_t( 'harta formularului are prețuri în fiecare monedă', (bool) array_filte
 	return isset( $list[0]['prices']['MDL'], $list[0]['prices']['RON'] );
 } ) );
 
+// Orașele în ordinea alfabetică românească (nu pe octeți, unde „Bălți” ajunge după „Buzău”), în formular și în lista din admin.
+$ab_l = array( 'Roman', 'Buzău', 'Rîșcani', 'Bălți', 'Ștefan Vodă', 'Bacău', 'Sovata', 'Țiganca', 'Tiraspol' );
+usort( $ab_l, array( 'LBB_Routes', 'compare_cities' ) );
+$ab_m = LBB_Routes::public_map();
+$ab_k = array_keys( $ab_m );
+$ab_s = $ab_k;
+usort( $ab_s, array( 'LBB_Routes', 'compare_cities' ) );
+$ab_d = true;
+foreach ( $ab_m as $ab_list ) {
+	$ab_t = wp_list_pluck( $ab_list, 'to' );
+	$ab_u = $ab_t;
+	usort( $ab_u, array( 'LBB_Routes', 'compare_cities' ) );
+	$ab_d = $ab_d && $ab_t === $ab_u;
+}
+lbb_t( 'orașe în ordine alfabetică românească: „Bălți” înainte de „Brașov”, „Rîșcani” înainte de „Roman”, „Tiraspol” înainte de „Țiganca”, la plecări și destinații', array( 'Bacău', 'Bălți', 'Buzău', 'Rîșcani', 'Roman', 'Sovata', 'Ștefan Vodă', 'Tiraspol', 'Țiganca' ) === $ab_l && count( $ab_k ) > 1 && $ab_k === $ab_s && $ab_d, array( $ab_l, $ab_k ) );
+
 // Potrivirea formularelor Contact Form 7 cu rutele, după titlu.
 $t = LBB_Frontend::route_for_title( 'Balti - Iasi' );
 lbb_t( 'titlul „Balti - Iasi” → Bălți → Iași (nu Iași Aeroport)', $t && 'Iași' === $t['destination'], $t );
