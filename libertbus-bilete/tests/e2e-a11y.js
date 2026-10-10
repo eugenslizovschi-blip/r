@@ -48,6 +48,9 @@ async function scan(page, label, include) {
   await page.waitForSelector('.lbb-ticket-qr img, .lbb-ticket-qr canvas', { state: 'attached' });
   // Pagina biletului e în întregime a plugin-ului: o verificăm toată (repere, titlu), nu doar biletul.
   await scan(page, 'pagina biletului', [['body']]);
+  // Linkul stricat (cheie greșită): pagina „Biletul nu a fost găsit” are aceleași repere și linkul spre telefon.
+  await page.goto(page.url().replace(/([?&]k=)[^&]+/, '$1' + '0'.repeat(20)));
+  await scan(page, 'bilet negăsit', [['body']]);
 
   // Admin: doar conținutul nostru (.wrap), nu meniurile WordPress.
   const admin = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
