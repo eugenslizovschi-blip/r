@@ -165,6 +165,8 @@ class LBB_Tickets {
 	 */
 	public static function mail_failed( $error ) {
 		$message = is_wp_error( $error ) ? $error->get_error_message() : '';
+		// Mesajul poate conține adresa clientului („recipients failed: ion@…”): nu o păstrăm în setări.
+		$message = preg_replace( '/[^\s<>"\'(),;:]+@[^\s<>"\'(),;:]+/', '[email]', $message );
 		update_option( 'lbb_mail_failed', array(
 			'time'    => time(),
 			'message' => mb_substr( sanitize_text_field( $message ), 0, 200 ),

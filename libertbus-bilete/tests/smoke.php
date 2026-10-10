@@ -1000,9 +1000,12 @@ delete_option( 'lbb_mail_failed' );
 $mf_none = $mf_item();
 do_action( 'wp_mail_failed', new WP_Error( 'wp_mail_failed', 'Could not instantiate mail function.' ) );
 $mf_now = $mf_item();
+do_action( 'wp_mail_failed', new WP_Error( 'wp_mail_failed', 'SMTP Error: The following recipients failed: ion.popescu@example.com' ) );
+$mf_pii = get_option( 'lbb_mail_failed' );
 update_option( 'lbb_mail_failed', array( 'time' => time() - 8 * DAY_IN_SECONDS, 'message' => 'veche' ), false );
 $mf_old = $mf_item();
 false === $mf_keep ? delete_option( 'lbb_mail_failed' ) : update_option( 'lbb_mail_failed', $mf_keep, false );
+lbb_t( 'eroarea de email salvată nu păstrează adresa clientului', is_array( $mf_pii ) && false === strpos( $mf_pii['message'], 'ion.popescu' ) && false !== strpos( $mf_pii['message'], 'recipients failed: [email]' ), $mf_pii );
 lbb_t( 'panou: un email eșuat recent apare ca avertisment cu mesajul, unul mai vechi de 7 zile nu', $mf_none && true === $mf_none['ok'] && $mf_now && 'warn' === $mf_now['ok'] && false !== strpos( $mf_now['detail'], 'Could not instantiate mail function' ) && $mf_old && true === $mf_old['ok'], array( $mf_none, $mf_now, $mf_old ) );
 // Panoul arată dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani).
 $or_keep = get_option( 'woocommerce_anonymize_completed_orders' );
