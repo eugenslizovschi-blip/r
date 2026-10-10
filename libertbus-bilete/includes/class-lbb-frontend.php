@@ -162,7 +162,14 @@ class LBB_Frontend {
 		$phone = preg_replace( '/[^\d+]/', '', (string) $raw );
 		$phone = '+' === substr( $phone, 0, 1 ) ? '+' . str_replace( '+', '', $phone ) : str_replace( '+', '', $phone );
 		if ( 0 === strpos( $phone, '00' ) ) {
-			return '+' . substr( $phone, 2 );
+			$phone = '+' . substr( $phone, 2 );
+		}
+		// „+373 069 184 111”, „+40 (0)740 …”: zeroul de după prefixul țării se scrie des din obișnuință, dar nu se formează.
+		if ( preg_match( '/^\+?3730(\d{8})$/', $phone, $m ) ) {
+			return '+373' . $m[1];
+		}
+		if ( preg_match( '/^\+?400(7\d{8})$/', $phone, $m ) ) {
+			return '+40' . $m[1];
 		}
 		if ( preg_match( '/^0(\d{8})$/', $phone, $m ) ) {
 			return '+373' . $m[1]; // Moldova: 069 123 456, 0231 12 345.
