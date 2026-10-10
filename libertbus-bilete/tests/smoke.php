@@ -686,6 +686,16 @@ if ( is_int( $ic_r ) ) {
 }
 lbb_t( 'bilet: .ics cu plecarea în UTC, memento cu 2 ore înainte, virgule escapate, rânduri ≤75 octeți; linkul apare doar pe biletul valabil', $ic && 0 === strpos( $ic, "BEGIN:VCALENDAR\r\n" ) && false !== strpos( $ic, 'DTSTART:' . $ic_s . "\r\n" ) && false !== strpos( $ic, 'TRIGGER:-PT2H' ) && false !== strpos( $ic_flat, 'LOCATION:Fălești\\, centru' ) && false !== strpos( $ic_flat, 'Fălești\\, centru → Târgu Mureș' ) && ! $ic_long && 0 === strpos( (string) $ic_type, 'text/calendar' ) && false !== strpos( $ic_page, 'Adaugă în calendar' ) && 0 !== strpos( (string) $ic_gone, 'text/calendar' ), array( $ic_type, $ic_gone, array_values( $ic_long ), substr( $ic, 0, 400 ) ) );
 
+// Calendarul ține cont de ora de iarnă/vară a Moldovei: 08:45 înseamnă 06:45 UTC iarna și 05:45 UTC vara
+// (inclusiv imediat după schimbarea orei din 25 octombrie 2026).
+$dst_r   = LBB_Routes::find( 'Bălți', 'Iași' );
+$dst_ics = function ( $date ) use ( $dst_r ) {
+	preg_match( '/DTSTART:(\S+)/', LBB_Tickets::ics( array( 'route_id' => $dst_r['id'], 'travel_date' => $date, 'dep_time' => '08:45', 'ticket_code' => 'LB-DSTTST', 'seats' => 1 ) ), $m );
+	return isset( $m[1] ) ? $m[1] : '';
+};
+$dst_got = $dst_r ? array( $dst_ics( '2026-10-24' ), $dst_ics( '2026-10-26' ), $dst_ics( '2027-01-15' ), $dst_ics( '2027-07-15' ) ) : array();
+lbb_t( 'calendar: ora plecării în UTC respectă ora de vară și de iarnă (Europe/Chisinau)', array( '20261024T054500Z', '20261026T064500Z', '20270115T064500Z', '20270715T054500Z' ) === $dst_got, $dst_got );
+
 // În lista de rute, „oprită” spune și de ce: debifată sau fără preț.
 $rs_ok   = LBB_Admin::route_state( array( 'active' => 1, 'price' => 240.0 ) );
 $rs_off  = LBB_Admin::route_state( array( 'active' => 0, 'price' => 240.0 ) );
