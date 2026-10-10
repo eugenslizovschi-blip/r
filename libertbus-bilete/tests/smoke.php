@@ -678,7 +678,7 @@ foreach ( $dt_b as $dt_x ) {
 if ( is_int( $dt_r ) ) {
 	LBB_Routes::delete( $dt_r );
 }
-lbb_t( 'lista pentru șofer arată locurile pe fiecare cursă din zi', array( '07:00 CurseA → CurseB' => 3, '19:00 CurseA → CurseB' => 1 ) === $dt_tot && false !== strpos( $dt_html, '07:00 CurseA → CurseB: 3 locuri · 19:00 CurseA → CurseB: 1 loc' ), array( $dt_tot, substr( wp_strip_all_tags( $dt_html ), 0, 300 ) ) );
+lbb_t( 'lista pentru șofer arată locurile pe fiecare cursă din zi', array( '07:00 CurseA → CurseB' => 3, '19:00 CurseA → CurseB' => 1 ) === $dt_tot && false !== strpos( $dt_html, '<li>07:00 CurseA → CurseB: 3 locuri</li><li>19:00 CurseA → CurseB: 1 loc</li>' ), array( $dt_tot, substr( wp_strip_all_tags( $dt_html ), 0, 300 ) ) );
 
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );

@@ -490,12 +490,13 @@ class LBB_Admin {
 		// Mai multe curse în aceeași zi: totalul de jos le adună pe toate, deci arătăm și locurile pe fiecare autobuz.
 		$per_trip = LBB_Bookings::departure_totals( $rows );
 		if ( count( $per_trip ) > 1 ) {
-			$parts = array();
+			// Câte o cursă pe rând: pe telefon și pe foaia printată șoferul își găsește ușor autobuzul.
+			echo '<div class="lbb-trip-totals"><strong>' . esc_html__( 'Pe curse', 'libertbus-bilete' ) . ':</strong><ul style="margin:4px 0 12px 1.2em;list-style:disc">';
 			foreach ( $per_trip as $trip => $seats ) {
 				/* translators: 1: ora și ruta cursei, 2: numărul de locuri */
-				$parts[] = sprintf( _n( '%1$s: %2$d loc', '%1$s: %2$d locuri', $seats, 'libertbus-bilete' ), $trip, $seats );
+				echo '<li>' . esc_html( sprintf( _n( '%1$s: %2$d loc', '%1$s: %2$d locuri', $seats, 'libertbus-bilete' ), $trip, $seats ) ) . '</li>';
 			}
-			echo '<p class="lbb-trip-totals"><strong>' . esc_html__( 'Pe curse', 'libertbus-bilete' ) . ':</strong> ' . esc_html( implode( ' · ', $parts ) ) . '</p>';
+			echo '</ul></div>';
 		}
 		self::stack_table_style( 'lbb-manifest-table', array( __( 'Ora', 'libertbus-bilete' ), __( 'Ruta', 'libertbus-bilete' ), __( 'Bilet', 'libertbus-bilete' ), __( 'Locuri', 'libertbus-bilete' ), __( 'Pasageri', 'libertbus-bilete' ), __( 'Telefon', 'libertbus-bilete' ), __( 'Plată', 'libertbus-bilete' ), __( 'Comanda', 'libertbus-bilete' ) ) );
 		echo '<table class="widefat striped lbb-manifest-table"><thead><tr><th>' . esc_html__( 'Ora', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Pasageri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Plată', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th></tr></thead><tbody>';
