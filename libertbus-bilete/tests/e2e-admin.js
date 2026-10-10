@@ -48,6 +48,9 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const found = await page.$$eval('#wpbody-content table.widefat tbody tr', rs => rs.map(r => r.textContent));
     if (found.length !== 1 || !found[0].includes(someCode)) fail('căutarea după cod ' + someCode + ' a dat ' + found.length + ' rânduri');
     if (await page.inputValue('#lbb-q') !== someCode.toLowerCase()) fail('căutarea nu rămâne în câmp după căutare');
+    // Telefonul și emailul clientului se apasă direct (tel:/mailto:), ca în lista pentru șofer.
+    const contact = await page.$$eval('#wpbody-content table.widefat tbody tr td a[href^="tel:"], #wpbody-content table.widefat tbody tr td a[href^="mailto:"]', as => as.map(a => a.getAttribute('href')));
+    if (!contact.some(h => /^tel:\+?\d{6,}$/.test(h)) || !contact.some(h => /^mailto:[^@\s]+@[^@\s]+$/.test(h))) fail('în Rezervări telefonul și emailul clientului nu sunt linkuri: ' + JSON.stringify(contact));
     // Filtrele de stare („Toate”, „Anulate”…) păstrează căutarea.
     const lost = await page.$$eval('.subsubsub a', (as, q) => as.filter(a => new URL(a.href).searchParams.get('q') !== q).map(a => a.textContent), someCode.toLowerCase());
     if (lost.length) fail('filtrele de stare pierd căutarea: ' + lost.join(', '));
