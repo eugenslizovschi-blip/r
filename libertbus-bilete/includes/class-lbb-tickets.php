@@ -202,7 +202,11 @@ class LBB_Tickets {
 				foreach ( LBB_WooCommerce::describe( $booking ) as $label => $value ) {
 					echo wp_strip_all_tags( $label . ': ' . $value ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 				}
-				echo esc_url_raw( self::url( $booking['ticket_code'] ) ) . "\n\n";
+				echo esc_url_raw( self::url( $booking['ticket_code'] ) ) . "\n";
+				if ( 'ok' === self::state( $booking )['class'] ) {
+					echo wp_strip_all_tags( __( 'Adaugă în calendar', 'libertbus-bilete' ) ) . ': ' . esc_url_raw( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+				}
+				echo "\n";
 			}
 			echo wp_strip_all_tags( (string) LBB_Settings::get( 'ticket_notes' ) ) . "\n\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 			return;

@@ -165,6 +165,7 @@ $lbb_plain = ob_get_clean();
 $lbb_wce   = new WC_Email();
 $lbb_plain = preg_replace( $lbb_wce->plain_search, $lbb_wce->plain_replace, wp_strip_all_tags( $lbb_plain ) );
 lbb_t( 'emailul text: „Ana D\'Angelo” rămâne întreg, titlul „BILETELE DUMNEAVOASTRĂ”', false !== strpos( $lbb_plain, "Ana D'Angelo" ) && false !== strpos( $lbb_plain, 'BILETELE DUMNEAVOASTRĂ' ), $lbb_plain );
+lbb_t( 'emailul text al comenzii are și „Adaugă în calendar” cu un link utilizabil (& nu &#038;)', (bool) preg_match( '#Adaugă în calendar: https?://\S+[?&]lbb_bilet=\S+&k=\w+&ics=1\n#u', $lbb_plain ), $lbb_plain );
 
 // Pagina biletului: semnătura.
 $code = LBB_Bookings::get_by_token( $late['token'] )['ticket_code'];
