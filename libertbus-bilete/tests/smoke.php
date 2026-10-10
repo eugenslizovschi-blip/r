@@ -134,6 +134,8 @@ lbb_t( 'rambursarea anulează biletul și eliberează locul', 'cancelled' === LB
 $fo->update_status( 'pending' );
 $fr = LBB_Bookings::get_by_token( $fh['token'] );
 lbb_t( 'plata reluată după rambursare: biletul (cu cod) apare „neachitat”, nu „anulat”', 'pending' === $fr['status'] && $fr['ticket_code'] && 0 === strpos( LBB_Tickets::state( $fr )['text'], 'Plata nu e finalizată' ), $fr );
+$fr_page = wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $fr['ticket_code'] ), array( 'timeout' => 20 ) ) );
+lbb_t( 'biletul neachitat are „Achită acum” spre plata comenzii (fără „Adaugă în calendar”)', false !== strpos( $fr_page, 'Achită acum' ) && false !== strpos( $fr_page, esc_url( $fo->get_checkout_payment_url() ) ) && false === strpos( $fr_page, 'Adaugă în calendar' ), substr( wp_strip_all_tags( $fr_page ), 0, 300 ) );
 $fo->update_status( 'cancelled' ); // eliberează locul ținut din nou, altfel testele de mai jos nu mai au locuri
 $fo->delete( true );
 
@@ -684,7 +686,7 @@ $ic_gone = $ic_b ? wp_remote_retrieve_header( wp_remote_get( add_query_arg( 'ics
 if ( is_int( $ic_r ) ) {
 	LBB_Routes::delete( $ic_r );
 }
-lbb_t( 'bilet: .ics cu plecarea în UTC, memento cu 2 ore înainte, virgule escapate, rânduri ≤75 octeți; linkul apare doar pe biletul valabil', $ic && 0 === strpos( $ic, "BEGIN:VCALENDAR\r\n" ) && false !== strpos( $ic, 'DTSTART:' . $ic_s . "\r\n" ) && false !== strpos( $ic, 'TRIGGER:-PT2H' ) && false !== strpos( $ic_flat, 'LOCATION:Fălești\\, centru' ) && false !== strpos( $ic_flat, 'Fălești\\, centru → Târgu Mureș' ) && ! $ic_long && 0 === strpos( (string) $ic_type, 'text/calendar' ) && false !== strpos( $ic_page, 'Adaugă în calendar' ) && 0 !== strpos( (string) $ic_gone, 'text/calendar' ), array( $ic_type, $ic_gone, array_values( $ic_long ), substr( $ic, 0, 400 ) ) );
+lbb_t( 'bilet: .ics cu plecarea în UTC, memento cu 2 ore înainte, virgule escapate, rânduri ≤75 octeți; linkul apare doar pe biletul valabil', $ic && 0 === strpos( $ic, "BEGIN:VCALENDAR\r\n" ) && false !== strpos( $ic, 'DTSTART:' . $ic_s . "\r\n" ) && false !== strpos( $ic, 'TRIGGER:-PT2H' ) && false !== strpos( $ic_flat, 'LOCATION:Fălești\\, centru' ) && false !== strpos( $ic_flat, 'Fălești\\, centru → Târgu Mureș' ) && ! $ic_long && 0 === strpos( (string) $ic_type, 'text/calendar' ) && false !== strpos( $ic_page, 'Adaugă în calendar' ) && false === strpos( $ic_page, 'Achită acum' ) && 0 !== strpos( (string) $ic_gone, 'text/calendar' ), array( $ic_type, $ic_gone, array_values( $ic_long ), substr( $ic, 0, 400 ) ) );
 
 // Calendarul ține cont de ora de iarnă/vară a Moldovei: 08:45 înseamnă 06:45 UTC iarna și 05:45 UTC vara
 // (inclusiv imediat după schimbarea orei din 25 octombrie 2026).

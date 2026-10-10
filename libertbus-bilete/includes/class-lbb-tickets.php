@@ -372,6 +372,12 @@ class LBB_Tickets {
 		status_header( $booking ? 200 : 404 );
 
 		$state = $booking ? self::state( $booking ) : null;
+		// Plata neterminată (ex. card refuzat): clientul o poate relua direct de pe bilet, cât comanda o așteaptă.
+		$pay_url = '';
+		if ( $booking && in_array( $booking['status'], array( 'hold', 'pending' ), true ) && $booking['order_id'] && function_exists( 'wc_get_order' ) ) {
+			$order   = wc_get_order( $booking['order_id'] );
+			$pay_url = $order && $order->needs_payment() ? $order->get_checkout_payment_url() : '';
+		}
 		// &ics=1: cursa în calendarul telefonului, doar pentru un bilet valabil al unei curse care urmează.
 		if ( $booking && 'ok' === $state['class'] && isset( $_GET['ics'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$ics = self::ics( $booking );
@@ -397,7 +403,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 .wrap{max-width:560px;margin:0 auto}.site{font-size:1em;margin:0 0 1em}
 .state{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
 .ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}.past{background:#eceff3;color:#3a4552}
-.actions{display:flex;gap:8px;margin-top:8px}.actions button,.actions .cal{flex:1;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.actions{display:flex;gap:8px;margin-top:8px}.actions button,.actions a{flex:1;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
 @media print{.actions{display:none}body{background:#fff}.state{border:2px solid currentColor}}
 </style>
 </head>
@@ -413,7 +419,8 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<?php echo self::html( $booking, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<?php echo self::notes_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<div class="actions"><button type="button" onclick="window.print()"><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button>
-			<?php if ( 'ok' === $state['class'] ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?></div>
+			<?php if ( 'ok' === $state['class'] ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?>
+			<?php if ( $pay_url ) : ?><a class="pay" href="<?php echo esc_url( $pay_url ); ?>"><?php esc_html_e( 'Achită acum', 'libertbus-bilete' ); ?></a><?php endif; ?></div>
 		<script src="<?php echo esc_url( LBB_URL . 'assets/qrcode.min.js?ver=' . LBB_Frontend::asset_ver( 'qrcode.min.js' ) ); ?>"></script>
 		<script>
 		document.querySelectorAll('[data-qr]').forEach(function(el){
