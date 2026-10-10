@@ -87,7 +87,9 @@ class LBB_Tickets {
 			self::mail_html( $booking['email'], sprintf( __( 'Rezervare %1$s — %2$s, %3$s', 'libertbus-bilete' ), $booking['ticket_code'], $name, $when ), $body, $headers );
 		}
 		$admin  = '<p>' . esc_html__( 'Rezervare nouă cu plata la urcare.', 'libertbus-bilete' ) . '</p>' . self::html( $booking )
-			. '<p>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': ' . esc_html( $booking['phone'] ) . '<br>Email: ' . esc_html( $booking['email'] ) . '</p>'
+			// Biroul sună sau scrie clientului dintr-o atingere, de pe telefon.
+			. '<p>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': <a href="tel:' . esc_attr( preg_replace( '/[^\d+]/', '', $booking['phone'] ) ) . '">' . esc_html( $booking['phone'] ) . '</a>'
+			. ( is_email( $booking['email'] ) ? '<br>Email: <a href="mailto:' . esc_attr( $booking['email'] ) . '">' . esc_html( $booking['email'] ) . '</a>' : '' ) . '</p>'
 			// Linkul deschide direct rezervarea aceasta (căutare după cod), nu lista cu ultimele 200.
 			. '<p><a href="' . esc_url( add_query_arg( array( 'page' => 'lbb-bookings', 'q' => rawurlencode( $booking['ticket_code'] ) ), admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Deschide rezervarea în admin', 'libertbus-bilete' ) . '</a></p>';
 		/* translators: 1: cod, 2: ruta, 3: data și ora */
@@ -153,7 +155,7 @@ class LBB_Tickets {
 		$text = preg_replace_callback( '#<a\s[^>]*href=(["\'])(.*?)\1[^>]*>(.*?)</a>#is', function ( $m ) {
 			$label = trim( wp_strip_all_tags( $m[3] ) );
 			$url   = html_entity_decode( $m[2], ENT_QUOTES, 'UTF-8' );
-			return ( 0 === strpos( $url, 'tel:' ) || $label === $url ) ? $label : $label . ' (' . $url . ')';
+			return ( 0 === strpos( $url, 'tel:' ) || 0 === strpos( $url, 'mailto:' ) || $label === $url ) ? $label : $label . ' (' . $url . ')';
 		}, preg_replace( '/\s+/u', ' ', (string) $html ) );
 		$text = preg_replace( '#<(br|/p|/div|/tr|/h[1-6]|/li)\b[^>]*>#i', "$0\n", $text );
 		$text = preg_replace( '#</t[hd]>#i', '$0 ', $text );
