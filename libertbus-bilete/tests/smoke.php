@@ -986,6 +986,24 @@ wp_update_post( array( 'ID' => $cb_page, 'post_content' => '<!-- wp:woocommerce/
 $cb_block = $cb_item();
 wp_update_post( array( 'ID' => $cb_page, 'post_content' => $cb_keep ) );
 lbb_t( 'panou: pagina de finalizare cu blocul „Checkout” e semnalată, cea clasică trece', $cb_classic && true === $cb_classic['ok'] && $cb_block && 'warn' === $cb_block['ok'] && false !== strpos( $cb_block['detail'], '[woocommerce_checkout]' ) && $cb_keep === get_post_field( 'post_content', $cb_page ), array( $cb_classic, $cb_block ) );
+// Panoul arată o trimitere de email eșuată din ultimele 7 zile (biletele nu ajung la clienți).
+$mf_keep = get_option( 'lbb_mail_failed' );
+$mf_item = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'mail' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+delete_option( 'lbb_mail_failed' );
+$mf_none = $mf_item();
+do_action( 'wp_mail_failed', new WP_Error( 'wp_mail_failed', 'Could not instantiate mail function.' ) );
+$mf_now = $mf_item();
+update_option( 'lbb_mail_failed', array( 'time' => time() - 8 * DAY_IN_SECONDS, 'message' => 'veche' ), false );
+$mf_old = $mf_item();
+false === $mf_keep ? delete_option( 'lbb_mail_failed' ) : update_option( 'lbb_mail_failed', $mf_keep, false );
+lbb_t( 'panou: un email eșuat recent apare ca avertisment cu mesajul, unul mai vechi de 7 zile nu', $mf_none && true === $mf_none['ok'] && $mf_now && 'warn' === $mf_now['ok'] && false !== strpos( $mf_now['detail'], 'Could not instantiate mail function' ) && $mf_old && true === $mf_old['ok'], array( $mf_none, $mf_now, $mf_old ) );
 // Panoul arată dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani).
 $or_keep = get_option( 'woocommerce_anonymize_completed_orders' );
 $or_item = function () {

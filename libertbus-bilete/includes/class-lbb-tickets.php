@@ -160,6 +160,18 @@ class LBB_Tickets {
 	}
 
 	/**
+	 * Ține minte ultima trimitere de email eșuată (wp_mail_failed), ca biroul să afle din panou că
+	 * biletele nu ajung la clienți.
+	 */
+	public static function mail_failed( $error ) {
+		$message = is_wp_error( $error ) ? $error->get_error_message() : '';
+		update_option( 'lbb_mail_failed', array(
+			'time'    => time(),
+			'message' => mb_substr( sanitize_text_field( $message ), 0, 200 ),
+		), false );
+	}
+
+	/**
 	 * „LibertBus <adresa obișnuită a site-ului>”: doar numele se schimbă, adresa rămâne cea a WordPress
 	 * (sau a unui plugin SMTP), ca emailurile să nu ajungă în spam.
 	 */

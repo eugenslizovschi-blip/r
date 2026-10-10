@@ -175,6 +175,13 @@ class LBB_Admin {
 			$form_pages ? implode( ', ', wp_list_pluck( $form_pages, 'post_title' ) ) : __( 'Adăugați [libertbus_rezervare] pe o pagină (sau [libertbus_rezervare from="Bălți" to="Iași"] pe paginile de rută).', 'libertbus-bilete' ),
 			admin_url( 'edit.php?post_type=page' ) );
 
+		$failed = get_option( 'lbb_mail_failed' );
+		$recent = is_array( $failed ) && ! empty( $failed['time'] ) && time() - (int) $failed['time'] < 7 * DAY_IN_SECONDS;
+		$add( 'mail', $recent ? 'warn' : true, __( 'Emailurile pleacă fără erori (ultimele 7 zile)', 'libertbus-bilete' ),
+			/* translators: 1: data și ora erorii, 2: mesajul de eroare */
+			$recent ? sprintf( __( 'Ultima eroare: %1$s — %2$s. Clienții pot rămâne fără bilet pe email: verificați emailul hostingului sau instalați un plugin SMTP.', 'libertbus-bilete' ), wp_date( 'd.m.Y H:i', (int) $failed['time'] ), $failed['message'] ) : '',
+			admin_url( 'plugin-install.php?s=smtp&tab=search&type=term' ) );
+
 		$add( 'cron', (bool) wp_next_scheduled( 'lbb_cleanup' ), __( 'Curățarea automată a rezervărilor expirate e programată', 'libertbus-bilete' ), '' );
 
 		return $items;
