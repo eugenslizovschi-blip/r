@@ -86,7 +86,9 @@ class LBB_Routes {
 		if ( '' === $origin || '' === $destination ) {
 			return new WP_Error( 'lbb_route', __( 'Completați plecarea și destinația.', 'libertbus-bilete' ) );
 		}
-		if ( $origin === $destination ) {
+		$origin      = self::known_city( $origin, $id );
+		$destination = self::known_city( $destination, $id );
+		if ( self::city_key( $origin ) === self::city_key( $destination ) ) {
 			return new WP_Error( 'lbb_route', __( 'Plecarea și destinația trebuie să fie diferite.', 'libertbus-bilete' ) );
 		}
 		$times = self::parse_times( isset( $data['departures'] ) ? $data['departures'] : '' );
@@ -131,6 +133,32 @@ class LBB_Routes {
 		$row['created_at'] = $row['updated_at'];
 		$wpdb->insert( self::table(), $row );
 		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Cheia de comparare a unui oraș: fără majuscule și fără diacritice („Chisinau” = „Chișinău”).
+	 */
+	private static function city_key( $city ) {
+		$city = remove_accents( $city );
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $city, 'UTF-8' ) : strtolower( $city );
+	}
+
+	/**
+	 * Un oraș scris altfel decât pe celelalte rute („chisinau”) primește scrierea existentă („Chișinău”),
+	 * ca să nu apară de două ori în lista de plecări. Ruta editată nu contează (așa se poate corecta scrierea).
+	 */
+	private static function known_city( $city, $id ) {
+		global $wpdb;
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT origin, destination FROM ' . self::table() . ' WHERE id <> %d ORDER BY id', (int) $id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$key  = self::city_key( $city );
+		foreach ( (array) $rows as $row ) {
+			foreach ( array( $row['origin'], $row['destination'] ) as $known ) {
+				if ( self::city_key( $known ) === $key ) {
+					return $known;
+				}
+			}
+		}
+		return $city;
 	}
 
 	private static function find_any( $origin, $destination ) {

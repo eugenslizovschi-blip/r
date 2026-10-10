@@ -38,6 +38,19 @@ lbb_t( 'orele normalizate și unice', array( '10:00', '23:59' ) === $route['time
 lbb_t( 'duplicat respins', is_wp_error( LBB_Routes::save( array( 'origin' => 'TestA', 'destination' => 'TestB', 'departures' => '11:00', 'price' => 1 ) ) ) );
 lbb_t( 'aceeași plecare și destinație respinsă', is_wp_error( LBB_Routes::save( array( 'origin' => 'X', 'destination' => 'X', 'departures' => '11:00', 'price' => 1 ) ) ) );
 lbb_t( 'fără ore respinsă', is_wp_error( LBB_Routes::save( array( 'origin' => 'X', 'destination' => 'Y', 'departures' => 'dimineața', 'price' => 1 ) ) ) );
+// Orașul scris altfel (majuscule, fără diacritice) primește scrierea de pe celelalte rute, ca să nu apară de două ori.
+$kc_r  = LBB_Routes::save( array( 'origin' => ' testa ', 'destination' => 'Orasul Nou', 'departures' => '11:00', 'price' => 1 ) );
+$kc_g  = is_int( $kc_r ) ? LBB_Routes::get( $kc_r ) : array();
+$kc_e  = is_int( $kc_r ) ? LBB_Routes::save( array( 'origin' => 'TestA', 'destination' => 'Orașul Nou', 'departures' => '11:00', 'price' => 1 ), $kc_r ) : 0;
+$kc_g2 = is_int( $kc_r ) ? LBB_Routes::get( $kc_r ) : array();
+$kc_x  = LBB_Routes::save( array( 'origin' => 'ORASUL NOU', 'destination' => 'orașul nou', 'departures' => '11:00', 'price' => 1 ) );
+if ( is_int( $kc_r ) ) {
+	LBB_Routes::delete( $kc_r );
+}
+if ( is_int( $kc_x ) ) {
+	LBB_Routes::delete( $kc_x );
+}
+lbb_t( 'oraș scris altfel („testa”) salvat ca pe celelalte rute („TestA”); scrierea se poate corecta; „ORASUL NOU” → „orașul nou” respinsă', $kc_g && 'TestA' === $kc_g['origin'] && $kc_g2 && 'Orașul Nou' === $kc_g2['destination'] && is_wp_error( $kc_x ), array( $kc_g ? $kc_g['origin'] : null, $kc_g2 ? $kc_g2['destination'] : null, $kc_x ) );
 
 $rate = LBB_Settings::get( 'rate_RON' );
 lbb_t( 'conversie RON→MDL', abs( LBB_Settings::convert( 60, 'RON', 'MDL' ) - round( 60 * $rate, 2 ) ) < 0.01 );
