@@ -379,6 +379,11 @@ $to_client = array_values( array_filter( $lbb_mails, function ( $m ) {
 	return 'client-mail@example.com' === $m['to'];
 } ) );
 lbb_t( 'rezervarea trimite 2 emailuri (client + birou)', 2 === count( $lbb_mails ), count( $lbb_mails ) );
+lbb_t( 'emailurile plugin-ului au font fără serife (ca pagina biletului), pentru client și birou', 2 === count( array_filter( $lbb_mails, function ( $m ) {
+	return 0 === strpos( $m['message'], '<div style="font-family:' ) && false !== strpos( substr( $m['message'], 0, 160 ), 'sans-serif' );
+} ) ), array_map( function ( $m ) {
+	return substr( $m['message'], 0, 80 );
+}, $lbb_mails ) );
 lbb_t( 'emailul clientului are codul, suma la urcare și telefonul', $em && $to_client
 	&& false !== strpos( $to_client[0]['message'], $em['ticket_code'] )
 	&& false !== strpos( $to_client[0]['message'], 'De achitat la urcare' )
