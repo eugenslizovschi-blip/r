@@ -704,6 +704,8 @@ if ( $ic_b ) {
 	LBB_Bookings::cancel( $ic_b['id'] );
 }
 $ic_mail_x = $ic_b ? LBB_Tickets::html( LBB_Bookings::get_by_code( $ic_b['ticket_code'] ) ) : '';
+$ic_css = apply_filters( 'woocommerce_email_styles', '', null );
+lbb_t( 'tabelul biletului ține spațierea în emailurile WooCommerce pe telefon (regulă mai specifică în media query)', (bool) preg_match( '/@media screen and \(max-width: 600px\)\{#body_content \.lbb-ticket td[^}]*padding: 3px[^}]*!important/', $ic_css ), $ic_css );
 lbb_t( 'emailul cu biletul valabil are și „Adaugă în calendar”; după anulare nu', false !== strpos( $ic_mail, 'Adaugă în calendar' ) && false !== strpos( $ic_mail, 'ics=1' ) && false === strpos( $ic_mail_x, 'Adaugă în calendar' ), array( substr( wp_strip_all_tags( $ic_mail ), -160 ), substr( wp_strip_all_tags( $ic_mail_x ), -160 ) ) );
 $ic_gone = $ic_b ? wp_remote_retrieve_header( wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $ic_b['ticket_code'] ) ), array( 'timeout' => 20 ) ), 'content-type' ) : '';
 if ( is_int( $ic_r ) ) {

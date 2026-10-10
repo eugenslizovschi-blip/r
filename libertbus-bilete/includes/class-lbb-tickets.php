@@ -160,6 +160,16 @@ class LBB_Tickets {
 	}
 
 	/**
+	 * Stilul WooCommerce pentru emailuri pe telefon dă tuturor celulelor „padding: 10px !important”, iar în
+	 * tabelul biletului valorile ar coborî sub etichete. O regulă mai specifică (are și o clasă), în același
+	 * media query, le ține aliniate. Fără „tbody” în selector: procesorul de stiluri al WooCommerce păstrează
+	 * doar regulile care se potrivesc în sursa emailului, iar acolo tabelul nu are tbody.
+	 */
+	public static function email_styles( $css ) {
+		return $css . '@media screen and (max-width: 600px){#body_content .lbb-ticket td,#body_content .lbb-ticket th{padding: 3px 10px 3px 0 !important;}}';
+	}
+
+	/**
 	 * Ține minte ultima trimitere de email eșuată (wp_mail_failed), ca biroul să afle din panou că
 	 * biletele nu ajung la clienți.
 	 */

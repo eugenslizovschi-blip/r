@@ -37,6 +37,7 @@ class LBB_Install {
 		add_action( 'lbb_cleanup', array( 'LBB_Bookings', 'cleanup' ) );
 		// O trimitere de email eșuată (ex. hostingul blochează mail()) apare în panoul „Gata de plăți?”.
 		add_action( 'wp_mail_failed', array( 'LBB_Tickets', 'mail_failed' ) );
+		add_filter( 'woocommerce_email_styles', array( 'LBB_Tickets', 'email_styles' ) );
 		// Unelte → Exportă / Șterge datele personale (cererile clienților, Legea 195/2024 și GDPR).
 		add_filter( 'wp_privacy_personal_data_exporters', function ( $exporters ) {
 			$exporters['libertbus-bilete'] = array( 'exporter_friendly_name' => __( 'Rezervări LibertBus', 'libertbus-bilete' ), 'callback' => array( 'LBB_Bookings', 'privacy_export' ) );
