@@ -135,9 +135,27 @@ $fo->update_status( 'pending' );
 $fr = LBB_Bookings::get_by_token( $fh['token'] );
 lbb_t( 'plata reluată după rambursare: biletul (cu cod) apare „neachitat”, nu „anulat”', 'pending' === $fr['status'] && $fr['ticket_code'] && 0 === strpos( LBB_Tickets::state( $fr )['text'], 'Plata nu e finalizată' ), $fr );
 $fr_page = wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $fr['ticket_code'] ), array( 'timeout' => 20 ) ) );
-lbb_t( 'biletul neachitat are „Achită acum” spre plata comenzii (fără „Adaugă în calendar”)', false !== strpos( $fr_page, 'Achită acum' ) && false !== strpos( $fr_page, esc_url( $fo->get_checkout_payment_url() ) ) && false === strpos( $fr_page, 'Adaugă în calendar' ), substr( wp_strip_all_tags( $fr_page ), 0, 300 ) );
+lbb_t( 'comanda plătită și rambursată, trecută înapoi în „așteaptă plata”: biletul nu cere o nouă plată', false === strpos( $fr_page, 'Achită acum' ) && false === strpos( $fr_page, 'Adaugă în calendar' ), substr( wp_strip_all_tags( $fr_page ), 0, 300 ) );
 $fo->update_status( 'cancelled' ); // eliberează locul ținut din nou, altfel testele de mai jos nu mai au locuri
 $fo->delete( true );
+
+// O comandă neplătită niciodată, cu bilet care are deja cod (ex. comandă refăcută de birou): „Achită acum” duce la plată.
+$pn_h = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 1, 0, array( 'Plata Noua' ), '+37369000087', 'pn@example.com', 'MDL' );
+$pn_o = wc_create_order();
+$pn_i = new WC_Order_Item_Product();
+$pn_i->set_product( wc_get_product( LBB_Install::product_id() ) );
+$pn_i->add_meta_data( '_lbb_token', $pn_h['token'], true );
+$pn_i->set_total( 120 );
+$pn_o->add_item( $pn_i );
+$pn_o->set_total( 120 );
+$pn_o->save();
+LBB_WooCommerce::attach_order( $pn_o );
+$pn_o->update_status( 'pending' );
+$wpdb->update( LBB_Bookings::table(), array( 'ticket_code' => 'LB-PNTEST', 'status' => 'pending' ), array( 'token' => $pn_h['token'] ) );
+$pn_page = wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( 'LB-PNTEST' ), array( 'timeout' => 20 ) ) );
+lbb_t( 'biletul unei comenzi neplătite niciodată are „Achită acum” spre plata comenzii', false !== strpos( $pn_page, 'Achită acum' ) && false !== strpos( $pn_page, esc_url( $pn_o->get_checkout_payment_url() ) ), substr( wp_strip_all_tags( $pn_page ), 0, 300 ) );
+$pn_o->update_status( 'cancelled' );
+$pn_o->delete( true );
 
 // Plată întârziată: rezervarea expiră, altcineva ia locurile, apoi vine plata.
 $late = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 3, 0, array( 'K', 'L', 'M' ), '+37360000000', 'a@example.com' );

@@ -372,11 +372,14 @@ class LBB_Tickets {
 		status_header( $booking ? 200 : 404 );
 
 		$state = $booking ? self::state( $booking ) : null;
-		// Plata neterminată (ex. card refuzat): clientul o poate relua direct de pe bilet, cât comanda o așteaptă.
+		// Plata neterminată: clientul o poate relua de pe bilet, dar doar pentru o comandă care n-a fost plătită
+		// niciodată și mai are ceva de plată. O comandă plătită (sau rambursată) și trecută apoi înapoi în
+		// „așteaptă plata” nu primește buton: ar cere a doua plată sau ar arăta o plată de 0.
 		$pay_url = '';
 		if ( $booking && in_array( $booking['status'], array( 'hold', 'pending' ), true ) && $booking['order_id'] && function_exists( 'wc_get_order' ) ) {
 			$order   = wc_get_order( $booking['order_id'] );
-			$pay_url = $order && $order->needs_payment() ? $order->get_checkout_payment_url() : '';
+			$unpaid  = $order && $order->needs_payment() && ! $order->get_date_paid() && (float) $order->get_total() - (float) $order->get_total_refunded() > 0;
+			$pay_url = $unpaid ? $order->get_checkout_payment_url() : '';
 		}
 		// &ics=1: cursa în calendarul telefonului, doar pentru un bilet valabil al unei curse care urmează.
 		if ( $booking && 'ok' === $state['class'] && isset( $_GET['ics'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
