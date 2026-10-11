@@ -26,11 +26,18 @@ global $wpdb;
 $tz       = wp_timezone();
 $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
-// Rută de test cu 3 locuri, preț în RON.
-$existing = LBB_Routes::find( 'TestA', 'TestB' );
-if ( $existing ) {
-	LBB_Routes::delete( $existing['id'] );
+// O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
+// și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ) ) as $lbb_pair ) {
+	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
+	if ( $lbb_old ) {
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
+		LBB_Routes::delete( $lbb_old['id'] );
+	}
 }
+$wpdb->query( 'DELETE b FROM ' . LBB_Bookings::table() . ' b LEFT JOIN ' . LBB_Routes::table() . ' r ON r.id = b.route_id WHERE r.id IS NULL' );
+
+// Rută de test cu 3 locuri, preț în RON.
 $rid = LBB_Routes::save( array( 'origin' => 'TestA', 'destination' => 'TestB', 'departures' => '10:00, 7:5, 23:59, 10:00', 'price' => 60, 'currency' => 'RON', 'capacity' => 3, 'active' => 1 ) );
 lbb_t( 'rută salvată', is_int( $rid ) && $rid > 0, $rid );
 $route = LBB_Routes::get( $rid );

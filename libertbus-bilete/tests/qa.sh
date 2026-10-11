@@ -9,6 +9,9 @@ FAIL=0
 fresh_carts() {
   (cd "$WP_PATH" && $WP_CLI eval 'global $wpdb; $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_sessions" ); $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE \"_woocommerce_persistent_cart_%\"" );' >/dev/null 2>&1) || true
 }
+# Contează doar erorile scrise în debug.log în timpul acestei rulări: una veche (ex. de la o rulare oprită la
+# jumătate) ar face QA să pice la nesfârșit.
+LOG="$WP_PATH/wp-content/debug.log"; LOG_START=$( [ -f "$LOG" ] && wc -l < "$LOG" || echo 0 )
 echo "== Comenzi WooCommerce în: $(cd "$WP_PATH" && $WP_CLI eval 'echo WC_Data_Store::load( "order" )->get_current_class_name();' 2>/dev/null)"
 echo "== Sintaxă PHP"
 for f in $(find "$DIR" -name '*.php'); do php -l "$f" >/dev/null || { echo "  eroare: $f"; FAIL=1; }; done
@@ -54,7 +57,7 @@ echo "== Rezervare cap-coadă"
 OUT_FLOW=$(BASE="$BASE" node "$DIR/tests/e2e-flow.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_FLOW" | grep -E 'ticket:|FAIL|ALERT|pageerror'
 echo "$OUT_FLOW" | grep -q 'ticket:' && ! echo "$OUT_FLOW" | grep -q 'FAIL' || FAIL=1
-[ -f "$WP_PATH/wp-content/debug.log" ] && grep -E "Fatal|Warning|Notice" "$WP_PATH/wp-content/debug.log" | grep -i lbb && FAIL=1
+[ -f "$LOG" ] && tail -n +$((LOG_START + 1)) "$LOG" | grep -E "Fatal|Warning|Notice" | grep -i lbb && FAIL=1
 fresh_carts
 echo "== Vizitator nelogat"
 OUT_GUEST=$(BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY)
@@ -71,7 +74,7 @@ grep -q 'PREVIEW: OK' "${TMPDIR:-/tmp}/lbb-preview.out" && echo "  ok" || { grep
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=1; update_option("lbb_settings",$s);')
 fresh_carts
 echo "== Paginile de admin (Panou, Rute, Pasageri, Rezervări, Setări) și CSV-ul cu pasageri"
-LOG="$WP_PATH/wp-content/debug.log"; BEFORE=$( [ -f "$LOG" ] && wc -l < "$LOG" || echo 0 )
+BEFORE=$( [ -f "$LOG" ] && wc -l < "$LOG" || echo 0 )
 OUT_ADM=$(BASE="$BASE" node "$DIR/tests/e2e-admin.js" 2>&1 | grep -v CERT_AUTHORITY)
 NEW_ERR=$( [ -f "$LOG" ] && tail -n +$((BEFORE + 1)) "$LOG" | grep -E "Fatal|Warning|Notice|Deprecated" | grep -i lbb )
 echo "$OUT_ADM" | grep -q "ADMIN: OK" && [ -z "$NEW_ERR" ] && echo "  ok" || { echo "$OUT_ADM" | grep FAIL | head -5; echo "$NEW_ERR" | head -5; echo "  PROBLEME"; FAIL=1; }
