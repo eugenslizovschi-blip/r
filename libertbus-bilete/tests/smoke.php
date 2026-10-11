@@ -771,6 +771,9 @@ $ic_mail_x = $ic_b ? LBB_Tickets::html( LBB_Bookings::get_by_code( $ic_b['ticket
 $ic_css = apply_filters( 'woocommerce_email_styles', '', null );
 lbb_t( 'tabelul biletului ține spațierea în emailurile WooCommerce pe telefon (regulă mai specifică în media query)', (bool) preg_match( '/@media screen and \(max-width: 600px\)\{#body_content \.lbb-ticket td[^}]*padding: 3px[^}]*!important/', $ic_css ), $ic_css );
 lbb_t( 'emailul cu biletul valabil are și „Adaugă în calendar”; după anulare nu', false !== strpos( $ic_mail, 'Adaugă în calendar' ) && false !== strpos( $ic_mail, 'ics=1' ) && false === strpos( $ic_mail_x, 'Adaugă în calendar' ), array( substr( wp_strip_all_tags( $ic_mail ), -160 ), substr( wp_strip_all_tags( $ic_mail_x ), -160 ) ) );
+$ic_page_x = $ic_b ? wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $ic_b['ticket_code'] ), array( 'timeout' => 20 ) ) ) : '';
+$ic_again  = LBB_Tickets::booking_page_url( null );
+lbb_t( 'pagina biletului anulat are „Rezervați din nou online” spre pagina cu formularul; biletul valabil nu', $ic_again && false !== strpos( $ic_page_x, 'class="again" href="' . esc_url( $ic_again ) . '"' ) && false === strpos( $ic_page, 'Rezervați din nou online' ), array( $ic_again, substr( wp_strip_all_tags( $ic_page_x ), 0, 600 ) ) );
 $ic_gone = $ic_b ? wp_remote_retrieve_header( wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $ic_b['ticket_code'] ) ), array( 'timeout' => 20 ) ), 'content-type' ) : '';
 if ( is_int( $ic_r ) ) {
 	LBB_Routes::delete( $ic_r );

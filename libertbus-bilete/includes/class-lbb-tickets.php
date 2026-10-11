@@ -121,13 +121,8 @@ class LBB_Tickets {
 			esc_html( $name ),
 			esc_html( $when )
 		) . '</p>';
-		// Clientul poate rezerva din nou singur, nu doar la telefon: pe pagina rutei sau, dacă ruta nu are una,
-		// pe prima pagină publicată cu formularul de rezervare.
-		$again = $route && ! empty( $route['page_url'] ) ? $route['page_url'] : '';
-		if ( ! $again ) {
-			$pages = LBB_Admin::pages_with_form();
-			$again = $pages ? get_permalink( $pages[0]->ID ) : '';
-		}
+		// Clientul poate rezerva din nou singur, nu doar la telefon.
+		$again = self::booking_page_url( $route );
 		if ( $again ) {
 			$body .= '<p><a href="' . esc_url( $again ) . '">' . esc_html__( 'Rezervați din nou online', 'libertbus-bilete' ) . '</a></p>';
 		}
@@ -377,6 +372,19 @@ class LBB_Tickets {
 	}
 
 	/**
+	 * Unde se rezervă din nou: pagina rutei sau, dacă ruta nu are una, prima pagină publicată cu formularul.
+	 *
+	 * @param array|null $route Ruta biletului.
+	 */
+	public static function booking_page_url( $route ) {
+		if ( $route && ! empty( $route['page_url'] ) ) {
+			return $route['page_url'];
+		}
+		$pages = LBB_Admin::pages_with_form();
+		return $pages ? (string) get_permalink( $pages[0]->ID ) : '';
+	}
+
+	/**
 	 * Pagina biletului: /?lbb_bilet=LB-XXXXXX&k=semnătură. Se poate printa sau arăta de pe telefon.
 	 */
 	public static function ticket_page() {
@@ -406,6 +414,11 @@ class LBB_Tickets {
 			$unpaid  = $order && $order->needs_payment() && ! $order->get_date_paid() && (float) $order->get_total() - (float) $order->get_total_refunded() > 0;
 			$pay_url = $unpaid ? $order->get_checkout_payment_url() : '';
 		}
+		// Bilet anulat sau cursă trecută: în loc de un bilet de nefolosit, drumul spre o rezervare nouă.
+		$again_url = '';
+		if ( $booking && ( 'past' === $state['class'] || ! in_array( $booking['status'], array( 'hold', 'pending', 'confirmed', 'reserved' ), true ) ) ) {
+			$again_url = self::booking_page_url( LBB_Routes::get( $booking['route_id'] ) );
+		}
 		// &ics=1: cursa în calendarul telefonului, doar pentru un bilet valabil al unei curse care urmează.
 		if ( $booking && 'ok' === $state['class'] && isset( $_GET['ics'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$ics = self::ics( $booking );
@@ -431,7 +444,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 .wrap{max-width:560px;margin:0 auto}.site{font-size:1em;margin:0 0 1em}
 .state{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
 .ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}.past{background:#eceff3;color:#3a4552}
-.actions{display:flex;gap:8px;margin-top:8px}.actions button,.actions a{flex:1;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.actions{display:flex;gap:8px;margin-top:8px}.actions button,.actions a{flex:1;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px 8px;box-sizing:border-box}
 @media print{.actions{display:none}body{background:#fff}.state{border:2px solid currentColor}}
 </style>
 </head>
@@ -448,7 +461,8 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<?php echo self::notes_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<div class="actions"><button type="button" onclick="window.print()"><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button>
 			<?php if ( 'ok' === $state['class'] ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?>
-			<?php if ( $pay_url ) : ?><a class="pay" href="<?php echo esc_url( $pay_url ); ?>"><?php esc_html_e( 'Achită acum', 'libertbus-bilete' ); ?></a><?php endif; ?></div>
+			<?php if ( $pay_url ) : ?><a class="pay" href="<?php echo esc_url( $pay_url ); ?>"><?php esc_html_e( 'Achită acum', 'libertbus-bilete' ); ?></a><?php endif; ?>
+			<?php if ( $again_url ) : ?><a class="again" href="<?php echo esc_url( $again_url ); ?>"><?php esc_html_e( 'Rezervați din nou online', 'libertbus-bilete' ); ?></a><?php endif; ?></div>
 		<script src="<?php echo esc_url( LBB_URL . 'assets/qrcode.min.js?ver=' . LBB_Frontend::asset_ver( 'qrcode.min.js' ) ); ?>"></script>
 		<script>
 		document.querySelectorAll('[data-qr]').forEach(function(el){

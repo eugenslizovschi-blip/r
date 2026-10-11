@@ -63,6 +63,7 @@
   - **Telefonul clientului:** un număr scris cu 0 după prefixul țării („+373 069 184 111”, „+40 (0)740 123 456”) se salvează corect (+37369184111, +40740123456); înainte rămânea cu zeroul și biroul nu putea suna la el.
   - **Ordinea orașelor:** în formular (plecări și destinații) și în sugestiile din admin, orașele sunt în ordinea alfabetică românească: „Bălți” după „Bacău”, „Rîșcani” înainte de „Roman”, „Ștefan Vodă” după „Sovata”. Înainte, orașele cu diacritice ajungeau la sfârșitul literei („Bălți” după „Buzău”).
   - **Rute cu orașe scrise altfel:** dacă la o rută nouă orașul e scris fără diacritice sau cu altă majusculă („chisinau”), se salvează ca pe celelalte rute („Chișinău”), ca să nu apară de două ori în lista de plecări. Scrierea se poate în continuare corecta din ruta respectivă.
+  - **Pagina unui bilet anulat sau a unei curse trecute:** are butonul „Rezervați din nou online” (spre pagina rutei sau pagina cu formularul), nu doar „Printează”.
   - **Emailul de anulare către client:** pe lângă telefon, are linkul „Rezervați din nou online” spre pagina rutei (sau, dacă ruta nu are pagină, spre pagina cu formularul de rezervare).
   - **Emailul către birou la o rezervare:** telefonul și emailul clientului sunt linkuri — biroul sună sau răspunde dintr-o atingere.
   - **Emailul comenzii pe telefon:** în tabelul biletului, valorile (ruta, data, ora…) stau acum în dreptul etichetelor; stilul WooCommerce pentru ecrane mici le cobora și lungea tabelul.
