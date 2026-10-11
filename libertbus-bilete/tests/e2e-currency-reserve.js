@@ -201,6 +201,27 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (/lbb_bilet=/.test(p4.url()) || !/test@gmail\.com/.test(msg) || field.value !== 'test@gmail.con' || field.bad !== 'true') fail('emailul „gmail.con” nu e semnalat corect: ' + JSON.stringify({ url: p4.url(), msg, field }));
     await p4.close();
   }
+  // O eroare de la server care trimite la telefon („Pentru grupuri sunați la …”, aici 99 de locuri trimise de mână):
+  // în mesajul de deasupra formularului telefonul se apasă direct pentru apel.
+  {
+    const p5 = await guestCtx.newPage();
+    await fillForm(p5, '+37369184111');
+    await p5.evaluate(() => {
+      const sel = document.querySelector('[data-lbb="adults"]');
+      sel.appendChild(new Option('99', '99'));
+      sel.value = '99';
+      const form = sel.form;
+      for (let i = 1; i < 99; i++) {
+        const inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'lbb_names[]'; inp.value = 'Test Pasager';
+        form.appendChild(inp);
+      }
+    });
+    await Promise.all([p5.waitForNavigation(), p5.click('[data-lbb-submit][value="reserve"]')]);
+    const al = await p5.$eval('.lbb-alert', a => ({ text: a.textContent.replace(/\s+/g, ' '), tel: (a.querySelector('a.lbb-phone') || {}).getAttribute ? a.querySelector('a.lbb-phone').getAttribute('href') : '' })).catch(() => null);
+    if (!al || !/Pentru grupuri sunați la/.test(al.text) || !/^tel:\+373\d{8}$/.test(al.tel)) fail('eroarea „Pentru grupuri sunați la …” fără telefon ca link: ' + JSON.stringify(al));
+    await p5.close();
+  }
   console.log(process.exitCode ? 'CURRENCY+RESERVE: PROBLEME' : 'CURRENCY+RESERVE: OK');
   await browser.close();
 })().catch(require('./crash')('currency-reserve', () => BROWSER));
