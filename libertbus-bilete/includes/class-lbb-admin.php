@@ -481,6 +481,11 @@ class LBB_Admin {
 			<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=lbb_manifest_csv&date=' . $date . '&route=' . $route ), 'lbb_manifest_csv' ) ); ?>">CSV</a>
 		</form>
 		<?php
+		// Ziua de dinainte și de după dintr-o atingere (pe telefon calendarul e incomod), cu aceeași rută aleasă.
+		$day_url = function ( $shift ) use ( $date, $route ) {
+			return add_query_arg( array( 'page' => 'lbb-manifest', 'date' => gmdate( 'Y-m-d', strtotime( $date . ' 12:00 UTC ' . $shift ) ), 'route' => $route ), admin_url( 'admin.php' ) );
+		};
+		echo '<p class="lbb-noprint lbb-day-nav"><a class="button" href="' . esc_url( $day_url( '-1 day' ) ) . '">‹ ' . esc_html__( 'Ziua precedentă', 'libertbus-bilete' ) . '</a> <a class="button" href="' . esc_url( $day_url( '+1 day' ) ) . '">' . esc_html__( 'Ziua următoare', 'libertbus-bilete' ) . ' ›</a></p>';
 		$rows = LBB_Bookings::manifest( $date, $route );
 		if ( ! $rows ) {
 			echo '<p>' . esc_html__( 'Nu sunt bilete vândute pentru această zi.', 'libertbus-bilete' ) . '</p></div>';

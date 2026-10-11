@@ -125,6 +125,16 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const onScreen = await boxCol();
   if (onPrint.head[onPrint.head.length - 1] !== 'Urcat' || !onPrint.rows || onPrint.boxes !== onPrint.rows) fail('foaia printată fără căsuța „Urcat” pe fiecare rând (' + boxDate + '): ' + JSON.stringify(onPrint));
   if (onScreen.head.includes('Urcat') || onScreen.boxes) fail('coloana „Urcat” apare și pe ecran: ' + JSON.stringify(onScreen));
+  // „Ziua următoare ›” / „‹ Ziua precedentă” schimbă ziua cu una și păstrează ruta aleasă (inclusiv peste sfârșitul lunii).
+  const navRoute = await page.$eval('select[name="route"] option:nth-child(2)', o => o.value);
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&date=2026-10-31&route=' + navRoute);
+  await Promise.all([page.waitForNavigation(), page.click('.lbb-day-nav a:has-text("Ziua următoare")')]);
+  const nextQ = new URL(page.url()).searchParams;
+  const nextH = (await page.textContent('#wpbody-content h1')).trim();
+  await Promise.all([page.waitForNavigation(), page.click('.lbb-day-nav a:has-text("Ziua precedentă")')]);
+  await Promise.all([page.waitForNavigation(), page.click('.lbb-day-nav a:has-text("Ziua precedentă")')]);
+  const prevQ = new URL(page.url()).searchParams;
+  if (nextQ.get('date') !== '2026-11-01' || nextQ.get('route') !== navRoute || !/01\.11\.2026/.test(nextH) || prevQ.get('date') !== '2026-10-30' || prevQ.get('route') !== navRoute) fail('navigarea între zile pe lista de pasageri: ' + JSON.stringify({ next: nextQ.toString(), nextH, prev: prevQ.toString() }));
 
   await page.setViewportSize({ width: 390, height: 844 });
   // Data pentru lista șoferului: de la o rezervare care apare în ea (plătită sau cu plata la urcare), nu de la
