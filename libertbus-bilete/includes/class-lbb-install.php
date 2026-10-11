@@ -15,11 +15,19 @@ class LBB_Install {
 		self::create_tables();
 		self::seed_routes();
 		update_option( 'lbb_db_version', LBB_DB_VERSION );
+		self::ensure_cron();
+		// Produsul se creează la prima încărcare cu WooCommerce activ.
+		update_option( 'lbb_needs_product', 1 );
+	}
+
+	/**
+	 * Curățarea orară (coșuri expirate, ștergerea datelor după 3 ani) se programează la activare. Dacă plugin-ul
+	 * e actualizat prin suprascrierea fișierelor (fără reactivare) sau programarea se pierde, o refacem singuri.
+	 */
+	public static function ensure_cron() {
 		if ( ! wp_next_scheduled( 'lbb_cleanup' ) ) {
 			wp_schedule_event( time() + 300, 'hourly', 'lbb_cleanup' );
 		}
-		// Produsul se creează la prima încărcare cu WooCommerce activ.
-		update_option( 'lbb_needs_product', 1 );
 	}
 
 	public static function deactivate() {
@@ -35,6 +43,7 @@ class LBB_Install {
 			add_action( 'init', array( __CLASS__, 'ensure_product' ), 20 );
 		}
 		add_action( 'lbb_cleanup', array( 'LBB_Bookings', 'cleanup' ) );
+		add_action( 'init', array( __CLASS__, 'ensure_cron' ) );
 		// O trimitere de email eșuată (ex. hostingul blochează mail()) apare în panoul „Gata de plăți?”.
 		add_action( 'wp_mail_failed', array( 'LBB_Tickets', 'mail_failed' ) );
 		add_filter( 'woocommerce_email_styles', array( 'LBB_Tickets', 'email_styles' ) );

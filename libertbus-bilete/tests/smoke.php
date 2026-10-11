@@ -37,6 +37,17 @@ foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'T
 }
 $wpdb->query( 'DELETE b FROM ' . LBB_Bookings::table() . ' b LEFT JOIN ' . LBB_Routes::table() . ' r ON r.id = b.route_id WHERE r.id IS NULL' );
 
+// Curățarea orară pierdută (ex. plugin actualizat prin suprascrierea fișierelor, fără reactivare): orice cerere
+// către site o programează din nou, fără ca administratorul să facă ceva.
+wp_clear_scheduled_hook( 'lbb_cleanup' );
+$cr_gone = wp_next_scheduled( 'lbb_cleanup' );
+wp_remote_get( home_url( '/' ), array( 'timeout' => 20 ) );
+wp_cache_delete( 'alloptions', 'options' );
+wp_cache_delete( 'cron', 'options' );
+$cr_back = wp_next_scheduled( 'lbb_cleanup' );
+LBB_Install::ensure_cron();
+lbb_t( 'curățarea orară pierdută se programează din nou la următoarea cerere către site', false === $cr_gone && $cr_back > time() && 'hourly' === wp_get_schedule( 'lbb_cleanup' ), array( $cr_gone, $cr_back ) );
+
 // Rută de test cu 3 locuri, preț în RON.
 $rid = LBB_Routes::save( array( 'origin' => 'TestA', 'destination' => 'TestB', 'departures' => '10:00, 7:5, 23:59, 10:00', 'price' => 60, 'currency' => 'RON', 'capacity' => 3, 'active' => 1 ) );
 lbb_t( 'rută salvată', is_int( $rid ) && $rid > 0, $rid );
