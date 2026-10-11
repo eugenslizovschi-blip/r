@@ -34,6 +34,15 @@ if [ -x "$WPCS_DIR/vendor/bin/phpcs" ]; then
 else
   echo "  sărit (setați WPCS_DIR)"
 fi
+echo "== JavaScript ES5 (sintaxă pentru telefoane vechi)"
+# ESLINT = calea spre eslint; fără el pasul se sare. Verifică doar sintaxa (nu și funcții ca fetch/Promise).
+ESLINT="${ESLINT:-$(command -v eslint || true)}"
+if [ -n "$ESLINT" ]; then
+  OUT_ES5=$("$ESLINT" -c "$DIR/tests/es5.config.cjs" "$DIR/assets/lbb.js" "$DIR/assets/cookies.js" 2>&1)
+  if [ -n "$OUT_ES5" ]; then echo "$OUT_ES5" | head -20; FAIL=1; else echo "  ok"; fi
+else
+  echo "  sărit (setați ESLINT)"
+fi
 # Pe site-ul de test toate emailurile se opresc înainte de trimitere (mu-plugin mail-dump). Pornim fără eroare
 # de email salvată: la final, una nouă înseamnă că un test sau codul a încercat să trimită un email real.
 (cd "$WP_PATH" && $WP_CLI option delete lbb_mail_failed >/dev/null 2>&1) || true
