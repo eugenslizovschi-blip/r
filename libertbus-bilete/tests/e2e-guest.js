@@ -146,6 +146,14 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   await page.waitForSelector('#payment');
   if (await page.$('#payment_method_lbb_test')) fail('plata de test e vizibilă pentru vizitatori');
   if (await page.inputValue('#billing_country') !== 'RO') fail('țara nu s-a dedus din +40');
+  // Pentru bilete finalizarea comenzii e scurtă: fără adresă poștală, telefonul obligatoriu, iar numele, telefonul
+  // și emailul vin completate din formularul de rezervare (vizitatorul nu are date salvate).
+  const co = await page.evaluate(() => {
+    const v = id => (document.getElementById(id) || {}).value;
+    const f = document.getElementById('billing_phone_field');
+    return { addr: ['billing_address_1', 'billing_city', 'billing_postcode', 'billing_company'].filter(id => document.getElementById(id)), first: v('billing_first_name'), last: v('billing_last_name'), phone: v('billing_phone'), email: v('billing_email'), phoneReq: !!f && f.classList.contains('validate-required') };
+  });
+  if (co.addr.length || co.first !== 'Vasile' || co.last !== 'Guest' || co.phone !== '+40712345678' || co.email !== 'guest@example.com' || !co.phoneReq) fail('finalizarea comenzii pentru bilete nu e scurtă sau completată din formular: ' + JSON.stringify(co));
   console.log('checkout ok, țara:', await page.inputValue('#billing_country'));
 
   const during = (await (await page.request.get(`${BASE}/wp-json/lbb/v1/departures?route_id=${routeId}&date=${day}`)).json()).departures.find(d => d.time === time).free;
