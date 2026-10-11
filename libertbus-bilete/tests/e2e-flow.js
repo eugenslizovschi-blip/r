@@ -54,10 +54,18 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   await page.screenshot({ path: (process.env.OUT || '.') + '/thankyou.png', fullPage: true });
   const link = await page.getAttribute('.lbb-ticket a', 'href');
   await page.goto(link);
-  console.log('ticket page state:', await page.textContent('.state'));
-  await page.waitForTimeout(1500);
-  console.log('qr rendered:', !!(await page.$('.lbb-ticket-qr canvas, .lbb-ticket-qr img')));
+  const state = (await page.textContent('.state')).trim();
+  console.log('ticket page state:', state);
+  // Biblioteca desenează pe un canvas ascuns și arată imaginea PNG rezultată.
+  const qr = await page.waitForSelector('.lbb-ticket-qr img[src^="data:image/png"]', { state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+  console.log('qr rendered:', qr);
   await page.screenshot({ path: (process.env.OUT || '.') + '/ticketpage.png', fullPage: true });
   console.log('JS errors:', errors.length ? errors : 'none');
+  // Ce vede clientul după plată: biletul plătit cu ambii pasageri, pagina lui „valabil”, cu cod QR, fără erori JS.
+  const flat = ticket.replace(/\s+/g, ' ');
+  if (!/Achitat online/.test(flat) || !/Ion Popescu, Maria Popescu/.test(flat)) console.log('FAIL biletul de după plată: ' + flat.slice(0, 200));
+  if (!/^Bilet valabil/.test(state)) console.log('FAIL pagina biletului nu spune „Bilet valabil”: ' + state);
+  if (!qr) console.log('FAIL codul QR nu apare pe pagina biletului');
+  if (errors.length) console.log('FAIL erori JS: ' + errors.join(' | '));
   await browser.close();
 })().catch(require('./crash')('flow', () => BROWSER));
