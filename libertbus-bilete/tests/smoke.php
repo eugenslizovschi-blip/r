@@ -393,6 +393,12 @@ foreach ( $ab_m as $ab_list ) {
 }
 lbb_t( 'orașe în ordine alfabetică românească: „Bălți” înainte de „Brașov”, „Rîșcani” înainte de „Roman”, „Tiraspol” înainte de „Țiganca”, la plecări și destinații', array( 'Bacău', 'Bălți', 'Buzău', 'Rîșcani', 'Roman', 'Sovata', 'Ștefan Vodă', 'Tiraspol', 'Țiganca' ) === $ab_l && count( $ab_k ) > 1 && $ab_k === $ab_s && $ab_d, array( $ab_l, $ab_k ) );
 
+// Erorile din formular care spun „sunați la …” au telefonul ca link de apel; restul textului rămâne escapat.
+$al_err  = LBB_Bookings::create_hold( LBB_Routes::get( $rid ), $tomorrow, '10:00', 99, 0, array(), '+37369000000', 'a@example.com' );
+$al_html = is_wp_error( $al_err ) ? LBB_Frontend::alert_html( $al_err->get_error_message() ) : '';
+$al_xss  = LBB_Frontend::alert_html( '<b>x</b> sunați la ' . LBB_Settings::phone_text() );
+lbb_t( 'mesajul de eroare din formular are telefonul ca link de apel și restul escapat', false !== strpos( $al_html, '<a class="lbb-phone" href="tel:' . preg_replace( '/[^\d+]/', '', LBB_Settings::get( 'support_phone' ) ) . '">' ) && 0 === strpos( $al_xss, '&lt;b&gt;x&lt;/b&gt;' ) && 1 === substr_count( $al_xss, '<a ' ), array( $al_html, $al_xss ) );
+
 // Potrivirea formularelor Contact Form 7 cu rutele, după titlu.
 $t = LBB_Frontend::route_for_title( 'Balti - Iasi' );
 lbb_t( 'titlul „Balti - Iasi” → Bălți → Iași (nu Iași Aeroport)', $t && 'Iași' === $t['destination'], $t );

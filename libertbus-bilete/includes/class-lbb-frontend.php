@@ -158,6 +158,15 @@ class LBB_Frontend {
 	 * Aduce telefonul la forma internațională, ca același număr scris local
 	 * (069…, 07…, 00373…) să conteze o singură dată la limita de rezervări.
 	 */
+	/**
+	 * Mesajul de eroare din formular, escapat, cu telefonul de suport ca link de apel („… sunați la +373 …”).
+	 */
+	public static function alert_html( $message ) {
+		$html  = esc_html( $message );
+		$phone = esc_html( LBB_Settings::phone_text() );
+		return '' !== $phone ? str_replace( $phone, LBB_Settings::phone_link(), $html ) : $html;
+	}
+
 	public static function normalize_phone( $raw ) {
 		$phone = preg_replace( '/[^\d+]/', '', (string) $raw );
 		$phone = '+' === substr( $phone, 0, 1 ) ? '+' . str_replace( '+', '', $phone ) : str_replace( '+', '', $phone );
@@ -409,7 +418,7 @@ class LBB_Frontend {
 				<h3 class="lbb-title"><?php echo esc_html( $atts['title'] ); ?></h3>
 			<?php endif; ?>
 			<?php if ( $error ) : ?>
-				<div class="lbb-alert" role="alert" tabindex="-1" data-lbb="alert" id="<?php echo esc_attr( $uid ); ?>-alert" data-lbb-field="<?php echo esc_attr( preg_replace( '/^lbb_/', '', (string) $error->get_error_code() ) ); ?>"><?php echo esc_html( $error->get_error_message() ); ?></div>
+				<div class="lbb-alert" role="alert" tabindex="-1" data-lbb="alert" id="<?php echo esc_attr( $uid ); ?>-alert" data-lbb-field="<?php echo esc_attr( preg_replace( '/^lbb_/', '', (string) $error->get_error_code() ) ); ?>"><?php echo self::alert_html( $error->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- alert_html() escapează. ?></div>
 			<?php endif; ?>
 			<?php /* translators: %s: telefonul pentru clienți */ ?>
 			<noscript><p class="lbb-alert"><?php echo sprintf( esc_html__( 'Pentru rezervare online activați JavaScript sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_link() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p></noscript>
