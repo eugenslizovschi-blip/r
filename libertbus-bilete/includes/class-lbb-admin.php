@@ -532,9 +532,19 @@ class LBB_Admin {
 		if ( count( $per_trip ) > 1 ) {
 			// Câte o cursă pe rând: pe telefon și pe foaia printată șoferul își găsește ușor autobuzul.
 			echo '<div class="lbb-trip-totals"><strong>' . esc_html__( 'Pe curse', 'libertbus-bilete' ) . ':</strong><ul style="margin:4px 0 12px 1.2em;list-style:disc">';
+			$per_due = LBB_Bookings::departure_due( $rows );
 			foreach ( $per_trip as $trip => $seats ) {
 				/* translators: 1: ora și ruta cursei, 2: numărul de locuri */
-				echo '<li>' . esc_html( sprintf( _n( '%1$s: %2$d loc', '%1$s: %2$d locuri', $seats, 'libertbus-bilete' ), $trip, $seats ) ) . '</li>';
+				$line = sprintf( _n( '%1$s: %2$d loc', '%1$s: %2$d locuri', $seats, 'libertbus-bilete' ), $trip, $seats );
+				if ( ! empty( $per_due[ $trip ] ) ) {
+					$sums = array();
+					foreach ( $per_due[ $trip ] as $cur => $sum ) {
+						$sums[] = LBB_WooCommerce::money( $sum, $cur );
+					}
+					/* translators: %s: suma de încasat la urcare pe această cursă */
+					$line .= ' · ' . sprintf( __( 'de încasat la urcare %s', 'libertbus-bilete' ), implode( ' + ', $sums ) );
+				}
+				echo '<li>' . esc_html( $line ) . '</li>';
 			}
 			echo '</ul></div>';
 		}

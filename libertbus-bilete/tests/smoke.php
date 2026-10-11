@@ -780,7 +780,14 @@ lbb_t( 'lista pentru șofer goală trimite la următoarea zi cu pasageri pe acee
 if ( is_int( $dt_r ) ) {
 	LBB_Routes::delete( $dt_r );
 }
-lbb_t( 'lista pentru șofer arată locurile pe fiecare cursă din zi', array( '07:00 CurseA → CurseB' => 3, '19:00 CurseA → CurseB' => 1 ) === $dt_tot && false !== strpos( $dt_html, '<li>07:00 CurseA → CurseB: 3 locuri</li><li>19:00 CurseA → CurseB: 1 loc</li>' ), array( $dt_tot, substr( wp_strip_all_tags( $dt_html ), 0, 300 ) ) );
+lbb_t( 'lista pentru șofer arată locurile și suma de încasat la urcare pe fiecare cursă din zi', array( '07:00 CurseA → CurseB' => 3, '19:00 CurseA → CurseB' => 1 ) === $dt_tot && false !== strpos( $dt_html, "<li>07:00 CurseA → CurseB: 3 locuri · de încasat la urcare 150\u{00A0}MDL</li><li>19:00 CurseA → CurseB: 1 loc · de încasat la urcare 50\u{00A0}MDL</li>" ), array( $dt_tot, substr( wp_strip_all_tags( $dt_html ), 0, 400 ) ) );
+// Un bilet plătit online nu intră în suma de încasat la urcare a cursei.
+$dd_rows = array(
+	array( 'status' => 'reserved', 'dep_time' => '07:00', 'origin' => 'A', 'destination' => 'B', 'seats' => 2, 'adults' => 2, 'children' => 0, 'route_id' => 0, 'currency' => 'MDL', 'pay_currency' => 'MDL', 'amount' => 100 ),
+	array( 'status' => 'confirmed', 'dep_time' => '07:00', 'origin' => 'A', 'destination' => 'B', 'seats' => 1, 'adults' => 1, 'children' => 0, 'route_id' => 0, 'currency' => 'MDL', 'pay_currency' => 'MDL', 'amount' => 50 ),
+);
+$dd_due = LBB_Bookings::departure_due( $dd_rows );
+lbb_t( 'suma de încasat pe cursă numără doar rezervările cu plata la urcare', array( '07:00 A → B' => array( 'MDL' => 100.0 ) ) == $dd_due, $dd_due ); // phpcs:ignore Universal.Operators.StrictComparisons -- 100 sau 100.0, după conversie.
 
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );

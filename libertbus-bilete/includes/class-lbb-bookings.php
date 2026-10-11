@@ -401,6 +401,23 @@ class LBB_Bookings {
 	}
 
 	/**
+	 * Cât e de încasat la urcare pe fiecare cursă (rezervările cu plata la urcare): [ cursă => [ monedă => sumă ] ],
+	 * cu aceleași chei ca departure_totals(). Fiecare șofer își vede suma de pe autobuzul lui.
+	 */
+	public static function departure_due( array $rows ) {
+		$out = array();
+		foreach ( $rows as $b ) {
+			if ( 'reserved' !== $b['status'] ) {
+				continue;
+			}
+			list( $amount, $cur ) = self::pay_amount( $b );
+			$key                  = $b['dep_time'] . ' ' . self::route_name( $b );
+			$out[ $key ][ $cur ]  = ( isset( $out[ $key ][ $cur ] ) ? $out[ $key ][ $cur ] : 0 ) + $amount;
+		}
+		return $out;
+	}
+
+	/**
 	 * Locurile pe fiecare cursă din lista pentru șofer: [ 'HH:MM Plecare → Destinație' => locuri ], în ordinea listei.
 	 */
 	public static function departure_totals( array $rows ) {
