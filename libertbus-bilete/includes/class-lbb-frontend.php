@@ -422,6 +422,8 @@ class LBB_Frontend {
 			<?php endif; ?>
 			<?php /* translators: %s: telefonul pentru clienți */ ?>
 			<noscript><p class="lbb-alert"><?php echo sprintf( esc_html__( 'Pentru rezervare online activați JavaScript sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_link() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p></noscript>
+			<?php /* translators: %s: telefonul pentru clienți */ ?>
+			<p class="lbb-js-fail" role="alert" data-lbb-js-fail hidden><?php echo sprintf( esc_html__( 'Formularul nu merge în acest browser (prea vechi). Actualizați browserul sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_link() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
 			<form method="post" class="lbb-form" novalidate>
 				<input type="hidden" name="lbb_action" value="book">
 				<?php if ( $preview ) : ?>

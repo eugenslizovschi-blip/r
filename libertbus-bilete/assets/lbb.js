@@ -724,12 +724,27 @@
 		return JSON.parse( new TextDecoder( 'utf-8' ).decode( bytes ) );
 	}
 
+	// Browser prea vechi (fără fetch/Promise/TextDecoder) sau formular care nu pornește: clientul vede un mesaj cu
+	// telefonul, nu un formular care nu răspunde.
+	function showFail( root ) {
+		var note = root.querySelector( '[data-lbb-js-fail]' );
+		if ( note ) {
+			note.hidden = false;
+		}
+	}
+
 	function boot() {
 		var roots = document.querySelectorAll( '.lbb-booking[data-lbb-config]' );
+		var able = !! ( window.fetch && window.Promise && window.TextDecoder );
 		for ( var i = 0; i < roots.length; i++ ) {
+			if ( ! able ) {
+				showFail( roots[ i ] );
+				continue;
+			}
 			try {
 				init( roots[ i ], i );
 			} catch ( e ) {
+				showFail( roots[ i ] );
 				if ( window.console ) {
 					window.console.error( 'LibertBus:', e );
 				}

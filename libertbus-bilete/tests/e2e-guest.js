@@ -46,6 +46,18 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     }
     await p3.close();
   }
+  // Browser prea vechi (fără fetch): în loc de un formular care nu răspunde, apare mesajul cu telefonul.
+  // Într-un browser obișnuit mesajul rămâne ascuns.
+  {
+    const old = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await old.addInitScript(() => { window.fetch = undefined; });
+    await old.goto(BASE + '/balti-iasi/');
+    const shown = await old.$eval('[data-lbb-js-fail]', e => ({ visible: e.getClientRects().length > 0, tel: (e.querySelector('a[href^="tel:"]') || {}).href || '' })).catch(() => null);
+    if (!shown || !shown.visible || !/^tel:\+373/.test(shown.tel)) fail('browser fără fetch: lipsește mesajul cu telefonul: ' + JSON.stringify(shown));
+    await old.close();
+    const hiddenNow = await page.$eval('[data-lbb-js-fail]', e => e.getClientRects().length === 0).catch(() => false);
+    if (!hiddenNow) fail('mesajul pentru browsere vechi apare și într-un browser obișnuit');
+  }
   // Toate cursele zilei pline: mesajul „nu mai sunt locuri online” are telefonul ca link de apel.
   {
     const p4 = await browser.newPage({ viewport: { width: 390, height: 844 } });

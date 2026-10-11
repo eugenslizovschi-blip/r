@@ -65,7 +65,9 @@ async function check(browser, state, [name, dev]) {
       const back = ov.querySelector('.lbb-back'); const pay = ov.querySelector('[data-lbb-submit]');
       const backColor = back ? getComputedStyle(back).color : '', accent = pay ? getComputedStyle(pay).borderTopColor : '';
       // Telefonul și sumele nu se rup pe două rânduri.
-      const phone = ov.querySelector('a.lbb-phone');
+      // Telefonul de la finalul formularului (mai sus, ascuns, e și cel din mesajul pentru browsere vechi).
+      const phones = ov.querySelectorAll('a.lbb-phone');
+      const phone = phones[phones.length - 1];
       const phoneLines = phone ? phone.getClientRects().length : 0;
       const tot = ov.querySelector('.lbb-summary-total');
       const totalSplit = tot ? /\d [A-Z]{3}/.test(tot.textContent) : false;
