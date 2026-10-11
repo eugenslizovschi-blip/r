@@ -250,6 +250,28 @@
 		}
 
 		// Protecția hostingului poate răspunde o clipă cu o pagină HTML în loc de JSON: reîncercăm.
+		// Telefonul din mesaje se apasă direct pentru apel, ca pe bilet și în emailuri.
+		function phoneLink() {
+			var a = document.createElement( 'a' );
+			a.className = 'lbb-phone';
+			a.href = t.phoneHref;
+			a.textContent = t.phone;
+			return a;
+		}
+
+		function setStatus( text ) {
+			el.status.textContent = '';
+			var parts = t.phone ? String( text ).split( t.phone ) : [ String( text ) ];
+			for ( var i = 0; i < parts.length; i++ ) {
+				if ( i ) {
+					el.status.appendChild( phoneLink() );
+				}
+				if ( parts[ i ] ) {
+					el.status.appendChild( document.createTextNode( parts[ i ] ) );
+				}
+			}
+		}
+
 		function getJSON( url, tries ) {
 			return fetch( url, { credentials: 'same-origin', headers: { Accept: 'application/json' } } )
 				.then( function ( r ) {
@@ -503,7 +525,7 @@
 						loadDepartures();
 						return;
 					}
-					el.status.textContent = departures.length ? ( open.length ? '' : t.noneOpen ) : t.noDeparture + runsOn( route );
+					setStatus( departures.length ? ( open.length ? '' : t.noneOpen ) : t.noDeparture + runsOn( route ) );
 					departures.forEach( function ( d ) {
 						// În formularul compact lista e îngustă: doar ora; locurile libere apar sub câmpuri.
 						var label = compact
@@ -542,13 +564,8 @@
 						loadDepartures();
 					} );
 					el.status.appendChild( again );
-					// Telefonul se apasă direct, ca în celelalte mesaje „sunați-ne”.
 					el.status.appendChild( document.createTextNode( ' ' + t.errorCall + ' ' ) );
-					var call = document.createElement( 'a' );
-					call.className = 'lbb-phone';
-					call.href = t.phoneHref;
-					call.textContent = t.phone;
-					el.status.appendChild( call );
+					el.status.appendChild( phoneLink() );
 					el.status.appendChild( document.createTextNode( '.' ) );
 				} );
 		}

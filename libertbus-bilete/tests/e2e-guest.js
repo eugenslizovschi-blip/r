@@ -46,6 +46,20 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     }
     await p3.close();
   }
+  // Toate cursele zilei pline: mesajul „nu mai sunt locuri online” are telefonul ca link de apel.
+  {
+    const p4 = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    p4.on('pageerror', e => fail('pageerror: ' + e.message));
+    await p4.route('**/lbb/v1/departures**', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ departures: [{ time: '08:45', free: 0, bookable: false, reason: 'full' }] }) }));
+    await p4.goto(BASE + '/balti-iasi/');
+    await p4.waitForSelector('[data-lbb="route"] option:checked', { state: 'attached' });
+    await p4.fill('[data-lbb="date"]', new Date(Date.now() + 86400000 * 5).toISOString().slice(0, 10));
+    await p4.dispatchEvent('[data-lbb="date"]', 'change');
+    const full = await p4.waitForFunction(() => /nu mai sunt locuri online/.test(document.querySelector('[data-lbb="status"]').textContent), null, { timeout: 15000 }).then(() => true).catch(() => false);
+    const href = full ? await p4.$eval('[data-lbb="status"] a.lbb-phone', a => a.getAttribute('href')).catch(() => '') : '';
+    if (!full || !/^tel:\+373\d{8}$/.test(href)) fail('„nu mai sunt locuri online” fără telefon ca link: „' + (await p4.textContent('[data-lbb="status"]')) + '” ' + href);
+    await p4.close();
+  }
   // Ruta care circulă doar luni și joi (din setup-local.sh): într-o marți, mesajul spune zilele de circulație.
   {
     const p2 = await browser.newPage({ viewport: { width: 390, height: 844 } });
