@@ -36,7 +36,8 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await p3.goto(BASE + '/balti-iasi/');
     const retry = await p3.waitForSelector('[data-lbb="status"] button.lbb-retry', { timeout: 15000 }).catch(() => null);
     const msg = retry ? (await p3.textContent('[data-lbb="status"]')).replace(/\s+/g, ' ') : '';
-    if (!retry || !/Încearcă din nou/.test(msg) || !/sunați la \+373/.test(msg)) fail('fără „Încearcă din nou” și telefon când verificarea locurilor eșuează: „' + msg + '”');
+    const tel = retry ? await p3.$eval('[data-lbb="status"] a.lbb-phone', a => a.getAttribute('href')).catch(() => '') : '';
+    if (!retry || !/Încearcă din nou/.test(msg) || !/sunați la \+373/.test(msg) || !/^tel:\+373\d{8}$/.test(tel)) fail('fără „Încearcă din nou” și telefonul ca link când verificarea locurilor eșuează: „' + msg + '” ' + tel);
     else {
       down = false;
       await retry.click();

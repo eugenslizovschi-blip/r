@@ -542,7 +542,14 @@
 						loadDepartures();
 					} );
 					el.status.appendChild( again );
-					el.status.appendChild( document.createTextNode( ' ' + t.errorCall ) );
+					// Telefonul se apasă direct, ca în celelalte mesaje „sunați-ne”.
+					el.status.appendChild( document.createTextNode( ' ' + t.errorCall + ' ' ) );
+					var call = document.createElement( 'a' );
+					call.className = 'lbb-phone';
+					call.href = t.phoneHref;
+					call.textContent = t.phone;
+					el.status.appendChild( call );
+					el.status.appendChild( document.createTextNode( '.' ) );
 				} );
 		}
 

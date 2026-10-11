@@ -381,8 +381,9 @@ class LBB_Frontend {
 				'namePh'      => __( 'Nume și prenume', 'libertbus-bilete' ),
 				'error'       => __( 'Nu am putut verifica locurile.', 'libertbus-bilete' ),
 				'retry'       => __( 'Încearcă din nou', 'libertbus-bilete' ),
-				/* translators: %s: telefonul pentru clienți */
-				'errorCall'   => sprintf( __( 'Sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
+				'errorCall'   => __( 'Sau sunați la', 'libertbus-bilete' ),
+				'phone'       => LBB_Settings::phone_text(),
+				'phoneHref'   => 'tel:' . preg_replace( '/[^\d+]/', '', (string) LBB_Settings::get( 'support_phone' ) ),
 				'total'       => __( 'Total de plată', 'libertbus-bilete' ),
 				'approxNote'  => __( 'echivalent orientativ, plata se face în moneda afișată', 'libertbus-bilete' ),
 				'payBoard'    => __( 'Se achită la urcare', 'libertbus-bilete' ),
