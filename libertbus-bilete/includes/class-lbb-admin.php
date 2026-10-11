@@ -108,6 +108,13 @@ class LBB_Admin {
 				$checkout_b ? __( 'Folosește blocul „Checkout”, unde apar doar metodele de plată compatibile cu blocurile. Faceți o comandă de probă și verificați că plata cu cardul a băncii apare; dacă nu, înlocuiți conținutul paginii cu [woocommerce_checkout].', 'libertbus-bilete' ) : '',
 				$checkout_p ? get_edit_post_link( $checkout, 'raw' ) : admin_url( 'admin.php?page=wc-settings&tab=advanced' ) );
 
+			// Fără comandă ca vizitator, clientul fără cont nu ajunge la plată (sau e obligat să-și facă unul).
+			$guest  = 'yes' === get_option( 'woocommerce_enable_guest_checkout' );
+			$signup = 'yes' === get_option( 'woocommerce_enable_signup_and_login_from_checkout' );
+			$add( 'guest_checkout', $guest ? true : ( $signup ? 'warn' : false ), __( 'Clienții pot plăti fără cont', 'libertbus-bilete' ),
+				$guest ? '' : ( $signup ? __( 'Acum clientul e obligat să-și facă un cont la plată. Bifați „Permite clienților să plaseze comenzi fără cont” în WooCommerce → Setări → Conturi și confidențialitate.', 'libertbus-bilete' ) : __( 'Clienții fără cont nu pot plăti online. Bifați „Permite clienților să plaseze comenzi fără cont” în WooCommerce → Setări → Conturi și confidențialitate.', 'libertbus-bilete' ) ),
+				admin_url( 'admin.php?page=wc-settings&tab=account' ) );
+
 			$product = wc_get_product( LBB_Install::product_id() );
 			$add( 'product', $product && 'publish' === $product->get_status(), __( 'Produsul intern „Bilet autocar” există', 'libertbus-bilete' ), __( 'Se recreează automat dacă lipsește.', 'libertbus-bilete' ) );
 		}

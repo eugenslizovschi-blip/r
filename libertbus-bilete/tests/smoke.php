@@ -1145,6 +1145,25 @@ wp_update_post( array( 'ID' => $cb_page, 'post_content' => '<!-- wp:woocommerce/
 $cb_block = $cb_item();
 wp_update_post( array( 'ID' => $cb_page, 'post_content' => $cb_keep ) );
 lbb_t( 'panou: pagina de finalizare cu blocul „Checkout” e semnalată, cea clasică trece', $cb_classic && true === $cb_classic['ok'] && $cb_block && 'warn' === $cb_block['ok'] && false !== strpos( $cb_block['detail'], '[woocommerce_checkout]' ) && $cb_keep === get_post_field( 'post_content', $cb_page ), array( $cb_classic, $cb_block ) );
+// Panoul semnalează când WooCommerce cere cont pentru plată: fără cont deloc (roșu) sau doar cu cont nou la plată (atenție).
+$gc_keep = array( get_option( 'woocommerce_enable_guest_checkout' ), get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) );
+$gc_item = function ( $guest, $signup ) {
+	update_option( 'woocommerce_enable_guest_checkout', $guest );
+	update_option( 'woocommerce_enable_signup_and_login_from_checkout', $signup );
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'guest_checkout' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+$gc_yes = $gc_item( 'yes', 'no' );
+$gc_reg = $gc_item( 'no', 'yes' );
+$gc_no  = $gc_item( 'no', 'no' );
+update_option( 'woocommerce_enable_guest_checkout', $gc_keep[0] );
+update_option( 'woocommerce_enable_signup_and_login_from_checkout', $gc_keep[1] );
+lbb_t( 'panou: plata fără cont e verificată (permisă / doar cu cont nou / imposibilă fără cont)', $gc_yes && true === $gc_yes['ok'] && $gc_reg && 'warn' === $gc_reg['ok'] && $gc_no && false === $gc_no['ok'] && false !== strpos( $gc_no['detail'], 'nu pot plăti' ) && 'yes' === get_option( 'woocommerce_enable_guest_checkout' ), array( $gc_yes, $gc_reg, $gc_no, $gc_keep ) );
+
 // Panoul arată când curățarea automată e programată, dar n-a mai rulat de peste o zi (WP-Cron oprit sau fără vizite).
 $lc_keep = get_option( 'lbb_last_cleanup' );
 $lc_item = function () {
