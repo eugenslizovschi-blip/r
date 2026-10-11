@@ -182,7 +182,16 @@ class LBB_Admin {
 			$recent ? sprintf( __( 'Ultima eroare: %1$s — %2$s. Clienții pot rămâne fără bilet pe email: verificați emailul hostingului sau instalați un plugin SMTP.', 'libertbus-bilete' ), wp_date( 'd.m.Y H:i', (int) $failed['time'] ), rtrim( (string) $failed['message'], '. ' ) ) : '',
 			admin_url( 'plugin-install.php?s=smtp&tab=search&type=term' ) );
 
-		$add( 'cron', (bool) wp_next_scheduled( 'lbb_cleanup' ), __( 'Curățarea automată a rezervărilor expirate e programată', 'libertbus-bilete' ), '' );
+		// Programată nu înseamnă că rulează: WP-Cron pornește doar la vizite pe site și poate fi oprit (DISABLE_WP_CRON).
+		$next  = wp_next_scheduled( 'lbb_cleanup' );
+		$last  = (int) get_option( 'lbb_last_cleanup' );
+		$stale = $next && ( $last ? time() - $last > DAY_IN_SECONDS : $next < time() - HOUR_IN_SECONDS );
+		$add( 'cron', $next ? ( $stale ? 'warn' : true ) : false, __( 'Curățarea automată a rezervărilor expirate e programată și rulează', 'libertbus-bilete' ),
+			$stale ? sprintf(
+				/* translators: %s: data și ora ultimei rulări sau „niciodată” */
+				__( 'Ultima rulare: %s. Fără ea locurile din coșurile abandonate nu se eliberează, iar datele personale nu se șterg după 3 ani. WP-Cron rulează doar la vizite pe site: cereți hostingului un cron real care apelează wp-cron.php la câteva minute.', 'libertbus-bilete' ),
+				$last ? wp_date( 'd.m.Y H:i', $last ) : __( 'niciodată', 'libertbus-bilete' )
+			) : '' );
 
 		return $items;
 	}

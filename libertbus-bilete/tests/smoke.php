@@ -1107,6 +1107,28 @@ wp_update_post( array( 'ID' => $cb_page, 'post_content' => '<!-- wp:woocommerce/
 $cb_block = $cb_item();
 wp_update_post( array( 'ID' => $cb_page, 'post_content' => $cb_keep ) );
 lbb_t( 'panou: pagina de finalizare cu blocul „Checkout” e semnalată, cea clasică trece', $cb_classic && true === $cb_classic['ok'] && $cb_block && 'warn' === $cb_block['ok'] && false !== strpos( $cb_block['detail'], '[woocommerce_checkout]' ) && $cb_keep === get_post_field( 'post_content', $cb_page ), array( $cb_classic, $cb_block ) );
+// Panoul arată când curățarea automată e programată, dar n-a mai rulat de peste o zi (WP-Cron oprit sau fără vizite).
+$lc_keep = get_option( 'lbb_last_cleanup' );
+$lc_item = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'cron' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+LBB_Install::ensure_cron();
+update_option( 'lbb_last_cleanup', time() - 3 * DAY_IN_SECONDS, false );
+$lc_old = $lc_item();
+LBB_Bookings::cleanup();
+$lc_ran = (int) get_option( 'lbb_last_cleanup' );
+$lc_new = $lc_item();
+if ( false === $lc_keep ) {
+	delete_option( 'lbb_last_cleanup' );
+} else {
+	update_option( 'lbb_last_cleanup', $lc_keep, false );
+}
+lbb_t( 'panou: curățarea automată care n-a mai rulat de 3 zile e semnalată cu data ultimei rulări; după o rulare trece', $lc_old && 'warn' === $lc_old['ok'] && false !== strpos( $lc_old['detail'], 'Ultima rulare: ' . wp_date( 'd.m.Y', time() - 3 * DAY_IN_SECONDS ) ) && abs( $lc_ran - time() ) < 60 && $lc_new && true === $lc_new['ok'], array( $lc_old, $lc_new ) );
 // Panoul arată o trimitere de email eșuată din ultimele 7 zile (biletele nu ajung la clienți).
 $mf_keep = get_option( 'lbb_mail_failed' );
 $mf_item = function () {
