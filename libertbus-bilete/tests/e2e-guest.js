@@ -26,6 +26,25 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const timeOff = await page.$eval('[data-lbb="time"]', s => s.disabled);
     if (!/Online se poate rezerva de azi până pe \d\d\.\d\d\.\d{4}/.test(st) || !timeOff) fail('data în afara intervalului: „' + st + '”');
   }
+  // Internet căzut la verificarea locurilor (toate cele 3 încercări eșuează): mesajul are „Încearcă din nou” și
+  // telefonul; după ce revine conexiunea, butonul încarcă orele fără ca clientul să schimbe data sau ruta.
+  {
+    const p3 = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    p3.on('pageerror', e => fail('pageerror: ' + e.message));
+    let down = true;
+    await p3.route('**/lbb/v1/departures**', route => down ? route.fulfill({ status: 503, contentType: 'text/html', body: 'Service Unavailable' }) : route.continue());
+    await p3.goto(BASE + '/balti-iasi/');
+    const retry = await p3.waitForSelector('[data-lbb="status"] button.lbb-retry', { timeout: 15000 }).catch(() => null);
+    const msg = retry ? (await p3.textContent('[data-lbb="status"]')).replace(/\s+/g, ' ') : '';
+    if (!retry || !/Încearcă din nou/.test(msg) || !/sunați la \+373/.test(msg)) fail('fără „Încearcă din nou” și telefon când verificarea locurilor eșuează: „' + msg + '”');
+    else {
+      down = false;
+      await retry.click();
+      const loaded = await p3.waitForFunction(() => !document.querySelector('[data-lbb="time"]').disabled && document.querySelectorAll('[data-lbb="time"] option:not([value=""])').length > 0, null, { timeout: 15000 }).then(() => true).catch(() => false);
+      if (!loaded) fail('„Încearcă din nou” nu a încărcat orele: „' + (await p3.textContent('[data-lbb="status"]')) + '”');
+    }
+    await p3.close();
+  }
   // Ruta care circulă doar luni și joi (din setup-local.sh): într-o marți, mesajul spune zilele de circulație.
   {
     const p2 = await browser.newPage({ viewport: { width: 390, height: 844 } });

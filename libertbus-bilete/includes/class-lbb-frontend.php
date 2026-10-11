@@ -379,7 +379,10 @@ class LBB_Frontend {
 				'adult'       => __( 'adult', 'libertbus-bilete' ),
 				'nameInvalid' => __( 'Scrieți numele și prenumele ca în pașaport (cel puțin două litere).', 'libertbus-bilete' ),
 				'namePh'      => __( 'Nume și prenume', 'libertbus-bilete' ),
-				'error'       => __( 'Nu am putut verifica locurile. Încercați din nou.', 'libertbus-bilete' ),
+				'error'       => __( 'Nu am putut verifica locurile.', 'libertbus-bilete' ),
+				'retry'       => __( 'Încearcă din nou', 'libertbus-bilete' ),
+				/* translators: %s: telefonul pentru clienți */
+				'errorCall'   => sprintf( __( 'Sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
 				'total'       => __( 'Total de plată', 'libertbus-bilete' ),
 				'approxNote'  => __( 'echivalent orientativ, plata se face în moneda afișată', 'libertbus-bilete' ),
 				'payBoard'    => __( 'Se achită la urcare', 'libertbus-bilete' ),

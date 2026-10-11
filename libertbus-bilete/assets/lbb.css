@@ -162,6 +162,7 @@ html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
 
 /* Telefonul de suport: un singur rând, se poate apăsa pentru apel. */
 .lbb-booking a.lbb-phone, .lbb-empty a.lbb-phone { white-space: nowrap; color: inherit !important; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.lbb-booking button.lbb-retry { display: inline !important; min-height: 0 !important; margin: 0 !important; padding: 4px 2px !important; border: 0 !important; background: none !important; box-shadow: none !important; color: inherit !important; font: inherit !important; font-weight: 600 !important; text-decoration: underline !important; text-underline-offset: 2px; text-transform: none !important; cursor: pointer; }
 
 .lbb-privacy-note { margin-top: 6px; font-size: 12px; }
 .lbb-privacy-note a { color: inherit !important; text-decoration: underline !important; }

@@ -529,9 +529,20 @@
 					fillCounts();
 				} )
 				.catch( function () {
-					if ( id === request ) {
-						el.status.textContent = t.error;
+					if ( id !== request ) {
+						return;
 					}
+					// Internet slab: clientul reîncearcă dintr-o atingere, fără să schimbe data sau ruta.
+					el.status.textContent = t.error + ' ';
+					var again = document.createElement( 'button' );
+					again.type = 'button';
+					again.className = 'lbb-retry';
+					again.textContent = t.retry;
+					again.addEventListener( 'click', function () {
+						loadDepartures();
+					} );
+					el.status.appendChild( again );
+					el.status.appendChild( document.createTextNode( ' ' + t.errorCall ) );
 				} );
 		}
 
