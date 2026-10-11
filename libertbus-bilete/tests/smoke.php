@@ -1145,6 +1145,29 @@ wp_update_post( array( 'ID' => $cb_page, 'post_content' => '<!-- wp:woocommerce/
 $cb_block = $cb_item();
 wp_update_post( array( 'ID' => $cb_page, 'post_content' => $cb_keep ) );
 lbb_t( 'panou: pagina de finalizare cu blocul „Checkout” e semnalată, cea clasică trece', $cb_classic && true === $cb_classic['ok'] && $cb_block && 'warn' === $cb_block['ok'] && false !== strpos( $cb_block['detail'], '[woocommerce_checkout]' ) && $cb_keep === get_post_field( 'post_content', $cb_page ), array( $cb_classic, $cb_block ) );
+// Panoul semnalează produsul intern stricat dintr-o editare: stoc gestionat cu 0 bucăți sau fără „Virtual”.
+$pp_prod = wc_get_product( LBB_Install::product_id() );
+$pp_item = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'product' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+$pp_ok = $pp_item();
+$pp_prod->set_manage_stock( true );
+$pp_prod->set_stock_quantity( 0 );
+$pp_prod->set_virtual( false );
+$pp_prod->save();
+$pp_bad = $pp_item();
+$pp_prod->set_manage_stock( false );
+$pp_prod->set_stock_status( 'instock' );
+$pp_prod->set_virtual( true );
+$pp_prod->save();
+$pp_back = $pp_item();
+lbb_t( 'panou: produsul intern fără stoc sau fără „Virtual” e semnalat, cu ce trebuie schimbat', $pp_ok && true === $pp_ok['ok'] && $pp_bad && false === $pp_bad['ok'] && false !== strpos( $pp_bad['detail'], 'stoc epuizat' ) && false !== strpos( $pp_bad['detail'], 'Virtual' ) && $pp_back && true === $pp_back['ok'], array( $pp_ok, $pp_bad, $pp_back ) );
+
 // Panoul semnalează când WooCommerce cere cont pentru plată: fără cont deloc (roșu) sau doar cu cont nou la plată (atenție).
 $gc_keep = array( get_option( 'woocommerce_enable_guest_checkout' ), get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) );
 $gc_item = function ( $guest, $signup ) {

@@ -115,8 +115,21 @@ class LBB_Admin {
 				$guest ? '' : ( $signup ? __( 'Acum clientul e obligat să-și facă un cont la plată. Bifați „Permite clienților să plaseze comenzi fără cont” în WooCommerce → Setări → Conturi și confidențialitate.', 'libertbus-bilete' ) : __( 'Clienții fără cont nu pot plăti online. Bifați „Permite clienților să plaseze comenzi fără cont” în WooCommerce → Setări → Conturi și confidențialitate.', 'libertbus-bilete' ) ),
 				admin_url( 'admin.php?page=wc-settings&tab=account' ) );
 
-			$product = wc_get_product( LBB_Install::product_id() );
-			$add( 'product', $product && 'publish' === $product->get_status(), __( 'Produsul intern „Bilet autocar” există', 'libertbus-bilete' ), __( 'Se recreează automat dacă lipsește.', 'libertbus-bilete' ) );
+			// Produsul intern poate fi stricat dintr-o editare în WooCommerce: cu stoc gestionat și 0 bucăți biletele nu
+			// mai intră în coș, iar fără „Virtual” plata cere adresă de livrare.
+			$product  = wc_get_product( LBB_Install::product_id() );
+			$p_issues = array();
+			if ( $product && 'publish' === $product->get_status() ) {
+				if ( ! $product->is_in_stock() ) {
+					$p_issues[] = __( 'apare „stoc epuizat”: opriți „Gestionează stocul” sau puneți-l „În stoc”', 'libertbus-bilete' );
+				}
+				if ( ! $product->is_virtual() ) {
+					$p_issues[] = __( 'nu mai e bifat „Virtual”: plata cere adresă de livrare', 'libertbus-bilete' );
+				}
+			}
+			$add( 'product', $product && 'publish' === $product->get_status() && ! $p_issues, __( 'Produsul intern „Bilet autocar” există și se poate cumpăra', 'libertbus-bilete' ),
+				$p_issues ? implode( '; ', $p_issues ) . '.' : __( 'Se recreează automat dacă lipsește.', 'libertbus-bilete' ),
+				$product ? get_edit_post_link( $product->get_id(), 'raw' ) : '' );
 		}
 
 		foreach ( LBB_Legal::pages() as $key => $page ) {
