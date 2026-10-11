@@ -67,7 +67,7 @@
   - **Emailul de anulare către client:** pe lângă telefon, are linkul „Rezervați din nou online” spre pagina rutei (sau, dacă ruta nu are pagină, spre pagina cu formularul de rezervare).
   - **Emailul către birou la o rezervare:** telefonul și emailul clientului sunt linkuri — biroul sună sau răspunde dintr-o atingere.
   - **Emailul comenzii pe telefon:** în tabelul biletului, valorile (ruta, data, ora…) stau acum în dreptul etichetelor; stilul WooCommerce pentru ecrane mici le cobora și lungea tabelul.
-  - **Lista Pasageri, de la o zi la alta:** butoanele „‹ Ziua precedentă” și „Ziua următoare ›” schimbă ziua dintr-o atingere, cu aceeași rută aleasă (pe telefon calendarul e incomod).
+  - **Lista Pasageri, de la o zi la alta:** butoanele „‹ Ziua precedentă” și „Ziua următoare ›” schimbă ziua dintr-o atingere, cu aceeași rută aleasă (pe telefon calendarul e incomod). Într-o zi fără pasageri, lista arată linkul „Următoarea zi cu pasageri: zz.ll.aaaa”.
   - **Lista Pasageri printată:** are la final coloana „Urcat”, cu o căsuță pe fiecare rând pe care șoferul bifează pasagerii urcați. Pe ecran și pe telefon coloana nu apare.
   - **Lista Pasageri (pentru șofer):** când în aceeași zi sunt mai multe curse, deasupra tabelului apar locurile pe fiecare cursă, câte una pe rând (ex. „07:00 Bălți → Iași: 3 locuri”), nu doar totalul zilei; se văd și pe foaia printată.
   - **Emailurile de rezervare și anulare** pleacă și cu o variantă text (nu doar HTML): ajung mai rar în spam și se citesc bine în orice aplicație; subiectul emailului de rezervare are codul (ex. „Rezervare LB-AB12CD — Bălți → Iași, 20.10.2026 08:45”).

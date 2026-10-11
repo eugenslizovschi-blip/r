@@ -363,6 +363,20 @@ class LBB_Bookings {
 	/**
 	 * Lista de pasageri pentru o zi (și opțional o rută).
 	 */
+	/**
+	 * Prima zi după $date cu pasageri (bilete plătite sau rezervări la urcare), pe toate rutele sau pe una.
+	 *
+	 * @return string Data (Y-m-d) sau '' dacă nu mai urmează nicio cursă cu pasageri.
+	 */
+	public static function next_manifest_date( $date, $route_id = 0 ) {
+		global $wpdb;
+		$sql = $wpdb->prepare( 'SELECT MIN(travel_date) FROM ' . self::table() . " WHERE travel_date > %s AND status IN ('confirmed','reserved')", $date ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		if ( $route_id ) {
+			$sql .= $wpdb->prepare( ' AND route_id = %d', $route_id );
+		}
+		return (string) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
 	public static function manifest( $date, $route_id = 0, $statuses = array( 'confirmed', 'reserved' ) ) {
 		global $wpdb;
 		$in   = implode( ',', array_map( function ( $s ) use ( $wpdb ) {

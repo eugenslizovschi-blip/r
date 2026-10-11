@@ -488,7 +488,13 @@ class LBB_Admin {
 		echo '<p class="lbb-noprint lbb-day-nav"><a class="button" href="' . esc_url( $day_url( '-1 day' ) ) . '">‹ ' . esc_html__( 'Ziua precedentă', 'libertbus-bilete' ) . '</a> <a class="button" href="' . esc_url( $day_url( '+1 day' ) ) . '">' . esc_html__( 'Ziua următoare', 'libertbus-bilete' ) . ' ›</a></p>';
 		$rows = LBB_Bookings::manifest( $date, $route );
 		if ( ! $rows ) {
-			echo '<p>' . esc_html__( 'Nu sunt bilete vândute pentru această zi.', 'libertbus-bilete' ) . '</p></div>';
+			echo '<p>' . esc_html__( 'Nu sunt bilete vândute pentru această zi.', 'libertbus-bilete' );
+			$next = LBB_Bookings::next_manifest_date( $date, $route );
+			if ( $next ) {
+				/* translators: %s: data (zz.ll.aaaa) */
+				echo ' <a class="lbb-next-day" href="' . esc_url( add_query_arg( array( 'page' => 'lbb-manifest', 'date' => $next, 'route' => $route ), admin_url( 'admin.php' ) ) ) . '">' . esc_html( sprintf( __( 'Următoarea zi cu pasageri: %s', 'libertbus-bilete' ), wp_date( 'd.m.Y', strtotime( $next . ' 12:00' ) ) ) ) . ' ›</a>';
+			}
+			echo '</p></div>';
 			return;
 		}
 		$total = 0;

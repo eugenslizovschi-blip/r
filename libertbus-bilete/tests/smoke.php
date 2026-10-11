@@ -745,12 +745,21 @@ $_GET   = array( 'page' => 'lbb-manifest', 'date' => $tomorrow, 'route' => $dt_r
 ob_start();
 LBB_Admin::page_manifest();
 $dt_html = ob_get_clean();
+// Ziua de azi fără pasageri pe rută: lista trimite la următoarea zi cu pasageri (mâine); după mâine nu mai e niciuna.
+$_GET    = array( 'page' => 'lbb-manifest', 'date' => LBB_Settings::today(), 'route' => $dt_r );
+ob_start();
+LBB_Admin::page_manifest();
+$nx_html = ob_get_clean();
 $_GET    = array();
+$nx_a    = is_int( $dt_r ) ? LBB_Bookings::next_manifest_date( LBB_Settings::today(), $dt_r ) : null;
+$nx_b    = is_int( $dt_r ) ? LBB_Bookings::next_manifest_date( $tomorrow, $dt_r ) : null;
 foreach ( $dt_b as $dt_x ) {
 	if ( $dt_x ) {
 		LBB_Bookings::cancel( $dt_x['id'] );
 	}
 }
+$nx_c = is_int( $dt_r ) ? LBB_Bookings::next_manifest_date( LBB_Settings::today(), $dt_r ) : null;
+lbb_t( 'lista pentru șofer goală trimite la următoarea zi cu pasageri pe aceeași rută; rezervările anulate nu contează', $tomorrow === $nx_a && '' === $nx_b && '' === $nx_c && (bool) preg_match( '#class="lbb-next-day" href="[^"]*date=' . $tomorrow . '[^"]*route=' . $dt_r . '"[^>]*>Următoarea zi cu pasageri: ' . preg_quote( wp_date( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) ), '#' ) . '#u', html_entity_decode( $nx_html, ENT_QUOTES, 'UTF-8' ) ), array( $nx_a, $nx_b, $nx_c, substr( wp_strip_all_tags( $nx_html ), -200 ) ) );
 if ( is_int( $dt_r ) ) {
 	LBB_Routes::delete( $dt_r );
 }

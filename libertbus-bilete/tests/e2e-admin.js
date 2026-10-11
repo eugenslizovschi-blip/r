@@ -135,6 +135,15 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   await Promise.all([page.waitForNavigation(), page.click('.lbb-day-nav a:has-text("Ziua precedentă")')]);
   const prevQ = new URL(page.url()).searchParams;
   if (nextQ.get('date') !== '2026-11-01' || nextQ.get('route') !== navRoute || !/01\.11\.2026/.test(nextH) || prevQ.get('date') !== '2026-10-30' || prevQ.get('route') !== navRoute) fail('navigarea între zile pe lista de pasageri: ' + JSON.stringify({ next: nextQ.toString(), nextH, prev: prevQ.toString() }));
+  // O zi fără pasageri trimite la următoarea zi cu pasageri, unde lista chiar are rânduri.
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&date=2000-01-01');
+  const nextLink = await page.$('a.lbb-next-day');
+  if (!nextLink) fail('lista goală nu arată următoarea zi cu pasageri');
+  else {
+    await Promise.all([page.waitForNavigation(), nextLink.click()]);
+    const nRows = await page.$$eval('.lbb-manifest-table tbody tr', rs => rs.length);
+    if (!nRows) fail('„Următoarea zi cu pasageri” duce la o listă goală: ' + page.url());
+  }
 
   await page.setViewportSize({ width: 390, height: 844 });
   // Data pentru lista șoferului: de la o rezervare care apare în ea (plătită sau cu plata la urcare), nu de la
