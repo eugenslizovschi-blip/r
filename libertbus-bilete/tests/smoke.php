@@ -975,6 +975,15 @@ lbb_t( 'căutare fără rezultat', array() === $sr_ids( 'zzqq-nimic' ) );
 $sr_h = LBB_Bookings::create_hold( LBB_Routes::get( $hp_rid ), $tomorrow, '10:00', 1, 0, array( 'Țîrdea Ștefan' ), '+37369555444', 'x@example.com' );
 lbb_t( 'căutare după nume cu diacritice', ! is_wp_error( $sr_h ) && in_array( (int) $sr_h['id'], $sr_ids( 'Țîrdea', 'hold' ), true ), $sr_h );
 lbb_t( 'căutarea păstrează filtrul de stare', ! is_wp_error( $sr_h ) && ! in_array( (int) $sr_h['id'], $sr_ids( 'Țîrdea', 'confirmed' ), true ) );
+// Filtrele din Rezervări arată câte rezervări are fiecare stare, pentru aceeași căutare („Toate” fără coșuri).
+$sc_name = LBB_Bookings::status_counts( 'Țîrdea' );
+$sc_code = LBB_Bookings::status_counts( $sr_b['ticket_code'] );
+$_GET    = array( 'page' => 'lbb-bookings', 'q' => $sr_b['ticket_code'] );
+ob_start();
+LBB_Admin::page_bookings();
+$sc_html = ob_get_clean();
+$_GET    = array();
+lbb_t( 'Rezervări: filtrele arată numărul pe stare, pentru căutarea curentă', 1 === ( $sc_name['hold'] ?? 0 ) && 0 === $sc_name[''] && 1 === $sc_code[''] && 1 === ( $sc_code[ $sr_b['status'] ] ?? 0 ) && false !== strpos( $sc_html, 'Toate <span class="count">(1)</span>' ), array( $sc_name, $sc_code ) );
 $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $hp_rid ) );
 LBB_Routes::delete( $hp_rid );
 

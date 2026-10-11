@@ -640,10 +640,6 @@ class LBB_Admin {
 	}
 
 	/**
-	 * Previne formulele în Excel când un client își scrie numele „=…”.
-	 * Un „+” la început rămâne doar la un telefon curat (+373 69 …); „+1+cmd|…” e tot formulă.
-	 */
-	/**
 	 * Telefonul și emailul clientului ca linkuri: de pe telefon biroul sună sau scrie dintr-o atingere.
 	 */
 	private static function contact_links( array $b ) {
@@ -657,6 +653,10 @@ class LBB_Admin {
 		return implode( ' ', $out );
 	}
 
+	/**
+	 * Previne formulele în Excel când un client își scrie numele „=…”.
+	 * Un „+” la început rămâne doar la un telefon curat (+373 69 …); „+1+cmd|…” e tot formulă.
+	 */
 	public static function csv_safe( $value ) {
 		$value = (string) $value;
 		return preg_match( '/^[=+\-@\t\r]/', $value ) && ! preg_match( '/^\+[\d\s().\-]+$/', $value ) ? "'" . $value : $value;
@@ -675,7 +675,8 @@ class LBB_Admin {
 			'hold'      => __( 'În coș', 'libertbus-bilete' ),
 		);
 		echo '<ul class="subsubsub">';
-		$links = array();
+		$counts = LBB_Bookings::status_counts( $search );
+		$links  = array();
 		foreach ( $labels as $key => $label ) {
 			// Filtrul păstrează căutarea: „Anulate” după ce ai căutat un telefon arată anulările acelui client.
 			$args = array( 'page' => 'lbb-bookings' );
@@ -685,7 +686,7 @@ class LBB_Admin {
 			if ( '' !== $search ) {
 				$args['q'] = rawurlencode( $search );
 			}
-			$links[] = '<a href="' . esc_url( add_query_arg( $args, admin_url( 'admin.php' ) ) ) . '"' . ( $status === $key ? ' class="current"' : '' ) . '>' . esc_html( $label ) . '</a>';
+			$links[] = '<a href="' . esc_url( add_query_arg( $args, admin_url( 'admin.php' ) ) ) . '"' . ( $status === $key ? ' class="current"' : '' ) . '>' . esc_html( $label ) . ' <span class="count">(' . (int) ( isset( $counts[ $key ] ) ? $counts[ $key ] : 0 ) . ')</span></a>';
 		}
 		// Separatorul „|” în interiorul <li>, ca în listele WordPress (o listă nu poate avea text direct).
 		echo '<li>' . implode( ' |</li><li>', $links ) . '</li></ul>'; // phpcs:ignore WordPress.Security.EscapeOutput
