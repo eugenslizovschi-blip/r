@@ -247,7 +247,7 @@ class LBB_Admin {
 			$type = isset( $_GET['lbb_err'] ) ? 'error' : 'success'; // phpcs:ignore WordPress.Security.NonceVerification
 			echo '<div class="notice notice-' . esc_attr( $type ) . ' is-dismissible"><p>' . esc_html( $msg ) . '</p></div>';
 		}
-		echo '<style>.lbb-admin .lbb-check td{vertical-align:top}.lbb-ok{color:#16632f;font-weight:700}.lbb-warn{color:#996800;font-weight:700}.lbb-bad{color:#b32d2e;font-weight:700}.lbb-admin .lbb-cards{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}.lbb-admin .lbb-card{background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;min-width:150px}.lbb-admin .lbb-card b{display:block;font-size:22px}.lbb-admin .lbb-days label{margin-right:8px}@media print{#adminmenumain,#wpadminbar,#wpfooter,.update-nag,.lbb-noprint,.notice{display:none!important}#wpcontent{margin:0!important}}</style>';
+		echo '<style>.lbb-admin .lbb-check td{vertical-align:top}.lbb-ok{color:#16632f;font-weight:700}.lbb-warn{color:#996800;font-weight:700}.lbb-bad{color:#b32d2e;font-weight:700}.lbb-admin .lbb-cards{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}.lbb-admin .lbb-card{background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;min-width:150px}.lbb-admin .lbb-card b{display:block;font-size:22px}.lbb-admin .lbb-days label{margin-right:8px}.lbb-admin .lbb-print-only{display:none}@media print{.lbb-admin .lbb-print-only{display:table-cell!important;width:3em;text-align:center}.lbb-admin .lbb-box{display:inline-block;width:16px;height:16px;border:1.5px solid #000}#adminmenumain,#wpadminbar,#wpfooter,.update-nag,.lbb-noprint,.notice{display:none!important}#wpcontent{margin:0!important}}</style>';
 	}
 
 	private static function redirect( $page, $msg, $error = false, $extra = array() ) {
@@ -499,7 +499,7 @@ class LBB_Admin {
 			echo '</ul></div>';
 		}
 		self::stack_table_style( 'lbb-manifest-table', array( __( 'Ora', 'libertbus-bilete' ), __( 'Ruta', 'libertbus-bilete' ), __( 'Bilet', 'libertbus-bilete' ), __( 'Locuri', 'libertbus-bilete' ), __( 'Pasageri', 'libertbus-bilete' ), __( 'Telefon', 'libertbus-bilete' ), __( 'Plată', 'libertbus-bilete' ), __( 'Comanda', 'libertbus-bilete' ) ) );
-		echo '<table class="widefat striped lbb-manifest-table"><thead><tr><th>' . esc_html__( 'Ora', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Pasageri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Plată', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th></tr></thead><tbody>';
+		echo '<table class="widefat striped lbb-manifest-table"><thead><tr><th>' . esc_html__( 'Ora', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Pasageri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Plată', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th class="lbb-print-only">' . esc_html__( 'Urcat', 'libertbus-bilete' ) . '</th></tr></thead><tbody>';
 		$due = array();
 		foreach ( $rows as $b ) {
 			$total += $b['seats'];
@@ -508,13 +508,14 @@ class LBB_Admin {
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a>';
 			}
-			echo '</td></tr>';
+			// Doar pe foaia printată: o căsuță pe care șoferul bifează pasagerii urcați.
+			echo '</td><td class="lbb-print-only"><span class="lbb-box"></span></td></tr>';
 		}
 		$due_text = array();
 		foreach ( $due as $cur => $sum ) {
 			$due_text[] = LBB_WooCommerce::money( $sum, $cur );
 		}
-		echo '</tbody><tfoot><tr><th colspan="3">' . esc_html__( 'Total locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html( $total ) . '</th><td colspan="2"></td><th colspan="2">' . ( $due_text ? esc_html__( 'De încasat la urcare', 'libertbus-bilete' ) . ': ' . esc_html( implode( ' + ', $due_text ) ) : '' ) . '</th></tr></tfoot></table></div>';
+		echo '</tbody><tfoot><tr><th colspan="3">' . esc_html__( 'Total locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html( $total ) . '</th><td colspan="2"></td><th colspan="2">' . ( $due_text ? esc_html__( 'De încasat la urcare', 'libertbus-bilete' ) . ': ' . esc_html( implode( ' + ', $due_text ) ) : '' ) . '</th><td class="lbb-print-only"></td></tr></tfoot></table></div>';
 	}
 
 	/**

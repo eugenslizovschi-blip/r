@@ -103,6 +103,29 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
 
   // Pe telefon (șoferul, dispecerul): lista de pasageri și rezervările încap pe ecran, fără derulare laterală,
   // iar codul biletului rămâne pe un rând.
+  // Pe foaia printată fiecare rând are o căsuță „Urcat” de bifat de șofer; pe ecran coloana nu apare.
+  // Ziua: a unei rezervări care apare în listă (plătită sau cu plata la urcare).
+  let boxDate = '';
+  for (const st of ['confirmed', 'reserved']) {
+    if (boxDate) break;
+    await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&status=' + st);
+    boxDate = await page.$$eval('#wpbody-content table.widefat tbody td', tds => { for (const td of tds) { const m = td.textContent.match(/(\d\d)\.(\d\d)\.(\d{4}) \d\d:\d\d/); if (m) return m[3] + '-' + m[2] + '-' + m[1]; } return ''; });
+  }
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&date=' + boxDate);
+  const boxCol = () => page.evaluate(() => {
+    const vis = e => getComputedStyle(e).display !== 'none' && e.getClientRects().length > 0;
+    const head = [...document.querySelectorAll('.lbb-manifest-table thead th')].filter(vis).map(t => t.textContent.trim());
+    const rows = [...document.querySelectorAll('.lbb-manifest-table tbody tr')].filter(r => r.cells.length > 1);
+    const boxes = rows.filter(r => { const b = r.querySelector('.lbb-box'); return b && vis(b) && b.getBoundingClientRect().width >= 12; }).length;
+    return { head, rows: rows.length, boxes };
+  });
+  await page.emulateMedia({ media: 'print' });
+  const onPrint = await boxCol();
+  await page.emulateMedia({ media: 'screen' });
+  const onScreen = await boxCol();
+  if (onPrint.head[onPrint.head.length - 1] !== 'Urcat' || !onPrint.rows || onPrint.boxes !== onPrint.rows) fail('foaia printată fără căsuța „Urcat” pe fiecare rând (' + boxDate + '): ' + JSON.stringify(onPrint));
+  if (onScreen.head.includes('Urcat') || onScreen.boxes) fail('coloana „Urcat” apare și pe ecran: ' + JSON.stringify(onScreen));
+
   await page.setViewportSize({ width: 390, height: 844 });
   // Data pentru lista șoferului: de la o rezervare care apare în ea (plătită sau cu plata la urcare), nu de la
   // una anulată sau rămasă în coș (altfel lista e goală și testul depinde de ce au lăsat testele de dinainte).
