@@ -393,12 +393,20 @@ class LBB_Bookings {
 	}
 
 	/**
+	 * Ruta unei rezervări din liste („Bălți → Iași”). O rută ștearsă (după ultima ei cursă) nu lasă un „ → ” gol.
+	 */
+	public static function route_name( array $b ) {
+		$origin = isset( $b['origin'] ) ? (string) $b['origin'] : '';
+		return '' !== $origin ? $origin . ' → ' . $b['destination'] : __( '(rută ștearsă)', 'libertbus-bilete' );
+	}
+
+	/**
 	 * Locurile pe fiecare cursă din lista pentru șofer: [ 'HH:MM Plecare → Destinație' => locuri ], în ordinea listei.
 	 */
 	public static function departure_totals( array $rows ) {
 		$out = array();
 		foreach ( $rows as $b ) {
-			$key         = $b['dep_time'] . ' ' . $b['origin'] . ' → ' . $b['destination'];
+			$key         = $b['dep_time'] . ' ' . self::route_name( $b );
 			$out[ $key ] = ( isset( $out[ $key ] ) ? $out[ $key ] : 0 ) + (int) $b['seats'];
 		}
 		return $out;
@@ -520,7 +528,7 @@ class LBB_Bookings {
 				'item_id'     => 'libertbus-booking-' . $b['id'],
 				'data'        => array(
 					array( 'name' => __( 'Cod', 'libertbus-bilete' ), 'value' => $b['ticket_code'] ),
-					array( 'name' => __( 'Ruta', 'libertbus-bilete' ), 'value' => trim( $b['origin'] . ' → ' . $b['destination'], ' →' ) ),
+					array( 'name' => __( 'Ruta', 'libertbus-bilete' ), 'value' => self::route_name( $b ) ),
 					array( 'name' => __( 'Data și ora', 'libertbus-bilete' ), 'value' => $b['travel_date'] . ' ' . $b['dep_time'] ),
 					array( 'name' => __( 'Pasageri', 'libertbus-bilete' ), 'value' => implode( ', ', self::passenger_labels( $b ) ) ),
 					array( 'name' => __( 'Telefon', 'libertbus-bilete' ), 'value' => $b['phone'] ),

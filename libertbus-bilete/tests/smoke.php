@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -975,6 +975,21 @@ lbb_t( 'căutare fără rezultat', array() === $sr_ids( 'zzqq-nimic' ) );
 $sr_h = LBB_Bookings::create_hold( LBB_Routes::get( $hp_rid ), $tomorrow, '10:00', 1, 0, array( 'Țîrdea Ștefan' ), '+37369555444', 'x@example.com' );
 lbb_t( 'căutare după nume cu diacritice', ! is_wp_error( $sr_h ) && in_array( (int) $sr_h['id'], $sr_ids( 'Țîrdea', 'hold' ), true ), $sr_h );
 lbb_t( 'căutarea păstrează filtrul de stare', ! is_wp_error( $sr_h ) && ! in_array( (int) $sr_h['id'], $sr_ids( 'Țîrdea', 'confirmed' ), true ) );
+// O rezervare a cărei rută a fost ștearsă (după ultima cursă) apare cu „(rută ștearsă)”, nu cu „ → ” gol.
+$rd_rt = LBB_Routes::save( array( 'origin' => 'StearsaA', 'destination' => 'StearsaB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$rd_h  = is_int( $rd_rt ) ? LBB_Bookings::create_hold( LBB_Routes::get( $rd_rt ), $tomorrow, '10:00', 1, 0, array( 'Ruta Stearsa' ), '+37369000071', 'rd@example.com', 'MDL' ) : null;
+if ( is_int( $rd_rt ) ) {
+	LBB_Routes::delete( $rd_rt );
+}
+$_GET   = array( 'page' => 'lbb-bookings', 'status' => 'hold', 'q' => '69000071' );
+ob_start();
+LBB_Admin::page_bookings();
+$rd_html = ob_get_clean();
+$_GET    = array();
+if ( is_array( $rd_h ) ) {
+	$wpdb->delete( LBB_Bookings::table(), array( 'id' => $rd_h['id'] ) );
+}
+lbb_t( 'Rezervări: o rezervare pe o rută ștearsă arată „(rută ștearsă)”, nu „ → ” gol', is_array( $rd_h ) && false !== strpos( $rd_html, '(rută ștearsă)' ) && false === strpos( $rd_html, '<td> → ' ) && 'Bălți → Iași' === LBB_Bookings::route_name( array( 'origin' => 'Bălți', 'destination' => 'Iași' ) ), substr( wp_strip_all_tags( $rd_html ), -300 ) );
 // Filtrele din Rezervări arată câte rezervări are fiecare stare, pentru aceeași căutare („Toate” fără coșuri).
 $sc_name = LBB_Bookings::status_counts( 'Țîrdea' );
 $sc_code = LBB_Bookings::status_counts( $sr_b['ticket_code'] );
