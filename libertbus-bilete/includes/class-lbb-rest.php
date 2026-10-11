@@ -27,7 +27,8 @@ class LBB_Rest {
 
 	public static function departures( WP_REST_Request $request ) {
 		$route = LBB_Routes::get( (int) $request['route_id'] );
-		if ( ! $route || ! $route['active'] ) {
+		// Ca în formular: o rută fără preț nu e de vânzare, deci nu-i arătăm nici orele.
+		if ( ! $route || ! $route['active'] || $route['price'] <= 0 ) {
 			return new WP_Error( 'lbb_not_found', __( 'Ruta nu există.', 'libertbus-bilete' ), array( 'status' => 404 ) );
 		}
 		$response = rest_ensure_response( array(

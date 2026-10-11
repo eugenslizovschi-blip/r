@@ -854,9 +854,17 @@ lbb_t( 'API: fără rută e refuzat (400)', 400 === $api( array( 'date' => $tomo
 lbb_t( 'API: ruta inexistentă dă 404', 404 === $api( array( 'route_id' => 999999, 'date' => $tomorrow ) )->get_status() );
 lbb_t( 'API: o dată imposibilă (31 februarie) nu are plecări', 200 === ( $api_imp = $api( array( 'route_id' => $rid2, 'date' => ( (int) gmdate( 'Y' ) + 1 ) . '-02-31' ) ) )->get_status() && array() === array_filter( $api_imp->get_data()['departures'], function ( $d ) { return ! empty( $d['bookable'] ); } ), $api_imp->get_data() );
 $wpdb->update( LBB_Routes::table(), array( 'active' => 0 ), array( 'id' => $rid2 ) );
-$api_off = $api( array( 'route_id' => $rid2, 'date' => $tomorrow ) )->get_status();
+$api_off  = $api( array( 'route_id' => $rid2, 'date' => $tomorrow ) )->get_status();
+$book_off = LBB_Frontend::book( array( 'lbb_route' => $rid2 ) );
 $wpdb->update( LBB_Routes::table(), array( 'active' => 1 ), array( 'id' => $rid2 ) );
 lbb_t( 'API: o rută dezactivată nu se mai arată (404)', 404 === $api_off && LBB_Routes::get( $rid2 )['active'], $api_off );
+// O rută fără preț nu apare în formular: nici API-ul nu o arată, iar o cerere făcută de mână e refuzată.
+$fp_price = LBB_Routes::get( $rid2 )['price'];
+$wpdb->update( LBB_Routes::table(), array( 'price' => 0 ), array( 'id' => $rid2 ) );
+$api_free  = $api( array( 'route_id' => $rid2, 'date' => $tomorrow ) )->get_status();
+$book_free = LBB_Frontend::book( array( 'lbb_route' => $rid2 ) );
+$wpdb->update( LBB_Routes::table(), array( 'price' => $fp_price ), array( 'id' => $rid2 ) );
+lbb_t( 'rută dezactivată sau fără preț: API-ul dă 404, iar rezervarea trimisă direct e refuzată', 404 === $api_free && is_wp_error( $book_off ) && 'lbb_route' === $book_off->get_error_code() && is_wp_error( $book_free ) && 'lbb_route' === $book_free->get_error_code() && (float) LBB_Routes::get( $rid2 )['price'] === (float) $fp_price, array( $api_free, $book_off, $book_free ) );
 
 // Pe bilet ziua săptămânii e în română și când administratorul lucrează în engleză.
 switch_to_locale( 'en_US' );
