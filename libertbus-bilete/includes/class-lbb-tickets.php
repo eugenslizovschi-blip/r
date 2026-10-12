@@ -106,11 +106,13 @@ class LBB_Tickets {
 	 * Biroul a anulat o rezervare cu plata la urcare: clientul află, ca să nu vină degeaba la autocar.
 	 */
 	public static function send_cancellation_email( array $booking ) {
-		if ( ! is_email( $booking['email'] ) ) {
+		// Cursa a trecut (ex. biroul curăță rezervările la care clientul n-a venit): „locurile nu mai sunt
+		// păstrate” după plecare doar l-ar încurca pe client.
+		if ( ! is_email( $booking['email'] ) || $booking['travel_date'] < LBB_Settings::today() ) {
 			return false;
 		}
 		$route  = LBB_Routes::get( $booking['route_id'] );
-		$name   = $route ? $route['origin'] . ' → ' . $route['destination'] : '';
+		$name   = LBB_Bookings::route_name( $route ? array( 'origin' => $route['origin'], 'destination' => $route['destination'] ) : array() );
 		$when   = wp_date( 'd.m.Y', strtotime( $booking['travel_date'] . ' 12:00' ) ) . ' ' . $booking['dep_time'];
 		$office = LBB_Settings::get( 'company_email' );
 		$office = is_email( $office ) ? $office : get_option( 'admin_email' );

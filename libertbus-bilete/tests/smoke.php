@@ -503,6 +503,9 @@ $lbb_mails = array();
 add_filter( 'pre_wp_mail', $lbb_catch, 1, 2 );
 $cx_sent = $em && LBB_Bookings::cancel( $em['id'] ) && LBB_Tickets::send_cancellation_email( LBB_Bookings::get( $em['id'] ) );
 lbb_t( 'fără email valid nu se trimite nimic la anulare', false === LBB_Tickets::send_cancellation_email( array_merge( (array) $em, array( 'email' => '' ) ) ) );
+$cx_past_n = count( $lbb_mails );
+$cx_past   = $em ? LBB_Tickets::send_cancellation_email( array_merge( LBB_Bookings::get( $em['id'] ), array( 'travel_date' => gmdate( 'Y-m-d', strtotime( LBB_Settings::today() . ' -1 day' ) ) ) ) ) : true;
+lbb_t( 'anularea unei rezervări pe o cursă trecută (clientul n-a venit) nu trimite email clientului', false === $cx_past && count( $lbb_mails ) === $cx_past_n );
 remove_filter( 'pre_wp_mail', $lbb_catch, 1 );
 $cx = $lbb_mails ? $lbb_mails[0] : array( 'to' => '', 'subject' => '', 'message' => '', 'headers' => array() );
 lbb_t( 'anularea din birou trimite un email clientului, cu codul, ruta și telefonul', $cx_sent && 1 === count( $lbb_mails ) && 'client-mail@example.com' === $cx['to']
