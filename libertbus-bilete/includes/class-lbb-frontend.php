@@ -177,16 +177,16 @@ class LBB_Frontend {
 		if ( preg_match( '/^\+?3730(\d{8})$/', $phone, $m ) ) {
 			return '+373' . $m[1];
 		}
-		if ( preg_match( '/^\+?400(7\d{8})$/', $phone, $m ) ) {
+		if ( preg_match( '/^\+?400([237]\d{8})$/', $phone, $m ) ) {
 			return '+40' . $m[1];
 		}
 		if ( preg_match( '/^0(\d{8})$/', $phone, $m ) ) {
 			return '+373' . $m[1]; // Moldova: 069 123 456, 0231 12 345.
 		}
-		if ( preg_match( '/^0(7\d{8})$/', $phone, $m ) ) {
-			return '+40' . $m[1]; // România: 07xx xxx xxx.
+		if ( preg_match( '/^0([237]\d{8})$/', $phone, $m ) ) {
+			return '+40' . $m[1]; // România: 07xx xxx xxx, fix 021 123 4567 / 0264 123 456 (în Moldova: 0 + 8 cifre).
 		}
-		if ( preg_match( '/^(373\d{8}|407\d{8})$/', $phone ) ) {
+		if ( preg_match( '/^(373\d{8}|40[237]\d{8})$/', $phone ) ) {
 			return '+' . $phone;
 		}
 		return $phone;
