@@ -267,7 +267,16 @@ class LBB_Admin {
 			'pending_payment'    => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $t WHERE status = 'pending' AND expires_at > %s", gmdate( 'Y-m-d H:i:s' ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			// Pasagerii de azi (plătiți online sau cu plata la urcare): primul lucru pe care îl caută biroul dimineața.
 			'seats_today'        => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status IN ('confirmed','reserved') AND travel_date = %s", LBB_Settings::today() ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// Seara biroul pregătește cursele de a doua zi.
+			'seats_tomorrow'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status IN ('confirmed','reserved') AND travel_date = %s", self::tomorrow() ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
+	}
+
+	/**
+	 * Data de mâine (Y-m-d) în fusul orar al firmei.
+	 */
+	private static function tomorrow() {
+		return ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '+1 day' )->format( 'Y-m-d' );
 	}
 
 	/* ---------- Pagini ---------- */
@@ -297,6 +306,7 @@ class LBB_Admin {
 		echo '<div class="lbb-cards">';
 		// Prima carte duce direct la lista pentru șofer de azi.
 		echo '<a class="lbb-card lbb-card-today" href="' . esc_url( admin_url( 'admin.php?page=lbb-manifest' ) ) . '"><b>' . esc_html( $stats['seats_today'] ) . '</b>' . esc_html__( 'Pasageri azi — vezi lista', 'libertbus-bilete' ) . '</a>';
+		echo '<a class="lbb-card lbb-card-today lbb-card-tomorrow" href="' . esc_url( admin_url( 'admin.php?page=lbb-manifest&date=' . self::tomorrow() ) ) . '"><b>' . esc_html( $stats['seats_tomorrow'] ) . '</b>' . esc_html__( 'Pasageri mâine — vezi lista', 'libertbus-bilete' ) . '</a>';
 		foreach ( array(
 			'routes_active'     => __( 'Rute active', 'libertbus-bilete' ),
 			'seats_upcoming'    => __( 'Locuri achitate online (curse viitoare)', 'libertbus-bilete' ),

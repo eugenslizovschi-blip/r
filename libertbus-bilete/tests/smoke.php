@@ -870,9 +870,12 @@ lbb_t( 'clientul WooCommerce primește numele, telefonul și emailul din formula
 
 // Panoul principal: câți pasageri sunt azi (plătiți + la urcare), cu link spre lista pentru șofer.
 $pt_before = LBB_Admin::stats()['seats_today'];
+$pt_tom_before = LBB_Admin::stats()['seats_tomorrow'];
 $pt_r = LBB_Routes::save( array( 'origin' => 'AziA', 'destination' => 'AziB', 'departures' => '23:59', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
 $pt_b = is_int( $pt_r ) ? $wpdb->insert( LBB_Bookings::table(), array( 'token' => wp_generate_password( 32, false ), 'route_id' => $pt_r, 'travel_date' => LBB_Settings::today(), 'dep_time' => '23:59', 'seats' => 3, 'children' => 0, 'passengers' => '[]', 'phone' => '', 'email' => '', 'amount' => 150, 'currency' => 'MDL', 'status' => 'reserved', 'ticket_code' => 'LB-AZI' . wp_rand( 100, 999 ), 'created_at' => gmdate( 'Y-m-d H:i:s' ), 'updated_at' => gmdate( 'Y-m-d H:i:s' ) ) ) : false;
 $pt_after = LBB_Admin::stats()['seats_today'];
+$pt_tom = is_int( $pt_r ) ? $wpdb->insert( LBB_Bookings::table(), array( 'token' => wp_generate_password( 32, false ), 'route_id' => $pt_r, 'travel_date' => $tomorrow, 'dep_time' => '23:59', 'seats' => 2, 'children' => 0, 'passengers' => '[]', 'phone' => '', 'email' => '', 'amount' => 100, 'currency' => 'MDL', 'status' => 'confirmed', 'ticket_code' => 'LB-MAI' . wp_rand( 100, 999 ), 'created_at' => gmdate( 'Y-m-d H:i:s' ), 'updated_at' => gmdate( 'Y-m-d H:i:s' ) ) ) : false;
+$pt_tom_after = LBB_Admin::stats()['seats_tomorrow'];
 ob_start();
 LBB_Admin::page_dashboard();
 $pt_html = ob_get_clean();
@@ -880,6 +883,7 @@ if ( is_int( $pt_r ) ) {
 	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $pt_r ) );
 	LBB_Routes::delete( $pt_r );
 }
+lbb_t( 'panoul arată și pasagerii de mâine, cu link spre lista de mâine', 1 === $pt_tom && $pt_tom_before + 2 === $pt_tom_after && (bool) preg_match( '#lbb-card-tomorrow" href="[^"]*page=lbb-manifest&(amp;|\#038;)date=' . $tomorrow . '"><b>' . $pt_tom_after . '</b>Pasageri mâine#u', $pt_html ), array( $pt_tom, $pt_tom_before, $pt_tom_after ) );
 lbb_t( 'panoul arată pasagerii de azi (plătiți + la urcare), cu link spre lista pentru șofer', 1 === $pt_b && $pt_before + 3 === $pt_after && (bool) preg_match( '#<a class="lbb-card lbb-card-today" href="[^"]*page=lbb-manifest"><b>' . $pt_after . '</b>Pasageri azi#u', $pt_html ), array( $pt_b, $pt_before, $pt_after, $wpdb->last_error ) );
 
 // Prețul rutei scris cu spațiu sau punct la mii („1 200”, „1.200”) nu devine 1 MDL.
