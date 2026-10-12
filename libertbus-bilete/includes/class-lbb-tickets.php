@@ -130,6 +130,10 @@ class LBB_Tickets {
 			return 0;
 		}
 		$tomorrow = $now->modify( '+1 day' )->format( 'Y-m-d' );
+		// Zi fără curse (sărbătoare, cursă anulată): un „vă reamintim de cursa de mâine” ar fi fals; biroul îi anunță.
+		if ( in_array( $tomorrow, LBB_Settings::closed_dates(), true ) ) {
+			return 0;
+		}
 		$ids      = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM ' . LBB_Bookings::table() . " WHERE travel_date = %s AND status IN ('confirmed','reserved') AND ticket_code <> '' AND email <> '' AND reminded_at IS NULL ORDER BY id LIMIT 50", $tomorrow ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$sent     = 0;
 		foreach ( $ids as $id ) {
@@ -140,7 +144,11 @@ class LBB_Tickets {
 				continue;
 			}
 			$route  = LBB_Routes::get( $booking['route_id'] );
-			$name   = LBB_Bookings::route_name( $route ? $route : array() );
+			// Ora sau ziua au fost scoase din orar după vânzare (biroul a fost avertizat la salvare): fără reamintire.
+			if ( ! $route || ! in_array( $booking['dep_time'], $route['times'], true ) || ! in_array( (int) gmdate( 'N', strtotime( $tomorrow . ' 12:00 UTC' ) ), $route['days'], true ) ) {
+				continue;
+			}
+			$name   = LBB_Bookings::route_name( $route );
 			$office = LBB_Settings::get( 'company_email' );
 			$office = is_email( $office ) ? $office : get_option( 'admin_email' );
 			$intro  = 'reserved' === $booking['status']
