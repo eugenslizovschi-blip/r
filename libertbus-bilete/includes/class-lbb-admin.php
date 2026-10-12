@@ -527,6 +527,11 @@ class LBB_Admin {
 			echo '</p></div>';
 			return;
 		}
+		// Zi închisă în Setări, dar cu bilete vândute înainte: pasagerii trebuie anunțați.
+		if ( in_array( $date, LBB_Settings::closed_dates(), true ) ) {
+			echo '<div class="notice notice-warning inline lbb-closed-day"><p>' . esc_html__( 'Această zi e trecută la „Zile fără curse”, dar are bilete sau rezervări. Anunțați pasagerii de mai jos sau scoateți ziua din', 'libertbus-bilete' )
+				. ' <a href="' . esc_url( admin_url( 'admin.php?page=lbb-settings' ) ) . '">' . esc_html__( 'Setări', 'libertbus-bilete' ) . '</a>.</p></div>';
+		}
 		$total = 0;
 		// Mai multe curse în aceeași zi: totalul de jos le adună pe toate, deci arătăm și locurile pe fiecare autobuz.
 		$per_trip = LBB_Bookings::departure_totals( $rows );
