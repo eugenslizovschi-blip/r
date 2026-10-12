@@ -830,6 +830,7 @@ class LBB_Admin {
 				$num( 'max_passengers', __( 'Maxim pasageri pe o rezervare', 'libertbus-bilete' ) );
 				$num( 'cutoff_minutes', __( 'Închide vânzarea cu (minute) înainte de plecare', 'libertbus-bilete' ) );
 				$num( 'max_days_ahead', __( 'Vânzare cu cel mult (zile) înainte', 'libertbus-bilete' ) );
+				$text( 'closed_dates', __( 'Zile fără curse', 'libertbus-bilete' ), __( 'Ex. sărbători: 25.12.2026, 01.01.2027. În aceste zile nu se vând bilete pe nicio rută; biletele deja vândute rămân.', 'libertbus-bilete' ) );
 				$num( 'cart_hold_minutes', __( 'Locurile se țin în coș (minute)', 'libertbus-bilete' ) );
 				$num( 'payment_minutes', __( 'Locurile se țin cât se așteaptă plata (minute)', 'libertbus-bilete' ), __( 'După acest timp, dacă banca nu a confirmat plata, locurile se eliberează.', 'libertbus-bilete' ) );
 				$check( 'allow_pay', __( 'Plata online cu cardul', 'libertbus-bilete' ), __( 'Arată butonul „Achit online cu cardul”. Porniți-l doar după ce metoda de plată a băncii (ex. Paynet) e activă și testată.', 'libertbus-bilete' ) );
@@ -894,7 +895,24 @@ class LBB_Admin {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_save_settings' ) ) {
 			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
 		}
-		LBB_Settings::save( wp_unslash( $_POST ) );
-		self::redirect( 'lbb-settings', __( 'Setările au fost salvate.', 'libertbus-bilete' ) );
+		$data = wp_unslash( $_POST );
+		LBB_Settings::save( $data );
+		$msg    = __( 'Setările au fost salvate.', 'libertbus-bilete' );
+		$closed = LBB_Settings::parse_dates( isset( $data['closed_dates'] ) ? $data['closed_dates'] : '' );
+		if ( $closed['bad'] ) {
+			/* translators: %s: textele care nu sunt date */
+			$msg .= ' ' . sprintf( __( 'Atenție: aceste zile fără curse nu au fost înțelese și nu s-au salvat: %s. Scrieți-le ca 25.12.2026.', 'libertbus-bilete' ), implode( ', ', $closed['bad'] ) );
+		}
+		// Biletele deja vândute pentru o zi închisă rămân: biroul trebuie să-i anunțe pe pasageri.
+		$sold = LBB_Bookings::sold_on_dates( $closed['dates'] );
+		if ( $sold ) {
+			$list = array();
+			foreach ( $sold as $date => $n ) {
+				$list[] = gmdate( 'd.m.Y', strtotime( $date . ' 12:00' ) ) . ' (' . $n . ')';
+			}
+			/* translators: %s: zilele cu bilete, ex. „25.12.2026 (3)” */
+			$msg .= ' ' . sprintf( __( 'Atenție: în aceste zile fără curse există deja bilete sau rezervări: %s. Anunțați pasagerii (lista e în Pasageri).', 'libertbus-bilete' ), implode( ', ', $list ) );
+		}
+		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold );
 	}
 }

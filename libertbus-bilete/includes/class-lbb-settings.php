@@ -24,6 +24,7 @@ class LBB_Settings {
 			'cutoff_minutes'     => 60,
 			'max_days_ahead'     => 90,
 			'max_passengers'     => 8,
+			'closed_dates'       => '',
 			'rate_MDL'           => 1,
 			'rate_RON'           => 3.9,
 			'rate_EUR'           => 19.5,
@@ -91,6 +92,10 @@ class LBB_Settings {
 				$value = max( 0, (int) $value );
 			} elseif ( 'ticket_notes' === $key || 'company_address' === $key ) {
 				$value = sanitize_textarea_field( $value );
+			} elseif ( 'closed_dates' === $key ) {
+				$value = implode( ', ', array_map( function ( $d ) {
+					return gmdate( 'd.m.Y', strtotime( $d . ' 12:00' ) );
+				}, self::parse_dates( $value )['dates'] ) );
 			} elseif ( 'company_email' === $key ) {
 				$value = sanitize_email( $value );
 			} else {
@@ -109,6 +114,47 @@ class LBB_Settings {
 		$clean['cart_hold_minutes'] = max( 5, $clean['cart_hold_minutes'] );
 		$clean['payment_minutes'] = max( 10, $clean['payment_minutes'] );
 		update_option( self::OPTION, $clean );
+	}
+
+	/**
+	 * „25.12.2026, 1/1/2027 2027-01-07” → datele valabile (Y-m-d, sortate, fără cele trecute) și ce n-a fost înțeles.
+	 *
+	 * @return array{dates:string[],bad:string[]}
+	 */
+	public static function parse_dates( $text ) {
+		$dates = array();
+		$bad   = array();
+		$today = self::today();
+		foreach ( preg_split( '/[\s,;]+/', (string) $text, -1, PREG_SPLIT_NO_EMPTY ) as $part ) {
+			if ( preg_match( '/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})$/', $part, $m ) ) {
+				list( $y, $mo, $d ) = array( (int) $m[3], (int) $m[2], (int) $m[1] );
+			} elseif ( preg_match( '/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $part, $m ) ) {
+				list( $y, $mo, $d ) = array( (int) $m[1], (int) $m[2], (int) $m[3] );
+			} else {
+				$bad[] = $part;
+				continue;
+			}
+			if ( ! checkdate( $mo, $d, $y ) ) {
+				$bad[] = $part;
+				continue;
+			}
+			$date = sprintf( '%04d-%02d-%02d', $y, $mo, $d );
+			if ( $date >= $today ) {
+				$dates[] = $date;
+			}
+		}
+		$dates = array_values( array_unique( $dates ) );
+		sort( $dates );
+		return array( 'dates' => $dates, 'bad' => $bad );
+	}
+
+	/**
+	 * Zilele fără curse (sărbători, curse anulate): în acestea nu se vinde nimic, pe nicio rută.
+	 *
+	 * @return string[] Y-m-d
+	 */
+	public static function closed_dates() {
+		return self::parse_dates( self::get( 'closed_dates' ) )['dates'];
 	}
 
 	public static function checkboxes() {

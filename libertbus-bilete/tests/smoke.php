@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -813,6 +813,32 @@ $cr_base = array( 'ticket_code' => 'LB-T1', 'passengers' => array( 'Ion Pop' ), 
 $cr_res  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[0], $cr_base, array( 'passengers' => array( 'Ion Pop', 'Ana Pop' ), 'currency' => 'RON', 'pay_currency' => 'RON', 'amount' => 30.5 ) ) );
 $cr_onl  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[1], $cr_base ) );
 lbb_t( 'CSV-ul listei de pasageri are suma de încasat și moneda în coloane separate (goale la plata online)', 13 === count( $cr_res ) && 'la urcare 30.5 RON' === $cr_res[9] && 30.5 === $cr_res[11] && 'RON' === $cr_res[12] && 'online' === $cr_onl[9] && '' === $cr_onl[11] && '' === $cr_onl[12], array( $cr_res, $cr_onl ) );
+
+// Zile fără curse (sărbători): în setări, cu date scrise ca 25.12.2026 / 2026-12-25; în aceste zile nu se vinde nimic.
+$zc_p = LBB_Settings::parse_dates( '25.12.2099, 1/1/2100 2099-12-26 32.01.2099 abc 01.01.2000 25.12.2099' );
+lbb_t( 'zile fără curse: datele se înțeleg în mai multe forme, cele greșite se semnalează, cele trecute se ignoră', array( '2099-12-25', '2099-12-26', '2100-01-01' ) === $zc_p['dates'] && array( '32.01.2099', 'abc' ) === $zc_p['bad'], $zc_p );
+$zc_keep = get_option( 'lbb_settings' );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'closed_dates' => '2099-12-26; 25.12.2099 nu' ) ) );
+$zc_saved = LBB_Settings::get( 'closed_dates' );
+$zc_r  = LBB_Routes::save( array( 'origin' => 'InchisA', 'destination' => 'InchisB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$zc_rt = is_int( $zc_r ) ? LBB_Routes::get( $zc_r ) : null;
+$zc_open = $zc_rt ? count( LBB_Routes::departures_on( $zc_rt, $tomorrow ) ) : 0;
+$zc_b  = $zc_rt ? LBB_Bookings::create_hold( $zc_rt, $tomorrow, '10:00', 1, 0, array( 'Inchis Unu' ), '+37369000095', 'zc@example.com', 'MDL' ) : null;
+$zc_b  = is_array( $zc_b ) ? LBB_Bookings::reserve( $zc_b['token'] ) : $zc_b;
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'closed_dates' => gmdate( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) ) ) ) );
+$zc_closed = $zc_rt ? LBB_Routes::departures_on( $zc_rt, $tomorrow ) : null;
+$zc_hold   = $zc_rt ? LBB_Bookings::create_hold( $zc_rt, $tomorrow, '10:00', 1, 0, array( 'Inchis Doi' ), '+37369000096', 'zc@example.com', 'MDL' ) : null;
+$zc_req    = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
+$zc_req->set_query_params( array( 'route_id' => $zc_r, 'date' => $tomorrow ) );
+$zc_rest   = rest_do_request( $zc_req )->get_data();
+$zc_sold   = LBB_Bookings::sold_on_dates( array( $tomorrow, '2099-12-26' ) );
+update_option( 'lbb_settings', $zc_keep );
+if ( is_int( $zc_r ) ) {
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $zc_r ) );
+	LBB_Routes::delete( $zc_r );
+}
+lbb_t( 'zile fără curse: se salvează ca 26.12.2099, 25.12.2099 → sortate, în formatul de pe ecran', '25.12.2099, 26.12.2099' === $zc_saved, $zc_saved );
+lbb_t( 'într-o zi fără curse nu se arată plecări și nu se poate rezerva; rezervarea făcută înainte se vede la avertizare', 1 === $zc_open && array() === $zc_closed && is_wp_error( $zc_hold ) && array() === ( $zc_rest['departures'] ?? null ) && ( $zc_sold[ $tomorrow ] ?? 0 ) >= 1 && array( $tomorrow ) === array_keys( $zc_sold ), array( $zc_open, $zc_closed, $zc_hold, $zc_rest, $zc_sold ) );
 
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );

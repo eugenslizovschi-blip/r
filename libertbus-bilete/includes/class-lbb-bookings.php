@@ -354,6 +354,29 @@ class LBB_Bookings {
 		return self::hydrate( $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE ticket_code = %s', $code ), ARRAY_A ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
+	/**
+	 * Câte bilete plătite și rezervări la urcare (rânduri) are fiecare dintre zilele date: [ Y-m-d => n ].
+	 */
+	public static function sold_on_dates( array $dates ) {
+		global $wpdb;
+		$dates = array_values( array_filter( $dates, function ( $d ) {
+			return (bool) preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d );
+		} ) );
+		if ( ! $dates ) {
+			return array();
+		}
+		$in   = implode( ',', array_map( function ( $d ) use ( $wpdb ) {
+			return $wpdb->prepare( '%s', $d );
+		}, $dates ) );
+		$sql  = 'SELECT travel_date, COUNT(*) AS n FROM ' . self::table() . " WHERE status IN ('confirmed','reserved') AND travel_date IN ($in) GROUP BY travel_date ORDER BY travel_date";
+		$rows = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fiecare dată e trecută prin $wpdb->prepare() mai sus.
+		$out  = array();
+		foreach ( (array) $rows as $row ) {
+			$out[ $row['travel_date'] ] = (int) $row['n'];
+		}
+		return $out;
+	}
+
 	public static function by_order( $order_id ) {
 		global $wpdb;
 		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE order_id = %d ORDER BY id', $order_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared

@@ -278,7 +278,7 @@ class LBB_Routes {
 		if ( ! $day || $day->format( 'Y-m-d' ) !== $date ) {
 			return array();
 		}
-		if ( ! in_array( (int) $day->format( 'N' ), $route['days'], true ) ) {
+		if ( ! in_array( (int) $day->format( 'N' ), $route['days'], true ) || in_array( $date, LBB_Settings::closed_dates(), true ) ) {
 			return array();
 		}
 		$now      = new DateTimeImmutable( 'now', $tz );
