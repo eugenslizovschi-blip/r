@@ -380,6 +380,7 @@ class LBB_Frontend {
 				'noDeparture' => __( 'În ziua aleasă nu sunt plecări pe această rută. Alegeți altă dată.', 'libertbus-bilete' ),
 				/* translators: %s: zilele săptămânii în care circulă ruta, ex. „luni, joi” */
 				'runsOn'      => __( 'Ruta circulă doar: %s.', 'libertbus-bilete' ),
+				'boarding'    => __( 'Loc de urcare', 'libertbus-bilete' ),
 				'closedDay'   => __( 'În ziua aleasă nu sunt curse (zi liberă). Alegeți altă dată.', 'libertbus-bilete' ),
 				'dayNames'    => array_merge( array( '' ), array_values( LBB_Routes::day_names() ) ),
 				// „luni, 12 octombrie” sub câmpul de dată: pe telefoanele în engleză data apare 10/12/2026 (lună/zi).

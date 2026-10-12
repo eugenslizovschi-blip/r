@@ -354,6 +354,7 @@ class LBB_Routes {
 				'pay_cur'     => LBB_Settings::default_pay_currency( $route['currency'] ),
 				'times'       => $route['times'],
 				'days'        => $route['days'],
+				'boarding'    => $route['boarding'],
 			);
 		}
 		uksort( $map, array( __CLASS__, 'compare_cities' ) );

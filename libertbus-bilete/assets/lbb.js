@@ -479,6 +479,13 @@
 				? unit( false ) + ' / ' + t.adult + ' · ' + unit( true ) + ' / ' + t.child
 				: unit( false ) + ' / ' + t.passenger.toLowerCase() ) + ( approx.length ? ' · ' + t.approxNote : '' );
 			el.summary.appendChild( line );
+			// Unde se urcă (autogara, peronul), înainte de plată: altfel clientul sună să întrebe.
+			if ( route.boarding ) {
+				var board = document.createElement( 'div' );
+				board.className = 'lbb-summary-boarding';
+				board.textContent = t.boarding + ': ' + route.boarding;
+				el.summary.appendChild( board );
+			}
 			el.summary.appendChild( price );
 			el.summary.appendChild( note );
 			el.summary.hidden = false;

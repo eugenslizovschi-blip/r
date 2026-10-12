@@ -903,12 +903,21 @@ $bd_b = array( 'route_id' => $bd_r, 'travel_date' => $tomorrow, 'dep_time' => '1
 $bd_d = is_int( $bd_r ) ? LBB_WooCommerce::describe( $bd_b ) : array();
 $bd_i = is_int( $bd_r ) ? LBB_Tickets::ics( $bd_b ) : '';
 $bd_h = is_int( $bd_r ) ? LBB_Tickets::html( $bd_b ) : '';
+$bd_m = array();
+foreach ( LBB_Routes::public_map() as $bd_o => $bd_list ) {
+	foreach ( $bd_list as $bd_x ) {
+		if ( $bd_x['id'] === $bd_r ) {
+			$bd_m = $bd_x;
+		}
+	}
+}
 $bd_e = is_int( $bd_r ) ? LBB_Routes::save( array_merge( LBB_Routes::get( $bd_r ), array( 'departures' => '10:00', 'boarding' => '' ) ), $bd_r ) : null;
 $bd_n = is_int( $bd_r ) ? LBB_WooCommerce::describe( $bd_b ) : array();
 $bd_i2 = is_int( $bd_r ) ? LBB_Tickets::ics( $bd_b ) : '';
 if ( is_int( $bd_r ) ) {
 	LBB_Routes::delete( $bd_r );
 }
+lbb_t( 'locul de urcare ajunge și în formular (rezumatul de dinainte de plată)', 'Autogara Nord, peronul 3' === ( $bd_m['boarding'] ?? null ) && false !== strpos( (string) file_get_contents( LBB_DIR . 'assets/lbb.js' ), "t.boarding + ': ' + route.boarding" ), $bd_m );
 lbb_t( 'locul de urcare al rutei apare pe bilet și în calendar; fără el, rândul lipsește și calendarul are orașul', 'Autogara Nord, peronul 3' === ( $bd_d['Loc de urcare'] ?? null ) && false !== strpos( $bd_h, 'Autogara Nord, peronul 3' ) && false !== strpos( $bd_i, "LOCATION:Autogara Nord\\, peronul 3\r\n" ) && ! isset( $bd_n['Loc de urcare'] ) && false !== strpos( $bd_i2, "LOCATION:UrcareA\r\n" ), array( $bd_d, $bd_n, $bd_e ) );
 
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
