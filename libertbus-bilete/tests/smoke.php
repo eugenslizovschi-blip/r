@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -861,6 +861,20 @@ $fc_k->set_billing_email( 'cont@example.com' );
 $fc_k->set_billing_first_name( 'Ion' );
 LBB_WooCommerce::fill_customer( $fc_k, array( 'name' => 'Ana Pop', 'phone' => '+37369000097', 'email' => 'fc@example.com' ) );
 lbb_t( 'clientul WooCommerce primește numele, telefonul și emailul din formular, fără să le suprascrie pe cele existente', true === $fc_1 && 'Ana' === $fc_c->get_billing_first_name() && 'Maria Pop' === $fc_c->get_billing_last_name() && '+37369000097' === $fc_c->get_billing_phone() && 'fc@example.com' === $fc_c->get_billing_email() && 'cont@example.com' === $fc_k->get_billing_email() && 'Ion' === $fc_k->get_billing_first_name() && 'Pop' === $fc_k->get_billing_last_name() && false === LBB_WooCommerce::fill_customer( null, array() ) );
+
+// Panoul principal: câți pasageri sunt azi (plătiți + la urcare), cu link spre lista pentru șofer.
+$pt_before = LBB_Admin::stats()['seats_today'];
+$pt_r = LBB_Routes::save( array( 'origin' => 'AziA', 'destination' => 'AziB', 'departures' => '23:59', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$pt_b = is_int( $pt_r ) ? $wpdb->insert( LBB_Bookings::table(), array( 'token' => wp_generate_password( 32, false ), 'route_id' => $pt_r, 'travel_date' => LBB_Settings::today(), 'dep_time' => '23:59', 'seats' => 3, 'children' => 0, 'passengers' => '[]', 'phone' => '', 'email' => '', 'amount' => 150, 'currency' => 'MDL', 'status' => 'reserved', 'ticket_code' => 'LB-AZI' . wp_rand( 100, 999 ), 'created_at' => gmdate( 'Y-m-d H:i:s' ), 'updated_at' => gmdate( 'Y-m-d H:i:s' ) ) ) : false;
+$pt_after = LBB_Admin::stats()['seats_today'];
+ob_start();
+LBB_Admin::page_dashboard();
+$pt_html = ob_get_clean();
+if ( is_int( $pt_r ) ) {
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $pt_r ) );
+	LBB_Routes::delete( $pt_r );
+}
+lbb_t( 'panoul arată pasagerii de azi (plătiți + la urcare), cu link spre lista pentru șofer', 1 === $pt_b && $pt_before + 3 === $pt_after && (bool) preg_match( '#<a class="lbb-card lbb-card-today" href="[^"]*page=lbb-manifest"><b>' . $pt_after . '</b>Pasageri azi#u', $pt_html ), array( $pt_b, $pt_before, $pt_after, $wpdb->last_error ) );
 
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );

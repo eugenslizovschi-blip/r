@@ -265,6 +265,8 @@ class LBB_Admin {
 			'seats_upcoming'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'confirmed' AND travel_date >= %s", LBB_Settings::today() ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'seats_reserved'     => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status = 'reserved' AND travel_date >= %s", LBB_Settings::today() ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'pending_payment'    => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $t WHERE status = 'pending' AND expires_at > %s", gmdate( 'Y-m-d H:i:s' ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// Pasagerii de azi (plătiți online sau cu plata la urcare): primul lucru pe care îl caută biroul dimineața.
+			'seats_today'        => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(seats),0) FROM $t WHERE status IN ('confirmed','reserved') AND travel_date = %s", LBB_Settings::today() ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 	}
 
@@ -277,7 +279,7 @@ class LBB_Admin {
 			$type = isset( $_GET['lbb_err'] ) ? 'error' : 'success'; // phpcs:ignore WordPress.Security.NonceVerification
 			echo '<div class="notice notice-' . esc_attr( $type ) . ' is-dismissible"><p>' . esc_html( $msg ) . '</p></div>';
 		}
-		echo '<style>.lbb-admin .lbb-check td{vertical-align:top}.lbb-ok{color:#16632f;font-weight:700}.lbb-warn{color:#996800;font-weight:700}.lbb-bad{color:#b32d2e;font-weight:700}.lbb-admin .lbb-cards{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}.lbb-admin .lbb-card{background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;min-width:150px}.lbb-admin .lbb-card b{display:block;font-size:22px}.lbb-admin .lbb-days label{margin-right:8px}.lbb-admin .lbb-print-only{display:none}@media print{.lbb-admin .lbb-print-only{display:table-cell!important;width:3em;text-align:center}.lbb-admin .lbb-box{display:inline-block;width:16px;height:16px;border:1.5px solid #000}#adminmenumain,#wpadminbar,#wpfooter,.update-nag,.lbb-noprint,.notice{display:none!important}#wpcontent{margin:0!important}}</style>';
+		echo '<style>.lbb-admin .lbb-check td{vertical-align:top}.lbb-ok{color:#16632f;font-weight:700}.lbb-warn{color:#996800;font-weight:700}.lbb-bad{color:#b32d2e;font-weight:700}.lbb-admin .lbb-cards{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}.lbb-admin .lbb-card{background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;min-width:150px}.lbb-admin .lbb-card b{display:block;font-size:22px}.lbb-admin a.lbb-card-today{text-decoration:none;color:inherit;border-color:#2271b1}.lbb-admin a.lbb-card-today:hover,.lbb-admin a.lbb-card-today:focus{border-color:#135e96;box-shadow:0 0 0 1px #135e96}.lbb-admin a.lbb-card-today b{color:#2271b1}.lbb-admin .lbb-days label{margin-right:8px}.lbb-admin .lbb-print-only{display:none}@media print{.lbb-admin .lbb-print-only{display:table-cell!important;width:3em;text-align:center}.lbb-admin .lbb-box{display:inline-block;width:16px;height:16px;border:1.5px solid #000}#adminmenumain,#wpadminbar,#wpfooter,.update-nag,.lbb-noprint,.notice{display:none!important}#wpcontent{margin:0!important}}</style>';
 	}
 
 	private static function redirect( $page, $msg, $error = false, $extra = array() ) {
@@ -293,6 +295,8 @@ class LBB_Admin {
 		self::header( __( 'LibertBus — gata de plăți cu cardul?', 'libertbus-bilete' ) );
 		$stats = self::stats();
 		echo '<div class="lbb-cards">';
+		// Prima carte duce direct la lista pentru șofer de azi.
+		echo '<a class="lbb-card lbb-card-today" href="' . esc_url( admin_url( 'admin.php?page=lbb-manifest' ) ) . '"><b>' . esc_html( $stats['seats_today'] ) . '</b>' . esc_html__( 'Pasageri azi — vezi lista', 'libertbus-bilete' ) . '</a>';
 		foreach ( array(
 			'routes_active'     => __( 'Rute active', 'libertbus-bilete' ),
 			'seats_upcoming'    => __( 'Locuri achitate online (curse viitoare)', 'libertbus-bilete' ),
