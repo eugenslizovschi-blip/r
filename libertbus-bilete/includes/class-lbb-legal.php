@@ -30,7 +30,7 @@ class LBB_Legal {
 			return;
 		}
 		$id   = self::page_id( 'privacy' );
-		$text = '<p>' . esc_html__( 'Rezervarea și biletul: numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri și codul biletului. Scop: rezervarea locului, emiterea biletului și lista de îmbarcare. Temei: executarea contractului de transport.', 'libertbus-bilete' ) . '</p>'
+		$text = '<p>' . esc_html__( 'Rezervarea și biletul: numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri și codul biletului. Scop: rezervarea locului, emiterea biletului, reamintirea cursei (dacă e pornită) și lista de îmbarcare. Temei: executarea contractului de transport.', 'libertbus-bilete' ) . '</p>'
 			. '<p>' . esc_html__( 'Păstrare: la 3 ani după data cursei, numele, telefonul și emailul se șterg automat din rezervare. La cererea clientului, datele se exportă sau se șterg din Unelte → Exportă / Șterge datele personale; un bilet valabil pentru o cursă viitoare se păstrează până după cursă.', 'libertbus-bilete' ) . '</p>'
 			. '<p>' . esc_html__( 'Datele cardului nu ajung pe site: se introduc doar pe pagina procesatorului de plăți.', 'libertbus-bilete' ) . '</p>';
 		if ( $id ) {
@@ -298,7 +298,7 @@ HTML;
 <p>[lbb_firma_date]</p>
 <h2>2. Ce date prelucrăm, de ce, pe ce temei și cât timp</h2>
 <ul>
-<li><strong>Rezervarea și biletul:</strong> numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri, codul biletului. Scop: rezervarea locului, emiterea biletului, lista de îmbarcare, anunțarea schimbărilor de cursă. Temei: executarea contractului de transport. Păstrare: 3 ani de la data călătoriei, cu excepția documentelor contabile.</li>
+<li><strong>Rezervarea și biletul:</strong> numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri, codul biletului. Scop: rezervarea locului, emiterea biletului, lista de îmbarcare, reamintirea cursei cu o zi înainte, anunțarea schimbărilor de cursă. Temei: executarea contractului de transport. Păstrare: 3 ani de la data călătoriei, cu excepția documentelor contabile.</li>
 <li><strong>Plata:</strong> suma, moneda, data și rezultatul plății, codul tranzacției. Datele cardului nu ajung la noi: le introduceți doar pe pagina procesatorului de plăți. Temei: executarea contractului și obligația legală (contabilitate, fiscalitate). Păstrare: cât cere legislația contabilă și fiscală.</li>
 <li><strong>Mesajele trimise prin formularele site-ului, telefon sau Viber:</strong> numele, telefonul, emailul și conținutul mesajului. Scop: să vă răspundem și să pregătim rezervarea. Temei: demersuri la cererea dumneavoastră înainte de contract și interesul nostru legitim de a răspunde. Păstrare: cel mult 1 an.</li>
 <li><strong>Securitatea site-ului:</strong> adresa IP, tipul browserului, paginile accesate, încercările de autentificare. Scop: protecția împotriva atacurilor și a abuzurilor. Temei: interes legitim. Păstrare: cel mult 90 de zile.</li>
