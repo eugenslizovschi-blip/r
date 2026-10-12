@@ -19,6 +19,7 @@ class LBB_Admin {
 		add_action( 'admin_post_lbb_manifest_csv', array( __CLASS__, 'manifest_csv' ) );
 		add_action( 'admin_post_lbb_cancel_booking', array( __CLASS__, 'cancel_booking' ) );
 		add_action( 'admin_post_lbb_new_preview_link', array( __CLASS__, 'new_preview_link' ) );
+		add_action( 'woocommerce_admin_order_data_after_order_details', array( __CLASS__, 'order_tickets' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'rest' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( LBB_FILE ), function ( $links ) {
 			array_unshift( $links, '<a href="' . esc_url( admin_url( 'admin.php?page=lbb' ) ) . '">' . esc_html__( 'Panou', 'libertbus-bilete' ) . '</a>' );
@@ -676,6 +677,31 @@ class LBB_Admin {
 		$reserved = 'reserved' === $b['status'];
 		$plata    = $reserved ? 'la urcare ' . $amount . ' ' . $cur : 'online';
 		return array( $date, $b['dep_time'], $b['origin'], $b['destination'], $b['ticket_code'], $b['seats'], implode( '; ', LBB_Bookings::passenger_labels( $b ) ), $b['phone'], $b['email'], $plata, $b['order_id'], $reserved ? $amount : '', $reserved ? $cur : '' );
+	}
+
+	/**
+	 * Pe pagina comenzii din WooCommerce: biletele comenzii (cod, cursă, stare) cu linkul spre fiecare bilet,
+	 * ca biroul să le poată deschide sau retrimite clientului direct din comandă.
+	 */
+	public static function order_tickets( $order ) {
+		if ( ! is_object( $order ) || ! method_exists( $order, 'get_id' ) || ! current_user_can( self::cap() ) ) {
+			return;
+		}
+		$rows = LBB_Bookings::by_order( $order->get_id() );
+		if ( ! $rows ) {
+			return;
+		}
+		echo '<div class="form-field form-field-wide lbb-order-tickets"><h3>' . esc_html__( 'Bilete LibertBus', 'libertbus-bilete' ) . '</h3><ul>';
+		foreach ( $rows as $b ) {
+			$r     = LBB_Routes::get( $b['route_id'] );
+			$route = LBB_Bookings::route_name( $r ? array_merge( $b, array( 'origin' => $r['origin'], 'destination' => $r['destination'] ) ) : $b );
+			$when  = wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'];
+			$code  = $b['ticket_code'] ? '<a href="' . esc_url( LBB_Tickets::url( $b['ticket_code'] ) ) . '" target="_blank" rel="noopener">' . esc_html( $b['ticket_code'] ) . '</a>' : esc_html__( '(fără cod încă)', 'libertbus-bilete' );
+			/* translators: %d: numărul de locuri */
+			$seats = sprintf( _n( '%d loc', '%d locuri', $b['seats'], 'libertbus-bilete' ), $b['seats'] );
+			echo '<li>' . $code . ' — ' . esc_html( $route . ', ' . $when . ', ' . $seats ) . '<br><small>' . esc_html( LBB_Tickets::state( $b )['text'] ) . '</small></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $code e escapat mai sus.
+		}
+		echo '</ul></div>';
 	}
 
 	/**

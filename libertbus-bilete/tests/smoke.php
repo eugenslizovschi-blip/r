@@ -206,6 +206,23 @@ $notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $o2->get_id() )
 lbb_t( 'plata întârziată: biletul se emite', 'confirmed' === LBB_Bookings::get_by_token( $late['token'] )['status'] );
 lbb_t( 'plata întârziată: notă de avertizare', (bool) preg_grep( '/ATENȚIE/u', $notes ), $notes );
 lbb_t( 'comanda doar cu bilete se finalizează automat', 'completed' === $o2->get_status(), $o2->get_status() );
+// Pe pagina comenzii din WooCommerce, biroul vede biletele comenzii, cu linkul spre fiecare (doar cu drepturi de admin).
+$ot_user = get_current_user_id();
+$ot_late = LBB_Bookings::get_by_token( $late['token'] );
+ob_start();
+LBB_Admin::order_tickets( $o2 );
+$ot_none = ob_get_clean();
+wp_set_current_user( 1 );
+ob_start();
+LBB_Admin::order_tickets( $o2 );
+$ot_html = html_entity_decode( ob_get_clean(), ENT_QUOTES, 'UTF-8' );
+ob_start();
+$ot_eo = wc_create_order();
+LBB_Admin::order_tickets( $ot_eo );
+$ot_empty = ob_get_clean();
+$ot_eo->delete( true );
+wp_set_current_user( $ot_user );
+lbb_t( 'pagina comenzii WooCommerce arată biletele comenzii (cod cu link, cursă, locuri, stare)', '' === $ot_none && '' === $ot_empty && false !== strpos( $ot_html, 'Bilete LibertBus' ) && false !== strpos( $ot_html, 'href="' . LBB_Tickets::url( $ot_late['ticket_code'] ) . '"' ) && false !== strpos( $ot_html, $route['origin'] . ' → ' . $route['destination'] . ', ' . wp_date( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) ) . ' 10:00, 3 locuri' ) && false !== strpos( $ot_html, LBB_Tickets::state( $ot_late )['text'] ), array( $ot_none, $ot_empty, wp_strip_all_tags( $ot_html ) ) );
 
 // Emailul text al comenzii (clienți cu emailuri „doar text”): numele cu apostrof rămâne întreg după
 // curățarea făcută de WooCommerce, iar titlul e cu majuscule corecte.
