@@ -458,6 +458,10 @@ class LBB_Bookings {
 		if ( strlen( $digits ) >= 4 ) {
 			$or .= $wpdb->prepare( ' OR b.phone LIKE %s', '%' . $wpdb->esc_like( $digits ) . '%' );
 		}
+		// Numărul comenzii WooCommerce („#1234” din emailul de plată sau din Paynet) găsește biletele comenzii.
+		if ( preg_match( '/^#?\s*(\d{1,10})$/', $search, $m ) && (int) $m[1] > 0 ) {
+			$or .= $wpdb->prepare( ' OR b.order_id = %d', (int) $m[1] );
+		}
 		return " AND ( $or )";
 	}
 

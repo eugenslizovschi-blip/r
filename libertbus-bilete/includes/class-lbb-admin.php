@@ -735,8 +735,8 @@ class LBB_Admin {
 		if ( $status ) {
 			echo '<input type="hidden" name="status" value="' . esc_attr( $status ) . '">';
 		}
-		echo '<label class="screen-reader-text" for="lbb-q">' . esc_html__( 'Caută după cod, telefon, nume sau email', 'libertbus-bilete' ) . '</label>'
-			. '<input type="search" id="lbb-q" name="q" value="' . esc_attr( $search ) . '" placeholder="' . esc_attr__( 'Cod, telefon, nume, email', 'libertbus-bilete' ) . '"> '
+		echo '<label class="screen-reader-text" for="lbb-q">' . esc_html__( 'Caută după cod, telefon, nume, email sau numărul comenzii', 'libertbus-bilete' ) . '</label>'
+			. '<input type="search" id="lbb-q" name="q" value="' . esc_attr( $search ) . '" placeholder="' . esc_attr__( 'Cod, telefon, nume, email, nr. comandă', 'libertbus-bilete' ) . '"> '
 			. '<button class="button">' . esc_html__( 'Caută', 'libertbus-bilete' ) . '</button></form><br class="clear">';
 		$limit = max( 1, (int) apply_filters( 'lbb_bookings_list_limit', 200 ) );
 		$rows  = LBB_Bookings::recent( $limit, $status, $search );
@@ -764,7 +764,7 @@ class LBB_Admin {
 		// Lista are o limită: biroul trebuie să știe că rezervările mai vechi există și cum le găsește.
 		if ( count( $rows ) >= $limit ) {
 			/* translators: %d: câte rezervări arată lista */
-			echo '<p class="description lbb-list-limit">' . esc_html( sprintf( __( 'Se arată doar ultimele %d. Pentru o rezervare mai veche, căutați după cod, telefon, nume sau email.', 'libertbus-bilete' ), $limit ) ) . '</p>';
+			echo '<p class="description lbb-list-limit">' . esc_html( sprintf( __( 'Se arată doar ultimele %d. Pentru o rezervare mai veche, căutați după cod, telefon, nume, email sau numărul comenzii.', 'libertbus-bilete' ), $limit ) ) . '</p>';
 		}
 		echo '</div>';
 	}

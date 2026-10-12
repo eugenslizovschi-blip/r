@@ -987,6 +987,11 @@ lbb_t( 'căutare fără rezultat', array() === $sr_ids( 'zzqq-nimic' ) );
 $sr_h = LBB_Bookings::create_hold( LBB_Routes::get( $hp_rid ), $tomorrow, '10:00', 1, 0, array( 'Țîrdea Ștefan' ), '+37369555444', 'x@example.com' );
 lbb_t( 'căutare după nume cu diacritice', ! is_wp_error( $sr_h ) && in_array( (int) $sr_h['id'], $sr_ids( 'Țîrdea', 'hold' ), true ), $sr_h );
 lbb_t( 'căutarea păstrează filtrul de stare', ! is_wp_error( $sr_h ) && ! in_array( (int) $sr_h['id'], $sr_ids( 'Țîrdea', 'confirmed' ), true ) );
+// Numărul comenzii WooCommerce (din emailul de plată / Paynet), cu sau fără „#”.
+if ( ! is_wp_error( $sr_h ) ) {
+	$wpdb->update( LBB_Bookings::table(), array( 'order_id' => 987654321 ), array( 'id' => $sr_h['id'] ) );
+}
+lbb_t( 'căutare după numărul comenzii WooCommerce, cu sau fără #', ! is_wp_error( $sr_h ) && array( (int) $sr_h['id'] ) === $sr_ids( '#987654321', 'hold' ) && array( (int) $sr_h['id'] ) === $sr_ids( '987654321', 'hold' ) && ! in_array( (int) $sr_h['id'], $sr_ids( '#98765432', 'hold' ), true ), $sr_h );
 // O rezervare a cărei rută a fost ștearsă (după ultima cursă) apare cu „(rută ștearsă)”, nu cu „ → ” gol.
 $rd_rt = LBB_Routes::save( array( 'origin' => 'StearsaA', 'destination' => 'StearsaB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
 $rd_h  = is_int( $rd_rt ) ? LBB_Bookings::create_hold( LBB_Routes::get( $rd_rt ), $tomorrow, '10:00', 1, 0, array( 'Ruta Stearsa' ), '+37369000071', 'rd@example.com', 'MDL' ) : null;
