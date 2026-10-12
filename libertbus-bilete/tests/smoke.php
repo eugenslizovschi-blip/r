@@ -911,12 +911,18 @@ foreach ( LBB_Routes::public_map() as $bd_o => $bd_list ) {
 		}
 	}
 }
+$_GET = array( 'page' => 'lbb-routes' );
+ob_start();
+LBB_Admin::page_routes();
+$bd_list = ob_get_clean();
+$_GET = array();
 $bd_e = is_int( $bd_r ) ? LBB_Routes::save( array_merge( LBB_Routes::get( $bd_r ), array( 'departures' => '10:00', 'boarding' => '' ) ), $bd_r ) : null;
 $bd_n = is_int( $bd_r ) ? LBB_WooCommerce::describe( $bd_b ) : array();
 $bd_i2 = is_int( $bd_r ) ? LBB_Tickets::ics( $bd_b ) : '';
 if ( is_int( $bd_r ) ) {
 	LBB_Routes::delete( $bd_r );
 }
+lbb_t( 'lista de rute arată locul de urcare sub rută și câte rute active nu-l au', false !== strpos( $bd_list, '<span class="description lbb-boarding">Urcare: Autogara Nord, peronul 3</span>' ) && (bool) preg_match( '#lbb-no-boarding">\\d+ rut#u', $bd_list ), substr( wp_strip_all_tags( $bd_list ), 0, 300 ) );
 lbb_t( 'locul de urcare ajunge și în formular (rezumatul de dinainte de plată)', 'Autogara Nord, peronul 3' === ( $bd_m['boarding'] ?? null ) && false !== strpos( (string) file_get_contents( LBB_DIR . 'assets/lbb.js' ), "t.boarding + ': ' + route.boarding" ), $bd_m );
 lbb_t( 'locul de urcare al rutei apare pe bilet și în calendar; fără el, rândul lipsește și calendarul are orașul', 'Autogara Nord, peronul 3' === ( $bd_d['Loc de urcare'] ?? null ) && false !== strpos( $bd_h, 'Autogara Nord, peronul 3' ) && false !== strpos( $bd_i, "LOCATION:Autogara Nord\\, peronul 3\r\n" ) && ! isset( $bd_n['Loc de urcare'] ) && false !== strpos( $bd_i2, "LOCATION:UrcareA\r\n" ), array( $bd_d, $bd_n, $bd_e ) );
 

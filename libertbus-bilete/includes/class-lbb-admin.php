@@ -357,6 +357,14 @@ class LBB_Admin {
 		echo '<p><a class="button button-primary" href="' . esc_url( admin_url( 'admin.php?page=lbb-routes&add=1' ) ) . '">' . esc_html__( 'Adaugă rută', 'libertbus-bilete' ) . '</a> ';
 		/* translators: %s: moneda magazinului */
 		echo '<span class="description">' . esc_html( sprintf( __( 'Prețurile se încasează în %s; cele în altă monedă se convertesc după cursul din Setări.', 'libertbus-bilete' ), $currency ) ) . '</span></p>';
+		// Locul de urcare apare pe bilete: biroul vede câte rute active încă nu-l au.
+		$no_board = count( array_filter( LBB_Routes::all( true ), function ( $r ) {
+			return '' === $r['boarding'];
+		} ) );
+		if ( $no_board ) {
+			/* translators: %d: numărul de rute */
+			echo '<p class="description lbb-no-boarding">' . esc_html( sprintf( _n( '%d rută activă nu are „Locul de urcare” (de unde urcă pasagerii; apare pe bilet).', '%d rute active nu au „Locul de urcare” (de unde urcă pasagerii; apare pe bilet).', $no_board, 'libertbus-bilete' ), $no_board ) ) . '</p>';
+		}
 		self::stack_table_style( 'lbb-routes-table', array( __( 'Ruta', 'libertbus-bilete' ), __( 'Ore', 'libertbus-bilete' ), __( 'Zile', 'libertbus-bilete' ), __( 'Preț', 'libertbus-bilete' ), __( 'Locuri/cursă', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ) ) );
 		echo '<table class="widefat striped lbb-routes-table"><thead><tr><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ore', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Zile', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Preț', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri/cursă', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
 		$day_names = self::day_names();
@@ -369,7 +377,8 @@ class LBB_Admin {
 				$price .= ' ≈ ' . wc_format_decimal( LBB_Settings::convert( $r['price'], $r['currency'] ), 2 ) . ' ' . $currency;
 			}
 			$edit = admin_url( 'admin.php?page=lbb-routes&edit=' . $r['id'] );
-			echo '<tr><td><a href="' . esc_url( $edit ) . '"><strong>' . esc_html( $r['origin'] . ' → ' . $r['destination'] ) . '</strong></a></td>';
+			echo '<tr><td><a href="' . esc_url( $edit ) . '"><strong>' . esc_html( $r['origin'] . ' → ' . $r['destination'] ) . '</strong></a>'
+				. ( '' !== $r['boarding'] ? '<br><span class="description lbb-boarding">' . esc_html__( 'Urcare', 'libertbus-bilete' ) . ': ' . esc_html( $r['boarding'] ) . '</span>' : '' ) . '</td>';
 			echo '<td>' . esc_html( implode( ', ', $r['times'] ) ) . '</td><td>' . esc_html( $days ) . '</td><td>' . esc_html( $price ) . '</td>';
 			echo '<td>' . esc_html( LBB_Routes::capacity( $r ) . ( $r['capacity'] ? '' : ' ' . __( '(implicit)', 'libertbus-bilete' ) ) ) . '</td>';
 			$state = self::route_state( $r );
