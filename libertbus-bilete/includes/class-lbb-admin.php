@@ -659,14 +659,23 @@ class LBB_Admin {
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" );
 		// Separator, ghilimele și fără caracter de escape (RFC 4180), explicit: implicitul se schimbă în PHP 8.4+.
-		fputcsv( $out, array( 'Data', 'Ora', 'Plecare', 'Destinatie', 'Bilet', 'Locuri', 'Pasageri', 'Telefon', 'Email', 'Plata', 'Comanda' ), ',', '"', '' );
+		fputcsv( $out, array( 'Data', 'Ora', 'Plecare', 'Destinatie', 'Bilet', 'Locuri', 'Pasageri', 'Telefon', 'Email', 'Plata', 'Comanda', 'De incasat', 'Moneda' ), ',', '"', '' );
 		foreach ( LBB_Bookings::manifest( $date, $route ) as $b ) {
-			list( $amount, $cur ) = LBB_Bookings::pay_amount( $b );
-			$plata = 'reserved' === $b['status'] ? 'la urcare ' . $amount . ' ' . $cur : 'online';
-			fputcsv( $out, array_map( array( __CLASS__, 'csv_safe' ), array( $date, $b['dep_time'], $b['origin'], $b['destination'], $b['ticket_code'], $b['seats'], implode( '; ', LBB_Bookings::passenger_labels( $b ) ), $b['phone'], $b['email'], $plata, $b['order_id'] ) ), ',', '"', '' );
+			fputcsv( $out, array_map( array( __CLASS__, 'csv_safe' ), self::manifest_csv_row( $date, $b ) ), ',', '"', '' );
 		}
 		fclose( $out );
 		exit;
+	}
+
+	/**
+	 * Un rând din CSV-ul listei de pasageri. Suma de încasat la urcare are și coloane proprii, numerice
+	 * („De incasat”, „Moneda”; goale la biletele plătite online), ca biroul să le poată aduna direct în Excel.
+	 */
+	public static function manifest_csv_row( $date, array $b ) {
+		list( $amount, $cur ) = LBB_Bookings::pay_amount( $b );
+		$reserved = 'reserved' === $b['status'];
+		$plata    = $reserved ? 'la urcare ' . $amount . ' ' . $cur : 'online';
+		return array( $date, $b['dep_time'], $b['origin'], $b['destination'], $b['ticket_code'], $b['seats'], implode( '; ', LBB_Bookings::passenger_labels( $b ) ), $b['phone'], $b['email'], $plata, $b['order_id'], $reserved ? $amount : '', $reserved ? $cur : '' );
 	}
 
 	/**

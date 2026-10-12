@@ -44,6 +44,7 @@
     - copiii sunt marcați „(copil)” pe bilet, în lista pentru șofer și în CSV;
     - CSV-ul cu pasageri pentru o singură rută are ruta în numele fișierului (ex. pasageri-2026-10-21-balti-iasi.csv);
     - CSV-ul cu pasageri nu mai lasă să treacă un „nume” pe care Excel l-ar executa ca formulă (ex. „+1+cmd|…”); telefoanele rămân la fel;
+    - CSV-ul cu pasageri are la final coloanele „De incasat” (număr) și „Moneda”, goale la biletele plătite online: biroul adună direct în Excel cât are de încasat șoferul;
     - codul QR are text pentru cititoarele de ecran;
     - ziua săptămânii de pe bilet e mereu în română (nu „Tuesday” când biroul confirmă comanda cu adminul în engleză);
     - pagina biletului nu mai rămâne în cache;

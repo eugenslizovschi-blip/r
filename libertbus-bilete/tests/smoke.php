@@ -788,6 +788,11 @@ $dd_rows = array(
 );
 $dd_due = LBB_Bookings::departure_due( $dd_rows );
 lbb_t( 'suma de încasat pe cursă numără doar rezervările cu plata la urcare', array( '07:00 A → B' => array( 'MDL' => 100.0 ) ) == $dd_due, $dd_due ); // phpcs:ignore Universal.Operators.StrictComparisons -- 100 sau 100.0, după conversie.
+// CSV-ul listei de pasageri: suma de la urcare are coloane numerice proprii (se adună în Excel); online = goale.
+$cr_base = array( 'ticket_code' => 'LB-T1', 'passengers' => array( 'Ion Pop' ), 'phone' => '+37369000001', 'email' => 'c@example.com', 'order_id' => 0 );
+$cr_res  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[0], $cr_base, array( 'passengers' => array( 'Ion Pop', 'Ana Pop' ), 'currency' => 'RON', 'pay_currency' => 'RON', 'amount' => 30.5 ) ) );
+$cr_onl  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[1], $cr_base ) );
+lbb_t( 'CSV-ul listei de pasageri are suma de încasat și moneda în coloane separate (goale la plata online)', 13 === count( $cr_res ) && 'la urcare 30.5 RON' === $cr_res[9] && 30.5 === $cr_res[11] && 'RON' === $cr_res[12] && 'online' === $cr_onl[9] && '' === $cr_onl[11] && '' === $cr_onl[12], array( $cr_res, $cr_onl ) );
 
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );

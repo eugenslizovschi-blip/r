@@ -93,7 +93,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const fs = require('fs');
   const csv = fs.readFileSync(await dl.path(), 'utf8');
   if (csv.charCodeAt(0) !== 0xFEFF) fail('CSV fără BOM: diacriticele se strică în Excel');
-  if (!/^﻿?Data,Ora,Plecare,Destinatie,Bilet,Locuri,Pasageri,Telefon,Email,Plata,Comanda/.test(csv)) fail('antet CSV greșit: ' + csv.slice(0, 80));
+  if (!/^﻿?Data,Ora,Plecare,Destinatie,Bilet,Locuri,Pasageri,Telefon,Email,Plata,Comanda,"De incasat",Moneda\r?\n/.test(csv)) fail('antet CSV greșit: ' + csv.slice(0, 80));
   if (!/^pasageri-\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename())) fail('nume de fișier CSV greșit: ' + dl.suggestedFilename());
   // Cu o rută aleasă, numele fișierului o conține (listele mai multor rute din aceeași zi nu se confundă).
   const rid = await page.$eval('select[name="route"] option:nth-child(2)', o => ({ id: o.value, text: o.textContent }));
