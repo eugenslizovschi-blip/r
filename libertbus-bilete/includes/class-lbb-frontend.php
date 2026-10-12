@@ -198,12 +198,13 @@ class LBB_Frontend {
 	 */
 	public static function email_typo( $email ) {
 		$typos = array(
-			'gmail'   => array( 'gmail.con', 'gmail.cm', 'gmail.om', 'gmail.cim', 'gmail.comm', 'gmial.com', 'gmai.com', 'gamil.com', 'gnail.com', 'gmaill.com', 'gmali.com', 'gmeil.com' ),
+			'gmail'   => array( 'gmail.con', 'gmail.cm', 'gmail.om', 'gmail.cim', 'gmail.comm', 'gmail.coom', 'gmail.co', 'gmail.cpm', 'gmail.vom', 'gmail.xom', 'gmial.com', 'gmai.com', 'gamil.com', 'gnail.com', 'gmaill.com', 'gmali.com', 'gmeil.com', 'gmal.com', 'gmaik.com', 'gmsil.com' ),
 			'yahoo'   => array( 'yahoo.con', 'yahoo.cm', 'yaho.com', 'yahooo.com', 'yhoo.com' ),
-			'hotmail' => array( 'hotmail.con', 'hotmail.cm', 'hotmial.com', 'hotmai.com', 'hotmal.com' ),
-			'outlook' => array( 'outlook.con', 'outlok.com', 'outllok.com' ),
-			'icloud'  => array( 'icloud.con', 'iclod.com', 'icoud.com' ),
-			'mail.ru' => array( 'mail.r', 'mail.ry', 'mail.rus', 'mai.ru' ),
+			'hotmail' => array( 'hotmail.con', 'hotmail.cm', 'hotmail.co', 'hotmial.com', 'hotmai.com', 'hotmal.com' ),
+			'outlook' => array( 'outlook.con', 'outlook.co', 'outlok.com', 'outllok.com' ),
+			'icloud'  => array( 'icloud.con', 'icloud.co', 'iclod.com', 'icoud.com' ),
+			'mail.ru' => array( 'mail.r', 'mail.ry', 'mail.rus', 'mai.ru', 'mali.ru', 'maill.ru' ),
+			'yandex.ru' => array( 'yandex.r', 'yandex.ry', 'yadex.ru', 'yandeks.ru', 'yandx.ru' ),
 		);
 		$at     = strrpos( $email, '@' );
 		$domain = false === $at ? '' : strtolower( substr( $email, $at + 1 ) );
