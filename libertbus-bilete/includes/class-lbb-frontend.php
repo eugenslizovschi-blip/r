@@ -314,11 +314,15 @@ class LBB_Frontend {
 			return new WP_Error( 'lbb_cart', __( 'Biletul nu a putut fi adăugat în coș. Încercați din nou.', 'libertbus-bilete' ) );
 		}
 		WC()->session->set( 'lbb_currency', $currency );
-		WC()->session->set( 'lbb_contact', array(
+		$contact = array(
 			'name'  => isset( $names[0] ) ? $names[0] : '',
 			'phone' => $phone,
 			'email' => $email,
-		) );
+		);
+		WC()->session->set( 'lbb_contact', $contact );
+		if ( WC()->customer && LBB_WooCommerce::fill_customer( WC()->customer, $contact ) ) {
+			WC()->customer->save();
+		}
 		return true;
 	}
 

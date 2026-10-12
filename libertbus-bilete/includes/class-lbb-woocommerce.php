@@ -369,6 +369,34 @@ class LBB_WooCommerce {
 		return $fields;
 	}
 
+	/**
+	 * Numele, telefonul și emailul din formular, puse și pe clientul WooCommerce (doar câmpurile goale): checkout-ul
+	 * cu blocuri (Store API) nu folosește woocommerce_checkout_get_value, deci altfel clientul le-ar scrie din nou.
+	 *
+	 * @param WC_Customer $customer Clientul din sesiune.
+	 * @param array       $contact  [ name, phone, email ].
+	 */
+	public static function fill_customer( $customer, array $contact ) {
+		if ( ! is_object( $customer ) || ! method_exists( $customer, 'set_billing_phone' ) ) {
+			return false;
+		}
+		$name   = preg_split( '/\s+/', trim( (string) $contact['name'] ), 2 );
+		$fields = array(
+			'billing_first_name' => $name[0],
+			'billing_last_name'  => isset( $name[1] ) ? $name[1] : '',
+			'billing_phone'      => (string) $contact['phone'],
+			'billing_email'      => (string) $contact['email'],
+		);
+		$changed = false;
+		foreach ( $fields as $field => $value ) {
+			if ( '' !== $value && '' === (string) $customer->{'get_' . $field}() ) {
+				$customer->{'set_' . $field}( $value );
+				$changed = true;
+			}
+		}
+		return $changed;
+	}
+
 	public static function prefill( $value, $input ) {
 		if ( null !== $value && '' !== $value ) {
 			return $value;

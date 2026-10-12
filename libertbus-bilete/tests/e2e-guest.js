@@ -167,6 +167,9 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   });
   if (co.addr.length || co.first !== 'Vasile' || co.last !== 'Guest' || co.phone !== '+40712345678' || co.email !== 'guest@example.com' || !co.phoneReq) fail('finalizarea comenzii pentru bilete nu e scurtă sau completată din formular: ' + JSON.stringify(co));
   console.log('checkout ok, țara:', await page.inputValue('#billing_country'));
+  // Finalizarea cu blocuri (Store API) citește datele din clientul WooCommerce, nu din câmpurile clasice: și acolo vin completate.
+  const sb = ((await (await page.request.get(`${BASE}/wp-json/wc/store/v1/cart`)).json()).billing_address) || {};
+  if (sb.first_name !== 'Vasile' || sb.last_name !== 'Guest' || sb.phone !== '+40712345678' || sb.email !== 'guest@example.com') fail('finalizarea cu blocuri nu primește numele, telefonul și emailul din formular: ' + JSON.stringify(sb));
 
   const during = (await (await page.request.get(`${BASE}/wp-json/lbb/v1/departures?route_id=${routeId}&date=${day}`)).json()).departures.find(d => d.time === time).free;
   if (during !== before - 1) fail(`locul nu e ținut (înainte ${before}, acum ${during})`);

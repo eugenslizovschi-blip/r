@@ -853,6 +853,15 @@ lbb_t( 'lista pentru șofer într-o zi fără curse care are totuși bilete: ave
 lbb_t( 'zile fără curse: se salvează ca 26.12.2099, 25.12.2099 → sortate, în formatul de pe ecran', '25.12.2099, 26.12.2099' === $zc_saved, $zc_saved );
 lbb_t( 'într-o zi fără curse nu se arată plecări și nu se poate rezerva; rezervarea făcută înainte se vede la avertizare', 1 === $zc_open && array() === $zc_closed && is_wp_error( $zc_hold ) && array() === ( $zc_rest['departures'] ?? null ) && ( $zc_sold[ $tomorrow ] ?? 0 ) >= 1 && array( $tomorrow ) === array_keys( $zc_sold ), array( $zc_open, $zc_closed, $zc_hold, $zc_rest, $zc_sold ) );
 
+// Checkout-ul cu blocuri: datele din formular ajung pe clientul WooCommerce, dar nu peste ce are deja clientul.
+$fc_c = new WC_Customer();
+$fc_1 = LBB_WooCommerce::fill_customer( $fc_c, array( 'name' => 'Ana Maria Pop', 'phone' => '+37369000097', 'email' => 'fc@example.com' ) );
+$fc_k = new WC_Customer();
+$fc_k->set_billing_email( 'cont@example.com' );
+$fc_k->set_billing_first_name( 'Ion' );
+LBB_WooCommerce::fill_customer( $fc_k, array( 'name' => 'Ana Pop', 'phone' => '+37369000097', 'email' => 'fc@example.com' ) );
+lbb_t( 'clientul WooCommerce primește numele, telefonul și emailul din formular, fără să le suprascrie pe cele existente', true === $fc_1 && 'Ana' === $fc_c->get_billing_first_name() && 'Maria Pop' === $fc_c->get_billing_last_name() && '+37369000097' === $fc_c->get_billing_phone() && 'fc@example.com' === $fc_c->get_billing_email() && 'cont@example.com' === $fc_k->get_billing_email() && 'Ion' === $fc_k->get_billing_first_name() && 'Pop' === $fc_k->get_billing_last_name() && false === LBB_WooCommerce::fill_customer( null, array() ) );
+
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
 $ic_h = is_int( $ic_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $ic_r ), $tomorrow, '10:15', 2, 0, array( 'Calendar Unu', 'Calendar Doi' ), '+37369000093', 'ic@example.com', 'MDL' ) : null;
