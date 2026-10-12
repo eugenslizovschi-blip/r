@@ -6,7 +6,7 @@
 		var cfg = decodeConfig( root.getAttribute( 'data-lbb-config' ) );
 		var t = cfg.i18n;
 		var el = {};
-		[ 'from', 'route', 'date', 'time', 'status', 'adults', 'children', 'names', 'summary', 'mode', 'sending' ].forEach( function ( k ) {
+		[ 'from', 'route', 'date', 'dateHint', 'time', 'status', 'adults', 'children', 'names', 'summary', 'mode', 'sending' ].forEach( function ( k ) {
 			el[ k ] = root.querySelector( '[data-lbb="' + k + '"]' );
 		} );
 		var buttons = root.querySelectorAll( '[data-lbb-submit]' );
@@ -484,8 +484,23 @@
 			el.summary.hidden = false;
 		}
 
+		// Data în cuvinte („luni, 12 octombrie”): pe un telefon în engleză câmpul arată 10/12/2026 (lună/zi).
+		function dateHint() {
+			var v = el.date.value;
+			if ( ! el.dateHint || ! t.monthNames ) {
+				return;
+			}
+			if ( ! /^\d{4}-\d{2}-\d{2}$/.test( v ) ) {
+				el.dateHint.textContent = '';
+				return;
+			}
+			var d = new Date( v + 'T12:00:00Z' );
+			el.dateHint.textContent = t.dayNames[ d.getUTCDay() || 7 ] + ', ' + d.getUTCDate() + ' ' + t.monthNames[ d.getUTCMonth() ];
+		}
+
 		function loadDepartures() {
 			var route = currentRoute();
+			dateHint();
 			syncCurrency();
 			shownDate = el.date.value;
 			departures = [];

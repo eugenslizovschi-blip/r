@@ -381,6 +381,8 @@ class LBB_Frontend {
 				'runsOn'      => __( 'Ruta circulă doar: %s.', 'libertbus-bilete' ),
 				'closedDay'   => __( 'În ziua aleasă nu sunt curse (zi liberă). Alegeți altă dată.', 'libertbus-bilete' ),
 				'dayNames'    => array_merge( array( '' ), array_values( LBB_Routes::day_names() ) ),
+				// „luni, 12 octombrie” sub câmpul de dată: pe telefoanele în engleză data apare 10/12/2026 (lună/zi).
+				'monthNames'  => array( __( 'ianuarie', 'libertbus-bilete' ), __( 'februarie', 'libertbus-bilete' ), __( 'martie', 'libertbus-bilete' ), __( 'aprilie', 'libertbus-bilete' ), __( 'mai', 'libertbus-bilete' ), __( 'iunie', 'libertbus-bilete' ), __( 'iulie', 'libertbus-bilete' ), __( 'august', 'libertbus-bilete' ), __( 'septembrie', 'libertbus-bilete' ), __( 'octombrie', 'libertbus-bilete' ), __( 'noiembrie', 'libertbus-bilete' ), __( 'decembrie', 'libertbus-bilete' ) ),
 				/* translators: %s: ultima dată la care se poate rezerva online. */
 				'dateRange'   => sprintf( __( 'Online se poate rezerva de azi până pe %s. Alegeți o dată din acest interval.', 'libertbus-bilete' ), $today->modify( '+' . (int) LBB_Settings::get( 'max_days_ahead' ) . ' days' )->format( 'd.m.Y' ) ),
 				/* translators: %s: telefonul de suport */
@@ -450,6 +452,7 @@ class LBB_Frontend {
 					</label>
 					<label class="lbb-field"><span><?php esc_html_e( 'Data plecării', 'libertbus-bilete' ); ?></span>
 						<input type="date" name="lbb_date" data-lbb="date" required min="<?php echo esc_attr( $config['today'] ); ?>" max="<?php echo esc_attr( $config['maxDate'] ); ?>">
+						<small class="lbb-date-hint" data-lbb="dateHint" aria-hidden="true"></small>
 					</label>
 					<label class="lbb-field"><span><?php esc_html_e( 'Ora plecării', 'libertbus-bilete' ); ?></span>
 						<select name="lbb_time" data-lbb="time" required></select>

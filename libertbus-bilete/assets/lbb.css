@@ -23,6 +23,8 @@
 .lbb-grid-2 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .lbb-field { display: flex; flex-direction: column; gap: 4px; margin: 0; font-weight: 600; font-size: 14px; }
 .lbb-field > span { color: var(--lbb-muted); }
+.lbb-booking .lbb-date-hint { font-weight: 400; font-size: 13px; color: var(--lbb-muted); min-height: 1.35em; line-height: 1.35; }
+.lbb-compact .lbb-date-hint { display: none; }
 .lbb-booking select, .lbb-booking input[type="text"], .lbb-booking input[type="tel"], .lbb-booking input[type="email"], .lbb-booking input[type="date"] {
 	width: 100%;
 	min-height: 46px;

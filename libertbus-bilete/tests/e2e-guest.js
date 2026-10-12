@@ -18,6 +18,13 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   });
   await page.goto(BASE + '/balti-iasi/');
   await page.waitForSelector('[data-lbb="route"] option:checked', { state: 'attached' });
+  // Sub dată, ziua în cuvinte: pe telefoanele în engleză câmpul arată 03/01/2027 (lună/zi), ușor de citit greșit.
+  const hint0 = await page.textContent('[data-lbb="dateHint"]');
+  if (!/^(luni|marți|miercuri|joi|vineri|sâmbătă|duminică), \d{1,2} (ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)$/.test(hint0)) fail('data în cuvinte lipsește sub câmpul de dată: „' + hint0 + '”');
+  await page.fill('[data-lbb="date"]', '2027-03-01');
+  await page.dispatchEvent('[data-lbb="date"]', 'change');
+  const hint1 = await page.textContent('[data-lbb="dateHint"]');
+  if (hint1 !== 'luni, 1 martie') fail('data în cuvinte nu urmează data aleasă: „' + hint1 + '”');
   // Safari pe iPhone lasă date în afara min/max: mesajul trebuie să spună intervalul, nu „nu sunt plecări”.
   for (const bad of [new Date(Date.now() - 86400000 * 3), new Date(Date.now() + 86400000 * 400)]) {
     await page.fill('[data-lbb="date"]', bad.toISOString().slice(0, 10));
