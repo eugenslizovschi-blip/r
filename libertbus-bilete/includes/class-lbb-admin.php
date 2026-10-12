@@ -386,7 +386,7 @@ class LBB_Admin {
 	private static function route_form( $route ) {
 		$route = $route ? $route : array(
 			'id' => 0, 'origin' => '', 'destination' => '', 'departures' => '', 'days' => array( 1, 2, 3, 4, 5, 6, 7 ),
-			'price' => '', 'child_price' => null, 'currency' => 'MDL', 'capacity' => 0, 'active' => 1, 'page_url' => '', 'notes' => '',
+			'price' => '', 'child_price' => null, 'currency' => 'MDL', 'capacity' => 0, 'active' => 1, 'page_url' => '', 'boarding' => '', 'notes' => '',
 		);
 		self::header( $route['id'] ? __( 'Editează ruta', 'libertbus-bilete' ) : __( 'Rută nouă', 'libertbus-bilete' ) );
 		$cities = array();
@@ -415,6 +415,7 @@ class LBB_Admin {
 				<tr><th><label for="lbb-cap"><?php esc_html_e( 'Locuri de vândut online pe cursă', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-cap" name="capacity" type="number" min="0" value="<?php echo esc_attr( $route['capacity'] ); ?>"><p class="description"><?php echo esc_html( sprintf( __( '0 = valoarea implicită din Setări (%d).', 'libertbus-bilete' ), LBB_Settings::get( 'default_capacity' ) ) ); ?></p></td></tr>
 				<tr><th><?php esc_html_e( 'Activă', 'libertbus-bilete' ); ?></th><td><label><input type="checkbox" name="active" value="1" <?php checked( $route['active'] ); ?>> <?php esc_html_e( 'Se vinde online', 'libertbus-bilete' ); ?></label></td></tr>
 				<tr><th><label for="lbb-url"><?php esc_html_e( 'Pagina rutei', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-url" name="page_url" type="url" class="regular-text" value="<?php echo esc_attr( $route['page_url'] ); ?>"></td></tr>
+				<tr><th><label for="lbb-boarding"><?php esc_html_e( 'Locul de urcare', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-boarding" name="boarding" type="text" class="regular-text" maxlength="255" value="<?php echo esc_attr( $route['boarding'] ); ?>"><p class="description"><?php esc_html_e( 'Apare pe bilet, în email și în calendarul clientului. Ex. „Bălți, Autogara Nord, peronul 3”.', 'libertbus-bilete' ); ?></p></td></tr>
 				<tr><th><label for="lbb-notes"><?php esc_html_e( 'Notițe interne', 'libertbus-bilete' ); ?></label></th><td><textarea id="lbb-notes" name="notes" rows="3" class="large-text"><?php echo esc_textarea( $route['notes'] ); ?></textarea></td></tr>
 			</table>
 			<?php submit_button( __( 'Salvează ruta', 'libertbus-bilete' ) ); ?>

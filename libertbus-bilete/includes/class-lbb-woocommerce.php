@@ -122,6 +122,12 @@ class LBB_WooCommerce {
 			__( 'Ruta', 'libertbus-bilete' )      => $route ? $route['origin'] . ' → ' . $route['destination'] : '#' . $booking['route_id'],
 			__( 'Data', 'libertbus-bilete' )      => self::date_with_day( $booking['travel_date'] ),
 			__( 'Ora plecării', 'libertbus-bilete' ) => $booking['dep_time'],
+		);
+		// Unde urcă pasagerul (autogara, peronul): întrebarea pe care altfel o pune la telefon.
+		if ( $route && '' !== $route['boarding'] ) {
+			$lines[ __( 'Loc de urcare', 'libertbus-bilete' ) ] = $route['boarding'];
+		}
+		$lines += array(
 			__( 'Locuri', 'libertbus-bilete' )    => $booking['children']
 				/* translators: 1: total, 2: copii */
 				? sprintf( _n( '%1$d (din care %2$d copil)', '%1$d (din care %2$d copii)', (int) $booking['children'], 'libertbus-bilete' ), $booking['seats'], $booking['children'] )

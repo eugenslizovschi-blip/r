@@ -41,6 +41,7 @@ class LBB_Routes {
 		$row['active']      = (int) $row['active'];
 		$row['times']       = self::parse_times( $row['departures'] );
 		$row['days']        = array_map( 'intval', array_filter( explode( ',', $row['weekdays'] ) ) );
+		$row['boarding']    = isset( $row['boarding'] ) ? (string) $row['boarding'] : '';
 		return $row;
 	}
 
@@ -122,6 +123,7 @@ class LBB_Routes {
 			'capacity'    => max( 0, (int) ( isset( $data['capacity'] ) ? $data['capacity'] : 0 ) ),
 			'active'      => empty( $data['active'] ) ? 0 : 1,
 			'page_url'    => esc_url_raw( isset( $data['page_url'] ) ? $data['page_url'] : '' ),
+			'boarding'    => sanitize_text_field( isset( $data['boarding'] ) ? $data['boarding'] : '' ),
 			'notes'       => sanitize_textarea_field( isset( $data['notes'] ) ? $data['notes'] : '' ),
 			'updated_at'  => current_time( 'mysql', true ),
 		);

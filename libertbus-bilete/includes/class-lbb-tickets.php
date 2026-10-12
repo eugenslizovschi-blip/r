@@ -346,7 +346,7 @@ class LBB_Tickets {
 			'DTEND:' . $start->modify( '+30 minutes' )->setTimezone( $utc )->format( 'Ymd\THis\Z' ),
 			/* translators: 1: ruta, ex. Bălți → Iași, 2: codul biletului */
 			'SUMMARY:' . $esc( sprintf( __( 'Autocar %1$s (%2$s)', 'libertbus-bilete' ), $name, $booking['ticket_code'] ) ),
-			'LOCATION:' . $esc( $route['origin'] ),
+			'LOCATION:' . $esc( '' !== $route['boarding'] ? $route['boarding'] : $route['origin'] ),
 			'DESCRIPTION:' . $esc( $desc ),
 			'URL:' . $url,
 			'BEGIN:VALARM',

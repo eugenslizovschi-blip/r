@@ -76,6 +76,7 @@ class LBB_Install {
 			capacity smallint(5) unsigned NOT NULL DEFAULT 0,
 			active tinyint(1) NOT NULL DEFAULT 1,
 			page_url varchar(255) NOT NULL DEFAULT '',
+			boarding varchar(255) NOT NULL DEFAULT '',
 			notes text NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
