@@ -6,7 +6,7 @@
 		var cfg = decodeConfig( root.getAttribute( 'data-lbb-config' ) );
 		var t = cfg.i18n;
 		var el = {};
-		[ 'from', 'route', 'date', 'dateHint', 'time', 'status', 'adults', 'children', 'names', 'summary', 'mode', 'sending' ].forEach( function ( k ) {
+		[ 'from', 'route', 'date', 'dateHint', 'groupNote', 'time', 'status', 'adults', 'children', 'names', 'summary', 'mode', 'sending' ].forEach( function ( k ) {
 			el[ k ] = root.querySelector( '[data-lbb="' + k + '"]' );
 		} );
 		var buttons = root.querySelectorAll( '[data-lbb-submit]' );
@@ -259,17 +259,22 @@
 			return a;
 		}
 
-		function setStatus( text ) {
-			el.status.textContent = '';
+		// Textul cu telefonul firmei transformat în link de apel.
+		function fillWithPhone( node, text ) {
+			node.textContent = '';
 			var parts = t.phone ? String( text ).split( t.phone ) : [ String( text ) ];
 			for ( var i = 0; i < parts.length; i++ ) {
 				if ( i ) {
-					el.status.appendChild( phoneLink() );
+					node.appendChild( phoneLink() );
 				}
 				if ( parts[ i ] ) {
-					el.status.appendChild( document.createTextNode( parts[ i ] ) );
+					node.appendChild( document.createTextNode( parts[ i ] ) );
 				}
 			}
+		}
+
+		function setStatus( text ) {
+			fillWithPhone( el.status, text );
 		}
 
 		function getJSON( url, tries ) {
@@ -328,6 +333,14 @@
 				el.children.value = children;
 			}
 			fillNames( adults, children );
+			// La limita de pasageri pe rezervare: un grup mai mare află că poate suna (altfel pleacă fără bilet).
+			if ( el.groupNote && t.groupNote && t.phone ) {
+				var atLimit = adults + children >= cfg.maxPassengers;
+				el.groupNote.hidden = ! atLimit;
+				if ( atLimit ) {
+					fillWithPhone( el.groupNote, t.groupNote );
+				}
+			}
 		}
 
 		// Opțiunile 0…max se refac doar dacă s-a schimbat maximul: un selector deschis pe telefon s-ar închide.

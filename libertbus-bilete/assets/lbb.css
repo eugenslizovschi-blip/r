@@ -51,6 +51,7 @@
 .lbb-summary-approx { font-size: 15px; font-weight: 600; color: var(--lbb-muted); white-space: nowrap; }
 .lbb-summary-note { color: var(--lbb-muted); font-size: 13px; }
 .lbb-summary-boarding { font-size: 14px; margin-top: 2px; }
+.lbb-booking .lbb-group-note { margin: 6px 0 0; font-size: 13px; color: var(--lbb-muted); line-height: 1.35; }
 .lbb-submit {
 	display: block;
 	width: 100%;

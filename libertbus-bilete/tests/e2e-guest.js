@@ -65,6 +65,21 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const hiddenNow = await page.$eval('[data-lbb-js-fail]', e => e.getClientRects().length === 0).catch(() => false);
     if (!hiddenNow) fail('mesajul pentru browsere vechi apare și într-un browser obișnuit');
   }
+  // Grup mai mare decât limita online: la numărul maxim de pasageri apare „pentru grupuri sunați la …” cu link de apel.
+  {
+    const pg = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    pg.on('pageerror', e => fail('pageerror: ' + e.message));
+    await pg.route('**/lbb/v1/departures**', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ departures: [{ time: '08:45', free: 20, bookable: true, reason: '' }] }) }));
+    await pg.goto(BASE + '/balti-iasi/');
+    await pg.waitForFunction(() => document.querySelector('[data-lbb="adults"]').options.length > 1);
+    const before = await pg.isVisible('[data-lbb="groupNote"]');
+    const max = await pg.$eval('[data-lbb="adults"]', s => s.options[s.options.length - 1].value);
+    await pg.selectOption('[data-lbb="adults"]', max);
+    await pg.waitForTimeout(200);
+    const note = await pg.$eval('[data-lbb="groupNote"]', e => ({ visible: e.getClientRects().length > 0, text: e.textContent, tel: (e.querySelector('a[href^="tel:"]') || {}).href || '' }));
+    if (before || !note.visible || !new RegExp('mai mult de ' + max + ' persoane').test(note.text) || !/^tel:\+373/.test(note.tel)) fail('nota pentru grupuri lipsește sau apare greșit: ' + JSON.stringify({ before, max, note }));
+    await pg.close();
+  }
   // Toate cursele zilei pline: mesajul „nu mai sunt locuri online” are telefonul ca link de apel.
   {
     const p4 = await browser.newPage({ viewport: { width: 390, height: 844 } });

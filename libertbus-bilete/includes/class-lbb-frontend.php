@@ -402,6 +402,8 @@ class LBB_Frontend {
 				'errorCall'   => __( 'Sau sunați la', 'libertbus-bilete' ),
 				'phone'       => LBB_Settings::phone_text(),
 				'phoneHref'   => 'tel:' . preg_replace( '/[^\d+]/', '', (string) LBB_Settings::get( 'support_phone' ) ),
+				/* translators: 1: numărul maxim de pasageri pe rezervare online, 2: telefon */
+				'groupNote'   => sprintf( __( 'Sunteți mai mult de %1$d persoane? Pentru grupuri sunați la %2$s.', 'libertbus-bilete' ), (int) LBB_Settings::get( 'max_passengers' ), LBB_Settings::phone_text() ),
 				'total'       => __( 'Total de plată', 'libertbus-bilete' ),
 				'approxNote'  => __( 'echivalent orientativ, plata se face în moneda afișată', 'libertbus-bilete' ),
 				'payBoard'    => __( 'Se achită la urcare', 'libertbus-bilete' ),
@@ -472,6 +474,7 @@ class LBB_Frontend {
 					</label>
 					<?php endif; ?>
 				</div>
+				<p class="lbb-group-note" data-lbb="groupNote" hidden></p>
 				</div>
 
 				<div class="lbb-summary" data-lbb="summary" aria-live="polite" aria-atomic="true" hidden></div>
