@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -880,6 +880,21 @@ if ( is_int( $pt_r ) ) {
 	LBB_Routes::delete( $pt_r );
 }
 lbb_t( 'panoul arată pasagerii de azi (plătiți + la urcare), cu link spre lista pentru șofer', 1 === $pt_b && $pt_before + 3 === $pt_after && (bool) preg_match( '#<a class="lbb-card lbb-card-today" href="[^"]*page=lbb-manifest"><b>' . $pt_after . '</b>Pasageri azi#u', $pt_html ), array( $pt_b, $pt_before, $pt_after, $wpdb->last_error ) );
+
+// Prețul rutei scris cu spațiu sau punct la mii („1 200”, „1.200”) nu devine 1 MDL.
+$pa_ok = true;
+foreach ( array( '1 200' => 1200.0, "1\u{00A0}200" => 1200.0, '1.200' => 1200.0, '1.200,50' => 1200.5, '1,200.50' => 1200.5, '240' => 240.0, '240,5' => 240.5, '240.50' => 240.5, '240 MDL' => 240.0, '' => 0.0 ) as $pa_in => $pa_want ) {
+	if ( $pa_want !== LBB_Routes::parse_amount( $pa_in ) ) {
+		$pa_ok = false;
+		echo '  prețul „' . $pa_in . '” → ' . LBB_Routes::parse_amount( $pa_in ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+	}
+}
+$pa_r  = LBB_Routes::save( array( 'origin' => 'PretA', 'destination' => 'PretB', 'departures' => '10:00', 'price' => '1 200', 'child_price' => '1 000,50', 'currency' => 'MDL', 'active' => 1 ) );
+$pa_rt = is_int( $pa_r ) ? LBB_Routes::get( $pa_r ) : null;
+if ( is_int( $pa_r ) ) {
+	LBB_Routes::delete( $pa_r );
+}
+lbb_t( 'prețul rutei scris „1 200” / „1.200,50” se salvează corect (nu 1 MDL)', $pa_ok && $pa_rt && 1200.0 === (float) $pa_rt['price'] && 1000.5 === (float) $pa_rt['child_price'], $pa_rt ? array( $pa_rt['price'], $pa_rt['child_price'] ) : $pa_r );
 
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );

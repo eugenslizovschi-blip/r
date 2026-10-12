@@ -104,7 +104,7 @@ class LBB_Routes {
 		if ( ! $days ) {
 			return new WP_Error( 'lbb_route', __( 'Alegeți cel puțin o zi a săptămânii.', 'libertbus-bilete' ) );
 		}
-		$child = isset( $data['child_price'] ) && '' !== trim( (string) $data['child_price'] ) ? max( 0, (float) str_replace( ',', '.', $data['child_price'] ) ) : null;
+		$child = isset( $data['child_price'] ) && '' !== trim( (string) $data['child_price'] ) ? max( 0, self::parse_amount( $data['child_price'] ) ) : null;
 
 		$existing = self::find_any( $origin, $destination );
 		if ( $existing && (int) $existing['id'] !== (int) $id ) {
@@ -116,7 +116,7 @@ class LBB_Routes {
 			'destination' => $destination,
 			'departures'  => implode( ',', $times ),
 			'weekdays'    => implode( ',', $days ),
-			'price'       => max( 0, (float) str_replace( ',', '.', isset( $data['price'] ) ? $data['price'] : 0 ) ),
+			'price'       => max( 0, self::parse_amount( isset( $data['price'] ) ? $data['price'] : 0 ) ),
 			'child_price' => $child,
 			'currency'    => $currency,
 			'capacity'    => max( 0, (int) ( isset( $data['capacity'] ) ? $data['capacity'] : 0 ) ),
@@ -133,6 +133,28 @@ class LBB_Routes {
 		$row['created_at'] = $row['updated_at'];
 		$wpdb->insert( self::table(), $row );
 		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Un preț scris de om: „1 200” sau „1.200” (mii) = 1200, „240,50” = „240.50” = 240.5, „1.200,50” = „1,200.50” = 1200.5.
+	 * Altfel (float) „1 200” dă 1 și biletul s-ar vinde cu 1 MDL.
+	 */
+	public static function parse_amount( $value ) {
+		$v = preg_replace( '/[\s\x{00A0}\x{202F}]+/u', '', (string) $value );
+		$v = preg_replace( '/[^\d.,-]/', '', (string) $v );
+		$dot   = strrpos( $v, '.' );
+		$comma = strrpos( $v, ',' );
+		if ( false !== $dot && false !== $comma ) {
+			// Ultimul semn e cel zecimal; celălalt separă miile.
+			$v = $dot > $comma ? str_replace( ',', '', $v ) : str_replace( ',', '.', str_replace( '.', '', $v ) );
+		} elseif ( false !== $comma ) {
+			$v = str_replace( ',', '.', $v );
+		}
+		// „1.200” / „12.500.000”: puncte urmate de exact 3 cifre, ca separator de mii.
+		if ( preg_match( '/^-?\d{1,3}(\.\d{3})+$/', $v ) ) {
+			$v = str_replace( '.', '', $v );
+		}
+		return (float) $v;
 	}
 
 	/**
