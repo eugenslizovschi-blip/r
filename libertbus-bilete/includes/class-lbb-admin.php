@@ -806,7 +806,12 @@ class LBB_Admin {
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a> (' . esc_html( wc_get_order_status_name( $order->get_status() ) ) . ')';
 			}
-			echo '</td><td>' . esc_html( get_date_from_gmt( $b['created_at'], 'd.m.Y H:i' ) ) . '</td><td>';
+			echo '</td><td>' . esc_html( get_date_from_gmt( $b['created_at'], 'd.m.Y H:i' ) );
+			// Clientul spune „n-am primit nimic”: biroul vede dacă a plecat reamintirea de cu o zi înainte.
+			if ( ! empty( $b['reminded_at'] ) ) {
+				echo '<br><small class="lbb-reminded">' . esc_html__( 'reamintit', 'libertbus-bilete' ) . ' ' . esc_html( get_date_from_gmt( $b['reminded_at'], 'd.m H:i' ) ) . '</small>';
+			}
+			echo '</td><td>';
 			if ( 'reserved' === $b['status'] ) {
 				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'' . esc_js( $b['travel_date'] < LBB_Settings::today() ? __( 'Anulați rezervarea? Cursa a trecut: clientul nu primește email.', 'libertbus-bilete' ) : ( is_email( $b['email'] ) ? __( 'Anulați rezervarea? Locurile devin libere, iar clientul primește un email că rezervarea e anulată.', 'libertbus-bilete' ) : __( 'Anulați rezervarea? Locurile devin libere. Clientul nu are email: anunțați-l la telefon.', 'libertbus-bilete' ) ) ) . '\');"><input type="hidden" name="action" value="lbb_cancel_booking"><input type="hidden" name="id" value="' . esc_attr( $b['id'] ) . '">'
 					. '<input type="hidden" name="back_status" value="' . esc_attr( $status ) . '"><input type="hidden" name="back_q" value="' . esc_attr( $search ) . '">';
