@@ -446,7 +446,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 .wrap{max-width:560px;margin:0 auto}.site{font-size:1em;margin:0 0 1em}
 .state{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
 .ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}.past{background:#eceff3;color:#3a4552}
-.actions{display:flex;gap:8px;margin-top:8px}.actions button,.actions a{flex:1;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px 8px;box-sizing:border-box}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.actions [hidden]{display:none}.actions button,.actions a{flex:1 1 30%;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px 8px;box-sizing:border-box}
 @media print{.actions{display:none}body{background:#fff}.state{border:2px solid currentColor}}
 </style>
 </head>
@@ -462,11 +462,20 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<?php echo self::html( $booking, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<?php echo self::notes_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<div class="actions"><button type="button" onclick="window.print()"><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button>
-			<?php if ( 'ok' === $state['class'] ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?>
+			<?php if ( 'ok' === $state['class'] ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a>
+			<button type="button" class="share" hidden data-share-title="<?php echo esc_attr( $booking['ticket_code'] ); ?>" data-share-url="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php esc_html_e( 'Trimite biletul', 'libertbus-bilete' ); ?></button><?php endif; ?>
 			<?php if ( $pay_url ) : ?><a class="pay" href="<?php echo esc_url( $pay_url ); ?>"><?php esc_html_e( 'Achită acum', 'libertbus-bilete' ); ?></a><?php endif; ?>
 			<?php if ( $again_url ) : ?><a class="again" href="<?php echo esc_url( $again_url ); ?>"><?php esc_html_e( 'Rezervați din nou online', 'libertbus-bilete' ); ?></a><?php endif; ?></div>
 		<script src="<?php echo esc_url( LBB_URL . 'assets/qrcode.min.js?ver=' . LBB_Frontend::asset_ver( 'qrcode.min.js' ) ); ?>"></script>
 		<script>
+		// „Trimite biletul” (WhatsApp, Viber, SMS…) doar unde telefonul știe să partajeze: ex. părintele trimite biletul copilului.
+		(function(b){
+			if (!b || !navigator.share) { return; }
+			b.hidden = false;
+			b.addEventListener('click', function(){
+				navigator.share({title: b.getAttribute('data-share-title'), url: b.getAttribute('data-share-url')}).catch(function(){});
+			});
+		})(document.querySelector('.share'));
 		document.querySelectorAll('[data-qr]').forEach(function(el){
 			if (window.QRCode) { new QRCode(el, {text: el.getAttribute('data-qr'), width: 132, height: 132, correctLevel: QRCode.CorrectLevel.M}); }
 			// Textul e pe container (role="img"); imaginea și canvasul generate nu se mai citesc o dată.

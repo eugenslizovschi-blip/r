@@ -109,6 +109,18 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const cal = calHref ? await guest.request.get(calHref) : null;
   const calBody = cal ? await cal.text() : '';
   if (!cal || !/^text\/calendar/.test(cal.headers()['content-type'] || '') || !/^BEGIN:VCALENDAR\r\n/.test(calBody) || !calBody.includes('UID:' + code + '@') || !/DTSTART:\d{8}T\d{6}Z/.test(calBody)) fail('„Adaugă în calendar” de pe bilet nu dă un .ics valid: ' + calHref + ' ' + calBody.slice(0, 120));
+  // „Trimite biletul”: ascuns unde browserul nu poate partaja; unde poate (telefon), trimite linkul biletului.
+  if (await guest.isVisible('.actions .share')) fail('„Trimite biletul” apare deși browserul nu poate partaja');
+  const sharePage = await guest.context().newPage();
+  await sharePage.addInitScript(() => { navigator.share = d => { window.__shared = d; return Promise.resolve(); }; });
+  await sharePage.goto(guest.url());
+  if (!(await sharePage.isVisible('.actions .share'))) fail('„Trimite biletul” lipsește pe un telefon care poate partaja');
+  else {
+    await sharePage.click('.actions .share');
+    const shared = await sharePage.evaluate(() => window.__shared || null);
+    if (!shared || shared.url !== guest.url() || shared.title !== code) fail('„Trimite biletul” nu trimite linkul biletului: ' + JSON.stringify(shared));
+  }
+  await sharePage.close();
   if (process.env.WP_PATH) {
     const fs = require('fs'), dir = process.env.WP_PATH + '/wp-content/mail';
     const mail = fs.existsSync(dir) ? fs.readdirSync(dir).sort().reverse().map(f => fs.readFileSync(dir + '/' + f, 'utf8')).find(m => m.includes(code) && /^TO: [^\n]*test@example\.com/m.test(m)) : '';
