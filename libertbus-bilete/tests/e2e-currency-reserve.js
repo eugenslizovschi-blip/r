@@ -118,7 +118,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   else {
     await sharePage.click('.actions .share');
     const shared = await sharePage.evaluate(() => window.__shared || null);
-    if (!shared || shared.url !== guest.url() || shared.title !== code) fail('„Trimite biletul” nu trimite linkul biletului: ' + JSON.stringify(shared));
+    if (!shared || shared.url !== guest.url() || shared.title !== code || !new RegExp('^Bilet LibertBus ' + code + ': .+ → .+, \\d\\d\\.\\d\\d\\.\\d{4} \\(\\S+\\), \\d\\d:\\d\\d$').test(shared.text || '')) fail('„Trimite biletul” nu trimite linkul biletului: ' + JSON.stringify(shared));
   }
   await sharePage.close();
   if (process.env.WP_PATH) {

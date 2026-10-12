@@ -20,6 +20,16 @@ class LBB_Tickets {
 		} );
 	}
 
+	/**
+	 * Textul trimis cu „Trimite biletul” (WhatsApp, Viber…): cine primește vede cursa fără să deschidă linkul.
+	 * Ex. „Bilet LibertBus LB-AB12CD: Bălți → Iași, 13.10.2026 (marți), 08:45”.
+	 */
+	public static function share_text( array $booking ) {
+		$route = LBB_Routes::get( $booking['route_id'] );
+		/* translators: 1: codul biletului, 2: ruta, 3: ziua și data, 4: ora */
+		return sprintf( __( 'Bilet LibertBus %1$s: %2$s, %3$s, %4$s', 'libertbus-bilete' ), $booking['ticket_code'], LBB_Bookings::route_name( $route ? $route : array() ), LBB_WooCommerce::date_with_day( $booking['travel_date'] ), $booking['dep_time'] );
+	}
+
 	public static function signature( $code ) {
 		return substr( hash_hmac( 'sha256', $code, wp_salt( 'auth' ) ), 0, 20 );
 	}
@@ -463,7 +473,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<?php echo self::notes_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<div class="actions"><button type="button" onclick="window.print()"><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button>
 			<?php if ( 'ok' === $state['class'] ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a>
-			<button type="button" class="share" hidden data-share-title="<?php echo esc_attr( $booking['ticket_code'] ); ?>" data-share-url="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php esc_html_e( 'Trimite biletul', 'libertbus-bilete' ); ?></button><?php endif; ?>
+			<button type="button" class="share" hidden data-share-title="<?php echo esc_attr( $booking['ticket_code'] ); ?>" data-share-text="<?php echo esc_attr( self::share_text( $booking ) ); ?>" data-share-url="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php esc_html_e( 'Trimite biletul', 'libertbus-bilete' ); ?></button><?php endif; ?>
 			<?php if ( $pay_url ) : ?><a class="pay" href="<?php echo esc_url( $pay_url ); ?>"><?php esc_html_e( 'Achită acum', 'libertbus-bilete' ); ?></a><?php endif; ?>
 			<?php if ( $again_url ) : ?><a class="again" href="<?php echo esc_url( $again_url ); ?>"><?php esc_html_e( 'Rezervați din nou online', 'libertbus-bilete' ); ?></a><?php endif; ?></div>
 		<script src="<?php echo esc_url( LBB_URL . 'assets/qrcode.min.js?ver=' . LBB_Frontend::asset_ver( 'qrcode.min.js' ) ); ?>"></script>
@@ -473,7 +483,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 			if (!b || !navigator.share) { return; }
 			b.hidden = false;
 			b.addEventListener('click', function(){
-				navigator.share({title: b.getAttribute('data-share-title'), url: b.getAttribute('data-share-url')}).catch(function(){});
+				navigator.share({title: b.getAttribute('data-share-title'), text: b.getAttribute('data-share-text'), url: b.getAttribute('data-share-url')}).catch(function(){});
 			});
 		})(document.querySelector('.share'));
 		document.querySelectorAll('[data-qr]').forEach(function(el){
