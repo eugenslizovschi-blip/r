@@ -878,6 +878,7 @@ class LBB_Admin {
 				$check( 'replace_cf7_routes', __( 'Formularele de rută', 'libertbus-bilete' ), __( 'Formularele Contact Form 7 cu titlul „Oraș - Oraș” (ex. „Balti - Iasi”) devin formularul rutei respective, dacă ruta există.', 'libertbus-bilete' ) );
 				$check( 'show_approx', __( 'Echivalent în altă monedă', 'libertbus-bilete' ), __( 'Arată lângă preț „≈ 62 RON” (sau „≈ 234 MDL”), doar informativ.', 'libertbus-bilete' ) );
 				$check( 'require_names', __( 'Numele pasagerilor', 'libertbus-bilete' ), __( 'Obligatoriu numele fiecărui pasager (util la vamă).', 'libertbus-bilete' ) );
+				$check( 'remind_day_before', __( 'Reamintire cu o zi înainte', 'libertbus-bilete' ), __( 'Clientul primește în ziua dinaintea cursei (între 9:00 și 21:00) un email cu biletul, ora și locul de urcare. Mai puțini pasageri care uită de rezervarea cu plata la urcare.', 'libertbus-bilete' ) );
 				$check( 'simple_checkout', __( 'Plată simplificată', 'libertbus-bilete' ), __( 'Fără adresă poștală la plata biletelor: doar nume, telefon, email, țară.', 'libertbus-bilete' ) );
 				$check( 'autocomplete', __( 'Finalizare automată', 'libertbus-bilete' ), __( 'Comanda plătită devine „Finalizată” și clientul primește imediat emailul cu biletul.', 'libertbus-bilete' ) );
 				$check( 'test_gateway', __( 'Plată de test', 'libertbus-bilete' ), __( 'Metodă de plată falsă, vizibilă doar administratorilor, pentru verificări.', 'libertbus-bilete' ) );

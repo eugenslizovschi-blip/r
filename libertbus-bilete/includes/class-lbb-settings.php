@@ -44,6 +44,7 @@ class LBB_Settings {
 			'autocomplete'       => 1,
 			'test_gateway'       => 0,
 			'require_names'      => 1,
+			'remind_day_before'  => 0,
 			'ticket_notes'       => "Prezentați-vă la urcare cu 15 minute înainte de plecare.\nPentru cursele internaționale aveți nevoie de pașaport sau buletin valabil.",
 			'support_phone'      => '+373 691 84 111',
 			'company_name'       => '',
@@ -158,7 +159,7 @@ class LBB_Settings {
 	}
 
 	public static function checkboxes() {
-		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'delete_on_uninstall', 'allow_pay', 'allow_reserve', 'show_approx', 'replace_cf7_routes', 'cookie_banner', 'footer_links' );
+		return array( 'simple_checkout', 'autocomplete', 'test_gateway', 'require_names', 'remind_day_before', 'delete_on_uninstall', 'allow_pay', 'allow_reserve', 'show_approx', 'replace_cf7_routes', 'cookie_banner', 'footer_links' );
 	}
 
 	/**

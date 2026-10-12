@@ -620,6 +620,7 @@ class LBB_Bookings {
 		global $wpdb;
 		// Panoul „Gata de plăți?” verifică dacă rulează cu adevărat (WP-Cron poate fi oprit sau fără vizite).
 		update_option( 'lbb_last_cleanup', time(), false );
+		LBB_Tickets::send_reminders();
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::table() . " WHERE status IN ('hold','cancelled') AND order_id = 0 AND ticket_code = '' AND updated_at < %s", gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		// Politica de confidențialitate: datele pasagerilor se păstrează 3 ani de la data călătoriei. După aceea rămân
 		// doar codul, ruta, data și locurile (pentru statistici); numele, telefonul și emailul se șterg.

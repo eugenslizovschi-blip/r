@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'ReamintA', 'ReamintB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -931,6 +931,38 @@ lbb_t( 'lista de rute arată locul de urcare sub rută și câte rute active nu-
 lbb_t( '„Trimite biletul” are și textul cursei (cod, rută, zi, oră); o rută ștearsă nu lasă text gol', 'Bilet LibertBus LB-URC1: UrcareA → UrcareB, ' . LBB_WooCommerce::date_with_day( $tomorrow ) . ', 10:00' === $bd_s && false !== strpos( LBB_Tickets::share_text( array_merge( $bd_b, array( 'route_id' => 0 ) ) ), '(rută ștearsă)' ), $bd_s );
 lbb_t( 'locul de urcare ajunge și în formular (rezumatul de dinainte de plată)', 'Autogara Nord, peronul 3' === ( $bd_m['boarding'] ?? null ) && false !== strpos( (string) file_get_contents( LBB_DIR . 'assets/lbb.js' ), "t.boarding + ': ' + route.boarding" ), $bd_m );
 lbb_t( 'locul de urcare al rutei apare pe bilet și în calendar; fără el, rândul lipsește și calendarul are orașul', 'Autogara Nord, peronul 3' === ( $bd_d['Loc de urcare'] ?? null ) && false !== strpos( $bd_h, 'Autogara Nord, peronul 3' ) && false !== strpos( $bd_i, "LOCATION:Autogara Nord\\, peronul 3\r\n" ) && ! isset( $bd_n['Loc de urcare'] ) && false !== strpos( $bd_i2, "LOCATION:UrcareA\r\n" ), array( $bd_d, $bd_n, $bd_e ) );
+
+// Reamintirea din ziua dinaintea cursei: doar dacă e pornită, doar ziua (9–21), o singură dată, doar pentru mâine.
+$rm_r  = LBB_Routes::save( array( 'origin' => 'ReamintA', 'destination' => 'ReamintB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1, 'boarding' => 'Autogara Sud' ) );
+$rm_rt = is_int( $rm_r ) ? LBB_Routes::get( $rm_r ) : null;
+$rm_d2 = gmdate( 'Y-m-d', strtotime( $tomorrow . ' 12:00 +1 day' ) );
+$rm_a  = $rm_rt ? LBB_Bookings::create_hold( $rm_rt, $tomorrow, '10:00', 1, 0, array( 'Ana Reamintire' ), '+37369000098', 'rm@example.com', 'MDL' ) : null;
+$rm_a  = is_array( $rm_a ) ? LBB_Bookings::reserve( $rm_a['token'] ) : $rm_a;
+$rm_b  = $rm_rt ? LBB_Bookings::create_hold( $rm_rt, $rm_d2, '10:00', 1, 0, array( 'Ion Poimaine' ), '+37369000099', 'rm2@example.com', 'MDL' ) : null;
+$rm_b  = is_array( $rm_b ) ? LBB_Bookings::reserve( $rm_b['token'] ) : $rm_b;
+$rm_keep   = get_option( 'lbb_settings' );
+$lbb_mails = array();
+add_filter( 'pre_wp_mail', $lbb_catch, 1, 2 );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'remind_day_before' => 0 ) ) );
+$rm_off = LBB_Tickets::send_reminders( 12 );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'remind_day_before' => 1 ) ) );
+$rm_night = LBB_Tickets::send_reminders( 23 );
+$rm_day   = LBB_Tickets::send_reminders( 12 );
+$rm_mine  = array_values( array_filter( $lbb_mails, function ( $m ) {
+	return in_array( $m['to'], array( 'rm@example.com', 'rm2@example.com' ), true ) || ( is_array( $m['to'] ) && array_intersect( $m['to'], array( 'rm@example.com', 'rm2@example.com' ) ) );
+} ) );
+$rm_again = LBB_Tickets::send_reminders( 12 );
+$rm_n2    = count( array_filter( $lbb_mails, function ( $m ) {
+	return 'rm@example.com' === $m['to'];
+} ) );
+remove_filter( 'pre_wp_mail', $lbb_catch, 1 );
+update_option( 'lbb_settings', $rm_keep );
+if ( is_int( $rm_r ) ) {
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $rm_r ) );
+	LBB_Routes::delete( $rm_r );
+}
+$rm_m = $rm_mine ? $rm_mine[0] : array( 'to' => '', 'subject' => '', 'message' => '' );
+lbb_t( 'reamintirea de mâine: oprită implicit, nu noaptea, o singură dată, doar pentru cursele de mâine, cu biletul și locul de urcare', is_array( $rm_a ) && is_array( $rm_b ) && 0 === (int) LBB_Settings::defaults()['remind_day_before'] && 0 === $rm_off && 0 === $rm_night && $rm_day >= 1 && 1 === count( $rm_mine ) && 'rm@example.com' === $rm_m['to'] && 0 === strpos( $rm_m['subject'], 'Mâine: ReamintA → ReamintB, ora 10:00 — ' . $rm_a['ticket_code'] ) && false !== strpos( $rm_m['message'], 'Plata se face la urcare' ) && false !== strpos( $rm_m['message'], 'Autogara Sud' ) && 0 === $rm_again && 1 === $rm_n2, array( $rm_off, $rm_night, $rm_day, $rm_again, count( $rm_mine ), $rm_m['subject'] ) );
 
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );

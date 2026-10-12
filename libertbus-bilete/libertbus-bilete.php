@@ -17,7 +17,7 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'LBB_VERSION', '1.5.0' );
-define( 'LBB_DB_VERSION', '3' );
+define( 'LBB_DB_VERSION', '4' );
 define( 'LBB_FILE', __FILE__ );
 define( 'LBB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LBB_URL', plugin_dir_url( __FILE__ ) );

@@ -113,6 +113,50 @@ class LBB_Tickets {
 	}
 
 	/**
+	 * Reamintirea din ziua dinaintea cursei (dacă e pornită în Setări), câte un email pe bilet, o singură dată.
+	 * Rulează din cronul orar; doar între 9:00 și 21:00, ca nimeni să nu primească emailuri noaptea.
+	 *
+	 * @param int|null $hour Ora locală (pentru teste); implicit ora curentă din fusul firmei.
+	 * @return int Câte emailuri au plecat.
+	 */
+	public static function send_reminders( $hour = null ) {
+		global $wpdb;
+		if ( ! LBB_Settings::get( 'remind_day_before' ) ) {
+			return 0;
+		}
+		$now  = new DateTimeImmutable( 'now', LBB_Settings::tz() );
+		$hour = null === $hour ? (int) $now->format( 'G' ) : (int) $hour;
+		if ( $hour < 9 || $hour >= 21 ) {
+			return 0;
+		}
+		$tomorrow = $now->modify( '+1 day' )->format( 'Y-m-d' );
+		$ids      = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM ' . LBB_Bookings::table() . " WHERE travel_date = %s AND status IN ('confirmed','reserved') AND ticket_code <> '' AND email <> '' AND reminded_at IS NULL ORDER BY id LIMIT 50", $tomorrow ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$sent     = 0;
+		foreach ( $ids as $id ) {
+			// Marcat înainte de trimitere: o eroare de email nu duce la reîncercări la fiecare oră.
+			$wpdb->update( LBB_Bookings::table(), array( 'reminded_at' => gmdate( 'Y-m-d H:i:s' ) ), array( 'id' => (int) $id ) );
+			$booking = LBB_Bookings::get( (int) $id );
+			if ( ! $booking || ! is_email( $booking['email'] ) ) {
+				continue;
+			}
+			$route  = LBB_Routes::get( $booking['route_id'] );
+			$name   = LBB_Bookings::route_name( $route ? $route : array() );
+			$office = LBB_Settings::get( 'company_email' );
+			$office = is_email( $office ) ? $office : get_option( 'admin_email' );
+			$intro  = 'reserved' === $booking['status']
+				? __( 'Vă reamintim de cursa de mâine. Plata se face la urcare, la șofer.', 'libertbus-bilete' )
+				: __( 'Vă reamintim de cursa de mâine. Arătați biletul (codul QR) la urcare.', 'libertbus-bilete' );
+			$body   = '<p>' . esc_html( $intro ) . '</p>' . self::html( $booking ) . self::notes_html();
+			$heads  = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header(), 'Reply-To: ' . $office );
+			/* translators: 1: ruta, 2: ora, 3: codul biletului */
+			if ( self::mail_html( $booking['email'], sprintf( __( 'Mâine: %1$s, ora %2$s — %3$s', 'libertbus-bilete' ), $name, $booking['dep_time'], $booking['ticket_code'] ), $body, $heads ) ) {
+				$sent++;
+			}
+		}
+		return $sent;
+	}
+
+	/**
 	 * Biroul a anulat o rezervare cu plata la urcare: clientul află, ca să nu vină degeaba la autocar.
 	 */
 	public static function send_cancellation_email( array $booking ) {

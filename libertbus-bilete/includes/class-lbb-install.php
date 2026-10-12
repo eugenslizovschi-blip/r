@@ -104,6 +104,7 @@ class LBB_Install {
 			currency char(3) NOT NULL DEFAULT '',
 			pay_currency char(3) NOT NULL DEFAULT '',
 			expires_at datetime NULL,
+			reminded_at datetime NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY  (id),
