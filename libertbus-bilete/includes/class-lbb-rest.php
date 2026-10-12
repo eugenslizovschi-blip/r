@@ -35,6 +35,8 @@ class LBB_Rest {
 			'route_id'   => $route['id'],
 			'date'       => $request['date'],
 			'departures' => LBB_Routes::departures_on( $route, $request['date'] ),
+			// Zi fără curse din Setări: formularul spune „zi liberă”, nu „ruta circulă doar: …”.
+			'closed'     => in_array( $request['date'], LBB_Settings::closed_dates(), true ),
 		) );
 		$response->header( 'Cache-Control', 'no-store' );
 		return $response;

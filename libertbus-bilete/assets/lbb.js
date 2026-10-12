@@ -525,7 +525,7 @@
 						loadDepartures();
 						return;
 					}
-					setStatus( departures.length ? ( open.length ? '' : t.noneOpen ) : t.noDeparture + runsOn( route ) );
+					setStatus( departures.length ? ( open.length ? '' : t.noneOpen ) : ( data.closed ? t.closedDay : t.noDeparture + runsOn( route ) ) );
 					departures.forEach( function ( d ) {
 						// În formularul compact lista e îngustă: doar ora; locurile libere apar sub câmpuri.
 						var label = compact
