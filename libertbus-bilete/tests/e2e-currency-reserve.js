@@ -121,6 +121,15 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (!shared || shared.url !== guest.url() || shared.title !== code || !new RegExp('^Rezervare LibertBus ' + code + ': .+ → .+, \\d\\d\\.\\d\\d\\.\\d{4} \\(\\S+\\), \\d\\d:\\d\\d$').test(shared.text || '')) fail('„Trimite biletul” nu trimite linkul biletului: ' + JSON.stringify(shared));
   }
   await sharePage.close();
+  // Telefon vechi, fără NodeList.forEach (Android 4.4, iOS 9): codul QR se desenează totuși, fără erori.
+  const oldPage = await guest.context().newPage();
+  const oldErrors = [];
+  oldPage.on('pageerror', e => oldErrors.push(e.message));
+  await oldPage.addInitScript(() => { delete NodeList.prototype.forEach; });
+  await oldPage.goto(guest.url());
+  const oldQr = await oldPage.$$eval('[data-qr]', els => els.map(el => el.querySelectorAll('canvas, img').length)).catch(() => []);
+  if (!oldQr.length || oldQr.some(n => n === 0) || oldErrors.length) fail('pe un browser fără NodeList.forEach codul QR nu se desenează: ' + JSON.stringify({ oldQr, oldErrors }));
+  await oldPage.close();
   if (process.env.WP_PATH) {
     const fs = require('fs'), dir = process.env.WP_PATH + '/wp-content/mail';
     const mail = fs.existsSync(dir) ? fs.readdirSync(dir).sort().reverse().map(f => fs.readFileSync(dir + '/' + f, 'utf8')).find(m => m.includes(code) && /^TO: [^\n]*test@example\.com/m.test(m)) : '';

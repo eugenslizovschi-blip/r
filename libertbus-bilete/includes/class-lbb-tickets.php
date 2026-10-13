@@ -562,11 +562,14 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 				navigator.share({title: b.getAttribute('data-share-title'), text: b.getAttribute('data-share-text'), url: b.getAttribute('data-share-url')}).catch(function(){});
 			});
 		})(document.querySelector('.share'));
-		document.querySelectorAll('[data-qr]').forEach(function(el){
+		// Array.prototype.forEach, nu NodeList.forEach: pe telefoanele vechi (Android 4.4, iOS 9) acela lipsește și
+		// codul QR, cel pe care îl scanează șoferul, nu s-ar mai desena.
+		var each = function(list, fn){ Array.prototype.forEach.call(list, fn); };
+		each(document.querySelectorAll('[data-qr]'), function(el){
 			if (window.QRCode) { new QRCode(el, {text: el.getAttribute('data-qr'), width: 132, height: 132, correctLevel: QRCode.CorrectLevel.M}); }
 			// Textul e pe container (role="img"); imaginea și canvasul generate nu se mai citesc o dată.
-			el.querySelectorAll('img').forEach(function(i){ i.setAttribute('alt', ''); });
-			el.querySelectorAll('canvas').forEach(function(c){ c.setAttribute('aria-hidden', 'true'); });
+			each(el.querySelectorAll('img'), function(i){ i.setAttribute('alt', ''); });
+			each(el.querySelectorAll('canvas'), function(c){ c.setAttribute('aria-hidden', 'true'); });
 		});
 		</script>
 	<?php endif; ?>
