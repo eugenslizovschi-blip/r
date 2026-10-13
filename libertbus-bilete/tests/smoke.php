@@ -1016,6 +1016,26 @@ if ( is_int( $ln_n ) && $ln_n ) {
 }
 lbb_t( 'rută cu un câmp prea lung: eroare clară, nu „salvată”; 255 de caractere (cu diacritice) încap', is_wp_error( $ln_u ) && false !== strpos( $ln_u->get_error_message(), 'Locul de urcare e prea lung' ) && is_wp_error( $ln_n ) && false !== strpos( $ln_n->get_error_message(), 'Plecarea e prea lung' ) && $ln_ok === $ln_r && 255 === mb_strlen( $ln_b ), array( $ln_u, $ln_n, $ln_ok, mb_strlen( $ln_b ) ) );
 
+// Accesibilitate în admin: explicația de sub un câmp e legată de el (aria-describedby), fiecare id o singură dată.
+ob_start();
+LBB_Admin::page_settings();
+$ad_set = ob_get_clean();
+$_GET = array( 'page' => 'lbb-routes', 'add' => 1 );
+ob_start();
+LBB_Admin::page_routes();
+$ad_rt = ob_get_clean();
+$_GET = array();
+$ad_ok = true;
+foreach ( array( $ad_set, $ad_rt ) as $ad_html ) {
+	preg_match_all( '/aria-describedby="([^"]+)"/', $ad_html, $ad_m );
+	foreach ( $ad_m[1] as $ad_id ) {
+		if ( 1 !== substr_count( $ad_html, 'id="' . $ad_id . '"' ) ) {
+			$ad_ok = false;
+		}
+	}
+}
+lbb_t( 'admin: explicațiile câmpurilor sunt legate de câmp (aria-describedby spre un id unic)', $ad_ok && false !== strpos( $ad_set, 'aria-describedby="lbb-closed_dates-desc"' ) && false !== strpos( $ad_rt, 'aria-describedby="lbb-boarding-desc"' ) && false !== strpos( $ad_rt, 'aria-describedby="lbb-cap-desc"' ) );
+
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
 $ic_h = is_int( $ic_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $ic_r ), $tomorrow, '10:15', 2, 0, array( 'Calendar Unu', 'Calendar Doi' ), '+37369000093', 'ic@example.com', 'MDL' ) : null;

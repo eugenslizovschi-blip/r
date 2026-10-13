@@ -429,12 +429,12 @@ class LBB_Admin {
 				<tr><th><label for="lbb-price"><?php esc_html_e( 'Preț adult', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-price" name="price" type="number" step="0.01" min="0" required value="<?php echo esc_attr( $route['price'] ); ?>">
 					<select name="currency" aria-label="<?php esc_attr_e( 'Moneda prețului', 'libertbus-bilete' ); ?>"><?php foreach ( LBB_Settings::currencies() as $cur ) : ?><option <?php selected( $route['currency'], $cur ); ?>><?php echo esc_html( $cur ); ?></option><?php endforeach; ?></select>
 					<p class="description"><?php esc_html_e( 'Cu prețul 0 ruta nu se vinde online.', 'libertbus-bilete' ); ?></p></td></tr>
-				<tr><th><label for="lbb-child"><?php esc_html_e( 'Preț copil', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-child" name="child_price" type="number" step="0.01" min="0" value="<?php echo esc_attr( null === $route['child_price'] ? '' : $route['child_price'] ); ?>"><p class="description"><?php esc_html_e( 'Gol = copiii plătesc ca adulții.', 'libertbus-bilete' ); ?></p></td></tr>
+				<tr><th><label for="lbb-child"><?php esc_html_e( 'Preț copil', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-child" name="child_price" type="number" step="0.01" min="0" aria-describedby="lbb-child-desc" value="<?php echo esc_attr( null === $route['child_price'] ? '' : $route['child_price'] ); ?>"><p class="description" id="lbb-child-desc"><?php esc_html_e( 'Gol = copiii plătesc ca adulții.', 'libertbus-bilete' ); ?></p></td></tr>
 				<?php /* translators: %s: moneda magazinului */ ?>
-				<tr><th><label for="lbb-cap"><?php esc_html_e( 'Locuri de vândut online pe cursă', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-cap" name="capacity" type="number" min="0" value="<?php echo esc_attr( $route['capacity'] ); ?>"><p class="description"><?php echo esc_html( sprintf( __( '0 = valoarea implicită din Setări (%d).', 'libertbus-bilete' ), LBB_Settings::get( 'default_capacity' ) ) ); ?></p></td></tr>
+				<tr><th><label for="lbb-cap"><?php esc_html_e( 'Locuri de vândut online pe cursă', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-cap" name="capacity" type="number" min="0" aria-describedby="lbb-cap-desc" value="<?php echo esc_attr( $route['capacity'] ); ?>"><p class="description" id="lbb-cap-desc"><?php echo esc_html( sprintf( __( '0 = valoarea implicită din Setări (%d).', 'libertbus-bilete' ), LBB_Settings::get( 'default_capacity' ) ) ); ?></p></td></tr>
 				<tr><th><?php esc_html_e( 'Activă', 'libertbus-bilete' ); ?></th><td><label><input type="checkbox" name="active" value="1" <?php checked( $route['active'] ); ?>> <?php esc_html_e( 'Se vinde online', 'libertbus-bilete' ); ?></label></td></tr>
 				<tr><th><label for="lbb-url"><?php esc_html_e( 'Pagina rutei', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-url" name="page_url" type="url" class="regular-text" maxlength="255" value="<?php echo esc_attr( $route['page_url'] ); ?>"></td></tr>
-				<tr><th><label for="lbb-boarding"><?php esc_html_e( 'Locul de urcare', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-boarding" name="boarding" type="text" class="regular-text" maxlength="255" value="<?php echo esc_attr( $route['boarding'] ); ?>"><p class="description"><?php esc_html_e( 'Apare pe bilet, în email și în calendarul clientului. Ex. „Bălți, Autogara Nord, peronul 3”.', 'libertbus-bilete' ); ?></p></td></tr>
+				<tr><th><label for="lbb-boarding"><?php esc_html_e( 'Locul de urcare', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-boarding" name="boarding" type="text" class="regular-text" maxlength="255" aria-describedby="lbb-boarding-desc" value="<?php echo esc_attr( $route['boarding'] ); ?>"><p class="description" id="lbb-boarding-desc"><?php esc_html_e( 'Apare pe bilet, în email și în calendarul clientului. Ex. „Bălți, Autogara Nord, peronul 3”.', 'libertbus-bilete' ); ?></p></td></tr>
 				<tr><th><label for="lbb-notes"><?php esc_html_e( 'Notițe interne', 'libertbus-bilete' ); ?></label></th><td><textarea id="lbb-notes" name="notes" rows="3" class="large-text"><?php echo esc_textarea( $route['notes'] ); ?></textarea></td></tr>
 			</table>
 			<?php submit_button( __( 'Salvează ruta', 'libertbus-bilete' ) ); ?>
@@ -842,16 +842,17 @@ class LBB_Admin {
 		$mins = array( 'default_capacity' => 1, 'max_passengers' => 1, 'max_days_ahead' => 1, 'cart_hold_minutes' => 5, 'payment_minutes' => 10 );
 		$num  = function ( $key, $label, $help = '', $step = '1' ) use ( $s, $mins ) {
 			$min = isset( $mins[ $key ] ) ? $mins[ $key ] : 0;
-			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="number" min="' . esc_attr( $min ) . '" step="' . esc_attr( $step ) . '" value="' . esc_attr( $s[ $key ] ) . '"' . ( $min ? ' required' : '' ) . '>';
+			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="number" min="' . esc_attr( $min ) . '" step="' . esc_attr( $step ) . '" value="' . esc_attr( $s[ $key ] ) . '"' . ( $min ? ' required' : '' ) . ( $help ? ' aria-describedby="lbb-' . esc_attr( $key ) . '-desc"' : '' ) . '>';
+			// Explicația legată de câmp: cititorul de ecran o spune odată cu eticheta.
 			if ( $help ) {
-				echo '<p class="description">' . esc_html( $help ) . '</p>';
+				echo '<p class="description" id="lbb-' . esc_attr( $key ) . '-desc">' . esc_html( $help ) . '</p>';
 			}
 			echo '</td></tr>';
 		};
 		$text = function ( $key, $label, $help = '' ) use ( $s ) {
-			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input type="text" id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" class="regular-text" value="' . esc_attr( $s[ $key ] ) . '">';
+			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input type="text" id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" class="regular-text" value="' . esc_attr( $s[ $key ] ) . '"' . ( $help ? ' aria-describedby="lbb-' . esc_attr( $key ) . '-desc"' : '' ) . '>';
 			if ( $help ) {
-				echo '<p class="description">' . esc_html( $help ) . '</p>';
+				echo '<p class="description" id="lbb-' . esc_attr( $key ) . '-desc">' . esc_html( $help ) . '</p>';
 			}
 			echo '</td></tr>';
 		};
