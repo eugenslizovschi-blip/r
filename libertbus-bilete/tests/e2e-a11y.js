@@ -49,10 +49,13 @@ async function scan(page, label, include) {
   await page.fill('input[name="lbb_names[]"]', 'Test Accesibil');
   await page.fill('input[name="lbb_phone"]', '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
   await page.fill('input[name="lbb_email"]', 'a11y@example.com');
+  // Ca pe un telefon care poate partaja: pe bilet apare și „Trimite biletul”, verificat și el.
+  await page.addInitScript(() => { navigator.share = () => Promise.resolve(); });
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="reserve"]')]);
   if (!/lbb_bilet=/.test(page.url())) fail('rezervarea nu a dus la pagina biletului: ' + page.url());
   await page.waitForSelector('.lbb-ticket-qr img, .lbb-ticket-qr canvas', { state: 'attached' });
   // Pagina biletului e în întregime a plugin-ului: o verificăm toată (repere, titlu), nu doar biletul.
+  if (!(await page.isVisible('.actions .share'))) fail('„Trimite biletul” nu apare pe biletul verificat');
   await scan(page, 'pagina biletului', [['body']]);
   // Linkul stricat (cheie greșită): pagina „Biletul nu a fost găsit” are aceleași repere și linkul spre telefon.
   await page.goto(page.url().replace(/([?&]k=)[^&]+/, '$1' + '0'.repeat(20)));
