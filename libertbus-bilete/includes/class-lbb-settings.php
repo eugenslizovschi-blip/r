@@ -200,7 +200,7 @@ class LBB_Settings {
 	 * formează doar din Moldova, iar un client din România care apasă pe link ar suna în altă parte.
 	 */
 	public static function phone_href() {
-		return 'tel:' . LBB_Frontend::normalize_phone( trim( (string) self::get( 'support_phone' ) ) );
+		return LBB_Frontend::tel_href( trim( (string) self::get( 'support_phone' ) ) );
 	}
 
 	/**

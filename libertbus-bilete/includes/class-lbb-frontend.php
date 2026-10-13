@@ -193,6 +193,16 @@ class LBB_Frontend {
 	}
 
 	/**
+	 * Linkul de apel pentru un număr scris oricum („069 000 111”, „+373 69…”, „0040 …”): cu prefixul țării,
+	 * ca să sune corect și de pe un telefon din altă țară.
+	 *
+	 * @param string $phone Numărul, cum a fost salvat.
+	 */
+	public static function tel_href( $phone ) {
+		return 'tel:' . self::normalize_phone( $phone );
+	}
+
+	/**
 	 * Greșelile de tastare cunoscute la domeniile de email folosite des („gmail.con”, „gmial.com”): pe astfel de
 	 * adrese biletul nu ajunge niciodată. Întoarce adresa corectată sau '' dacă domeniul nu e o greșeală știută.
 	 */

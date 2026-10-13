@@ -788,6 +788,23 @@ $_GET   = array( 'page' => 'lbb-manifest', 'date' => $tomorrow, 'route' => $dt_r
 ob_start();
 LBB_Admin::page_manifest();
 $dt_html = ob_get_clean();
+// Un număr salvat local, cu spații (rezervări din versiuni vechi, introduse de birou): linkul de apel are totuși +373.
+$tl_b = isset( $dt_b[1]['id'] ) ? $dt_b[1] : null;
+if ( $tl_b ) {
+	$wpdb->update( LBB_Bookings::table(), array( 'phone' => '069 000 095' ), array( 'id' => $tl_b['id'] ) );
+}
+$_GET = array( 'page' => 'lbb-manifest', 'date' => $tomorrow, 'route' => $dt_r );
+ob_start();
+LBB_Admin::page_manifest();
+$tl_man = ob_get_clean();
+$_GET = array( 'page' => 'lbb-bookings', 'q' => $tl_b ? $tl_b['ticket_code'] : '' );
+ob_start();
+LBB_Admin::page_bookings();
+$tl_list = ob_get_clean();
+if ( $tl_b ) {
+	$wpdb->update( LBB_Bookings::table(), array( 'phone' => '+37369000094' ), array( 'id' => $tl_b['id'] ) );
+}
+lbb_t( 'telefonul clientului salvat local („069 000 095”) are link de apel cu +373 în lista pentru șofer și în Rezervări', $tl_b && false !== strpos( $tl_man, '<a href="tel:+37369000095">069 000 095</a>' ) && false !== strpos( $tl_list, '<a href="tel:+37369000095">069 000 095</a>' ) && false === strpos( $tl_man . $tl_list, 'tel:069' ), array( substr( wp_strip_all_tags( $tl_list ), 0, 400 ) ) );
 // Ziua de azi fără pasageri pe rută: lista trimite la următoarea zi cu pasageri (mâine); după mâine nu mai e niciuna.
 $_GET    = array( 'page' => 'lbb-manifest', 'date' => LBB_Settings::today(), 'route' => $dt_r );
 ob_start();

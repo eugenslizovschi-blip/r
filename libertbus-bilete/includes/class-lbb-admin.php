@@ -595,7 +595,7 @@ class LBB_Admin {
 		foreach ( $rows as $b ) {
 			$total += $b['seats'];
 			$order  = $b['order_id'] ? wc_get_order( $b['order_id'] ) : null;
-			echo '<tr><td><strong>' . esc_html( $b['dep_time'] ) . '</strong></td><td>' . esc_html( LBB_Bookings::route_name( $b ) ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '</td><td><a href="tel:' . esc_attr( $b['phone'] ) . '">' . esc_html( $b['phone'] ) . '</a></td><td>' . self::payment_label( $b, $due ) . '</td><td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ticket_code_html() și payment_label() escapează singure.
+			echo '<tr><td><strong>' . esc_html( $b['dep_time'] ) . '</strong></td><td>' . esc_html( LBB_Bookings::route_name( $b ) ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '</td><td><a href="' . esc_attr( LBB_Frontend::tel_href( $b['phone'] ) ) . '">' . esc_html( $b['phone'] ) . '</a></td><td>' . self::payment_label( $b, $due ) . '</td><td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ticket_code_html() și payment_label() escapează singure.
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a>';
 			}
@@ -750,7 +750,7 @@ class LBB_Admin {
 	private static function contact_links( array $b ) {
 		$out = array();
 		if ( '' !== (string) $b['phone'] ) {
-			$out[] = '<a href="tel:' . esc_attr( preg_replace( '/[^\d+]/', '', $b['phone'] ) ) . '">' . esc_html( $b['phone'] ) . '</a>';
+			$out[] = '<a href="' . esc_attr( LBB_Frontend::tel_href( $b['phone'] ) ) . '">' . esc_html( $b['phone'] ) . '</a>';
 		}
 		if ( is_email( $b['email'] ) ) {
 			$out[] = '<a href="mailto:' . esc_attr( $b['email'] ) . '" style="word-break:break-all">' . esc_html( $b['email'] ) . '</a>';

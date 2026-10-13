@@ -104,7 +104,7 @@ class LBB_Tickets {
 		}
 		$admin  = '<p>' . esc_html__( 'Rezervare nouă cu plata la urcare.', 'libertbus-bilete' ) . '</p>' . self::html( $booking )
 			// Biroul sună sau scrie clientului dintr-o atingere, de pe telefon.
-			. '<p>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': <a href="tel:' . esc_attr( preg_replace( '/[^\d+]/', '', $booking['phone'] ) ) . '">' . esc_html( $booking['phone'] ) . '</a>'
+			. '<p>' . esc_html__( 'Telefon', 'libertbus-bilete' ) . ': <a href="' . esc_attr( LBB_Frontend::tel_href( $booking['phone'] ) ) . '">' . esc_html( $booking['phone'] ) . '</a>'
 			. ( is_email( $booking['email'] ) ? '<br>Email: <a href="mailto:' . esc_attr( $booking['email'] ) . '">' . esc_html( $booking['email'] ) . '</a>' : '' ) . '</p>'
 			// Linkul deschide direct rezervarea aceasta (căutare după cod), nu lista cu ultimele 200.
 			. '<p><a href="' . esc_url( add_query_arg( array( 'page' => 'lbb-bookings', 'q' => rawurlencode( $booking['ticket_code'] ) ), admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Deschide rezervarea în admin', 'libertbus-bilete' ) . '</a></p>';
