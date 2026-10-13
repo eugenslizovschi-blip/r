@@ -1369,6 +1369,12 @@ wp_set_current_user( 1 );
 ob_start();
 LBB_Admin::page_settings();
 $form_html = ob_get_clean();
+$_GET = array( 'page' => 'lbb-routes', 'add' => 1 );
+ob_start();
+LBB_Admin::page_routes();
+$im_route = ob_get_clean();
+$_GET = array();
+lbb_t( 'pe telefon, câmpurile numerice deschid tastatura cu cifre (cu zecimale la prețuri și cursuri)', false !== strpos( $form_html, 'id="lbb-max_passengers" name="max_passengers" type="number" inputmode="numeric"' ) && false !== strpos( $form_html, 'id="lbb-rate_RON" name="rate_RON" type="number" inputmode="decimal"' ) && false !== strpos( $im_route, 'name="price" type="number" inputmode="decimal"' ) && false !== strpos( $im_route, 'name="child_price" type="number" inputmode="decimal"' ) && false !== strpos( $im_route, 'name="capacity" type="number" inputmode="numeric"' ) );
 // Pe telefon adminul primește tastatura potrivită: telefon, @ pentru email, cifre pentru IDNO.
 lbb_t( 'Setări: telefonul, emailul și IDNO-ul firmei au tastatura potrivită pe telefon', false !== strpos( $form_html, '<input type="tel" id="lbb-support_phone"' ) && false !== strpos( $form_html, '<input type="email" id="lbb-company_email"' ) && (bool) preg_match( '/<input type="text" id="lbb-company_idno"[^>]* inputmode="numeric"/', $form_html ) );
 $dom = new DOMDocument();
