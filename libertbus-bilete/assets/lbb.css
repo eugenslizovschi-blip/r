@@ -1,6 +1,7 @@
 .lbb-booking {
 	--lbb-accent: #00875a;
 	--lbb-accent-ink: #fff;
+	--lbb-accent-text: #00875a; /* text și contururi pe alb; închis automat dacă culoarea aleasă e prea deschisă */
 	--lbb-border: #d7dbe0;
 	--lbb-muted: #5f6b7a;
 	--lbb-bg: #fff;
@@ -38,7 +39,7 @@
 	color: inherit;
 	margin: 0;
 }
-.lbb-booking select:focus, .lbb-booking input:focus { outline: 2px solid var(--lbb-accent); outline-offset: 1px; border-color: var(--lbb-accent); }
+.lbb-booking select:focus, .lbb-booking input:focus { outline: 2px solid var(--lbb-accent-text); outline-offset: 1px; border-color: var(--lbb-accent-text); }
 .lbb-booking [aria-invalid="true"] { border-color: #c62828 !important; box-shadow: 0 0 0 1px #c62828; }
 .lbb-booking select, .lbb-booking input[type="text"], .lbb-booking input[type="tel"], .lbb-booking input[type="email"], .lbb-booking input[type="date"] { box-shadow: none !important; height: auto !important; font-size: 16px !important; color: #1d2733 !important; background-color: #fff !important; }
 .lbb-booking label, .lbb-booking legend { text-transform: none; letter-spacing: normal; }
@@ -83,9 +84,9 @@
 	font-size: 17px !important;
 	font-weight: 700 !important;
 }
-.lbb-booking .lbb-submit-alt { background: #fff !important; color: var(--lbb-accent) !important; }
+.lbb-booking .lbb-submit-alt { background: #fff !important; color: var(--lbb-accent-text) !important; border-color: var(--lbb-accent-text) !important; }
 .lbb-booking .lbb-submit:hover, .lbb-booking .lbb-submit:focus, .lbb-booking .lbb-submit:active { background: var(--lbb-accent) !important; color: var(--lbb-accent-ink) !important; border-color: var(--lbb-accent) !important; }
-.lbb-booking .lbb-submit.lbb-submit-alt:hover, .lbb-booking .lbb-submit.lbb-submit-alt:focus, .lbb-booking .lbb-submit.lbb-submit-alt:active { background: #fff !important; color: var(--lbb-accent) !important; }
+.lbb-booking .lbb-submit.lbb-submit-alt:hover, .lbb-booking .lbb-submit.lbb-submit-alt:focus, .lbb-booking .lbb-submit.lbb-submit-alt:active { background: #fff !important; color: var(--lbb-accent-text) !important; border-color: var(--lbb-accent-text) !important; }
 .lbb-booking .lbb-submit:hover:not(:disabled) { box-shadow: 0 0 0 3px rgba(0, 0, 0, .12) !important; }
 .lbb-booking .lbb-submit::after, .lbb-booking .lbb-submit::before { display: none !important; }
 .lbb-booking .lbb-submit:disabled { opacity: .45 !important; cursor: not-allowed; }
@@ -97,7 +98,7 @@
 .lbb-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .lbb-chip span { display: inline-block; min-width: 64px; min-height: 40px; line-height: 38px; padding: 0 14px; text-align: center; border: 1px solid var(--lbb-border); border-radius: 20px; font-weight: 700; }
 .lbb-chip input:checked + span { background: var(--lbb-accent); border-color: var(--lbb-accent); color: var(--lbb-accent-ink); }
-.lbb-chip input:focus-visible + span { outline: 2px solid var(--lbb-accent); outline-offset: 2px; }
+.lbb-chip input:focus-visible + span { outline: 2px solid var(--lbb-accent-text); outline-offset: 2px; }
 .lbb-submit:disabled { opacity: .45; cursor: not-allowed; }
 .lbb-submit.is-busy { opacity: .7; cursor: progress; }
 .lbb-sending { margin: 10px 0 0; font-weight: 600; text-align: center; }
@@ -127,7 +128,7 @@
 .lbb-compact .lbb-summary { margin: 4px 0 10px; padding: 10px 12px; }
 .lbb-compact .lbb-summary-total { font-size: 18px; }
 .lbb-next-wrap { margin-bottom: 4px; }
-.lbb-back { background: none !important; border: 0 !important; color: var(--lbb-accent) !important; padding: 4px 0 !important; margin: 0 0 8px !important; font: inherit; font-weight: 600; cursor: pointer; box-shadow: none !important; }
+.lbb-back { background: none !important; border: 0 !important; color: var(--lbb-accent-text) !important; padding: 4px 0 !important; margin: 0 0 8px !important; font: inherit; font-weight: 600; cursor: pointer; box-shadow: none !important; }
 @media (max-width: 340px) { .lbb-compact .lbb-grid { grid-template-columns: 1fr; } }
 
 /* Pasul 2 al formularului compact: fereastră peste pagină */
@@ -161,7 +162,7 @@ html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
 /* Tema impune înălțimi de rând mici și culori pe butoane: le fixăm în formular. */
 .lbb-booking .lbb-summary, .lbb-booking .lbb-summary div, .lbb-booking .lbb-summary span { line-height: 1.35 !important; }
 .lbb-booking .lbb-field > span, .lbb-booking .lbb-status, .lbb-booking .lbb-note, .lbb-booking .lbb-preview-note { line-height: 1.35 !important; }
-.lbb-booking button.lbb-back, .lbb-booking button.lbb-back:hover, .lbb-booking button.lbb-back:focus { color: var(--lbb-accent) !important; background: none !important; border: 0 !important; text-decoration: underline; text-underline-offset: 3px; }
+.lbb-booking button.lbb-back, .lbb-booking button.lbb-back:hover, .lbb-booking button.lbb-back:focus { color: var(--lbb-accent-text) !important; background: none !important; border: 0 !important; text-decoration: underline; text-underline-offset: 3px; }
 
 .lbb-legend-hint { font-weight: 400; font-size: 13px; color: var(--lbb-muted); }
 
