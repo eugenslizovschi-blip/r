@@ -855,8 +855,9 @@ class LBB_Admin {
 			}
 			echo '</td></tr>';
 		};
-		$text = function ( $key, $label, $help = '' ) use ( $s ) {
-			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input type="text" id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" class="regular-text" value="' . esc_attr( $s[ $key ] ) . '"' . ( $help ? ' aria-describedby="lbb-' . esc_attr( $key ) . '-desc"' : '' ) . '>';
+		// $type / $inputmode: pe telefon, adminul primește tastatura potrivită (cifre, @, telefon).
+		$text = function ( $key, $label, $help = '', $type = 'text', $inputmode = '' ) use ( $s ) {
+			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input type="' . esc_attr( $type ) . '" id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" class="regular-text" value="' . esc_attr( $s[ $key ] ) . '"' . ( $inputmode ? ' inputmode="' . esc_attr( $inputmode ) . '"' : '' ) . ( $help ? ' aria-describedby="lbb-' . esc_attr( $key ) . '-desc"' : '' ) . '>';
 			if ( $help ) {
 				echo '<p class="description" id="lbb-' . esc_attr( $key ) . '-desc">' . esc_html( $help ) . '</p>';
 			}
@@ -917,10 +918,10 @@ class LBB_Admin {
 			<table class="form-table">
 				<?php
 				$text( 'company_name', __( 'Denumirea firmei', 'libertbus-bilete' ), __( 'ex. „Libert Tur” SRL', 'libertbus-bilete' ) );
-				$text( 'company_idno', __( 'IDNO / cod fiscal', 'libertbus-bilete' ) );
+				$text( 'company_idno', __( 'IDNO / cod fiscal', 'libertbus-bilete' ), '', 'text', 'numeric' );
 				$text( 'company_address', __( 'Adresa juridică', 'libertbus-bilete' ) );
-				$text( 'company_email', __( 'Email pentru clienți', 'libertbus-bilete' ) );
-				$text( 'support_phone', __( 'Telefon pentru clienți', 'libertbus-bilete' ) );
+				$text( 'company_email', __( 'Email pentru clienți', 'libertbus-bilete' ), '', 'email' );
+				$text( 'support_phone', __( 'Telefon pentru clienți', 'libertbus-bilete' ), '', 'tel' );
 				?>
 				<tr><th><label for="lbb-ticket_notes"><?php esc_html_e( 'Text pe bilet', 'libertbus-bilete' ); ?></label></th><td><textarea id="lbb-ticket_notes" name="ticket_notes" rows="4" class="large-text"><?php echo esc_textarea( $s['ticket_notes'] ); ?></textarea></td></tr>
 			</table>

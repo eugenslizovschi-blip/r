@@ -1369,6 +1369,8 @@ wp_set_current_user( 1 );
 ob_start();
 LBB_Admin::page_settings();
 $form_html = ob_get_clean();
+// Pe telefon adminul primește tastatura potrivită: telefon, @ pentru email, cifre pentru IDNO.
+lbb_t( 'Setări: telefonul, emailul și IDNO-ul firmei au tastatura potrivită pe telefon', false !== strpos( $form_html, '<input type="tel" id="lbb-support_phone"' ) && false !== strpos( $form_html, '<input type="email" id="lbb-company_email"' ) && (bool) preg_match( '/<input type="text" id="lbb-company_idno"[^>]* inputmode="numeric"/', $form_html ) );
 $dom = new DOMDocument();
 libxml_use_internal_errors( true );
 $dom->loadHTML( '<?xml encoding="utf-8"?>' . $form_html );
