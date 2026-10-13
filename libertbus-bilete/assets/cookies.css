@@ -28,8 +28,9 @@
 .lbb-cc.is-settings .lbb-cc-btns { grid-template-columns: 1fr 1fr; grid-template-areas: "nec acc"; }
 .lbb-cc .lbb-cc-panel { margin: 0 0 12px; padding: 10px 0 0; border-top: 1px solid #e3e6ea; }
 .lbb-cc .lbb-cc-panel[hidden] { display: none !important; }
-.lbb-cc .lbb-cc-opt { display: flex !important; gap: 10px; align-items: flex-start; margin: 0 0 10px !important; font-size: 14px !important; line-height: 1.4 !important; font-weight: 400 !important; color: #1d2733 !important; text-transform: none !important; cursor: pointer; }
-.lbb-cc .lbb-cc-opt input { width: 20px !important; height: 20px !important; min-width: 20px; margin: 1px 0 0 !important; accent-color: #00875a; }
+.lbb-cc .lbb-cc-opt { display: flex !important; align-items: flex-start; margin: 0 0 10px !important; font-size: 14px !important; line-height: 1.4 !important; font-weight: 400 !important; color: #1d2733 !important; text-transform: none !important; cursor: pointer; }
+/* Margine, nu gap: flex gap lipsește în Safari < 14.1. */
+.lbb-cc .lbb-cc-opt input { width: 20px !important; height: 20px !important; min-width: 20px; margin: 1px 10px 0 0 !important; accent-color: #00875a; }
 .lbb-cc .lbb-cc-btn.lbb-cc-save { width: 100%; background: #1d2733 !important; border-color: #1d2733 !important; color: #fff !important; }
 .lbb-cc .lbb-cc-btn {
 	min-height: 44px !important;

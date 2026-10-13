@@ -21,9 +21,10 @@
 .lbb-title { margin: 0 0 12px; }
 .lbb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; }
 .lbb-grid-2 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.lbb-field { display: flex; flex-direction: column; gap: 4px; margin: 0; font-weight: 600; font-size: 14px; }
-.lbb-field > span { color: var(--lbb-muted); }
-.lbb-booking .lbb-date-hint { font-weight: 400; font-size: 13px; color: var(--lbb-muted); min-height: 1.35em; line-height: 1.35; }
+/* Spațiile din rândurile flex sunt margini, nu gap: flex gap lipsește în Safari < 14.1 (iPhone-uri încă folosite). */
+.lbb-field { display: flex; flex-direction: column; margin: 0; font-weight: 600; font-size: 14px; }
+.lbb-field > span { color: var(--lbb-muted); margin-bottom: 4px; }
+.lbb-booking .lbb-date-hint { margin-top: 4px; font-weight: 400; font-size: 13px; color: var(--lbb-muted); min-height: 1.35em; line-height: 1.35; }
 .lbb-compact .lbb-date-hint { display: none; }
 .lbb-booking select, .lbb-booking input[type="text"], .lbb-booking input[type="tel"], .lbb-booking input[type="email"], .lbb-booking input[type="date"] {
 	width: 100%;
@@ -89,10 +90,10 @@
 .lbb-booking .lbb-submit::after, .lbb-booking .lbb-submit::before { display: none !important; }
 .lbb-booking .lbb-submit:disabled { opacity: .45 !important; cursor: not-allowed; }
 .lbb-preview-note { background: #fff8e1; border: 1px dashed #c99a00; color: #6b5000; border-radius: 8px; padding: 8px 12px; margin: 0 0 12px; font-size: 14px; }
-.lbb-currency { border: 0; padding: 0; margin: 0 0 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.lbb-currency { border: 0; padding: 0; margin: -4px 0 8px; display: flex; flex-wrap: wrap; align-items: center; }
 .lbb-currency[hidden] { display: none; }
 .lbb-currency > legend { float: left; margin: 0 8px 0 0; padding: 0; font-weight: 700; font-size: 14px; color: var(--lbb-muted); }
-.lbb-chip { position: relative; margin: 0; cursor: pointer; }
+.lbb-chip { position: relative; margin: 4px 0 4px 8px; cursor: pointer; }
 .lbb-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .lbb-chip span { display: inline-block; min-width: 64px; min-height: 40px; line-height: 38px; padding: 0 14px; text-align: center; border: 1px solid var(--lbb-border); border-radius: 20px; font-weight: 700; }
 .lbb-chip input:checked + span { background: var(--lbb-accent); border-color: var(--lbb-accent); color: var(--lbb-accent-ink); }
