@@ -1541,6 +1541,17 @@ foreach ( array( '069 184 111', '0691 84 111' ) as $ph_loc ) {
 	$it = $ph_item();
 	lbb_t( 'panou: telefonul „' . $ph_loc . '” fără prefix apare ca avertisment', $it && 'warn' === $it['ok'] && false !== strpos( $it['detail'], $ph_loc ) && false !== strpos( $it['detail'], '+373' ), $it );
 }
+// Linkul de apel primește oricum prefixul țării, ca un client din România să sune la birou, nu în rețeaua lui.
+$ph_links = array();
+foreach ( array( '069 184 111' => 'tel:+37369184111', '+373 691 84 111' => 'tel:+37369184111', '00373 691 84 111' => 'tel:+37369184111', '+373 (0)69 184 111' => 'tel:+37369184111' ) as $ph_in => $ph_want ) {
+	update_option( 'lbb_settings', array_merge( $cl_keep, array( 'support_phone' => $ph_in ) ) );
+	$ph_links[ $ph_in ] = array( LBB_Settings::phone_href(), LBB_Settings::phone_link() );
+	$ph_ok_link         = $ph_want === $ph_links[ $ph_in ][0] && false !== strpos( $ph_links[ $ph_in ][1], 'href="' . $ph_want . '"' ) && false !== strpos( $ph_links[ $ph_in ][1], str_replace( ' ', "\u{00A0}", $ph_in ) );
+	if ( ! $ph_ok_link ) {
+		break;
+	}
+}
+lbb_t( 'telefonul de suport scris local are link de apel cu +373, textul rămâne cum l-a scris biroul', $ph_ok_link, $ph_links );
 update_option( 'lbb_settings', array_merge( $cl_keep, array( 'support_phone' => '00373 691 84 111' ) ) );
 $it = $ph_item();
 lbb_t( 'panou: telefonul cu prefixul 00373 apare ca bifat', $it && true === $it['ok'], $it );

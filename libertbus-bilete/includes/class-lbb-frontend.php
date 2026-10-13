@@ -401,7 +401,7 @@ class LBB_Frontend {
 				'retry'       => __( 'Încearcă din nou', 'libertbus-bilete' ),
 				'errorCall'   => __( 'Sau sunați la', 'libertbus-bilete' ),
 				'phone'       => LBB_Settings::phone_text(),
-				'phoneHref'   => 'tel:' . preg_replace( '/[^\d+]/', '', (string) LBB_Settings::get( 'support_phone' ) ),
+				'phoneHref'   => LBB_Settings::phone_href(),
 				/* translators: 1: numărul maxim de pasageri pe rezervare online, 2: telefon */
 				'groupNote'   => sprintf( __( 'Sunteți mai mult de %1$d persoane? Pentru grupuri sunați la %2$s.', 'libertbus-bilete' ), (int) LBB_Settings::get( 'max_passengers' ), LBB_Settings::phone_text() ),
 				'total'       => __( 'Total de plată', 'libertbus-bilete' ),

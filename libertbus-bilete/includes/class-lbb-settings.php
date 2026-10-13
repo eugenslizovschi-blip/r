@@ -192,8 +192,15 @@ class LBB_Settings {
 	 * Telefonul de suport ca link de apel, pe un singur rând.
 	 */
 	public static function phone_link() {
-		$phone = trim( (string) self::get( 'support_phone' ) );
-		return '<a class="lbb-phone" href="tel:' . esc_attr( preg_replace( '/[^\d+]/', '', $phone ) ) . '">' . esc_html( self::phone_text() ) . '</a>';
+		return '<a class="lbb-phone" href="' . esc_attr( self::phone_href() ) . '">' . esc_html( self::phone_text() ) . '</a>';
+	}
+
+	/**
+	 * Linkul de apel pentru telefonul de suport, cu prefixul țării: scris local („069 184 111”) numărul se
+	 * formează doar din Moldova, iar un client din România care apasă pe link ar suna în altă parte.
+	 */
+	public static function phone_href() {
+		return 'tel:' . LBB_Frontend::normalize_phone( trim( (string) self::get( 'support_phone' ) ) );
 	}
 
 	/**
