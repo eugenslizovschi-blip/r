@@ -1058,6 +1058,13 @@ $ic_long = array_filter( $ic_l, function ( $l ) {
 } );
 $ic_flat = str_replace( "\r\n ", '', $ic );
 lbb_t( 'calendarul rezervării cu plata la urcare spune „Rezervare” și suma de achitat la șofer (biletul plătit online: „Bilet”, fără sumă)', false !== strpos( $ic_flat, "De achitat la urcare: 100\u{00A0}MDL." ) && false !== strpos( $ic_flat, 'DESCRIPTION:Rezervare ' . $ic_b['ticket_code'] ) && false === strpos( str_replace( "\r\n ", '', $bd_i ), 'De achitat' ) && false !== strpos( str_replace( "\r\n ", '', $bd_i ), 'DESCRIPTION:Bilet LB-URC1' ), substr( $ic_flat, 0, 600 ) );
+$ic_keep = get_option( 'lbb_settings' );
+update_option( 'lbb_settings', array_merge( (array) $ic_keep, array( 'support_phone' => '069 184 111' ) ) );
+$ic_tel = $ic_b ? str_replace( "\r\n ", '', LBB_Tickets::ics( LBB_Bookings::get_by_code( $ic_b['ticket_code'] ) ) ) : '';
+update_option( 'lbb_settings', array_merge( (array) $ic_keep, array( 'support_phone' => '' ) ) );
+$ic_notel = $ic_b ? str_replace( "\r\n ", '', LBB_Tickets::ics( LBB_Bookings::get_by_code( $ic_b['ticket_code'] ) ) ) : '';
+update_option( 'lbb_settings', $ic_keep );
+lbb_t( 'calendarul are telefonul biroului cu prefixul țării; fără telefon în setări nu apare „Telefon:”', (bool) preg_match( '/^DESCRIPTION:Rezervare [^\r\n]* Telefon: \+37369184111\r$/m', $ic_tel ) && false === strpos( $ic_notel, 'Telefon:' ), substr( $ic_tel, 0, 700 ) );
 $ic_http = $ic_b ? wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $ic_b['ticket_code'] ) ), array( 'timeout' => 20 ) ) : null;
 $ic_type = is_array( $ic_http ) ? wp_remote_retrieve_header( $ic_http, 'content-type' ) : '';
 $ic_page = $ic_b ? wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $ic_b['ticket_code'] ), array( 'timeout' => 20 ) ) ) : '';

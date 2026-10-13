@@ -413,6 +413,12 @@ class LBB_Tickets {
 			/* translators: %s: suma, ex. 240 MDL */
 			$desc .= ' ' . sprintf( __( 'De achitat la urcare: %s.', 'libertbus-bilete' ), LBB_WooCommerce::money( $amount, $cur ) );
 		}
+		// Telefonul biroului, cu prefixul țării: în ziua cursei, pasagerul care întârzie îl găsește direct în calendar.
+		$tel = substr( LBB_Settings::phone_href(), 4 );
+		if ( strlen( preg_replace( '/\D/', '', $tel ) ) >= 8 ) {
+			/* translators: %s: telefonul biroului, ex. +37369184111 */
+			$desc .= ' ' . sprintf( __( 'Telefon: %s', 'libertbus-bilete' ), $tel );
+		}
 		$lines = array(
 			'BEGIN:VCALENDAR',
 			'VERSION:2.0',
