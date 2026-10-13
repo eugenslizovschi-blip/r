@@ -378,7 +378,7 @@ class LBB_Frontend {
 			'from'     => isset( $posted['lbb_from'] ) ? sanitize_text_field( $posted['lbb_from'] ) : self::match_city( $atts['from'], array_keys( $map ) ),
 			'route'    => isset( $posted['lbb_route'] ) ? (int) $posted['lbb_route'] : 0,
 			'to'       => self::match_city( $atts['to'], self::all_destinations( $map ) ),
-			'date'     => isset( $posted['lbb_date'] ) ? sanitize_text_field( $posted['lbb_date'] ) : '',
+			'date'     => isset( $posted['lbb_date'] ) ? self::iso_date( sanitize_text_field( $posted['lbb_date'] ) ) : '',
 			'time'     => isset( $posted['lbb_time'] ) ? sanitize_text_field( $posted['lbb_time'] ) : '',
 			'adults'   => isset( $posted['lbb_adults'] ) ? (int) $posted['lbb_adults'] : 1,
 			'children' => isset( $posted['lbb_children'] ) ? (int) $posted['lbb_children'] : 0,

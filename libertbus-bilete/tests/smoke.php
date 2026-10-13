@@ -289,6 +289,17 @@ lbb_t( 'email prea lung pentru baza de date respins cu mesaj clar', is_wp_error(
 lbb_t( 'câmpul de email are limită de lungime', (bool) preg_match( '/<input type="email" name="lbb_email"[^>]* maxlength="190"/', LBB_Frontend::shortcode( array() ) ) );
 // Fără calendar pentru dată (Safari pe Mac < 14.1) câmpul e text: „25.12.2026” se înțelege ca 2026-12-25.
 lbb_t( 'data scrisă de mână („25.12.2026”, „5/1/2027”) se înțelege; formatul ISO rămâne; altceva nu devine dată', '2026-12-25' === LBB_Frontend::iso_date( '25.12.2026' ) && '2027-01-05' === LBB_Frontend::iso_date( ' 5/1/2027 ' ) && '2026-12-25' === LBB_Frontend::iso_date( '2026-12-25' ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', LBB_Frontend::iso_date( '25 dec' ) ) );
+// După o eroare, formularul revine cu data trimisă: scrisă „zz.ll.aaaa” (browser fără calendar) revine ca dată ISO.
+$pd_err = new ReflectionProperty( 'LBB_Frontend', 'error' );
+$pd_err->setAccessible( true );
+$pd_err->setValue( null, new WP_Error( 'lbb_test', 'test' ) );
+$pd_post = $_POST;
+$_POST   = array( 'lbb_date' => '25.12.2026', 'lbb_route' => 0 );
+$pd_html = LBB_Frontend::shortcode( array() );
+$_POST   = $pd_post;
+$pd_err->setValue( null, null );
+$pd_cfg  = preg_match( '/data-lbb-config="([^"]+)"/', $pd_html, $pd_m ) ? json_decode( base64_decode( html_entity_decode( $pd_m[1], ENT_QUOTES ) ), true ) : null;
+lbb_t( 'după o eroare, data trimisă „25.12.2026” revine în formular ca 2026-12-25', isset( $pd_cfg['preset']['date'] ) && '2026-12-25' === $pd_cfg['preset']['date'], isset( $pd_cfg['preset'] ) ? $pd_cfg['preset'] : $pd_html );
 // Flex gap lipsește în Safari < 14.1 (iPhone-uri încă folosite): în rândurile flex spațiile sunt margini.
 $fg_bad = array();
 foreach ( array( 'assets/lbb.css', 'assets/cookies.css', 'includes/class-lbb-tickets.php' ) as $fg_f ) {
