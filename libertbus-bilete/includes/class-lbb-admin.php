@@ -551,6 +551,11 @@ class LBB_Admin {
 			echo '</p></div>';
 			return;
 		}
+		// O singură rută aleasă: pe foaia șoferului (și pentru un șofer înlocuitor) ruta și locul de urcare, sus.
+		$route_row = $route ? LBB_Routes::get( $route ) : null;
+		if ( $route_row && '' !== $route_row['boarding'] ) {
+			echo '<p class="lbb-manifest-route"><strong>' . esc_html( LBB_Bookings::route_name( $route_row ) ) . '</strong> · ' . esc_html__( 'Loc de urcare', 'libertbus-bilete' ) . ': ' . esc_html( $route_row['boarding'] ) . '</p>';
+		}
 		// Zi închisă în Setări, dar cu bilete vândute înainte: pasagerii trebuie anunțați.
 		if ( in_array( $date, LBB_Settings::closed_dates(), true ) ) {
 			echo '<div class="notice notice-warning inline lbb-closed-day"><p>' . esc_html__( 'Această zi e trecută la „Zile fără curse”, dar are bilete sau rezervări. Anunțați pasagerii de mai jos sau scoateți ziua din', 'libertbus-bilete' )
