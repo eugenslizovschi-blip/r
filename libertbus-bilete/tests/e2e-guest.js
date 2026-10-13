@@ -65,6 +65,30 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const hiddenNow = await page.$eval('[data-lbb-js-fail]', e => e.getClientRects().length === 0).catch(() => false);
     if (!hiddenNow) fail('mesajul pentru browsere vechi apare și într-un browser obișnuit');
   }
+  // Browser fără calendar pentru dată (Safari pe Mac < 14.1): câmpul e text, clientul scrie „zz.ll.aaaa”,
+  // iar formularul cere orele pentru data corectă, nu spune „în afara intervalului”.
+  {
+    const nd = await browser.newPage({ viewport: { width: 1024, height: 800 } });
+    nd.on('pageerror', e => fail('pageerror: ' + e.message));
+    await nd.addInitScript(() => {
+      const desc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'type');
+      Object.defineProperty(HTMLInputElement.prototype, 'type', { configurable: true, get() { const v = desc.get.call(this); return v === 'date' ? 'text' : v; }, set(v) { desc.set.call(this, v); } });
+    });
+    const asked = [];
+    await nd.route('**/lbb/v1/departures**', route => { asked.push(new URL(route.request().url()).searchParams.get('date')); route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ departures: [{ time: '08:45', free: 20, bookable: true, reason: '' }] }) }); });
+    await nd.goto(BASE + '/balti-iasi/');
+    await nd.waitForFunction(() => document.querySelector('[data-lbb="time"]').options.length > 1);
+    const ph = await nd.getAttribute('[data-lbb="date"]', 'placeholder');
+    await nd.$eval('[data-lbb="date"]', e => e.setAttribute('type', 'text'));
+    const d = new Date(Date.now() + 86400000 * 5), dd = String(d.getUTCDate()).padStart(2, '0'), mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    await nd.fill('[data-lbb="date"]', dd + '.' + mm + '.' + d.getUTCFullYear());
+    await nd.dispatchEvent('[data-lbb="date"]', 'change');
+    await nd.waitForTimeout(400);
+    const st = await nd.evaluate(() => ({ v: document.querySelector('[data-lbb="date"]').value, status: document.querySelector('[data-lbb="status"]').textContent, times: document.querySelector('[data-lbb="time"]').options.length }));
+    const iso = d.getUTCFullYear() + '-' + mm + '-' + dd;
+    if (ph !== 'zz.ll.aaaa' || st.v !== iso || asked[asked.length - 1] !== iso || st.times < 2) fail('data scrisă „zz.ll.aaaa” într-un browser fără calendar nu e înțeleasă: ' + JSON.stringify({ ph, st, asked }));
+    await nd.close();
+  }
   // Grup mai mare decât limita online: la numărul maxim de pasageri apare „pentru grupuri sunați la …” cu link de apel.
   {
     const pg = await browser.newPage({ viewport: { width: 390, height: 844 } });

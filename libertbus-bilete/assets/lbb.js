@@ -157,6 +157,16 @@
 			}
 		}
 
+		// Browser fără calendar pentru dată (Safari pe Mac < 14.1, Firefox < 57): câmpul e text, iar clientul scrie
+		// „25.12.2026” sau „25/12/2026”. Îl aducem la 2026-12-25, formatul cu care lucrează restul formularului.
+		function isoDate( v ) {
+			var m = /^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4})\s*$/.exec( v || '' );
+			if ( ! m ) {
+				return v;
+			}
+			return m[ 3 ] + '-' + ( m[ 2 ].length < 2 ? '0' : '' ) + m[ 2 ] + '-' + ( m[ 1 ].length < 2 ? '0' : '' ) + m[ 1 ];
+		}
+
 		function option( value, label, disabled ) {
 			var o = document.createElement( 'option' );
 			o.value = value;
@@ -651,8 +661,14 @@
 			skipped = 0;
 			loadDepartures();
 		} );
+		if ( el.date.type !== 'date' ) {
+			el.date.placeholder = 'zz.ll.aaaa';
+		}
 		el.date.addEventListener( 'change', function () {
 			dateTouched = true;
+			if ( isoDate( el.date.value ) !== el.date.value ) {
+				el.date.value = isoDate( el.date.value );
+			}
 			loadDepartures();
 		} );
 		el.time.addEventListener( 'change', function () {

@@ -227,6 +227,19 @@ class LBB_Frontend {
 	}
 
 	/**
+	 * Data scrisă de mână („25.12.2026”, „25/12/2026”) adusă la 2026-12-25: în browserele fără calendar pentru
+	 * dată câmpul e text simplu. Orice alt format rămâne neschimbat (și e refuzat mai departe).
+	 *
+	 * @param string $date Data din formular.
+	 */
+	public static function iso_date( $date ) {
+		if ( preg_match( '/^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4})\s*$/', (string) $date, $m ) ) {
+			return sprintf( '%04d-%02d-%02d', $m[3], $m[2], $m[1] );
+		}
+		return trim( (string) $date );
+	}
+
+	/**
 	 * Validează datele, ține locurile și adaugă biletul în coș.
 	 *
 	 * Cu lbb_mode=reserve locurile se rezervă fără plată și se întoarce linkul rezervării.
@@ -239,7 +252,7 @@ class LBB_Frontend {
 		if ( ! $route || ! $route['active'] || $route['price'] <= 0 ) {
 			return new WP_Error( 'lbb_route', __( 'Alegeți ruta.', 'libertbus-bilete' ) );
 		}
-		$date = isset( $data['lbb_date'] ) ? sanitize_text_field( $data['lbb_date'] ) : '';
+		$date = self::iso_date( isset( $data['lbb_date'] ) ? sanitize_text_field( $data['lbb_date'] ) : '' );
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
 			return new WP_Error( 'lbb_date', __( 'Alegeți data călătoriei.', 'libertbus-bilete' ) );
 		}
