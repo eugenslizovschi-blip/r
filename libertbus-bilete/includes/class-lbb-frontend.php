@@ -123,7 +123,7 @@ class LBB_Frontend {
 		wp_register_style( 'lbb', LBB_URL . 'assets/lbb.css', array(), self::asset_ver( 'lbb.css' ) );
 		$accent = LBB_Settings::get( 'accent_color' );
 		if ( $accent ) {
-			wp_add_inline_style( 'lbb', '.lbb-booking{--lbb-accent:' . $accent . '}' );
+			wp_add_inline_style( 'lbb', '.lbb-booking{--lbb-accent:' . $accent . ';--lbb-accent-ink:' . LBB_Settings::accent_ink( $accent ) . '}' );
 		}
 		wp_register_script( 'lbb', LBB_URL . 'assets/lbb.js', array(), self::asset_ver( 'lbb.js' ), true );
 	}

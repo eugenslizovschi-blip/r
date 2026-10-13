@@ -182,6 +182,30 @@ class LBB_Settings {
 	}
 
 	/**
+	 * Culoarea textului de pe butoane pentru culoarea aleasă în Setări: alb pe o culoare închisă, aproape negru pe
+	 * una deschisă (ex. galben), ca „Rezerv” și „Achit online” să se citească. Alege varianta cu contrastul mai mare
+	 * (WCAG 2.x, luminanță relativă).
+	 *
+	 * @param string $hex Culoarea, ex. #00875a sau #fd0.
+	 */
+	public static function accent_ink( $hex ) {
+		$hex = ltrim( (string) $hex, '#' );
+		if ( 3 === strlen( $hex ) ) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+		if ( ! preg_match( '/^[0-9a-f]{6}$/i', $hex ) ) {
+			return '#fff';
+		}
+		$lum = 0;
+		foreach ( array( 0.2126, 0.7152, 0.0722 ) as $i => $w ) {
+			$c    = hexdec( substr( $hex, $i * 2, 2 ) ) / 255;
+			$lum += $w * ( $c <= 0.03928 ? $c / 12.92 : pow( ( $c + 0.055 ) / 1.055, 2.4 ) );
+		}
+		// #1d2733 are luminanța ≈ 0,019; contrastul cu albul e (1 + 0,05) / (L + 0,05), cu textul închis (L + 0,05) / 0,069.
+		return ( 1.05 / ( $lum + 0.05 ) ) >= ( ( $lum + 0.05 ) / 0.069 ) ? '#fff' : '#1d2733';
+	}
+
+	/**
 	 * Telefonul de suport fără ruperi de rând (spații nedespărțitoare), ca text.
 	 */
 	public static function phone_text() {

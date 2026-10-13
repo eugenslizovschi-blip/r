@@ -300,6 +300,16 @@ $_POST   = $pd_post;
 $pd_err->setValue( null, null );
 $pd_cfg  = preg_match( '/data-lbb-config="([^"]+)"/', $pd_html, $pd_m ) ? json_decode( base64_decode( html_entity_decode( $pd_m[1], ENT_QUOTES ) ), true ) : null;
 lbb_t( 'după o eroare, data trimisă „25.12.2026” revine în formular ca 2026-12-25', isset( $pd_cfg['preset']['date'] ) && '2026-12-25' === $pd_cfg['preset']['date'], isset( $pd_cfg['preset'] ) ? $pd_cfg['preset'] : $pd_html );
+// Culoarea butoanelor aleasă deschisă (ex. galben): textul devine închis, ca „Rezerv” să se citească.
+$ai_keep = get_option( 'lbb_settings' );
+update_option( 'lbb_settings', array_merge( (array) $ai_keep, array( 'accent_color' => '#ffd700' ) ) );
+wp_deregister_style( 'lbb' );
+LBB_Frontend::register_assets();
+$ai_css = implode( '', (array) wp_styles()->get_data( 'lbb', 'after' ) );
+update_option( 'lbb_settings', $ai_keep );
+wp_deregister_style( 'lbb' );
+LBB_Frontend::register_assets();
+lbb_t( 'culoarea butoanelor: text alb pe verde/albastru închis, text închis pe galben sau alb; aplicat în stilul formularului', '#fff' === LBB_Settings::accent_ink( '#00875a' ) && '#fff' === LBB_Settings::accent_ink( '#1e40af' ) && '#1d2733' === LBB_Settings::accent_ink( '#ffd700' ) && '#1d2733' === LBB_Settings::accent_ink( '#fff' ) && '#fff' === LBB_Settings::accent_ink( 'nu' ) && false !== strpos( $ai_css, '--lbb-accent:#ffd700;--lbb-accent-ink:#1d2733' ), $ai_css );
 // Flex gap lipsește în Safari < 14.1 (iPhone-uri încă folosite): în rândurile flex spațiile sunt margini.
 $fg_bad = array();
 foreach ( array( 'assets/lbb.css', 'assets/cookies.css', 'includes/class-lbb-tickets.php' ) as $fg_f ) {
