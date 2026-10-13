@@ -158,11 +158,17 @@ class LBB_Admin {
 
 		// Numărul apare în formular, pe bilet și în emailuri, ca link de apel: cu mai puțin de 8 cifre nu sună nicăieri.
 		$phone = trim( (string) LBB_Settings::get( 'support_phone' ) );
-		$add( 'phone', strlen( preg_replace( '/\D/', '', $phone ) ) >= 8, __( 'Telefonul pentru clienți e complet', 'libertbus-bilete' ),
+		// Fără prefixul țării („069 184 111”) numărul se formează doar din Moldova: clienții din România nu pot suna.
+		$phone_ok   = strlen( preg_replace( '/\D/', '', $phone ) ) >= 8;
+		$phone_intl = (bool) preg_match( '/^\s*(\+|00)/', $phone );
+		$add( 'phone', $phone_ok ? ( $phone_intl ? true : 'warn' ) : false, __( 'Telefonul pentru clienți e complet', 'libertbus-bilete' ),
 			'' === $phone
 				? __( 'Lipsește. Clienții îl văd în formular, pe bilet și în emailuri.', 'libertbus-bilete' )
-				/* translators: %s: numărul de telefon din setări */
-				: sprintf( __( 'Acum: %s. Clienții îl văd în formular, pe bilet și în emailuri, cu prefixul țării (ex. +373 691 84 111).', 'libertbus-bilete' ), $phone ),
+				: ( $phone_ok && ! $phone_intl
+					/* translators: %s: numărul de telefon din setări */
+					? sprintf( __( 'Acum: %s, fără prefixul țării. Scrieți-l ca +373 …: altfel clienții din România nu vă pot suna.', 'libertbus-bilete' ), $phone )
+					/* translators: %s: numărul de telefon din setări */
+					: sprintf( __( 'Acum: %s. Clienții îl văd în formular, pe bilet și în emailuri, cu prefixul țării (ex. +373 691 84 111).', 'libertbus-bilete' ), $phone ) ),
 			admin_url( 'admin.php?page=lbb-settings' ) );
 
 		$add( 'cookies', (bool) LBB_Settings::get( 'cookie_banner' ), __( 'Bannerul de cookies e pornit', 'libertbus-bilete' ),

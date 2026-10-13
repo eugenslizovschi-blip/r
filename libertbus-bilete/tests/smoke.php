@@ -1535,6 +1535,15 @@ foreach ( array( '+373', '', '069 18' ) as $ph_bad ) {
 	$it = $ph_item();
 	lbb_t( 'panou: telefonul „' . $ph_bad . '” apare ca problemă', $it && false === $it['ok'], $it );
 }
+// Fără prefixul țării numărul nu se formează din România: avertisment, cu numărul în detalii.
+foreach ( array( '069 184 111', '0691 84 111' ) as $ph_loc ) {
+	update_option( 'lbb_settings', array_merge( $cl_keep, array( 'support_phone' => $ph_loc ) ) );
+	$it = $ph_item();
+	lbb_t( 'panou: telefonul „' . $ph_loc . '” fără prefix apare ca avertisment', $it && 'warn' === $it['ok'] && false !== strpos( $it['detail'], $ph_loc ) && false !== strpos( $it['detail'], '+373' ), $it );
+}
+update_option( 'lbb_settings', array_merge( $cl_keep, array( 'support_phone' => '00373 691 84 111' ) ) );
+$it = $ph_item();
+lbb_t( 'panou: telefonul cu prefixul 00373 apare ca bifat', $it && true === $it['ok'], $it );
 update_option( 'lbb_settings', $cl_keep );
 
 // Copiii sunt ultimii în lista de pasageri: pe bilet, în lista pentru șofer și în CSV se văd ca „(copil)”.
