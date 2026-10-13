@@ -970,6 +970,7 @@ ob_start();
 LBB_Admin::page_bookings();
 $rm_list2 = ob_get_clean();
 $_GET = array();
+$rm_claim = $rm_b && is_array( $rm_b ) ? array( LBB_Bookings::claim_reminder( $rm_b['id'] ), LBB_Bookings::claim_reminder( $rm_b['id'] ) ) : array();
 // Zi închisă sau oră scoasă din orar: fără „vă reamintim de cursa de mâine”.
 $rm_c = $rm_rt ? LBB_Bookings::create_hold( $rm_rt, $tomorrow, '10:00', 1, 0, array( 'Ana Inchis' ), '+37369000097', 'rm3@example.com', 'MDL' ) : null;
 $rm_c = is_array( $rm_c ) ? LBB_Bookings::reserve( $rm_c['token'] ) : $rm_c;
@@ -994,6 +995,7 @@ if ( is_int( $rm_r ) ) {
 }
 $rm_m = $rm_mine ? $rm_mine[0] : array( 'to' => '', 'subject' => '', 'message' => '' );
 lbb_t( 'lista pentru șofer pe o singură rută arată sus ruta și locul de urcare (nu și pe toate rutele)', false !== strpos( $rm_man, '<p class="lbb-manifest-route"><strong>ReamintA → ReamintB</strong> · Loc de urcare: Autogara Sud</p>' ) && false === strpos( $rm_man_all, 'lbb-manifest-route' ), substr( wp_strip_all_tags( $rm_man ), 0, 300 ) );
+lbb_t( 'reamintirea se „revendică” atomic: a doua încercare pe aceeași rezervare nu mai trimite', array( true, false ) === $rm_claim, $rm_claim );
 lbb_t( 'Rezervări arată când a plecat reamintirea (și nimic la cele fără reamintire)', (bool) preg_match( '#<small class="lbb-reminded">reamintit \\d\\d\\.\\d\\d \\d\\d:\\d\\d</small>#', $rm_list ) && false === strpos( $rm_list2, 'lbb-reminded' ) && false !== strpos( $rm_list2, 'Ion Poimaine' ), substr( wp_strip_all_tags( $rm_list ), -300 ) );
 lbb_t( 'reamintirea de mâine: oprită implicit, nu noaptea, o singură dată, doar pentru cursele de mâine, nu în zilele fără curse sau la ore scoase din orar, cu biletul și locul de urcare', is_array( $rm_a ) && is_array( $rm_b ) && 0 === (int) LBB_Settings::defaults()['remind_day_before'] && 0 === $rm_off && 0 === $rm_night && $rm_day >= 1 && 1 === count( $rm_mine ) && 'rm@example.com' === $rm_m['to'] && 0 === strpos( $rm_m['subject'], 'Mâine: ReamintA → ReamintB, ora 10:00 — ' . $rm_a['ticket_code'] ) && false !== strpos( $rm_m['message'], 'Plata se face la urcare' ) && false !== strpos( $rm_m['message'], 'Autogara Sud' ) && 0 === $rm_again && 1 === $rm_n2 && is_array( $rm_c ) && 0 === $rm_closed && 0 === $rm_moved && 0 === $rm_n3, array( $rm_off, $rm_night, $rm_day, $rm_again, $rm_closed, $rm_moved, $rm_n3, count( $rm_mine ), $rm_m['subject'] ) );
 

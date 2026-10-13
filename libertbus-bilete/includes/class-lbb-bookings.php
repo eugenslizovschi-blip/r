@@ -377,6 +377,14 @@ class LBB_Bookings {
 		return $out;
 	}
 
+	/**
+	 * Marchează reamintirea ca trimisă doar dacă nu era deja: true pentru cine a „câștigat” rezervarea.
+	 */
+	public static function claim_reminder( $id ) {
+		global $wpdb;
+		return 1 === (int) $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::table() . ' SET reminded_at = %s WHERE id = %d AND reminded_at IS NULL', gmdate( 'Y-m-d H:i:s' ), $id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
 	public static function by_order( $order_id ) {
 		global $wpdb;
 		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE order_id = %d ORDER BY id', $order_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared

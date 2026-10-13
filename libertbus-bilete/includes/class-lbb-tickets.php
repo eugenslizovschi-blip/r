@@ -137,8 +137,11 @@ class LBB_Tickets {
 		$ids      = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM ' . LBB_Bookings::table() . " WHERE travel_date = %s AND status IN ('confirmed','reserved') AND ticket_code <> '' AND email <> '' AND reminded_at IS NULL ORDER BY id LIMIT 50", $tomorrow ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$sent     = 0;
 		foreach ( $ids as $id ) {
-			// Marcat înainte de trimitere: o eroare de email nu duce la reîncercări la fiecare oră.
-			$wpdb->update( LBB_Bookings::table(), array( 'reminded_at' => gmdate( 'Y-m-d H:i:s' ) ), array( 'id' => (int) $id ) );
+			// Marcat înainte de trimitere (o eroare de email nu duce la reîncercări la fiecare oră) și atomic: dacă
+			// WP-Cron pornește din două vizite deodată, doar una trimite.
+			if ( ! LBB_Bookings::claim_reminder( (int) $id ) ) {
+				continue;
+			}
 			$booking = LBB_Bookings::get( (int) $id );
 			if ( ! $booking || ! is_email( $booking['email'] ) ) {
 				continue;
