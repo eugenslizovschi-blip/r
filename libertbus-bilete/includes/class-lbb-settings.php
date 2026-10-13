@@ -97,6 +97,9 @@ class LBB_Settings {
 				$value = implode( ', ', array_map( function ( $d ) {
 					return gmdate( 'd.m.Y', strtotime( $d . ' 12:00' ) );
 				}, self::parse_dates( $value )['dates'] ) );
+			} elseif ( 'company_idno' === $key ) {
+				// IDNO-ul copiat dintr-un document vine des cu spații („1003 600 123 456”): se păstrează doar cifrele/literele.
+				$value = preg_replace( '/[\s.\-]+/u', '', sanitize_text_field( $value ) );
 			} elseif ( 'company_email' === $key ) {
 				$value = sanitize_email( $value );
 			} else {

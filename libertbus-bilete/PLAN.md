@@ -115,7 +115,7 @@ Vezi `README.md`. Pe scurt:
 
 ### Ce faceți dumneavoastră
 1. **Contractul cu banca**: e-commerce acquiring cu Paynet, maib sau Victoriabank. Pentru plăți în RON prin BT iPay e nevoie de firmă în România.
-2. **Datele firmei** pentru LibertBus → Setări: denumire, IDNO, adresă. Apar în politica de confidențialitate, cerută de Legea nr. 195/2024. Confirmați și cât timp se păstrează datele: rezervările 3 ani, mesajele 1 an, jurnalele de securitate 90 de zile.
+2. **Datele firmei** pentru LibertBus → Setări: denumire, IDNO, adresă. Apar în politica de confidențialitate, cerută de Legea nr. 195/2024. Confirmați și cât timp se păstrează datele: rezervările 3 ani, mesajele 1 an, jurnalele de securitate 90 de zile. IDNO-ul se poate lipi și cu spații (ex. „1003 600 123 456”): se salvează doar cifrele.
 3. **Regulile de anulare și rambursare**. Textul-model propune 100% / 50% / 0% în funcție de cât timp mai e până la plecare. Ajustați-l.
 4. **Câte locuri pe cursă** se vând online.
 

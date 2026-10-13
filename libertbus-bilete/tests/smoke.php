@@ -1039,6 +1039,13 @@ foreach ( array( $ad_set, $ad_rt ) as $ad_html ) {
 }
 lbb_t( 'admin: explicațiile câmpurilor sunt legate de câmp (aria-describedby spre un id unic)', $ad_ok && false !== strpos( $ad_set, 'aria-describedby="lbb-closed_dates-desc"' ) && false !== strpos( $ad_rt, 'aria-describedby="lbb-boarding-desc"' ) && false !== strpos( $ad_rt, 'aria-describedby="lbb-cap-desc"' ) );
 
+// IDNO-ul scris cu spații sau puncte se salvează doar cu cifrele (panoul cere 13 cifre).
+$id_keep = get_option( 'lbb_settings' );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'company_idno' => ' 1003 600.123-456 ' ) ) );
+$id_saved = LBB_Settings::get( 'company_idno' );
+update_option( 'lbb_settings', $id_keep );
+lbb_t( 'IDNO-ul cu spații/puncte se salvează ca 13 cifre lipite', '1003600123456' === $id_saved, $id_saved );
+
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
 $ic_h = is_int( $ic_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $ic_r ), $tomorrow, '10:15', 2, 0, array( 'Calendar Unu', 'Calendar Doi' ), '+37369000093', 'ic@example.com', 'MDL' ) : null;
