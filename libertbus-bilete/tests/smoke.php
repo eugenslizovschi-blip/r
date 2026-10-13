@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'ReamintA', 'ReamintB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -1001,6 +1001,20 @@ lbb_t( 'reamintirea de mâine: oprită implicit, nu noaptea, o singură dată, d
 $lg_m = new ReflectionMethod( 'LBB_Legal', 'content' );
 $lg_m->setAccessible( true );
 lbb_t( 'politica de confidențialitate numește reamintirea cursei printre scopuri', false !== strpos( (string) $lg_m->invoke( null, 'privacy' ), 'reamintirea cursei cu o zi înainte' ) );
+
+// Un text mai lung decât coloana (loc de urcare, oraș) nu mai trece drept „salvat”: biroul primește un mesaj clar.
+$ln_r = LBB_Routes::save( array( 'origin' => 'LungA', 'destination' => 'LungB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$ln_u = is_int( $ln_r ) ? LBB_Routes::save( array( 'origin' => 'LungA', 'destination' => 'LungB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1, 'boarding' => str_repeat( 'Autogara ', 40 ) ), $ln_r ) : null;
+$ln_n = LBB_Routes::save( array( 'origin' => str_repeat( 'Oraș', 30 ), 'destination' => 'LungC', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$ln_ok = is_int( $ln_r ) ? LBB_Routes::save( array( 'origin' => 'LungA', 'destination' => 'LungB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1, 'boarding' => str_repeat( 'ă', 255 ) ), $ln_r ) : null;
+$ln_b = is_int( $ln_r ) ? LBB_Routes::get( $ln_r )['boarding'] : '';
+if ( is_int( $ln_r ) ) {
+	LBB_Routes::delete( $ln_r );
+}
+if ( is_int( $ln_n ) && $ln_n ) {
+	LBB_Routes::delete( $ln_n );
+}
+lbb_t( 'rută cu un câmp prea lung: eroare clară, nu „salvată”; 255 de caractere (cu diacritice) încap', is_wp_error( $ln_u ) && false !== strpos( $ln_u->get_error_message(), 'Locul de urcare e prea lung' ) && is_wp_error( $ln_n ) && false !== strpos( $ln_n->get_error_message(), 'Plecarea e prea lung' ) && $ln_ok === $ln_r && 255 === mb_strlen( $ln_b ), array( $ln_u, $ln_n, $ln_ok, mb_strlen( $ln_b ) ) );
 
 // Pe pagina biletului: „Adaugă în calendar” (.ics) cu ora plecării în UTC, memento și rânduri de cel mult 75 de octeți.
 $ic_r = LBB_Routes::save( array( 'origin' => 'Fălești, centru', 'destination' => 'Târgu Mureș', 'departures' => '10:15', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );

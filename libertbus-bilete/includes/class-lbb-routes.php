@@ -128,12 +128,32 @@ class LBB_Routes {
 			'updated_at'  => current_time( 'mysql', true ),
 		);
 
+		// Coloanele au lungimi fixe: un text mai lung face ca baza de date să refuze tot rândul, iar biroul ar vedea
+		// „Ruta a fost salvată” fără să se fi salvat nimic.
+		$limits = array(
+			'origin'      => array( 100, __( 'Plecarea', 'libertbus-bilete' ) ),
+			'destination' => array( 100, __( 'Destinația', 'libertbus-bilete' ) ),
+			'boarding'    => array( 255, __( 'Locul de urcare', 'libertbus-bilete' ) ),
+			'page_url'    => array( 255, __( 'Pagina rutei', 'libertbus-bilete' ) ),
+			'departures'  => array( 255, __( 'Orele de plecare', 'libertbus-bilete' ) ),
+		);
+		foreach ( $limits as $field => $limit ) {
+			if ( mb_strlen( (string) $row[ $field ] ) > $limit[0] ) {
+				/* translators: 1: numele câmpului, 2: numărul maxim de caractere */
+				return new WP_Error( 'lbb_route', sprintf( __( '%1$s e prea lung (cel mult %2$d de caractere).', 'libertbus-bilete' ), $limit[1], $limit[0] ) );
+			}
+		}
+
 		if ( $id ) {
-			$wpdb->update( self::table(), $row, array( 'id' => (int) $id ) );
+			if ( false === $wpdb->update( self::table(), $row, array( 'id' => (int) $id ) ) ) {
+				return new WP_Error( 'lbb_route', __( 'Ruta nu a putut fi salvată. Încercați din nou.', 'libertbus-bilete' ) );
+			}
 			return (int) $id;
 		}
 		$row['created_at'] = $row['updated_at'];
-		$wpdb->insert( self::table(), $row );
+		if ( ! $wpdb->insert( self::table(), $row ) ) {
+			return new WP_Error( 'lbb_route', __( 'Ruta nu a putut fi salvată. Încercați din nou.', 'libertbus-bilete' ) );
+		}
 		return (int) $wpdb->insert_id;
 	}
 
