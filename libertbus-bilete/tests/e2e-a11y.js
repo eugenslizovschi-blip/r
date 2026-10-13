@@ -40,6 +40,12 @@ async function scan(page, label, include) {
   await page.dispatchEvent('[data-lbb="date"]', 'change');
   await page.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled])').length > 1);
   await page.selectOption('[data-lbb="time"]', await page.$eval('[data-lbb="time"] option:not([disabled]):not([value=""])', o => o.value));
+  // Cu numărul maxim de pasageri: nota pentru grupuri (text estompat + link de apel), data în cuvinte și rezumatul.
+  const maxAdults = await page.$eval('[data-lbb="adults"]', s => s.options[s.options.length - 1].value);
+  await page.selectOption('[data-lbb="adults"]', maxAdults);
+  await page.waitForSelector('[data-lbb="groupNote"]:not([hidden])');
+  await scan(page, 'formular cu nota pentru grupuri', [['.lbb-booking']]);
+  await page.selectOption('[data-lbb="adults"]', '1');
   await page.fill('input[name="lbb_names[]"]', 'Test Accesibil');
   await page.fill('input[name="lbb_phone"]', '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
   await page.fill('input[name="lbb_email"]', 'a11y@example.com');
