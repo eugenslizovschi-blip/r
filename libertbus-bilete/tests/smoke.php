@@ -1049,6 +1049,7 @@ $ic_long = array_filter( $ic_l, function ( $l ) {
 	return strlen( $l ) > 75 || ! mb_check_encoding( $l, 'UTF-8' );
 } );
 $ic_flat = str_replace( "\r\n ", '', $ic );
+lbb_t( 'calendarul rezervării cu plata la urcare spune și suma de achitat la șofer (biletul plătit online nu)', false !== strpos( $ic_flat, "De achitat la urcare: 100\u{00A0}MDL." ) && false === strpos( str_replace( "\r\n ", '', $bd_i ), 'De achitat' ), substr( $ic_flat, 0, 600 ) );
 $ic_http = $ic_b ? wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $ic_b['ticket_code'] ) ), array( 'timeout' => 20 ) ) : null;
 $ic_type = is_array( $ic_http ) ? wp_remote_retrieve_header( $ic_http, 'content-type' ) : '';
 $ic_page = $ic_b ? wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $ic_b['ticket_code'] ), array( 'timeout' => 20 ) ) ) : '';

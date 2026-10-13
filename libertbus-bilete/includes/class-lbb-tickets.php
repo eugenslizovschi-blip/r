@@ -398,6 +398,12 @@ class LBB_Tickets {
 		$url   = self::url( $booking['ticket_code'] );
 		/* translators: 1: codul biletului, 2: numărul de locuri, 3: linkul biletului */
 		$desc  = sprintf( __( 'Bilet %1$s, locuri: %2$d. Biletul cu cod QR: %3$s', 'libertbus-bilete' ), $booking['ticket_code'], (int) $booking['seats'], $url );
+		// Rezervare cu plata la urcare: suma apare și în calendar, ca pasagerul să aibă banii pregătiți.
+		if ( isset( $booking['status'] ) && 'reserved' === $booking['status'] ) {
+			list( $amount, $cur ) = LBB_Bookings::pay_amount( $booking );
+			/* translators: %s: suma, ex. 240 MDL */
+			$desc .= ' ' . sprintf( __( 'De achitat la urcare: %s.', 'libertbus-bilete' ), LBB_WooCommerce::money( $amount, $cur ) );
+		}
 		$lines = array(
 			'BEGIN:VCALENDAR',
 			'VERSION:2.0',
