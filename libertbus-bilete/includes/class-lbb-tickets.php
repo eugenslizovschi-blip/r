@@ -26,8 +26,14 @@ class LBB_Tickets {
 	 */
 	public static function share_text( array $booking ) {
 		$route = LBB_Routes::get( $booking['route_id'] );
+		$args  = array( $booking['ticket_code'], LBB_Bookings::route_name( $route ? $route : array() ), LBB_WooCommerce::date_with_day( $booking['travel_date'] ), $booking['dep_time'] );
+		// Ca pe pagina biletului: rezervarea cu plata la urcare nu e numită „bilet” (încă nu e plătită).
+		if ( isset( $booking['status'] ) && 'reserved' === $booking['status'] ) {
+			/* translators: 1: codul rezervării, 2: ruta, 3: ziua și data, 4: ora */
+			return vsprintf( __( 'Rezervare LibertBus %1$s: %2$s, %3$s, %4$s', 'libertbus-bilete' ), $args );
+		}
 		/* translators: 1: codul biletului, 2: ruta, 3: ziua și data, 4: ora */
-		return sprintf( __( 'Bilet LibertBus %1$s: %2$s, %3$s, %4$s', 'libertbus-bilete' ), $booking['ticket_code'], LBB_Bookings::route_name( $route ? $route : array() ), LBB_WooCommerce::date_with_day( $booking['travel_date'] ), $booking['dep_time'] );
+		return vsprintf( __( 'Bilet LibertBus %1$s: %2$s, %3$s, %4$s', 'libertbus-bilete' ), $args );
 	}
 
 	public static function signature( $code ) {
