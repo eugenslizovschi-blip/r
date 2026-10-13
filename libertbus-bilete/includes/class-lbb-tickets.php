@@ -532,7 +532,8 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 .wrap{max-width:560px;margin:0 auto}.site{font-size:1em;margin:0 0 1em}
 .state{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
 .ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}.past{background:#eceff3;color:#3a4552}
-.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.actions [hidden]{display:none}.actions button,.actions a{flex:1 1 30%;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px 8px;box-sizing:border-box}
+/* Spațiu cu margini, nu cu gap: flex gap lipsește în Safari < 14.1 (iPhone-uri încă folosite), butoanele s-ar lipi. */
+.actions{display:flex;flex-wrap:wrap;margin:4px -4px 0}.actions [hidden]{display:none}.actions button,.actions a{flex:1 1 30%;margin:4px;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px 8px;box-sizing:border-box}
 @media print{.actions{display:none}body{background:#fff}.state{border:2px solid currentColor}}
 </style>
 </head>

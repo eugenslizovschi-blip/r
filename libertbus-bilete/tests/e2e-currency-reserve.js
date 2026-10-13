@@ -130,6 +130,11 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const oldQr = await oldPage.$$eval('[data-qr]', els => els.map(el => el.querySelectorAll('canvas, img').length)).catch(() => []);
   if (!oldQr.length || oldQr.some(n => n === 0) || oldErrors.length) fail('pe un browser fără NodeList.forEach codul QR nu se desenează: ' + JSON.stringify({ oldQr, oldErrors }));
   await oldPage.close();
+  // Butoanele de sub bilet au spațiu între ele fără flex gap (Safari < 14.1): nu se ating pe telefon.
+  const actCss = await guest.$eval('style', st => (st.textContent.match(/\.actions\{[^}]*\}/) || [''])[0]).catch(() => '');
+  const actBoxes = await guest.$$eval('.actions > :not([hidden])', els => els.map(e => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; }));
+  const touching = actBoxes.some((a, i) => actBoxes.some((b, j) => j > i && a[0] < b[2] + 6 && b[0] < a[2] + 6 && a[1] < b[3] + 6 && b[1] < a[3] + 6));
+  if (/gap/.test(actCss) || actBoxes.length < 2 || touching) fail('butoanele de sub bilet depind de flex gap sau se ating: ' + JSON.stringify({ actCss, actBoxes }));
   if (process.env.WP_PATH) {
     const fs = require('fs'), dir = process.env.WP_PATH + '/wp-content/mail';
     const mail = fs.existsSync(dir) ? fs.readdirSync(dir).sort().reverse().map(f => fs.readFileSync(dir + '/' + f, 'utf8')).find(m => m.includes(code) && /^TO: [^\n]*test@example\.com/m.test(m)) : '';
