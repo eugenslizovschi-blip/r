@@ -1001,6 +1001,11 @@ add_filter( 'pre_wp_mail', $lbb_catch, 1, 2 );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'remind_day_before' => 0 ) ) );
 $rm_off = LBB_Tickets::send_reminders( 12 );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'remind_day_before' => 1 ) ) );
+// Rezervarea abia făcută (biletul tocmai a plecat pe email) nu primește încă o reamintire; una de ieri, da.
+$rm_fresh = LBB_Tickets::send_reminders( 12 );
+if ( is_array( $rm_a ) ) {
+	$wpdb->update( LBB_Bookings::table(), array( 'created_at' => gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) ), array( 'id' => $rm_a['id'] ) );
+}
 $rm_night = LBB_Tickets::send_reminders( 23 );
 $rm_day   = LBB_Tickets::send_reminders( 12 );
 $rm_mine  = array_values( array_filter( $lbb_mails, function ( $m ) {
@@ -1029,6 +1034,9 @@ $rm_claim = $rm_b && is_array( $rm_b ) ? array( LBB_Bookings::claim_reminder( $r
 // Zi închisă sau oră scoasă din orar: fără „vă reamintim de cursa de mâine”.
 $rm_c = $rm_rt ? LBB_Bookings::create_hold( $rm_rt, $tomorrow, '10:00', 1, 0, array( 'Ana Inchis' ), '+37369000097', 'rm3@example.com', 'MDL' ) : null;
 $rm_c = is_array( $rm_c ) ? LBB_Bookings::reserve( $rm_c['token'] ) : $rm_c;
+if ( is_array( $rm_c ) ) {
+	$wpdb->update( LBB_Bookings::table(), array( 'created_at' => gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) ), array( 'id' => $rm_c['id'] ) );
+}
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'closed_dates' => gmdate( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) ) ) ) );
 $rm_closed = LBB_Tickets::send_reminders( 12 );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'closed_dates' => '' ) ) );
@@ -1049,6 +1057,7 @@ if ( is_int( $rm_r ) ) {
 	LBB_Routes::delete( $rm_r );
 }
 $rm_m = $rm_mine ? $rm_mine[0] : array( 'to' => '', 'subject' => '', 'message' => '' );
+lbb_t( 'reamintirea nu pleacă pentru o rezervare făcută în ultimele 12 ore (biletul tocmai a fost trimis)', 0 === $rm_fresh && $rm_day >= 1, array( $rm_fresh, $rm_day ) );
 lbb_t( 'lista pentru șofer pe o singură rută arată sus ruta și locul de urcare (nu și pe toate rutele)', false !== strpos( $rm_man, '<p class="lbb-manifest-route"><strong>ReamintA → ReamintB</strong> · Loc de urcare: Autogara Sud</p>' ) && false === strpos( $rm_man_all, 'lbb-manifest-route' ), substr( wp_strip_all_tags( $rm_man ), 0, 300 ) );
 lbb_t( 'reamintirea se „revendică” atomic: a doua încercare pe aceeași rezervare nu mai trimite', array( true, false ) === $rm_claim, $rm_claim );
 lbb_t( 'Rezervări arată când a plecat reamintirea (și nimic la cele fără reamintire)', (bool) preg_match( '#<small class="lbb-reminded">reamintit \\d\\d\\.\\d\\d \\d\\d:\\d\\d</small>#', $rm_list ) && false === strpos( $rm_list2, 'lbb-reminded' ) && false !== strpos( $rm_list2, 'Ion Poimaine' ), substr( wp_strip_all_tags( $rm_list ), -300 ) );

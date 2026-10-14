@@ -140,7 +140,10 @@ class LBB_Tickets {
 		if ( in_array( $tomorrow, LBB_Settings::closed_dates(), true ) ) {
 			return 0;
 		}
-		$ids      = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM ' . LBB_Bookings::table() . " WHERE travel_date = %s AND status IN ('confirmed','reserved') AND ticket_code <> '' AND email <> '' AND reminded_at IS NULL ORDER BY id LIMIT 50", $tomorrow ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// Rezervată în ultimele 12 ore (ex. azi la prânz pentru mâine): clientul abia a primit biletul pe email, o
+		// reamintire la câteva minute după ar fi un al doilea email aproape identic.
+		$fresh    = gmdate( 'Y-m-d H:i:s', time() - 12 * HOUR_IN_SECONDS );
+		$ids      = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM ' . LBB_Bookings::table() . " WHERE travel_date = %s AND status IN ('confirmed','reserved') AND ticket_code <> '' AND email <> '' AND reminded_at IS NULL AND created_at < %s ORDER BY id LIMIT 50", $tomorrow, $fresh ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$sent     = 0;
 		foreach ( $ids as $id ) {
 			// Marcat înainte de trimitere (o eroare de email nu duce la reîncercări la fiecare oră) și atomic: dacă
