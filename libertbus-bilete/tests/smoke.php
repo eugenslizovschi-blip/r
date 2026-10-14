@@ -238,6 +238,17 @@ lbb_t( 'emailul text al comenzii are și „Adaugă în calendar” cu un link u
 // Pagina biletului: semnătura.
 $code = LBB_Bookings::get_by_token( $late['token'] )['ticket_code'];
 lbb_t( 'linkul biletului e semnat', false !== strpos( LBB_Tickets::url( $code ), 'k=' . LBB_Tickets::signature( $code ) ) );
+// Cheile WordPress schimbate (ex. după o parolă expusă): biletele trimise și codurile QR rămân valabile.
+$sk_sig    = LBB_Tickets::signature( $code );
+$sk_legacy = substr( hash_hmac( 'sha256', $code, wp_salt( 'auth' ) ), 0, 20 );
+$sk_salt   = function () {
+	return 'chei-noi-dupa-schimbare';
+};
+add_filter( 'salt', $sk_salt );
+$sk_after  = LBB_Tickets::valid_signature( $code, $sk_sig ) && $sk_sig === LBB_Tickets::signature( $code );
+$sk_old    = LBB_Tickets::valid_signature( $code, $sk_legacy );
+remove_filter( 'salt', $sk_salt );
+lbb_t( 'linkul biletului rămâne valabil după schimbarea cheilor WordPress; biletele vechi (semnătura de până acum) merg cât cheile nu se schimbă; o semnătură greșită sau goală e refuzată', strlen( (string) get_option( 'lbb_ticket_key' ) ) >= 32 && $sk_sig !== $sk_legacy && $sk_after && LBB_Tickets::valid_signature( $code, $sk_legacy ) && ! $sk_old && ! LBB_Tickets::valid_signature( $code, 'gresit' ) && ! LBB_Tickets::valid_signature( $code, '' ) );
 
 // Calendarul din formular are limitele și fără JavaScript (telefon cu JS lent sau blocat).
 $lbb_form_html = do_shortcode( '[libertbus_rezervare]' );

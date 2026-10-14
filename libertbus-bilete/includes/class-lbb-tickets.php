@@ -37,7 +37,40 @@ class LBB_Tickets {
 	}
 
 	public static function signature( $code ) {
+		return substr( hash_hmac( 'sha256', $code, self::key() ), 0, 20 );
+	}
+
+	/**
+	 * Cheia proprie a plugin-ului pentru linkurile biletelor. Nu folosim direct cheile WordPress: dacă sunt
+	 * schimbate (recomandat după o parolă expusă), toate biletele și codurile QR trimise ar deveni „negăsite”.
+	 */
+	private static function key() {
+		$key = (string) get_option( 'lbb_ticket_key', '' );
+		if ( strlen( $key ) < 32 ) {
+			// add_option, nu update: dacă două cereri o creează deodată, prima câștigă și ambele o folosesc pe ea.
+			add_option( 'lbb_ticket_key', wp_generate_password( 64, true, true ), '', 'no' );
+			$key = (string) get_option( 'lbb_ticket_key', '' );
+		}
+		return $key;
+	}
+
+	/**
+	 * Semnătura veche (până la 1.5.0), din cheile WordPress: biletele deja trimise rămân valabile cât timp
+	 * cheile nu se schimbă.
+	 */
+	private static function legacy_signature( $code ) {
 		return substr( hash_hmac( 'sha256', $code, wp_salt( 'auth' ) ), 0, 20 );
+	}
+
+	/**
+	 * Linkul biletului e autentic: semnat cu cheia plugin-ului sau, pentru biletele vechi, cu cea veche.
+	 *
+	 * @param string $code Codul biletului.
+	 * @param string $sig  Parametrul k= din link.
+	 */
+	public static function valid_signature( $code, $sig ) {
+		$sig = (string) $sig;
+		return '' !== $sig && ( hash_equals( self::signature( $code ), $sig ) || hash_equals( self::legacy_signature( $code ), $sig ) );
 	}
 
 	public static function url( $code ) {
@@ -487,7 +520,7 @@ class LBB_Tickets {
 			return;
 		}
 		$sig     = isset( $_GET['k'] ) ? sanitize_text_field( wp_unslash( $_GET['k'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
-		$booking = hash_equals( self::signature( $code ), $sig ) ? LBB_Bookings::get_by_code( $code ) : null;
+		$booking = self::valid_signature( $code, $sig ) ? LBB_Bookings::get_by_code( $code ) : null;
 		nocache_headers();
 		// Date personale: nimic în cache (nici la hosting), fără indexare, iar linkul cu cheia k= nu pleacă în Referer.
 		header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private' );
