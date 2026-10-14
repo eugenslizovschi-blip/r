@@ -567,6 +567,22 @@
 							nonceField.value = data.nonce;
 						}
 					}
+					// Pagina din cache de ieri: intervalul de date se mută pe ziua de azi a serverului, iar o dată rămasă
+					// în urmă (nealeasă de client) trece pe azi și orele se cer din nou.
+					if ( data.today && data.today > cfg.today ) {
+						cfg.today = data.today;
+						el.date.min = data.today;
+						if ( data.maxDate ) {
+							cfg.maxDate = data.maxDate;
+							el.date.max = data.maxDate;
+						}
+						if ( el.date.value < cfg.today ) {
+							el.date.value = cfg.today;
+							dateHint();
+							loadDepartures();
+							return;
+						}
+					}
 					var open = departures.filter( function ( d ) {
 						return d.bookable;
 					} );

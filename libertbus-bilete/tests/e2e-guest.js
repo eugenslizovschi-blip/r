@@ -31,6 +31,30 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (!/^[a-f0-9]{10}$/.test(fresh)) fail('cheia expirată a formularului nu se reîmprospătează: ' + fresh);
     await nc.close();
   }
+  // Pagina din cache de ieri: serverul spune că „azi” e altă zi; formularul mută intervalul și data pe ziua serverului.
+  {
+    const st = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    st.on('pageerror', e => fail('pageerror: ' + e.message));
+    const plus = (iso, n) => new Date(Date.parse(iso + 'T12:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+    await st.route('**/lbb/v1/departures**', async route => {
+      try {
+        const res = await route.fetch();
+        const body = await res.json();
+        body.today = plus(body.today, 1);
+        body.maxDate = plus(body.maxDate, 1);
+        await route.fulfill({ response: res, json: body });
+      } catch (e) { /* pagina s-a închis între timp */ }
+    });
+    await st.goto(BASE + '/balti-iasi/');
+    const pageToday = await st.getAttribute('[data-lbb="date"]', 'min');
+    await st.waitForFunction(t => document.querySelector('[data-lbb="date"]').min !== t, pageToday, { timeout: 8000 }).catch(() => {});
+    const sd = await st.evaluate(() => { const d = document.querySelector('[data-lbb="date"]'); return { min: d.min, value: d.value }; });
+    const want = plus(pageToday, 1);
+    if (sd.min !== want || sd.value < want) fail('pagina din cache vechi nu ia ziua de azi a serverului: ' + JSON.stringify({ pageToday, sd }));
+    await st.waitForLoadState('networkidle').catch(() => {});
+    await st.unrouteAll({ behavior: 'ignoreErrors' });
+    await st.close();
+  }
   // Sub dată, ziua în cuvinte: pe telefoanele în engleză câmpul arată 03/01/2027 (lună/zi), ușor de citit greșit.
   const hint0 = await page.textContent('[data-lbb="dateHint"]');
   if (!/^(luni|marți|miercuri|joi|vineri|sâmbătă|duminică), \d{1,2} (ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)$/.test(hint0)) fail('data în cuvinte lipsește sub câmpul de dată: „' + hint0 + '”');
