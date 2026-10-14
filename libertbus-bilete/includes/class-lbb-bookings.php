@@ -104,6 +104,11 @@ class LBB_Bookings {
 				/* translators: %s: telefonul de suport */
 				return new WP_Error( 'lbb_departure', sprintf( __( 'Vânzarea online pentru această plecare s-a încheiat. Pentru locuri sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ) );
 			}
+			if ( $departure['free'] < 1 ) {
+				// Alt client a luat ultimele locuri cât acesta completa formularul: nu „au mai rămas 0 locuri”.
+				/* translators: %s: telefonul de suport */
+				return new WP_Error( 'lbb_full', sprintf( __( 'Locurile la această plecare tocmai s-au terminat. Alegeți altă oră sau altă zi, ori sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ) );
+			}
 			if ( $departure['free'] < $seats ) {
 				$left = LBB_Settings::ro_count( $departure['free'], __( 'loc liber', 'libertbus-bilete' ), __( 'locuri libere', 'libertbus-bilete' ) );
 				/* translators: %s: locurile libere, ex. „1 loc liber”, „20 de locuri libere” */

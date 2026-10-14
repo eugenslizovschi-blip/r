@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'LimitaA', 'LimitaB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'LimitaA', 'LimitaB' ), array( 'PlinA', 'PlinB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -86,6 +86,15 @@ lbb_t( 'rezervare 2 locuri', is_array( $h1 ) && 2 === $h1['seats'] && 'hold' ===
 lbb_t( 'suma în moneda rutei', is_array( $h1 ) && 120.0 === $h1['amount'] && 'RON' === $h1['currency'], $h1 );
 $h2 = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 2, 0, array( 'C', 'D' ), '+37360000000', 'a@example.com' );
 lbb_t( 'depășirea locurilor respinsă', is_wp_error( $h2 ) && 'lbb_full' === $h2->get_error_code(), $h2 );
+// Ultimele locuri luate de altcineva cât clientul completa formularul: mesaj clar, cu telefonul, nu „0 locuri”.
+$fl_r = LBB_Routes::save( array( 'origin' => 'PlinA', 'destination' => 'PlinB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'capacity' => 1, 'active' => 1 ) );
+$fl_1 = is_int( $fl_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $fl_r ), $tomorrow, '10:00', 1, 0, array( 'Ion Plin' ), '+37369000077', 'plin@example.com', 'MDL' ) : null;
+$fl_2 = is_int( $fl_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $fl_r ), $tomorrow, '10:00', 1, 0, array( 'Ana Plin' ), '+37369000076', 'plin2@example.com', 'MDL' ) : null;
+if ( is_int( $fl_r ) ) {
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $fl_r ) );
+	LBB_Routes::delete( $fl_r );
+}
+lbb_t( 'cursa plină între timp: „Locurile … tocmai s-au terminat”, cu telefonul, nu „au mai rămas 0 locuri”', is_array( $fl_1 ) && is_wp_error( $fl_2 ) && 'lbb_full' === $fl_2->get_error_code() && false !== strpos( $fl_2->get_error_message(), 'tocmai s-au terminat' ) && false !== strpos( $fl_2->get_error_message(), LBB_Settings::phone_text() ) && false === strpos( $fl_2->get_error_message(), ' 0 ' ), is_wp_error( $fl_2 ) ? $fl_2->get_error_message() : $fl_2 );
 // „1 loc liber”, „5 locuri libere”, „20 de locuri libere”, „101 locuri”, „120 de locuri”: acordul din română.
 lbb_t( 'numărul de locuri acordat ca în română (1 loc liber, 5 locuri, 20 de locuri, 101 locuri, 120 de locuri)', '1 loc liber' === LBB_Settings::ro_count( 1, 'loc liber', 'locuri libere' ) && '5 locuri libere' === LBB_Settings::ro_count( 5, 'loc liber', 'locuri libere' ) && '19 locuri libere' === LBB_Settings::ro_count( 19, 'loc liber', 'locuri libere' ) && '20 de locuri libere' === LBB_Settings::ro_count( 20, 'loc liber', 'locuri libere' ) && '101 locuri libere' === LBB_Settings::ro_count( 101, 'loc liber', 'locuri libere' ) && '120 de locuri libere' === LBB_Settings::ro_count( 120, 'loc liber', 'locuri libere' ) && '100 de locuri libere' === LBB_Settings::ro_count( 100, 'loc liber', 'locuri libere' ) && is_wp_error( $h2 ) && (bool) preg_match( '/^(A mai rămas 1 loc liber|Au mai rămas \d+ (de )?locuri libere) la această plecare\.$/u', $h2->get_error_message() ), is_wp_error( $h2 ) ? $h2->get_error_message() : $h2 );
 $h3 = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 1, 0, array( 'C' ), '+37360000000', 'a@example.com' );
