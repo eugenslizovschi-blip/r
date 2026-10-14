@@ -334,6 +334,15 @@ class LBB_Frontend {
 		if ( ! WC()->cart ) {
 			wc_load_cart();
 		}
+		// Aceeași cursă trimisă din nou (dublu-tap, sau „Înapoi” de la plată și alt număr de pasageri): biletul nou îl
+		// înlocuiește pe cel din coș, altfel clientul ar plăti de două ori. Alte curse (ex. tur-retur) rămân în coș;
+		// biletele deja legate de o comandă nu se ating.
+		foreach ( WC()->cart->get_cart() as $key => $item ) {
+			$old = empty( $item['lbb']['token'] ) ? null : LBB_Bookings::get_by_token( $item['lbb']['token'] );
+			if ( $old && 'hold' === $old['status'] && (int) $old['route_id'] === (int) $booking['route_id'] && $old['travel_date'] === $booking['travel_date'] && $old['dep_time'] === $booking['dep_time'] ) {
+				WC()->cart->remove_cart_item( $key );
+			}
+		}
 		$added = WC()->cart->add_to_cart( LBB_Install::product_id(), 1, 0, array(), array(
 			'lbb' => array( 'token' => $booking['token'] ),
 		) );

@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'LimitaA', 'LimitaB' ), array( 'PlinA', 'PlinB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'LimitaA', 'LimitaB' ), array( 'PlinA', 'PlinB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ), array( 'CosA', 'CosB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -418,6 +418,37 @@ if ( is_int( $ar_r ) ) {
 }
 // La 00:00–00:04 sau la 23:59 cursele de test nu sunt încă / mai sunt plecate: verificarea nu are sens atunci.
 lbb_t( 'limita de rezervări neachitate nu numără cursele de azi deja plecate', ! is_int( $ar_r ) ? false : ( $ar_hm < '00:05' || $ar_hm >= '23:59' || ( 0 === $ar_n1 && 1 === $ar_n2 ) ), array( $ar_hm, isset( $ar_n1 ) ? $ar_n1 : null, isset( $ar_n2 ) ? $ar_n2 : null ) );
+// „Achit online” trimis de două ori pentru aceeași cursă (dublu-tap, „Înapoi” de la plată și alt număr de pasageri):
+// în coș rămâne doar ultimul bilet, iar locurile celui vechi se eliberează; o altă cursă (tur-retur) se adaugă alături.
+$cs_r    = LBB_Routes::save( array( 'origin' => 'CosA', 'destination' => 'CosB', 'departures' => '10:00, 23:58', 'price' => 50, 'currency' => 'MDL', 'capacity' => 5, 'active' => 1 ) );
+$cs_keep = get_option( 'lbb_settings', array() );
+$cs_res  = array();
+if ( is_int( $cs_r ) && function_exists( 'WC' ) ) {
+	update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 1 ) ) );
+	if ( ! WC()->cart ) {
+		wc_load_cart();
+	}
+	WC()->cart->empty_cart();
+	$cs_d   = array( 'lbb_route' => $cs_r, 'lbb_date' => $tomorrow, 'lbb_time' => '23:58', 'lbb_adults' => 1, 'lbb_names' => array( 'Ion Cos', 'Ana Cos' ), 'lbb_phone' => '+37369000077', 'lbb_email' => 'cos@example.com', 'lbb_mode' => 'pay' );
+	$cs_tok = function () {
+		return array_values( array_map( function ( $i ) {
+			return isset( $i['lbb']['token'] ) ? $i['lbb']['token'] : '';
+		}, WC()->cart->get_cart() ) );
+	};
+	$cs_res['a']     = LBB_Frontend::book( $cs_d );
+	$cs_t1           = $cs_tok();
+	$cs_res['b']     = LBB_Frontend::book( array_merge( $cs_d, array( 'lbb_adults' => 2 ) ) );
+	$cs_t2           = $cs_tok();
+	$cs_res['old']   = $cs_t1 ? LBB_Bookings::get_by_token( $cs_t1[0] )['status'] : null;
+	$cs_res['new']   = $cs_t2 ? LBB_Bookings::get_by_token( $cs_t2[0] )['seats'] : null;
+	$cs_res['other'] = LBB_Frontend::book( array_merge( $cs_d, array( 'lbb_time' => '10:00', 'lbb_date' => ( new DateTimeImmutable( $tomorrow ) )->modify( '+1 day' )->format( 'Y-m-d' ) ) ) );
+	$cs_res['n']     = array( count( $cs_t1 ), count( $cs_t2 ), count( $cs_tok() ) );
+	WC()->cart->empty_cart();
+	update_option( 'lbb_settings', $cs_keep );
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $cs_r ) );
+	LBB_Routes::delete( $cs_r );
+}
+lbb_t( 'aceeași cursă trimisă din nou cu „Achit online” înlocuiește biletul din coș (fără plată dublă), locurile vechi se eliberează; altă cursă (tur-retur) se adaugă', true === ( $cs_res['a'] ?? null ) && true === ( $cs_res['b'] ?? null ) && true === ( $cs_res['other'] ?? null ) && array( 1, 1, 2 ) === ( $cs_res['n'] ?? null ) && 'cancelled' === $cs_res['old'] && 2 === $cs_res['new'], $cs_res );
 $desc = LBB_WooCommerce::describe( $rv );
 lbb_t( 'biletul rezervat arată suma la urcare', isset( $desc['De achitat la urcare'] ) && "120\u{00A0}RON" === $desc['De achitat la urcare'], $desc );
 lbb_t( 'anularea rezervării eliberează locurile', LBB_Bookings::cancel( $rv['id'] ) && 3 === LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow )[1]['free'] );
