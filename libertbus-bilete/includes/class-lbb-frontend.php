@@ -310,6 +310,20 @@ class LBB_Frontend {
 			if ( ! LBB_Settings::get( 'allow_reserve' ) ) {
 				return new WP_Error( 'lbb_mode', __( 'Rezervarea fără plată nu este disponibilă. Achitați online.', 'libertbus-bilete' ) );
 			}
+			// Aceeași rezervare trimisă din nou în câteva minute: clientul ajunge la cea făcută deja, fără locuri
+			// blocate de două ori și fără emailuri duble.
+			$twin = LBB_Bookings::recent_twin( array(
+				'route_id'    => $route['id'],
+				'travel_date' => $date,
+				'dep_time'    => $time,
+				'seats'       => max( 0, $adults ) + max( 0, $children ),
+				'children'    => max( 0, $children ),
+				'passengers'  => $names,
+				'phone'       => $phone,
+			) );
+			if ( $twin ) {
+				return LBB_Tickets::url( $twin['ticket_code'] );
+			}
 			$limit = (int) LBB_Settings::get( 'reserve_limit' );
 			if ( $limit && LBB_Bookings::active_reservations( $phone ) >= $limit ) {
 				/* translators: %s: telefon suport */

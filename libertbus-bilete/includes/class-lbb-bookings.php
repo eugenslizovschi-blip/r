@@ -266,6 +266,24 @@ class LBB_Bookings {
 	}
 
 	/**
+	 * Aceeași rezervare cu plata la urcare, făcută în ultimele minute de pe același telefon (formular trimis din nou:
+	 * „Înapoi” și iar „Rezerv”, reîncercare pe internet lent). Null dacă nu există.
+	 *
+	 * @param array $want route_id, travel_date, dep_time, seats, children, passengers, phone.
+	 */
+	public static function recent_twin( array $want, $minutes = 10 ) {
+		global $wpdb;
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . self::table() . " WHERE phone = %s AND route_id = %d AND travel_date = %s AND dep_time = %s AND seats = %d AND children = %d AND status = 'reserved' AND created_at >= %s ORDER BY id DESC", $want['phone'], $want['route_id'], $want['travel_date'], $want['dep_time'], $want['seats'], $want['children'], gmdate( 'Y-m-d H:i:s', time() - 60 * (int) $minutes ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		foreach ( $rows as $row ) {
+			$row = self::hydrate( $row );
+			if ( array_values( $row['passengers'] ) === array_values( $want['passengers'] ) ) {
+				return $row;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Cursa rezervării a plecat deja (data și ora plecării, în fusul orar al orarului, sunt în trecut).
 	 *
 	 * @param array $booking Rezervarea (travel_date, dep_time).

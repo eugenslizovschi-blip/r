@@ -477,10 +477,28 @@ $tk_today = array( 'status' => 'confirmed', 'travel_date' => LBB_Settings::today
 lbb_t( 'în ziua cursei biletul rămâne valabil', 'ok' === LBB_Tickets::state( $tk_today )['class'] );
 lbb_t( 'biletul cu plata reluată (pending) nu apare „anulat”, ci neachitat', 'bad' === LBB_Tickets::state( array( 'status' => 'pending', 'travel_date' => LBB_Settings::today() ) )['class'] && 0 === strpos( LBB_Tickets::state( array( 'status' => 'pending', 'travel_date' => LBB_Settings::today() ) )['text'], 'Plata nu e finalizată' ) );
 lbb_t( 'un bilet anulat dintr-o zi trecută rămâne „anulat”', 'Bilet anulat' === LBB_Tickets::state( array( 'status' => 'cancelled', 'travel_date' => $tk_yday ) )['text'] );
-$res2 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002' ) ) );
+// Alt pasager pe aceeași cursă = rezervare nouă (o rezervare identică e doar formularul trimis din nou, vezi mai jos).
+$res2 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002', 'lbb_names' => array( 'Maria' ) ) ) );
 lbb_t( 'a doua rezervare neachitată pe același telefon e refuzată', is_wp_error( $res2 ) && 'lbb_limit' === $res2->get_error_code(), $res2 );
-$res2b = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '069 000 002' ) ) );
+$res2b = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '069 000 002', 'lbb_names' => array( 'Maria' ) ) ) );
 lbb_t( 'același număr scris local (069…) e prins de limită', is_wp_error( $res2b ) && 'lbb_limit' === $res2b->get_error_code(), $res2b );
+// Aceeași rezervare trimisă din nou („Înapoi” și iar „Rezerv”, reîncercare pe internet lent), și cu numărul scris
+// local: clientul ajunge la rezervarea făcută deja, fără una nouă, fără emailuri duble și fără „limită atinsă”.
+$tw_n     = function () use ( $wpdb ) {
+	return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . LBB_Bookings::table() . ' WHERE phone = %s', '+37369000002' ) );
+};
+$tw_n0    = $tw_n();
+$tw_mails = array();
+$tw_catch = function ( $null, $atts ) use ( &$tw_mails ) {
+	$tw_mails[] = $atts['to'];
+	return true;
+};
+add_filter( 'pre_wp_mail', $tw_catch, 1, 2 );
+$tw_again = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002', 'lbb_currency' => 'MDL' ) ) );
+$tw_local = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '069 000 002', 'lbb_currency' => 'MDL' ) ) );
+remove_filter( 'pre_wp_mail', $tw_catch, 1 );
+$tw_more  = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002', 'lbb_adults' => 2, 'lbb_names' => array( 'Ion', 'Ion' ) ) ) );
+lbb_t( 'aceeași rezervare trimisă din nou duce la rezervarea făcută deja: fără una nouă și fără emailuri; alt număr de pasageri nu e „aceeași”', is_string( $res1 ) && $res1 === $tw_again && $res1 === $tw_local && $tw_n() === $tw_n0 && ! $tw_mails && is_wp_error( $tw_more ) && 'lbb_limit' === $tw_more->get_error_code(), array( $res1, $tw_again, $tw_local, $tw_n0, $tw_n(), $tw_mails, $tw_more ) );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_reserve' => 0 ) ) );
 $res3 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000003' ) ) );
 lbb_t( 'rezervarea oprită din setări e refuzată', is_wp_error( $res3 ) && 'lbb_mode' === $res3->get_error_code(), $res3 );
