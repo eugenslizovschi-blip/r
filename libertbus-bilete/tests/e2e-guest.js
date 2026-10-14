@@ -87,6 +87,12 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const st = await nd.evaluate(() => ({ v: document.querySelector('[data-lbb="date"]').value, status: document.querySelector('[data-lbb="status"]').textContent, times: document.querySelector('[data-lbb="time"]').options.length }));
     const iso = d.getUTCFullYear() + '-' + mm + '-' + dd;
     if (ph !== 'zz.ll.aaaa' || st.v !== iso || asked[asked.length - 1] !== iso || st.times < 2) fail('data scrisă „zz.ll.aaaa” într-un browser fără calendar nu e înțeleasă: ' + JSON.stringify({ ph, st, asked }));
+    // Anul cu două cifre („zz.ll.aa”), cum îl scriu mulți.
+    await nd.fill('[data-lbb="date"]', dd + '.' + mm + '.' + String(d.getUTCFullYear()).slice(2));
+    await nd.dispatchEvent('[data-lbb="date"]', 'change');
+    await nd.waitForTimeout(300);
+    const v2 = await nd.inputValue('[data-lbb="date"]');
+    if (v2 !== iso) fail('data scrisă „zz.ll.aa” nu e înțeleasă: ' + v2);
     await nd.close();
   }
   // Grup mai mare decât limita online: la numărul maxim de pasageri apare „pentru grupuri sunați la …” cu link de apel.

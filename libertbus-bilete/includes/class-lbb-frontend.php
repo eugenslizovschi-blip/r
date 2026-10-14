@@ -227,14 +227,15 @@ class LBB_Frontend {
 	}
 
 	/**
-	 * Data scrisă de mână („25.12.2026”, „25/12/2026”) adusă la 2026-12-25: în browserele fără calendar pentru
+	 * Data scrisă de mână („25.12.2026”, „25/12/2026”, „25.12.26”) adusă la 2026-12-25: în browserele fără calendar pentru
 	 * dată câmpul e text simplu. Orice alt format rămâne neschimbat (și e refuzat mai departe).
 	 *
 	 * @param string $date Data din formular.
 	 */
 	public static function iso_date( $date ) {
-		if ( preg_match( '/^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4})\s*$/', (string) $date, $m ) ) {
-			return sprintf( '%04d-%02d-%02d', $m[3], $m[2], $m[1] );
+		// Anul și cu două cifre („25.12.26”): biletele se vând doar pentru zilele următoare, deci 20xx.
+		if ( preg_match( '/^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4}|\d{2})\s*$/', (string) $date, $m ) ) {
+			return sprintf( '%04d-%02d-%02d', 2 === strlen( $m[3] ) ? 2000 + (int) $m[3] : $m[3], $m[2], $m[1] );
 		}
 		return trim( (string) $date );
 	}

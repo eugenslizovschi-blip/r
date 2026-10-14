@@ -160,11 +160,12 @@
 		// Browser fără calendar pentru dată (Safari pe Mac < 14.1, Firefox < 57): câmpul e text, iar clientul scrie
 		// „25.12.2026” sau „25/12/2026”. Îl aducem la 2026-12-25, formatul cu care lucrează restul formularului.
 		function isoDate( v ) {
-			var m = /^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4})\s*$/.exec( v || '' );
+			var m = /^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4}|\d{2})\s*$/.exec( v || '' );
 			if ( ! m ) {
 				return v;
 			}
-			return m[ 3 ] + '-' + ( m[ 2 ].length < 2 ? '0' : '' ) + m[ 2 ] + '-' + ( m[ 1 ].length < 2 ? '0' : '' ) + m[ 1 ];
+			// Anul cu două cifre („25.12.26”) e 20xx: biletele se vând doar pentru zilele următoare.
+			return ( m[ 3 ].length === 2 ? '20' : '' ) + m[ 3 ] + '-' + ( m[ 2 ].length < 2 ? '0' : '' ) + m[ 2 ] + '-' + ( m[ 1 ].length < 2 ? '0' : '' ) + m[ 1 ];
 		}
 
 		function option( value, label, disabled ) {

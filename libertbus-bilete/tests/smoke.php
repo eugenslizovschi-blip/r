@@ -288,7 +288,7 @@ $r = LBB_Frontend::book( array_merge( $base, array( 'lbb_email' => str_repeat( '
 lbb_t( 'email prea lung pentru baza de date respins cu mesaj clar', is_wp_error( $r ) && 'lbb_email' === $r->get_error_code(), $r );
 lbb_t( 'câmpul de email are limită de lungime', (bool) preg_match( '/<input type="email" name="lbb_email"[^>]* maxlength="190"/', LBB_Frontend::shortcode( array() ) ) );
 // Fără calendar pentru dată (Safari pe Mac < 14.1) câmpul e text: „25.12.2026” se înțelege ca 2026-12-25.
-lbb_t( 'data scrisă de mână („25.12.2026”, „5/1/2027”) se înțelege; formatul ISO rămâne; altceva nu devine dată', '2026-12-25' === LBB_Frontend::iso_date( '25.12.2026' ) && '2027-01-05' === LBB_Frontend::iso_date( ' 5/1/2027 ' ) && '2026-12-25' === LBB_Frontend::iso_date( '2026-12-25' ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', LBB_Frontend::iso_date( '25 dec' ) ) );
+lbb_t( 'data scrisă de mână („25.12.2026”, „5/1/2027”, „25.12.26”) se înțelege; formatul ISO rămâne; altceva nu devine dată', '2026-12-25' === LBB_Frontend::iso_date( '25.12.2026' ) && '2027-01-05' === LBB_Frontend::iso_date( ' 5/1/2027 ' ) && '2026-12-25' === LBB_Frontend::iso_date( '2026-12-25' ) && '2026-12-25' === LBB_Frontend::iso_date( '25.12.26' ) && '2027-01-05' === LBB_Frontend::iso_date( '5/1/27' ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', LBB_Frontend::iso_date( '25.12.202' ) ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', LBB_Frontend::iso_date( '25 dec' ) ) );
 // După o eroare, formularul revine cu data trimisă: scrisă „zz.ll.aaaa” (browser fără calendar) revine ca dată ISO.
 $pd_err = new ReflectionProperty( 'LBB_Frontend', 'error' );
 $pd_err->setAccessible( true );
