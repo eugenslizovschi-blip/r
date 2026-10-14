@@ -351,31 +351,40 @@ class LBB_Routes {
 	/**
 	 * Lista pentru formular: plecare → destinații, cu prețuri în moneda magazinului.
 	 */
+	/**
+	 * Ce vede formularul despre o rută: prețuri în fiecare monedă de plată, ore, zile, loc de urcare.
+	 *
+	 * @param array $route Ruta.
+	 */
+	public static function public_entry( array $route ) {
+		$prices = array();
+		foreach ( array_unique( array_merge( LBB_Settings::pay_currencies(), array( 'MDL', 'RON', $route['currency'] ) ) ) as $cur ) {
+			$prices[ $cur ] = array(
+				LBB_Settings::convert( $route['price'], $route['currency'], $cur ),
+				null === $route['child_price'] ? null : LBB_Settings::convert( $route['child_price'], $route['currency'], $cur ),
+			);
+		}
+		return array(
+			'id'          => $route['id'],
+			'to'          => $route['destination'],
+			'prices'      => $prices,
+			'child_price' => $route['child_price'],
+			'orig_price'  => $route['price'],
+			'orig_cur'    => $route['currency'],
+			'pay_cur'     => LBB_Settings::default_pay_currency( $route['currency'] ),
+			'times'       => $route['times'],
+			'days'        => $route['days'],
+			'boarding'    => $route['boarding'],
+		);
+	}
+
 	public static function public_map() {
 		$map = array();
 		foreach ( self::all( true ) as $route ) {
 			if ( $route['price'] <= 0 ) {
 				continue;
 			}
-			$prices = array();
-			foreach ( array_unique( array_merge( LBB_Settings::pay_currencies(), array( 'MDL', 'RON', $route['currency'] ) ) ) as $cur ) {
-				$prices[ $cur ] = array(
-					LBB_Settings::convert( $route['price'], $route['currency'], $cur ),
-					null === $route['child_price'] ? null : LBB_Settings::convert( $route['child_price'], $route['currency'], $cur ),
-				);
-			}
-			$map[ $route['origin'] ][] = array(
-				'id'          => $route['id'],
-				'to'          => $route['destination'],
-				'prices'      => $prices,
-				'child_price' => $route['child_price'],
-				'orig_price'  => $route['price'],
-				'orig_cur'    => $route['currency'],
-				'pay_cur'     => LBB_Settings::default_pay_currency( $route['currency'] ),
-				'times'       => $route['times'],
-				'days'        => $route['days'],
-				'boarding'    => $route['boarding'],
-			);
+			$map[ $route['origin'] ][] = self::public_entry( $route );
 		}
 		uksort( $map, array( __CLASS__, 'compare_cities' ) );
 		foreach ( $map as $origin => $list ) {

@@ -1232,10 +1232,19 @@ $nc_user = get_current_user_id();
 wp_set_current_user( 0 );
 $nc_data = $api( array( 'route_id' => $rid2, 'date' => $tomorrow ) )->get_data();
 $nc_ok   = ! empty( $nc_data['nonce'] ) && false !== wp_verify_nonce( $nc_data['nonce'], 'lbb_book' );
+$nc_ent  = null;
+foreach ( LBB_Routes::public_map() as $nc_list ) {
+	foreach ( $nc_list as $nc_e ) {
+		if ( (int) $nc_e['id'] === (int) $rid2 ) {
+			$nc_ent = $nc_e;
+		}
+	}
+}
+$nc_ok   = $nc_ok && $nc_ent && $nc_ent === ( $nc_data['route'] ?? null );
 $nc_ok   = $nc_ok && LBB_Settings::today() === ( $nc_data['today'] ?? '' ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $nc_data['maxDate'] ?? '' ) && $nc_data['maxDate'] > $nc_data['today'];
 wp_set_current_user( $nc_user );
 $nc_cfg  = preg_match( '/data-lbb-config="([^"]+)"/', LBB_Frontend::shortcode( array() ), $nc_m ) ? json_decode( base64_decode( html_entity_decode( $nc_m[1], ENT_QUOTES ) ), true ) : array();
-lbb_t( 'API: cheia formularului și ziua de azi vin proaspete (pagina poate fi din cache), iar formularul știe dacă vizitatorul e nelogat', $nc_ok && array_key_exists( 'guest', $nc_cfg ) && ( 0 === $nc_user ) === $nc_cfg['guest'], array( $nc_data, isset( $nc_cfg['guest'] ) ? $nc_cfg['guest'] : null ) );
+lbb_t( 'API: cheia formularului, ziua de azi și prețul rutei vin proaspete (pagina poate fi din cache), iar formularul știe dacă vizitatorul e nelogat', $nc_ok && array_key_exists( 'guest', $nc_cfg ) && ( 0 === $nc_user ) === $nc_cfg['guest'], array( $nc_data, isset( $nc_cfg['guest'] ) ? $nc_cfg['guest'] : null ) );
 lbb_t( 'API: data în alt format e refuzată (400)', 400 === $api( array( 'route_id' => $rid2, 'date' => '07.10.2026' ) )->get_status() );
 lbb_t( 'API: fără rută e refuzat (400)', 400 === $api( array( 'date' => $tomorrow ) )->get_status() );
 lbb_t( 'API: ruta inexistentă dă 404', 404 === $api( array( 'route_id' => 999999, 'date' => $tomorrow ) )->get_status() );

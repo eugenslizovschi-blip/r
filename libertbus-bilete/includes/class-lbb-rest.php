@@ -42,6 +42,8 @@ class LBB_Rest {
 			// pe care formularul o folosește doar pentru vizitatorii nelogați (cererea REST e mereu fără utilizator).
 			'nonce'      => wp_create_nonce( 'lbb_book' ),
 			// Tot pentru pagina din cache: „azi” scris în ea poate fi ieri; formularul ia ziua de azi de aici.
+			// Și prețul: o pagină din cache ar arăta în rezumat prețul vechi, iar la plată s-ar cere cel nou.
+			'route'      => LBB_Routes::public_entry( $route ),
 			'today'      => LBB_Settings::today(),
 			'maxDate'    => ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '+' . (int) LBB_Settings::get( 'max_days_ahead' ) . ' days' )->format( 'Y-m-d' ),
 		) );

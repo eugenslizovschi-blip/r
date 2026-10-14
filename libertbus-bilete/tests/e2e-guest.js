@@ -55,6 +55,29 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await st.unrouteAll({ behavior: 'ignoreErrors' });
     await st.close();
   }
+  // Prețul schimbat de birou după ce pagina a intrat în cache: rezumatul arată prețul curent de la server.
+  {
+    const pr = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    pr.on('pageerror', e => fail('pageerror: ' + e.message));
+    await pr.route('**/lbb/v1/departures**', async route => {
+      try {
+        const res = await route.fetch();
+        const body = await res.json();
+        Object.keys(body.route.prices).forEach(c => { body.route.prices[c] = [987, null]; });
+        body.departures = [{ time: '08:45', free: 20, bookable: true, reason: '' }];
+        await route.fulfill({ response: res, json: body });
+      } catch (e) { /* pagina s-a închis între timp */ }
+    });
+    await pr.goto(BASE + '/balti-iasi/');
+    await pr.waitForFunction(() => document.querySelector('[data-lbb="time"]').options.length > 1);
+    await pr.selectOption('[data-lbb="time"]', '08:45').catch(() => {});
+    await pr.waitForFunction(() => /987/.test(document.querySelector('[data-lbb="summary"]').textContent), null, { timeout: 8000 }).catch(() => {});
+    const sum = await pr.textContent('[data-lbb="summary"]');
+    if (!/987/.test(sum)) fail('rezumatul nu arată prețul curent al rutei: ' + sum);
+    await pr.waitForLoadState('networkidle').catch(() => {});
+    await pr.unrouteAll({ behavior: 'ignoreErrors' });
+    await pr.close();
+  }
   // Sub dată, ziua în cuvinte: pe telefoanele în engleză câmpul arată 03/01/2027 (lună/zi), ușor de citit greșit.
   const hint0 = await page.textContent('[data-lbb="dateHint"]');
   if (!/^(luni|marți|miercuri|joi|vineri|sâmbătă|duminică), \d{1,2} (ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)$/.test(hint0)) fail('data în cuvinte lipsește sub câmpul de dată: „' + hint0 + '”');

@@ -567,6 +567,14 @@
 							nonceField.value = data.nonce;
 						}
 					}
+					// Prețul curent al rutei (pagina din cache poate avea prețuri vechi): rezumatul arată ce se va plăti.
+					if ( data.route && String( data.route.id ) === String( route.id ) && data.route.prices ) {
+						route.prices = data.route.prices;
+						route.child_price = data.route.child_price;
+						route.orig_price = data.route.orig_price;
+						route.orig_cur = data.route.orig_cur;
+						route.boarding = data.route.boarding;
+					}
 					// Pagina din cache de ieri: intervalul de date se mută pe ziua de azi a serverului, iar o dată rămasă
 					// în urmă (nealeasă de client) trece pe azi și orele se cer din nou.
 					if ( data.today && data.today > cfg.today ) {
