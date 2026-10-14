@@ -130,8 +130,16 @@ class LBB_Settings {
 		$bad   = array();
 		$today = self::today();
 		foreach ( preg_split( '/[\s,;]+/', (string) $text, -1, PREG_SPLIT_NO_EMPTY ) as $part ) {
-			if ( preg_match( '/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})$/', $part, $m ) ) {
-				list( $y, $mo, $d ) = array( (int) $m[3], (int) $m[2], (int) $m[1] );
+			if ( preg_match( '/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4}|\d{2})$/', $part, $m ) ) {
+				// Anul și cu două cifre („25.12.26” = 2026).
+				list( $y, $mo, $d ) = array( 2 === strlen( $m[3] ) ? 2000 + (int) $m[3] : (int) $m[3], (int) $m[2], (int) $m[1] );
+			} elseif ( preg_match( '/^(\d{1,2})[.\/](\d{1,2})$/', $part, $m ) ) {
+				// Fără an („25.12, 1.1”, cum se scriu sărbătorile): următoarea dată cu ziua și luna asta.
+				list( $mo, $d ) = array( (int) $m[2], (int) $m[1] );
+				$y = (int) substr( $today, 0, 4 );
+				if ( sprintf( '%04d-%02d-%02d', $y, $mo, $d ) < $today || ! checkdate( $mo, $d, $y ) ) {
+					$y++;
+				}
 			} elseif ( preg_match( '/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $part, $m ) ) {
 				list( $y, $mo, $d ) = array( (int) $m[1], (int) $m[2], (int) $m[3] );
 			} else {

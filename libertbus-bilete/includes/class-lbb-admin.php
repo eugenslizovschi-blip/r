@@ -878,7 +878,7 @@ class LBB_Admin {
 				$num( 'max_passengers', __( 'Maxim pasageri pe o rezervare', 'libertbus-bilete' ) );
 				$num( 'cutoff_minutes', __( 'Închide vânzarea cu (minute) înainte de plecare', 'libertbus-bilete' ) );
 				$num( 'max_days_ahead', __( 'Vânzare cu cel mult (zile) înainte', 'libertbus-bilete' ) );
-				$text( 'closed_dates', __( 'Zile fără curse', 'libertbus-bilete' ), __( 'Ex. sărbători: 25.12.2026, 01.01.2027. În aceste zile nu se vând bilete pe nicio rută; biletele deja vândute rămân.', 'libertbus-bilete' ) );
+				$text( 'closed_dates', __( 'Zile fără curse', 'libertbus-bilete' ), __( 'Ex. sărbători: 25.12.2026, 01.01.2027 (sau doar 25.12, 1.1 — anul următor se pune singur). În aceste zile nu se vând bilete pe nicio rută; biletele deja vândute rămân.', 'libertbus-bilete' ) );
 				$num( 'cart_hold_minutes', __( 'Locurile se țin în coș (minute)', 'libertbus-bilete' ) );
 				$num( 'payment_minutes', __( 'Locurile se țin cât se așteaptă plata (minute)', 'libertbus-bilete' ), __( 'După acest timp, dacă banca nu a confirmat plata, locurile se eliberează.', 'libertbus-bilete' ) );
 				$check( 'allow_pay', __( 'Plata online cu cardul', 'libertbus-bilete' ), __( 'Arată butonul „Achit online cu cardul”. Porniți-l doar după ce metoda de plată a băncii (ex. Paynet) e activă și testată.', 'libertbus-bilete' ) );

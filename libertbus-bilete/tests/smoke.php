@@ -929,6 +929,14 @@ $cr_onl  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[1], 
 lbb_t( 'CSV-ul listei de pasageri are suma de încasat și moneda în coloane separate (goale la plata online)', 13 === count( $cr_res ) && 'la urcare 30.5 RON' === $cr_res[9] && 30.5 === $cr_res[11] && 'RON' === $cr_res[12] && 'online' === $cr_onl[9] && '' === $cr_onl[11] && '' === $cr_onl[12], array( $cr_res, $cr_onl ) );
 
 // Zile fără curse (sărbători): în setări, cu date scrise ca 25.12.2026 / 2026-12-25; în aceste zile nu se vinde nimic.
+// Fără an („25.12, 1.1”) sau cu anul scurt („25.12.99”): următoarea apariție, respectiv 2099.
+$zy_today = LBB_Settings::today();
+$zy_next  = function ( $m, $d ) use ( $zy_today ) {
+	$y = (int) substr( $zy_today, 0, 4 );
+	return sprintf( '%04d-%02d-%02d', sprintf( '%04d-%02d-%02d', $y, $m, $d ) < $zy_today ? $y + 1 : $y, $m, $d );
+};
+$zy_p = LBB_Settings::parse_dates( '25.12, 1.1, 25.12.99, 32.13' );
+lbb_t( 'zile fără curse: „25.12”, „1.1” fără an devin următoarea apariție, „25.12.99” devine 2099, „32.13” e semnalat', in_array( $zy_next( 12, 25 ), $zy_p['dates'], true ) && in_array( $zy_next( 1, 1 ), $zy_p['dates'], true ) && in_array( '2099-12-25', $zy_p['dates'], true ) && array( '32.13' ) === $zy_p['bad'], $zy_p );
 $zc_p = LBB_Settings::parse_dates( '25.12.2099, 1/1/2100 2099-12-26 32.01.2099 abc 01.01.2000 25.12.2099' );
 lbb_t( 'zile fără curse: datele se înțeleg în mai multe forme, cele greșite se semnalează, cele trecute se ignoră', array( '2099-12-25', '2099-12-26', '2100-01-01' ) === $zc_p['dates'] && array( '32.01.2099', 'abc' ) === $zc_p['bad'], $zc_p );
 $zc_keep = get_option( 'lbb_settings' );
