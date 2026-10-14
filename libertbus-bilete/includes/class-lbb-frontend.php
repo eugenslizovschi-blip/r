@@ -207,14 +207,15 @@ class LBB_Frontend {
 	 * adrese biletul nu ajunge niciodată. Întoarce adresa corectată sau '' dacă domeniul nu e o greșeală știută.
 	 */
 	public static function email_typo( $email ) {
+		// Și domeniul fără „.com” („ion@gmail”): browserul îl acceptă ca email valid, dar biletul n-ar ajunge nicăieri.
 		$typos = array(
-			'gmail'   => array( 'gmail.con', 'gmail.cm', 'gmail.om', 'gmail.cim', 'gmail.comm', 'gmail.coom', 'gmail.co', 'gmail.cpm', 'gmail.vom', 'gmail.xom', 'gmial.com', 'gmai.com', 'gamil.com', 'gnail.com', 'gmaill.com', 'gmali.com', 'gmeil.com', 'gmal.com', 'gmaik.com', 'gmsil.com' ),
-			'yahoo'   => array( 'yahoo.con', 'yahoo.cm', 'yaho.com', 'yahooo.com', 'yhoo.com' ),
-			'hotmail' => array( 'hotmail.con', 'hotmail.cm', 'hotmail.co', 'hotmial.com', 'hotmai.com', 'hotmal.com' ),
-			'outlook' => array( 'outlook.con', 'outlook.co', 'outlok.com', 'outllok.com' ),
-			'icloud'  => array( 'icloud.con', 'icloud.co', 'iclod.com', 'icoud.com' ),
+			'gmail'   => array( 'gmail', 'gmail.con', 'gmail.cm', 'gmail.om', 'gmail.cim', 'gmail.comm', 'gmail.coom', 'gmail.co', 'gmail.cpm', 'gmail.vom', 'gmail.xom', 'gmial.com', 'gmai.com', 'gamil.com', 'gnail.com', 'gmaill.com', 'gmali.com', 'gmeil.com', 'gmal.com', 'gmaik.com', 'gmsil.com' ),
+			'yahoo'   => array( 'yahoo', 'yahoo.con', 'yahoo.cm', 'yaho.com', 'yahooo.com', 'yhoo.com' ),
+			'hotmail' => array( 'hotmail', 'hotmail.con', 'hotmail.cm', 'hotmail.co', 'hotmial.com', 'hotmai.com', 'hotmal.com' ),
+			'outlook' => array( 'outlook', 'outlook.con', 'outlook.co', 'outlok.com', 'outllok.com' ),
+			'icloud'  => array( 'icloud', 'icloud.con', 'icloud.co', 'iclod.com', 'icoud.com' ),
 			'mail.ru' => array( 'mail.r', 'mail.ry', 'mail.rus', 'mai.ru', 'mali.ru', 'maill.ru' ),
-			'yandex.ru' => array( 'yandex.r', 'yandex.ry', 'yadex.ru', 'yandeks.ru', 'yandx.ru' ),
+			'yandex.ru' => array( 'yandex', 'yandex.r', 'yandex.ry', 'yadex.ru', 'yandeks.ru', 'yandx.ru' ),
 		);
 		$at     = strrpos( $email, '@' );
 		$domain = false === $at ? '' : strtolower( substr( $email, $at + 1 ) );
@@ -284,15 +285,17 @@ class LBB_Frontend {
 		if ( $digits < 8 || $digits > 15 ) {
 			return new WP_Error( 'lbb_phone', __( 'Introduceți un număr de telefon valid, cu prefixul țării (+373 sau +40).', 'libertbus-bilete' ) );
 		}
-		$email = isset( $data['lbb_email'] ) ? sanitize_email( $data['lbb_email'] ) : '';
+		$typed = isset( $data['lbb_email'] ) ? trim( sanitize_text_field( $data['lbb_email'] ) ) : '';
+		// „ion@gmail” nu trece de sanitize_email (domeniu fără punct), așa că propunerea se face pe ce s-a scris.
+		$fixed = self::email_typo( $typed );
+		if ( $fixed && is_email( $fixed ) ) {
+			/* translators: %s: adresa corectată, ex. ion@gmail.com */
+			return new WP_Error( 'lbb_email', sprintf( __( 'Verificați adresa de email: ați vrut să scrieți %s? Acolo primiți biletul.', 'libertbus-bilete' ), $fixed ) );
+		}
+		$email = sanitize_email( $typed );
 		// Coloana din baza de date are 190 de caractere; peste ar da „nu s-a putut salva” la nesfârșit.
 		if ( ! is_email( $email ) || strlen( $email ) > 190 ) {
 			return new WP_Error( 'lbb_email', __( 'Introduceți o adresă de email validă. Acolo primiți biletul.', 'libertbus-bilete' ) );
-		}
-		$fixed = self::email_typo( $email );
-		if ( $fixed ) {
-			/* translators: %s: adresa corectată, ex. ion@gmail.com */
-			return new WP_Error( 'lbb_email', sprintf( __( 'Verificați adresa de email: ați vrut să scrieți %s? Acolo primiți biletul.', 'libertbus-bilete' ), $fixed ) );
 		}
 
 		$currency = isset( $data['lbb_currency'] ) ? strtoupper( sanitize_text_field( $data['lbb_currency'] ) ) : '';
