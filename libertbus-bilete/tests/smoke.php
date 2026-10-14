@@ -215,7 +215,9 @@ update_option( 'lbb_settings', $ob_keep );
 $ob_alert = array_values( array_filter( $ob_mails, function ( $m ) {
 	return false !== strpos( (string) $m['subject'], 'Locuri depășite' );
 } ) );
-lbb_t( 'plata întârziată peste capacitate: emailul de avertizare merge la biroul din Setări', 1 === count( $ob_alert ) && 'birou-test@example.com' === $ob_alert[0]['to'], wp_list_pluck( $ob_mails, 'to' ) );
+$ob_m = $ob_alert ? $ob_alert[0] : array( 'to' => '', 'message' => '', 'headers' => array() );
+$ob_h = implode( "\n", (array) $ob_m['headers'] );
+lbb_t( 'plata întârziată peste capacitate: emailul de avertizare merge la biroul din Setări, de la firmă, cu linkul comenzii', 1 === count( $ob_alert ) && 'birou-test@example.com' === $ob_m['to'] && false !== strpos( $ob_h, 'From: LibertBus <' ) && false !== strpos( $ob_m['message'], 'href="' . esc_url( $o2->get_edit_order_url() ) . '"' ) && false !== strpos( $ob_m['message'], 'ATENȚIE' ), array( wp_list_pluck( $ob_mails, 'to' ), $ob_h ) );
 $o2 = wc_get_order( $o2->get_id() );
 $notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $o2->get_id() ) ), 'content' );
 lbb_t( 'plata întârziată: biletul se emite', 'confirmed' === LBB_Bookings::get_by_token( $late['token'] )['status'] );

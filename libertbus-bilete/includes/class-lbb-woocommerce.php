@@ -293,8 +293,22 @@ class LBB_WooCommerce {
 		if ( $over ) {
 			$msg = __( 'ATENȚIE: plata a sosit după expirarea rezervării și cursa a depășit numărul de locuri. Verificați lista de pasageri și contactați clientul.', 'libertbus-bilete' );
 			$order->add_order_note( 'LibertBus: ' . $msg );
-			// La birou (ca emailul „rezervare nouă”), nu doar la administratorul WordPress: trebuie sunat clientul.
-			wp_mail( LBB_Settings::office_email(), sprintf( '[LibertBus] Locuri depășite — comanda #%s', $order->get_order_number() ), $msg . "\n\n" . $order->get_edit_order_url() );
+			// La birou (ca emailul „rezervare nouă”), nu doar la administratorul WordPress: trebuie sunat clientul,
+			// deci emailul are telefonul (link de apel) și răspunsul ajunge direct la client.
+			$phone   = (string) $order->get_billing_phone();
+			$email   = (string) $order->get_billing_email();
+			$html    = '<p>' . esc_html( $msg ) . '</p><p><a href="' . esc_url( $order->get_edit_order_url() ) . '">'
+				/* translators: %s: numărul comenzii */
+				. esc_html( sprintf( __( 'Deschide comanda #%s', 'libertbus-bilete' ), $order->get_order_number() ) ) . '</a></p>'
+				. ( '' !== $phone || is_email( $email ) ? '<p>' . esc_html__( 'Client', 'libertbus-bilete' ) . ': '
+					. ( '' !== $phone ? '<a href="' . esc_attr( LBB_Frontend::tel_href( $phone ) ) . '">' . esc_html( $phone ) . '</a>' : '' )
+					. ( '' !== $phone && is_email( $email ) ? ' · ' : '' )
+					. ( is_email( $email ) ? '<a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>' : '' ) . '</p>' : '' );
+			$headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . LBB_Tickets::from_header() );
+			if ( is_email( $email ) ) {
+				$headers[] = 'Reply-To: ' . $email;
+			}
+			LBB_Tickets::mail_html( LBB_Settings::office_email(), sprintf( '[LibertBus] Locuri depășite — comanda #%s', $order->get_order_number() ), $html, $headers );
 		}
 	}
 
