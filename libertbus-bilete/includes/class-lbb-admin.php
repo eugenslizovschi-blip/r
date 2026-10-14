@@ -413,6 +413,16 @@ class LBB_Admin {
 			'id' => 0, 'origin' => '', 'destination' => '', 'departures' => '', 'days' => array( 1, 2, 3, 4, 5, 6, 7 ),
 			'price' => '', 'child_price' => null, 'currency' => 'MDL', 'capacity' => 0, 'active' => 1, 'page_url' => '', 'boarding' => '', 'notes' => '',
 		);
+		$times_text = implode( ', ', LBB_Routes::parse_times( $route['departures'] ) );
+		$draft      = get_transient( 'lbb_route_draft_' . get_current_user_id() );
+		if ( is_array( $draft ) && (int) $draft['id'] === (int) $route['id'] ) {
+			delete_transient( 'lbb_route_draft_' . get_current_user_id() );
+			foreach ( array( 'origin', 'destination', 'price', 'currency', 'capacity', 'page_url', 'boarding', 'notes', 'days', 'active' ) as $key ) {
+				$route[ $key ] = $draft[ $key ];
+			}
+			$route['child_price'] = '' === $draft['child_price'] ? null : $draft['child_price'];
+			$times_text           = $draft['departures']; // Exact cum le-a scris adminul, ca să vadă și ce nu s-a înțeles.
+		}
 		self::header( $route['id'] ? __( 'Editează ruta', 'libertbus-bilete' ) : __( 'Rută nouă', 'libertbus-bilete' ) );
 		$cities = array();
 		foreach ( LBB_Routes::all() as $r ) {
@@ -430,7 +440,7 @@ class LBB_Admin {
 			<table class="form-table">
 				<tr><th><label for="lbb-origin"><?php esc_html_e( 'Plecare', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-origin" name="origin" class="regular-text" list="lbb-cities" maxlength="100" required value="<?php echo esc_attr( $route['origin'] ); ?>"></td></tr>
 				<tr><th><label for="lbb-dest"><?php esc_html_e( 'Destinație', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-dest" name="destination" class="regular-text" list="lbb-cities" maxlength="100" required value="<?php echo esc_attr( $route['destination'] ); ?>"></td></tr>
-				<tr><th><label for="lbb-times"><?php esc_html_e( 'Ore de plecare', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-times" name="departures" class="regular-text" maxlength="255" required aria-describedby="lbb-times-desc" value="<?php echo esc_attr( implode( ', ', LBB_Routes::parse_times( $route['departures'] ) ) ); ?>"><p class="description" id="lbb-times-desc"><?php esc_html_e( 'Separate prin virgulă, ex. 08:45, 17:45', 'libertbus-bilete' ); ?></p></td></tr>
+				<tr><th><label for="lbb-times"><?php esc_html_e( 'Ore de plecare', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-times" name="departures" class="regular-text" maxlength="255" required aria-describedby="lbb-times-desc" value="<?php echo esc_attr( $times_text ); ?>"><p class="description" id="lbb-times-desc"><?php esc_html_e( 'Separate prin virgulă, ex. 08:45, 17:45', 'libertbus-bilete' ); ?></p></td></tr>
 				<tr><th><?php esc_html_e( 'Zile', 'libertbus-bilete' ); ?></th><td class="lbb-days"><?php foreach ( self::day_names() as $n => $label ) : ?><label><input type="checkbox" name="days[]" value="<?php echo esc_attr( $n ); ?>" <?php checked( in_array( $n, $route['days'], true ) ); ?>> <?php echo esc_html( $label ); ?></label><?php endforeach; ?></td></tr>
 				<tr><th><label for="lbb-price"><?php esc_html_e( 'Preț adult', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-price" name="price" type="number" inputmode="decimal" step="0.01" min="0" required value="<?php echo esc_attr( $route['price'] ); ?>">
 					<select name="currency" aria-label="<?php esc_attr_e( 'Moneda prețului', 'libertbus-bilete' ); ?>"><?php foreach ( LBB_Settings::currencies() as $cur ) : ?><option <?php selected( $route['currency'], $cur ); ?>><?php echo esc_html( $cur ); ?></option><?php endforeach; ?></select>
@@ -472,6 +482,23 @@ class LBB_Admin {
 		return array( false, __( 'oprită: fără preț', 'libertbus-bilete' ) );
 	}
 
+	/**
+	 * Ruta respinsă la salvare (ex. „există deja”, un câmp prea lung): formularul revine cu ce a scris adminul,
+	 * nu gol. Ține 5 minute, doar pentru utilizatorul curent, și se folosește o singură dată.
+	 *
+	 * @param array $data Datele trimise din formular.
+	 */
+	public static function remember_route_draft( array $data ) {
+		$draft = array( 'id' => isset( $data['id'] ) ? (int) $data['id'] : 0 );
+		foreach ( array( 'origin', 'destination', 'departures', 'price', 'child_price', 'currency', 'capacity', 'page_url', 'boarding' ) as $key ) {
+			$draft[ $key ] = isset( $data[ $key ] ) ? sanitize_text_field( (string) $data[ $key ] ) : '';
+		}
+		$draft['notes']  = isset( $data['notes'] ) ? sanitize_textarea_field( (string) $data['notes'] ) : '';
+		$draft['days']   = array_map( 'intval', isset( $data['days'] ) ? (array) $data['days'] : array() );
+		$draft['active'] = ! empty( $data['active'] );
+		set_transient( 'lbb_route_draft_' . get_current_user_id(), $draft, 5 * MINUTE_IN_SECONDS );
+	}
+
 	public static function save_route() {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_save_route' ) ) {
 			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
@@ -481,6 +508,7 @@ class LBB_Admin {
 		$data['days'] = isset( $data['days'] ) ? (array) $data['days'] : array();
 		$result = LBB_Routes::save( $data, $id );
 		if ( is_wp_error( $result ) ) {
+			self::remember_route_draft( $data );
 			self::redirect( 'lbb-routes', $result->get_error_message(), true, $id ? array( 'edit' => $id ) : array( 'add' => 1 ) );
 		}
 		$bad = LBB_Routes::unrecognized_times( isset( $data['departures'] ) ? $data['departures'] : '' );

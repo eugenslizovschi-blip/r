@@ -1477,6 +1477,20 @@ ob_start();
 LBB_Admin::page_routes();
 $im_route = ob_get_clean();
 $_GET = array();
+// Ruta respinsă la salvare: formularul revine cu ce s-a scris (o singură dată), nu gol.
+$rd_user = get_current_user_id();
+wp_set_current_user( 1 );
+LBB_Admin::remember_route_draft( array( 'id' => 0, 'origin' => 'Ciorna A', 'destination' => 'Ciorna B', 'departures' => '08:45, 8h99', 'price' => '120', 'child_price' => '', 'currency' => 'RON', 'capacity' => '18', 'page_url' => '', 'boarding' => 'Peronul 2', 'notes' => "rând 1\nrând 2", 'days' => array( '1', '5' ) ) );
+$_GET = array( 'page' => 'lbb-routes', 'add' => 1 );
+ob_start();
+LBB_Admin::page_routes();
+$rd_1 = ob_get_clean();
+ob_start();
+LBB_Admin::page_routes();
+$rd_2 = ob_get_clean();
+$_GET = array();
+wp_set_current_user( $rd_user );
+lbb_t( 'ruta respinsă la salvare: formularul revine cu datele scrise (orele exact cum au fost scrise), o singură dată', false !== strpos( $rd_1, 'name="origin" class="regular-text" list="lbb-cities" maxlength="100" required value="Ciorna A"' ) && false !== strpos( $rd_1, 'value="08:45, 8h99"' ) && false !== strpos( $rd_1, 'value="Peronul 2"' ) && false !== strpos( $rd_1, 'name="price" type="number" inputmode="decimal" step="0.01" min="0" required value="120"' ) && (bool) preg_match( '#<option +selected=.selected.>RON</option>#', $rd_1 ) && (bool) preg_match( '#value="5" +checked=.checked.#', $rd_1 ) && ! preg_match( '#value="2" +checked=.checked.#', $rd_1 ) && false === strpos( $rd_2, 'Ciorna A' ), substr( wp_strip_all_tags( $rd_1 ), 0, 300 ) );
 lbb_t( 'ruta: „Ore de plecare” are limită de lungime și explicația legată de câmp', (bool) preg_match( '/<input type="text" id="lbb-times" name="departures"[^>]* maxlength="255"[^>]* aria-describedby="lbb-times-desc"/', $im_route ) && false !== strpos( $im_route, '<p class="description" id="lbb-times-desc">' ) );
 lbb_t( 'pe telefon, câmpurile numerice deschid tastatura cu cifre (cu zecimale la prețuri și cursuri)', false !== strpos( $form_html, 'id="lbb-max_passengers" name="max_passengers" type="number" inputmode="numeric"' ) && false !== strpos( $form_html, 'id="lbb-rate_RON" name="rate_RON" type="number" inputmode="decimal"' ) && false !== strpos( $im_route, 'name="price" type="number" inputmode="decimal"' ) && false !== strpos( $im_route, 'name="child_price" type="number" inputmode="decimal"' ) && false !== strpos( $im_route, 'name="capacity" type="number" inputmode="numeric"' ) );
 // Pe telefon adminul primește tastatura potrivită: telefon, @ pentru email, cifre pentru IDNO.
