@@ -861,6 +861,13 @@ if ( $tl_b ) {
 	$wpdb->update( LBB_Bookings::table(), array( 'phone' => '+37369000094' ), array( 'id' => $tl_b['id'] ) );
 }
 lbb_t( 'telefonul clientului salvat local („069 000 095”) are link de apel cu +373 în lista pentru șofer și în Rezervări', $tl_b && false !== strpos( $tl_man, '<a href="tel:+37369000095">069 000 095</a>' ) && false !== strpos( $tl_list, '<a href="tel:+37369000095">069 000 095</a>' ) && false === strpos( $tl_man . $tl_list, 'tel:069' ), array( substr( wp_strip_all_tags( $tl_list ), 0, 400 ) ) );
+// Data scrisă de mână în lista pentru șofer (browser fără calendar): „zz.ll.aaaa” deschide ziua cerută, nu azi.
+$md_dmy = gmdate( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) );
+$_GET   = array( 'page' => 'lbb-manifest', 'date' => $md_dmy, 'route' => $dt_r );
+ob_start();
+LBB_Admin::page_manifest();
+$md_html = ob_get_clean();
+lbb_t( 'lista pentru șofer: data scrisă „' . $md_dmy . '” deschide ziua aceea', false !== strpos( $md_html, 'name="date" value="' . $tomorrow . '"' ) && false !== strpos( $md_html, 'Curse Test' ), substr( wp_strip_all_tags( $md_html ), 0, 300 ) );
 // Ziua de azi fără pasageri pe rută: lista trimite la următoarea zi cu pasageri (mâine); după mâine nu mai e niciuna.
 $_GET    = array( 'page' => 'lbb-manifest', 'date' => LBB_Settings::today(), 'route' => $dt_r );
 ob_start();

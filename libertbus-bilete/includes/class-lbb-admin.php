@@ -522,7 +522,8 @@ class LBB_Admin {
 	}
 
 	public static function page_manifest() {
-		$date  = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : LBB_Settings::today(); // phpcs:ignore WordPress.Security.NonceVerification
+		// Fără calendar pentru dată (Safari pe Mac < 14.1) câmpul e text: „25.10.2026” se înțelege, nu devine „azi”.
+		$date  = isset( $_GET['date'] ) ? LBB_Frontend::iso_date( sanitize_text_field( wp_unslash( $_GET['date'] ) ) ) : LBB_Settings::today(); // phpcs:ignore WordPress.Security.NonceVerification
 		$route = isset( $_GET['route'] ) ? (int) $_GET['route'] : 0; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
 			$date = LBB_Settings::today();
@@ -683,7 +684,7 @@ class LBB_Admin {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_manifest_csv' ) ) {
 			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
 		}
-		$date  = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : LBB_Settings::today();
+		$date  = isset( $_GET['date'] ) ? LBB_Frontend::iso_date( sanitize_text_field( wp_unslash( $_GET['date'] ) ) ) : LBB_Settings::today();
 		$route = isset( $_GET['route'] ) ? (int) $_GET['route'] : 0;
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
 			wp_die( 'Data invalidă' );
