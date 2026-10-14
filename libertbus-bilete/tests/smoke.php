@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'LimitaA', 'LimitaB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -359,6 +359,22 @@ lbb_t( 'rezervarea nu se poate „reînnoi” ca un coș', ! LBB_Bookings::refre
 list( $amt, $cur ) = LBB_Bookings::pay_amount( $rv );
 lbb_t( 'suma de achitat e în moneda aleasă', 'RON' === $cur && abs( $amt - 120 ) < 0.01, array( $amt, $cur ) );
 lbb_t( 'rezervările active se numără pe telefon', 1 === LBB_Bookings::active_reservations( '+37369000001' ) );
+// O cursă de azi deja plecată nu mai ține ocupată limita de rezervări neachitate; una de azi, încă neplecată, da.
+$ar_r   = LBB_Routes::save( array( 'origin' => 'LimitaA', 'destination' => 'LimitaB', 'departures' => '00:00, 23:59', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$ar_ins = function ( $time ) use ( $wpdb, $ar_r ) {
+	$wpdb->insert( LBB_Bookings::table(), array( 'token' => wp_generate_password( 32, false ), 'route_id' => $ar_r, 'travel_date' => LBB_Settings::today(), 'dep_time' => $time, 'seats' => 1, 'children' => 0, 'passengers' => '[]', 'phone' => '+37369000088', 'email' => '', 'amount' => 50, 'currency' => 'MDL', 'status' => 'reserved', 'ticket_code' => 'LB-LIM' . wp_rand( 1000, 9999 ), 'created_at' => gmdate( 'Y-m-d H:i:s' ), 'updated_at' => gmdate( 'Y-m-d H:i:s' ) ) );
+};
+$ar_hm  = ( new DateTimeImmutable( 'now', LBB_Settings::tz() ) )->format( 'H:i' );
+if ( is_int( $ar_r ) ) {
+	$ar_ins( '00:00' );
+	$ar_n1 = LBB_Bookings::active_reservations( '+37369000088' );
+	$ar_ins( '23:59' );
+	$ar_n2 = LBB_Bookings::active_reservations( '+37369000088' );
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $ar_r ) );
+	LBB_Routes::delete( $ar_r );
+}
+// La 00:00–00:04 sau la 23:59 cursele de test nu sunt încă / mai sunt plecate: verificarea nu are sens atunci.
+lbb_t( 'limita de rezervări neachitate nu numără cursele de azi deja plecate', ! is_int( $ar_r ) ? false : ( $ar_hm < '00:05' || $ar_hm >= '23:59' || ( 0 === $ar_n1 && 1 === $ar_n2 ) ), array( $ar_hm, isset( $ar_n1 ) ? $ar_n1 : null, isset( $ar_n2 ) ? $ar_n2 : null ) );
 $desc = LBB_WooCommerce::describe( $rv );
 lbb_t( 'biletul rezervat arată suma la urcare', isset( $desc['De achitat la urcare'] ) && "120\u{00A0}RON" === $desc['De achitat la urcare'], $desc );
 lbb_t( 'anularea rezervării eliberează locurile', LBB_Bookings::cancel( $rv['id'] ) && 3 === LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow )[1]['free'] );

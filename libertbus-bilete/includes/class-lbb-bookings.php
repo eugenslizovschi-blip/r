@@ -253,7 +253,10 @@ class LBB_Bookings {
 	 */
 	public static function active_reservations( $phone ) {
 		global $wpdb;
-		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table() . " WHERE phone = %s AND status = 'reserved' AND travel_date >= %s", $phone, LBB_Settings::today() ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// Doar cursele care n-au plecat: rezervarea cu plata la urcare rămâne „neachitată” și după călătorie, iar
+		// cine a mers dimineață n-ar mai putea rezerva întoarcerea de seară.
+		$now = new DateTimeImmutable( 'now', LBB_Settings::tz() );
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table() . " WHERE phone = %s AND status = 'reserved' AND ( travel_date > %s OR ( travel_date = %s AND dep_time >= %s ) )", $phone, $now->format( 'Y-m-d' ), $now->format( 'Y-m-d' ), $now->format( 'H:i' ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	public static function cancel( $id ) {
