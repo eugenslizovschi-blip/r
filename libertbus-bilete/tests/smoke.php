@@ -1374,6 +1374,7 @@ ob_start();
 LBB_Admin::page_routes();
 $im_route = ob_get_clean();
 $_GET = array();
+lbb_t( 'ruta: „Ore de plecare” are limită de lungime și explicația legată de câmp', (bool) preg_match( '/<input type="text" id="lbb-times" name="departures"[^>]* maxlength="255"[^>]* aria-describedby="lbb-times-desc"/', $im_route ) && false !== strpos( $im_route, '<p class="description" id="lbb-times-desc">' ) );
 lbb_t( 'pe telefon, câmpurile numerice deschid tastatura cu cifre (cu zecimale la prețuri și cursuri)', false !== strpos( $form_html, 'id="lbb-max_passengers" name="max_passengers" type="number" inputmode="numeric"' ) && false !== strpos( $form_html, 'id="lbb-rate_RON" name="rate_RON" type="number" inputmode="decimal"' ) && false !== strpos( $im_route, 'name="price" type="number" inputmode="decimal"' ) && false !== strpos( $im_route, 'name="child_price" type="number" inputmode="decimal"' ) && false !== strpos( $im_route, 'name="capacity" type="number" inputmode="numeric"' ) );
 // Pe telefon adminul primește tastatura potrivită: telefon, @ pentru email, cifre pentru IDNO.
 lbb_t( 'Setări: telefonul, emailul și IDNO-ul firmei au tastatura potrivită pe telefon', false !== strpos( $form_html, '<input type="tel" id="lbb-support_phone"' ) && false !== strpos( $form_html, '<input type="email" id="lbb-company_email"' ) && (bool) preg_match( '/<input type="text" id="lbb-company_idno"[^>]* inputmode="numeric"/', $form_html ) );
