@@ -86,6 +86,8 @@ lbb_t( 'rezervare 2 locuri', is_array( $h1 ) && 2 === $h1['seats'] && 'hold' ===
 lbb_t( 'suma în moneda rutei', is_array( $h1 ) && 120.0 === $h1['amount'] && 'RON' === $h1['currency'], $h1 );
 $h2 = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 2, 0, array( 'C', 'D' ), '+37360000000', 'a@example.com' );
 lbb_t( 'depășirea locurilor respinsă', is_wp_error( $h2 ) && 'lbb_full' === $h2->get_error_code(), $h2 );
+// „1 loc liber”, „5 locuri libere”, „20 de locuri libere”, „101 locuri”, „120 de locuri”: acordul din română.
+lbb_t( 'numărul de locuri acordat ca în română (1 loc liber, 5 locuri, 20 de locuri, 101 locuri, 120 de locuri)', '1 loc liber' === LBB_Settings::ro_count( 1, 'loc liber', 'locuri libere' ) && '5 locuri libere' === LBB_Settings::ro_count( 5, 'loc liber', 'locuri libere' ) && '19 locuri libere' === LBB_Settings::ro_count( 19, 'loc liber', 'locuri libere' ) && '20 de locuri libere' === LBB_Settings::ro_count( 20, 'loc liber', 'locuri libere' ) && '101 locuri libere' === LBB_Settings::ro_count( 101, 'loc liber', 'locuri libere' ) && '120 de locuri libere' === LBB_Settings::ro_count( 120, 'loc liber', 'locuri libere' ) && '100 de locuri libere' === LBB_Settings::ro_count( 100, 'loc liber', 'locuri libere' ) && is_wp_error( $h2 ) && (bool) preg_match( '/^(A mai rămas 1 loc liber|Au mai rămas \d+ (de )?locuri libere) la această plecare\.$/u', $h2->get_error_message() ), is_wp_error( $h2 ) ? $h2->get_error_message() : $h2 );
 $h3 = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 1, 0, array( 'C' ), '+37360000000', 'a@example.com' );
 lbb_t( 'ultimul loc rezervat', is_array( $h3 ) );
 $deps = LBB_Routes::departures_on( $route, $tomorrow );

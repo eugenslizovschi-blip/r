@@ -105,8 +105,9 @@ class LBB_Bookings {
 				return new WP_Error( 'lbb_departure', sprintf( __( 'Vânzarea online pentru această plecare s-a încheiat. Pentru locuri sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ) );
 			}
 			if ( $departure['free'] < $seats ) {
-				/* translators: %d: locuri libere */
-				return new WP_Error( 'lbb_full', sprintf( _n( 'A mai rămas %d loc liber la această plecare.', 'Au mai rămas %d locuri libere la această plecare.', $departure['free'], 'libertbus-bilete' ), $departure['free'] ) );
+				$left = LBB_Settings::ro_count( $departure['free'], __( 'loc liber', 'libertbus-bilete' ), __( 'locuri libere', 'libertbus-bilete' ) );
+				/* translators: %s: locurile libere, ex. „1 loc liber”, „20 de locuri libere” */
+				return new WP_Error( 'lbb_full', sprintf( 1 === (int) $departure['free'] ? __( 'A mai rămas %s la această plecare.', 'libertbus-bilete' ) : __( 'Au mai rămas %s la această plecare.', 'libertbus-bilete' ), $left ) );
 			}
 
 			$amount = $adults * $route['price'] + $children * ( null === $route['child_price'] ? $route['price'] : $route['child_price'] );

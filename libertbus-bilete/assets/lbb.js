@@ -317,11 +317,20 @@
 				} );
 		}
 
+		// „1 loc liber”, „5 locuri libere”, „20 de locuri libere” (în română „de” de la 20 în sus, ca 120, dar nu 101–119).
+		function freeLabel( n ) {
+			var last = n % 100;
+			if ( n === 1 ) {
+				return '1 ' + ( t.freeOne || t.free );
+			}
+			return n + ( n >= 20 && ( last === 0 || last >= 20 ) ? ' de ' : ' ' ) + t.free;
+		}
+
 		function fillCounts() {
 			var route = currentRoute();
 			var dep = currentDeparture();
 			if ( compact && dep && dep.bookable ) {
-				el.status.textContent = dep.time + ': ' + dep.free + ' ' + t.free;
+				el.status.textContent = dep.time + ': ' + freeLabel( dep.free );
 			}
 			var max = cfg.maxPassengers;
 			if ( dep && dep.free < max ) {
@@ -611,7 +620,7 @@
 						// În formularul compact lista e îngustă: doar ora; locurile libere apar sub câmpuri.
 						var label = compact
 							? d.time + ( d.bookable ? '' : ' · ' + ( d.reason === 'full' ? t.full : t.closed ) )
-							: d.time + ' — ' + ( d.bookable ? d.free + ' ' + t.free : ( d.reason === 'full' ? t.full : t.closed ) );
+							: d.time + ' — ' + ( d.bookable ? freeLabel( d.free ) : ( d.reason === 'full' ? t.full : t.closed ) );
 						el.time.appendChild( option( d.time, label, ! d.bookable ) );
 					} );
 					var firstOpen = departures.filter( function ( d ) {

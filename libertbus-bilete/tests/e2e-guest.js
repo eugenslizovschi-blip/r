@@ -90,6 +90,16 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (!/nu se mai rezervă online/.test(gs.text) || !gs.tel || calls !== 1) fail('ruta oprită (404) nu are mesajul potrivit: ' + JSON.stringify({ gs, calls }));
     await gone.close();
   }
+  // Lista de ore în română corectă: „1 loc liber”, „20 de locuri libere”, „7 locuri libere”.
+  {
+    const gr = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await gr.route('**/lbb/v1/departures**', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ departures: [{ time: '06:00', free: 1, bookable: true, reason: '' }, { time: '08:45', free: 20, bookable: true, reason: '' }, { time: '17:45', free: 7, bookable: true, reason: '' }] }) }));
+    await gr.goto(BASE + '/balti-iasi/');
+    await gr.waitForFunction(() => document.querySelector('[data-lbb="time"]').options.length > 3);
+    const labels = await gr.$$eval('[data-lbb="time"] option', o => o.slice(1).map(x => x.textContent));
+    if (!/^06:00 — 1 loc liber$/.test(labels[0]) || !/^08:45 — 20 de locuri libere$/.test(labels[1]) || !/^17:45 — 7 locuri libere$/.test(labels[2])) fail('acordul la locurile libere: ' + JSON.stringify(labels));
+    await gr.close();
+  }
   // Sub dată, ziua în cuvinte: pe telefoanele în engleză câmpul arată 03/01/2027 (lună/zi), ușor de citit greșit.
   const hint0 = await page.textContent('[data-lbb="dateHint"]');
   if (!/^(luni|marți|miercuri|joi|vineri|sâmbătă|duminică), \d{1,2} (ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)$/.test(hint0)) fail('data în cuvinte lipsește sub câmpul de dată: „' + hint0 + '”');

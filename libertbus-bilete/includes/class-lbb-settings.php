@@ -237,6 +237,23 @@ class LBB_Settings {
 	}
 
 	/**
+	 * Numărul cu substantivul acordat ca în română: „1 loc liber”, „5 locuri libere”, „20 de locuri libere”
+	 * („de” de la 20 în sus, când ultimele două cifre nu sunt 01–19). _n() știe doar singular/plural.
+	 *
+	 * @param int    $n    Numărul.
+	 * @param string $one  Forma pentru 1, ex. „loc liber”.
+	 * @param string $many Forma de plural, ex. „locuri libere”.
+	 */
+	public static function ro_count( $n, $one, $many ) {
+		$n    = (int) $n;
+		$last = abs( $n ) % 100;
+		if ( 1 === $n ) {
+			return '1 ' . $one;
+		}
+		return $n . ( abs( $n ) >= 20 && ( 0 === $last || $last >= 20 ) ? ' de ' : ' ' ) . $many;
+	}
+
+	/**
 	 * Adresa biroului pentru emailurile interne (rezervare nouă, locuri depășite) și Reply-To: „Email pentru
 	 * clienți” din Setări, altfel emailul administratorului WordPress.
 	 */

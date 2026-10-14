@@ -417,6 +417,7 @@ class LBB_Frontend {
 				/* translators: %s: telefonul de suport */
 				'noneOpen'    => sprintf( __( 'Pentru ziua aleasă nu mai sunt locuri online. Alegeți altă dată sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
 				'free'        => __( 'locuri libere', 'libertbus-bilete' ),
+				'freeOne'     => __( 'loc liber', 'libertbus-bilete' ),
 				'full'        => __( 'complet', 'libertbus-bilete' ),
 				'closed'      => __( 'vânzare închisă', 'libertbus-bilete' ),
 				'passenger'   => __( 'Pasager', 'libertbus-bilete' ),
