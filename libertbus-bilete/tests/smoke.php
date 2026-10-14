@@ -874,6 +874,18 @@ $_GET   = array( 'page' => 'lbb-manifest', 'date' => $tomorrow, 'route' => $dt_r
 ob_start();
 LBB_Admin::page_manifest();
 $dt_html = ob_get_clean();
+// Peste 20 de locuri pe cursă, lista pentru șofer scrie „25 de locuri” (acordul din română).
+$ro_html = '';
+if ( isset( $dt_b[0]['id'] ) ) {
+	$wpdb->update( LBB_Bookings::table(), array( 'seats' => 24 ), array( 'id' => $dt_b[0]['id'] ) );
+	$_GET = array( 'page' => 'lbb-manifest', 'date' => $tomorrow, 'route' => $dt_r );
+	ob_start();
+	LBB_Admin::page_manifest();
+	$ro_html = ob_get_clean();
+	$_GET = array();
+	$wpdb->update( LBB_Bookings::table(), array( 'seats' => 2 ), array( 'id' => $dt_b[0]['id'] ) );
+}
+lbb_t( 'lista pentru șofer: „25 de locuri” la o cursă cu peste 20 de pasageri', false !== strpos( $ro_html, '<li>07:00 CurseA → CurseB: 25 de locuri' ), substr( wp_strip_all_tags( $ro_html ), 0, 400 ) );
 // Un număr salvat local, cu spații (rezervări din versiuni vechi, introduse de birou): linkul de apel are totuși +373.
 $tl_b = isset( $dt_b[1]['id'] ) ? $dt_b[1] : null;
 if ( $tl_b ) {
@@ -1045,7 +1057,7 @@ $bd_i2 = is_int( $bd_r ) ? LBB_Tickets::ics( $bd_b ) : '';
 if ( is_int( $bd_r ) ) {
 	LBB_Routes::delete( $bd_r );
 }
-lbb_t( 'lista de rute arată locul de urcare sub rută și câte rute active nu-l au', false !== strpos( $bd_list, '<span class="description lbb-boarding">Urcare: Autogara Nord, peronul 3</span>' ) && (bool) preg_match( '#lbb-no-boarding">\\d+ rut#u', $bd_list ), substr( wp_strip_all_tags( $bd_list ), 0, 300 ) );
+lbb_t( 'lista de rute arată locul de urcare sub rută și câte rute active nu-l au', false !== strpos( $bd_list, '<span class="description lbb-boarding">Urcare: Autogara Nord, peronul 3</span>' ) && (bool) preg_match( '#lbb-no-boarding">\\d+ (de )?rut#u', $bd_list ), substr( wp_strip_all_tags( $bd_list ), 0, 300 ) );
 lbb_t( '„Trimite biletul” la o rezervare cu plata la urcare scrie „Rezervare”, ca pagina', 0 === strpos( LBB_Tickets::share_text( array_merge( $bd_b, array( 'status' => 'reserved' ) ) ), 'Rezervare LibertBus LB-URC1: ' ) );
 lbb_t( '„Trimite biletul” are și textul cursei (cod, rută, zi, oră); o rută ștearsă nu lasă text gol', 'Bilet LibertBus LB-URC1: UrcareA → UrcareB, ' . LBB_WooCommerce::date_with_day( $tomorrow ) . ', 10:00' === $bd_s && false !== strpos( LBB_Tickets::share_text( array_merge( $bd_b, array( 'route_id' => 0 ) ) ), '(rută ștearsă)' ), $bd_s );
 lbb_t( 'locul de urcare ajunge și în formular (rezumatul de dinainte de plată)', 'Autogara Nord, peronul 3' === ( $bd_m['boarding'] ?? null ) && false !== strpos( (string) file_get_contents( LBB_DIR . 'assets/lbb.js' ), "t.boarding + ': ' + route.boarding" ), $bd_m );

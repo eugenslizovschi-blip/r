@@ -378,8 +378,8 @@ class LBB_Admin {
 			return '' === $r['boarding'];
 		} ) );
 		if ( $no_board ) {
-			/* translators: %d: numărul de rute */
-			echo '<p class="description lbb-no-boarding">' . esc_html( sprintf( _n( '%d rută activă nu are „Locul de urcare” (de unde urcă pasagerii; apare pe bilet).', '%d rute active nu au „Locul de urcare” (de unde urcă pasagerii; apare pe bilet).', $no_board, 'libertbus-bilete' ), $no_board ) ) . '</p>';
+			/* translators: %s: numărul de rute, ex. „1 rută activă”, „20 de rute active” */
+			echo '<p class="description lbb-no-boarding">' . esc_html( sprintf( 1 === (int) $no_board ? __( '%s nu are „Locul de urcare” (de unde urcă pasagerii; apare pe bilet).', 'libertbus-bilete' ) : __( '%s nu au „Locul de urcare” (de unde urcă pasagerii; apare pe bilet).', 'libertbus-bilete' ), LBB_Settings::ro_count( $no_board, __( 'rută activă', 'libertbus-bilete' ), __( 'rute active', 'libertbus-bilete' ) ) ) ) . '</p>';
 		}
 		self::stack_table_style( 'lbb-routes-table', array( __( 'Ruta', 'libertbus-bilete' ), __( 'Ore', 'libertbus-bilete' ), __( 'Zile', 'libertbus-bilete' ), __( 'Preț', 'libertbus-bilete' ), __( 'Locuri/cursă', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ) ) );
 		echo '<table class="widefat striped lbb-routes-table"><thead><tr><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ore', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Zile', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Preț', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri/cursă', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
@@ -514,8 +514,8 @@ class LBB_Admin {
 		$id      = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
 		$waiting = LBB_Routes::upcoming_bookings( $id );
 		if ( $waiting ) {
-			/* translators: %d: numărul de bilete și rezervări pentru curse viitoare */
-			self::redirect( 'lbb-routes', sprintf( _n( 'Ruta are %d bilet sau rezervare pentru o cursă viitoare și nu se poate șterge. Debifați „Activă” ca să opriți vânzarea; ștergeți-o după ultima cursă.', 'Ruta are %d bilete sau rezervări pentru curse viitoare și nu se poate șterge. Debifați „Activă” ca să opriți vânzarea; ștergeți-o după ultima cursă.', $waiting, 'libertbus-bilete' ), $waiting ), true, array( 'edit' => $id ) );
+			/* translators: %s: biletele și rezervările, ex. „3 bilete sau rezervări” */
+			self::redirect( 'lbb-routes', sprintf( 1 === (int) $waiting ? __( 'Ruta are %s pentru o cursă viitoare și nu se poate șterge. Debifați „Activă” ca să opriți vânzarea; ștergeți-o după ultima cursă.', 'libertbus-bilete' ) : __( 'Ruta are %s pentru curse viitoare și nu se poate șterge. Debifați „Activă” ca să opriți vânzarea; ștergeți-o după ultima cursă.', 'libertbus-bilete' ), LBB_Settings::ro_count( $waiting, __( 'bilet sau rezervare', 'libertbus-bilete' ), __( 'bilete sau rezervări', 'libertbus-bilete' ) ) ), true, array( 'edit' => $id ) );
 		}
 		LBB_Routes::delete( $id );
 		self::redirect( 'lbb-routes', __( 'Ruta a fost ștearsă.', 'libertbus-bilete' ) );
@@ -577,7 +577,8 @@ class LBB_Admin {
 			$per_due = LBB_Bookings::departure_due( $rows );
 			foreach ( $per_trip as $trip => $seats ) {
 				/* translators: 1: ora și ruta cursei, 2: numărul de locuri */
-				$line = sprintf( _n( '%1$s: %2$d loc', '%1$s: %2$d locuri', $seats, 'libertbus-bilete' ), $trip, $seats );
+				// „25 de locuri”, nu „25 locuri”: acordul din română (LBB_Settings::ro_count).
+				$line = $trip . ': ' . LBB_Settings::ro_count( $seats, __( 'loc', 'libertbus-bilete' ), __( 'locuri', 'libertbus-bilete' ) );
 				if ( ! empty( $per_due[ $trip ] ) ) {
 					$sums = array();
 					foreach ( $per_due[ $trip ] as $cur => $sum ) {
@@ -739,7 +740,7 @@ class LBB_Admin {
 			$when  = wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'];
 			$code  = $b['ticket_code'] ? '<a href="' . esc_url( LBB_Tickets::url( $b['ticket_code'] ) ) . '" target="_blank" rel="noopener">' . esc_html( $b['ticket_code'] ) . '</a>' : esc_html__( '(fără cod încă)', 'libertbus-bilete' );
 			/* translators: %d: numărul de locuri */
-			$seats = sprintf( _n( '%d loc', '%d locuri', $b['seats'], 'libertbus-bilete' ), $b['seats'] );
+			$seats = LBB_Settings::ro_count( $b['seats'], __( 'loc', 'libertbus-bilete' ), __( 'locuri', 'libertbus-bilete' ) );
 			echo '<li>' . $code . ' — ' . esc_html( $route . ', ' . $when . ', ' . $seats ) . '<br><small>' . esc_html( LBB_Tickets::state( $b )['text'] ) . '</small></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $code e escapat mai sus.
 		}
 		echo '</ul></div>';
