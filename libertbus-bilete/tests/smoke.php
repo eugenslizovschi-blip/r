@@ -639,8 +639,10 @@ lbb_t( 'fără email valid nu se trimite nimic la anulare', false === LBB_Ticket
 $cx_past_n = count( $lbb_mails );
 $cx_past   = $em ? LBB_Tickets::send_cancellation_email( array_merge( LBB_Bookings::get( $em['id'] ), array( 'travel_date' => gmdate( 'Y-m-d', strtotime( LBB_Settings::today() . ' -1 day' ) ) ) ) ) : true;
 $cx_now    = new DateTimeImmutable( 'now', LBB_Settings::tz() );
-$cx_today  = $em ? LBB_Tickets::send_cancellation_email( array_merge( LBB_Bookings::get( $em['id'] ), array( 'travel_date' => $cx_now->format( 'Y-m-d' ), 'dep_time' => $cx_now->modify( '-2 hours' )->format( 'H:i' ) ) ) ) : true;
-lbb_t( 'anularea unei rezervări pe o cursă trecută (clientul n-a venit) nu trimite email clientului, nici azi după ora plecării', false === $cx_past && ( (int) $cx_now->format( 'G' ) < 2 || false === $cx_today ) && count( $lbb_mails ) === $cx_past_n, array( $cx_past, $cx_today ) );
+// Plecarea de acum 2 ore, cu data ei: după miezul nopții (00:53 → 22:53) e ieri, nu o cursă de azi încă neplecată.
+$cx_gone   = $cx_now->modify( '-2 hours' );
+$cx_today  = $em ? LBB_Tickets::send_cancellation_email( array_merge( LBB_Bookings::get( $em['id'] ), array( 'travel_date' => $cx_gone->format( 'Y-m-d' ), 'dep_time' => $cx_gone->format( 'H:i' ) ) ) ) : true;
+lbb_t( 'anularea unei rezervări pe o cursă trecută (clientul n-a venit) nu trimite email clientului, nici azi după ora plecării', false === $cx_past && false === $cx_today && count( $lbb_mails ) === $cx_past_n, array( $cx_past, $cx_today, $cx_gone->format( 'Y-m-d H:i' ) ) );
 lbb_t( 'cursa a plecat: după data și ora plecării în fusul orar al orarului', LBB_Bookings::departed( array( 'travel_date' => '2020-01-01', 'dep_time' => '10:00' ) ) && ! LBB_Bookings::departed( array( 'travel_date' => $cx_now->modify( '+1 day' )->format( 'Y-m-d' ), 'dep_time' => '00:00' ) ) && ( (int) $cx_now->format( 'G' ) >= 22 || ! LBB_Bookings::departed( array( 'travel_date' => $cx_now->format( 'Y-m-d' ), 'dep_time' => $cx_now->modify( '+2 hours' )->format( 'H:i' ) ) ) ) );
 remove_filter( 'pre_wp_mail', $lbb_catch, 1 );
 $cx = $lbb_mails ? $lbb_mails[0] : array( 'to' => '', 'subject' => '', 'message' => '', 'headers' => array() );
