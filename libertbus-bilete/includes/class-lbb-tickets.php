@@ -124,8 +124,7 @@ class LBB_Tickets {
 		$route   = LBB_Routes::get( $booking['route_id'] );
 		$name    = $route ? $route['origin'] . ' → ' . $route['destination'] : '';
 		$when    = wp_date( 'd.m.Y', strtotime( $booking['travel_date'] . ' 12:00' ) ) . ' ' . $booking['dep_time'];
-		$office  = LBB_Settings::get( 'company_email' );
-		$office  = is_email( $office ) ? $office : get_option( 'admin_email' );
+		$office  = LBB_Settings::office_email();
 		// Expeditor „LibertBus” (nu „WordPress”); răspunsul clientului ajunge la birou.
 		$headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header(), 'Reply-To: ' . $office );
 		$body    = '<p>' . esc_html__( 'Rezervarea dumneavoastră este confirmată. Plata se face la urcare, la șofer.', 'libertbus-bilete' ) . '</p>'
@@ -194,8 +193,7 @@ class LBB_Tickets {
 				continue;
 			}
 			$name   = LBB_Bookings::route_name( $route );
-			$office = LBB_Settings::get( 'company_email' );
-			$office = is_email( $office ) ? $office : get_option( 'admin_email' );
+			$office = LBB_Settings::office_email();
 			$intro  = 'reserved' === $booking['status']
 				? __( 'Vă reamintim de cursa de mâine. Plata se face la urcare, la șofer.', 'libertbus-bilete' )
 				: __( 'Vă reamintim de cursa de mâine. Arătați biletul (codul QR) la urcare.', 'libertbus-bilete' );
@@ -221,8 +219,7 @@ class LBB_Tickets {
 		$route  = LBB_Routes::get( $booking['route_id'] );
 		$name   = LBB_Bookings::route_name( $route ? array( 'origin' => $route['origin'], 'destination' => $route['destination'] ) : array() );
 		$when   = wp_date( 'd.m.Y', strtotime( $booking['travel_date'] . ' 12:00' ) ) . ' ' . $booking['dep_time'];
-		$office = LBB_Settings::get( 'company_email' );
-		$office = is_email( $office ) ? $office : get_option( 'admin_email' );
+		$office = LBB_Settings::office_email();
 		$body   = '<p>' . sprintf(
 			/* translators: 1: codul rezervării, 2: ruta, 3: data și ora */
 			esc_html__( 'Rezervarea %1$s pentru %2$s, %3$s a fost anulată. Locurile nu mai sunt păstrate.', 'libertbus-bilete' ),

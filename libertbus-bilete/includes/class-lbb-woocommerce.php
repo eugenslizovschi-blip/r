@@ -293,7 +293,8 @@ class LBB_WooCommerce {
 		if ( $over ) {
 			$msg = __( 'ATENȚIE: plata a sosit după expirarea rezervării și cursa a depășit numărul de locuri. Verificați lista de pasageri și contactați clientul.', 'libertbus-bilete' );
 			$order->add_order_note( 'LibertBus: ' . $msg );
-			wp_mail( get_option( 'admin_email' ), sprintf( '[LibertBus] Locuri depășite — comanda #%s', $order->get_order_number() ), $msg . "\n\n" . $order->get_edit_order_url() );
+			// La birou (ca emailul „rezervare nouă”), nu doar la administratorul WordPress: trebuie sunat clientul.
+			wp_mail( LBB_Settings::office_email(), sprintf( '[LibertBus] Locuri depășite — comanda #%s', $order->get_order_number() ), $msg . "\n\n" . $order->get_edit_order_url() );
 		}
 	}
 

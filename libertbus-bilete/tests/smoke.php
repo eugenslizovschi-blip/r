@@ -200,7 +200,22 @@ LBB_WooCommerce::attach_order( $o2 );
 $wpdb->update( LBB_Bookings::table(), array( 'expires_at' => gmdate( 'Y-m-d H:i:s', time() - 60 ) ), array( 'id' => $late['id'] ) );
 $other = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 1, 0, array( 'N' ), '+37360000000', 'a@example.com' );
 lbb_t( 'locul expirat e luat de alt client', is_array( $other ) );
+// Avertismentul „locuri depășite” merge la biroul din Setări (cine sună clientul), nu doar la adminul WordPress.
+$ob_keep  = get_option( 'lbb_settings' );
+update_option( 'lbb_settings', array_merge( (array) $ob_keep, array( 'company_email' => 'birou-test@example.com' ) ) );
+$ob_mails = array();
+$ob_catch = function ( $null, $atts ) use ( &$ob_mails ) {
+	$ob_mails[] = $atts;
+	return true;
+};
+add_filter( 'pre_wp_mail', $ob_catch, 1, 2 );
 $o2->payment_complete( 'TEST' );
+remove_filter( 'pre_wp_mail', $ob_catch, 1 );
+update_option( 'lbb_settings', $ob_keep );
+$ob_alert = array_values( array_filter( $ob_mails, function ( $m ) {
+	return false !== strpos( (string) $m['subject'], 'Locuri depășite' );
+} ) );
+lbb_t( 'plata întârziată peste capacitate: emailul de avertizare merge la biroul din Setări', 1 === count( $ob_alert ) && 'birou-test@example.com' === $ob_alert[0]['to'], wp_list_pluck( $ob_mails, 'to' ) );
 $o2 = wc_get_order( $o2->get_id() );
 $notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $o2->get_id() ) ), 'content' );
 lbb_t( 'plata întârziată: biletul se emite', 'confirmed' === LBB_Bookings::get_by_token( $late['token'] )['status'] );

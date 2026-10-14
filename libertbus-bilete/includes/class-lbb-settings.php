@@ -229,6 +229,15 @@ class LBB_Settings {
 	}
 
 	/**
+	 * Adresa biroului pentru emailurile interne (rezervare nouă, locuri depășite) și Reply-To: „Email pentru
+	 * clienți” din Setări, altfel emailul administratorului WordPress.
+	 */
+	public static function office_email() {
+		$office = (string) self::get( 'company_email' );
+		return is_email( $office ) ? $office : (string) get_option( 'admin_email' );
+	}
+
+	/**
 	 * Telefonul de suport fără ruperi de rând (spații nedespărțitoare), ca text.
 	 */
 	public static function phone_text() {
