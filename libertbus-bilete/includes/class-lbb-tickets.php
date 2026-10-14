@@ -180,9 +180,9 @@ class LBB_Tickets {
 	 * Biroul a anulat o rezervare cu plata la urcare: clientul află, ca să nu vină degeaba la autocar.
 	 */
 	public static function send_cancellation_email( array $booking ) {
-		// Cursa a trecut (ex. biroul curăță rezervările la care clientul n-a venit): „locurile nu mai sunt
-		// păstrate” după plecare doar l-ar încurca pe client.
-		if ( ! is_email( $booking['email'] ) || $booking['travel_date'] < LBB_Settings::today() ) {
+		// Cursa a plecat, inclusiv azi la o oră trecută (ex. biroul curăță rezervările la care clientul n-a venit):
+		// „locurile nu mai sunt păstrate” după plecare doar l-ar încurca pe client.
+		if ( ! is_email( $booking['email'] ) || LBB_Bookings::departed( $booking ) ) {
 			return false;
 		}
 		$route  = LBB_Routes::get( $booking['route_id'] );

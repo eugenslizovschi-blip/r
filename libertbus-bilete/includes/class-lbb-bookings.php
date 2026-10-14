@@ -259,6 +259,18 @@ class LBB_Bookings {
 		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table() . " WHERE phone = %s AND status = 'reserved' AND ( travel_date > %s OR ( travel_date = %s AND dep_time >= %s ) )", $phone, $now->format( 'Y-m-d' ), $now->format( 'Y-m-d' ), $now->format( 'H:i' ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
+	/**
+	 * Cursa rezervării a plecat deja (data și ora plecării, în fusul orar al orarului, sunt în trecut).
+	 *
+	 * @param array $booking Rezervarea (travel_date, dep_time).
+	 */
+	public static function departed( array $booking ) {
+		$tz   = LBB_Settings::tz();
+		$time = isset( $booking['dep_time'] ) && preg_match( '/^\d{1,2}:\d{2}$/', (string) $booking['dep_time'] ) ? $booking['dep_time'] : '23:59';
+		$when = DateTimeImmutable::createFromFormat( '!Y-m-d H:i', $booking['travel_date'] . ' ' . $time, $tz );
+		return $when ? $when < new DateTimeImmutable( 'now', $tz ) : $booking['travel_date'] < LBB_Settings::today();
+	}
+
 	public static function cancel( $id ) {
 		global $wpdb;
 		return (bool) $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::table() . " SET status = 'cancelled', updated_at = %s WHERE id = %d AND status IN ('reserved','hold','pending')", self::now_utc(), $id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
