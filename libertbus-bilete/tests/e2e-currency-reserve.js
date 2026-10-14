@@ -248,6 +248,17 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (!al || !/Pentru grupuri sunați la/.test(al.text) || !/^tel:\+373\d{8}$/.test(al.tel)) fail('eroarea „Pentru grupuri sunați la …” fără telefon ca link: ' + JSON.stringify(al));
     await p5.close();
   }
+  // Safari < 15.4 (iPhone cu iOS 14 / 15.0–15.3) nu are e.submitter: „Rezerv, achit la urcare” rămâne rezervare,
+  // nu trimite clientul la plata online (primul buton).
+  {
+    const p6 = await guestCtx.newPage();
+    await p6.addInitScript(() => { Object.defineProperty(SubmitEvent.prototype, 'submitter', { get() { return undefined; }, configurable: true }); });
+    await fillForm(p6, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
+    await Promise.all([p6.waitForNavigation(), p6.click('[data-lbb-submit][value="reserve"]')]);
+    const st6 = (await p6.textContent('.state').catch(() => '')).trim();
+    if (!/lbb_bilet=/.test(p6.url()) || !/achitați la urcare/.test(st6)) fail('fără e.submitter (Safari < 15.4) „Rezerv” nu duce la rezervare: ' + JSON.stringify({ url: p6.url(), st6 }));
+    await p6.close();
+  }
   console.log(process.exitCode ? 'CURRENCY+RESERVE: PROBLEME' : 'CURRENCY+RESERVE: OK');
   await browser.close();
 })().catch(require('./crash')('currency-reserve', () => BROWSER));

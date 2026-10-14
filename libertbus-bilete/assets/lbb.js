@@ -735,7 +735,18 @@
 				summary();
 			} );
 		}
+		// Safari < 15.4 (iPhone cu iOS 14 / 15.0–15.3) nu are e.submitter: ținem minte butonul apăsat, altfel
+		// „Rezerv, achit la urcare” s-ar trimite ca „Achit online” (primul buton).
+		var clicked = null;
+		function rememberClick() {
+			clicked = this;
+		}
+		for ( var cb = 0; cb < buttons.length; cb++ ) {
+			buttons[ cb ].addEventListener( 'click', rememberClick );
+		}
 		root.querySelector( 'form' ).addEventListener( 'submit', function ( e ) {
+			var pressed = e.submitter || clicked;
+			clicked = null;
 			// Enter la pasul 1 al formularului compact = „Continuă”, nu trimitere fără nume.
 			if ( compact && root.getAttribute( 'data-step' ) !== '2' ) {
 				e.preventDefault();
@@ -744,7 +755,7 @@
 				}
 				return;
 			}
-			var btn = e.submitter || buttons[ 0 ];
+			var btn = pressed || buttons[ 0 ];
 			if ( ! btn || btn.disabled ) {
 				e.preventDefault();
 				return;
