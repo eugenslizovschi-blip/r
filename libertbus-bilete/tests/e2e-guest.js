@@ -18,6 +18,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   });
   await page.goto(BASE + '/balti-iasi/');
   await page.waitForSelector('[data-lbb="route"] option:checked', { state: 'attached' });
+  // Pagina dintr-un cache vechi, cu cheia formularului expirată: orele cerute de la server aduc o cheie nouă.
+  {
+    const nc = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await nc.goto(BASE + '/balti-iasi/');
+    await nc.waitForSelector('[data-lbb="route"] option:checked', { state: 'attached' });
+    await nc.$eval('input[name="lbb_nonce"]', i => { i.value = 'expirata'; });
+    await nc.fill('[data-lbb="date"]', new Date(Date.now() + 86400000 * 4).toISOString().slice(0, 10));
+    await nc.dispatchEvent('[data-lbb="date"]', 'change');
+    await nc.waitForFunction(() => document.querySelector('input[name="lbb_nonce"]').value !== 'expirata', null, { timeout: 8000 }).catch(() => {});
+    const fresh = await nc.inputValue('input[name="lbb_nonce"]');
+    if (!/^[a-f0-9]{10}$/.test(fresh)) fail('cheia expirată a formularului nu se reîmprospătează: ' + fresh);
+    await nc.close();
+  }
   // Sub dată, ziua în cuvinte: pe telefoanele în engleză câmpul arată 03/01/2027 (lună/zi), ușor de citit greșit.
   const hint0 = await page.textContent('[data-lbb="dateHint"]');
   if (!/^(luni|marți|miercuri|joi|vineri|sâmbătă|duminică), \d{1,2} (ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)$/.test(hint0)) fail('data în cuvinte lipsește sub câmpul de dată: „' + hint0 + '”');

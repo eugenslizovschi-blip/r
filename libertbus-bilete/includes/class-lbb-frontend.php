@@ -390,6 +390,7 @@ class LBB_Frontend {
 			'map'           => $map,
 			'preset'        => $preset,
 			'restUrl'       => esc_url_raw( rest_url( 'lbb/v1/departures' ) ),
+			'guest'         => ! is_user_logged_in(),
 			'today'         => $today->format( 'Y-m-d' ),
 			'maxDate'       => $today->modify( '+' . (int) LBB_Settings::get( 'max_days_ahead' ) . ' days' )->format( 'Y-m-d' ),
 			'maxPassengers' => (int) LBB_Settings::get( 'max_passengers' ),

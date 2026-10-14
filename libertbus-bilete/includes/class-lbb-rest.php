@@ -37,6 +37,10 @@ class LBB_Rest {
 			'departures' => LBB_Routes::departures_on( $route, $request['date'] ),
 			// Zi fără curse din Setări: formularul spune „zi liberă”, nu „ruta circulă doar: …”.
 			'closed'     => in_array( $request['date'], LBB_Settings::closed_dates(), true ),
+			// Pagina cu formularul poate veni dintr-un cache de pagini mai vechi de 12–24 de ore, cu o cheie expirată
+			// („Sesiunea a expirat” la trimitere). Răspunsul acesta nu se păstrează în cache: dă o cheie proaspătă,
+			// pe care formularul o folosește doar pentru vizitatorii nelogați (cererea REST e mereu fără utilizator).
+			'nonce'      => wp_create_nonce( 'lbb_book' ),
 		) );
 		$response->header( 'Cache-Control', 'no-store' );
 		return $response;

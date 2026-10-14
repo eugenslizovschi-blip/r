@@ -559,6 +559,14 @@
 						return;
 					}
 					departures = data.departures || [];
+					// Pagina poate veni dintr-un cache vechi: cheia formularului se ia proaspătă (doar pentru vizitatori;
+					// un admin logat își păstrează cheia din pagină, legată de contul lui).
+					if ( cfg.guest && data.nonce ) {
+						var nonceField = root.querySelector( 'input[name="lbb_nonce"]' );
+						if ( nonceField ) {
+							nonceField.value = data.nonce;
+						}
+					}
 					var open = departures.filter( function ( d ) {
 						return d.bookable;
 					} );
