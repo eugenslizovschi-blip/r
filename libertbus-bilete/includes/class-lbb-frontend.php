@@ -407,6 +407,8 @@ class LBB_Frontend {
 				'runsOn'      => __( 'Ruta circulă doar: %s.', 'libertbus-bilete' ),
 				'boarding'    => __( 'Loc de urcare', 'libertbus-bilete' ),
 				'closedDay'   => __( 'În ziua aleasă nu sunt curse (zi liberă). Alegeți altă dată.', 'libertbus-bilete' ),
+				/* translators: %s: telefon */
+				'routeGone'   => sprintf( __( 'Această rută nu se mai rezervă online. Reîncărcați pagina sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
 				'dayNames'    => array_merge( array( '' ), array_values( LBB_Routes::day_names() ) ),
 				// „luni, 12 octombrie” sub câmpul de dată: pe telefoanele în engleză data apare 10/12/2026 (lună/zi).
 				'monthNames'  => array( __( 'ianuarie', 'libertbus-bilete' ), __( 'februarie', 'libertbus-bilete' ), __( 'martie', 'libertbus-bilete' ), __( 'aprilie', 'libertbus-bilete' ), __( 'mai', 'libertbus-bilete' ), __( 'iunie', 'libertbus-bilete' ), __( 'iulie', 'libertbus-bilete' ), __( 'august', 'libertbus-bilete' ), __( 'septembrie', 'libertbus-bilete' ), __( 'octombrie', 'libertbus-bilete' ), __( 'noiembrie', 'libertbus-bilete' ), __( 'decembrie', 'libertbus-bilete' ) ),

@@ -78,6 +78,18 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await pr.unrouteAll({ behavior: 'ignoreErrors' });
     await pr.close();
   }
+  // Ruta oprită de birou cât pagina era în cache (API: 404): mesaj clar cu telefonul, fără reîncercări inutile.
+  {
+    const gone = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    gone.on('pageerror', e => fail('pageerror: ' + e.message));
+    let calls = 0;
+    await gone.route('**/lbb/v1/departures**', route => { calls++; route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ code: 'lbb_not_found', message: 'Ruta nu există.' }) }); });
+    await gone.goto(BASE + '/balti-iasi/');
+    await gone.waitForFunction(() => /nu se mai rezervă online/.test(document.querySelector('[data-lbb="status"]').textContent), null, { timeout: 6000 }).catch(() => {});
+    const gs = await gone.$eval('[data-lbb="status"]', e => ({ text: e.textContent, tel: !!e.querySelector('a[href^="tel:"]') }));
+    if (!/nu se mai rezervă online/.test(gs.text) || !gs.tel || calls !== 1) fail('ruta oprită (404) nu are mesajul potrivit: ' + JSON.stringify({ gs, calls }));
+    await gone.close();
+  }
   // Sub dată, ziua în cuvinte: pe telefoanele în engleză câmpul arată 03/01/2027 (lună/zi), ușor de citit greșit.
   const hint0 = await page.textContent('[data-lbb="dateHint"]');
   if (!/^(luni|marți|miercuri|joi|vineri|sâmbătă|duminică), \d{1,2} (ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)$/.test(hint0)) fail('data în cuvinte lipsește sub câmpul de dată: „' + hint0 + '”');

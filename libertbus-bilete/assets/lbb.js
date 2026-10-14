@@ -297,13 +297,16 @@
 							data = JSON.parse( body );
 						} catch ( e ) {}
 						if ( ! r.ok || ! data ) {
-							throw new Error( 'bad response ' + r.status );
+							var err = new Error( 'bad response ' + r.status );
+							// 404: ruta a fost oprită între timp (pagina poate fi din cache); nu are rost să reîncercăm.
+							err.notFound = r.status === 404;
+							throw err;
 						}
 						return data;
 					} );
 				} )
 				.catch( function ( err ) {
-					if ( tries <= 1 ) {
+					if ( tries <= 1 || err.notFound ) {
 						throw err;
 					}
 					return new Promise( function ( resolve ) {
@@ -628,8 +631,12 @@
 					el.time.disabled = ! departures.length;
 					fillCounts();
 				} )
-				.catch( function () {
+				.catch( function ( err ) {
 					if ( id !== request ) {
+						return;
+					}
+					if ( err && err.notFound ) {
+						setStatus( t.routeGone );
 						return;
 					}
 					// Internet slab: clientul reîncearcă dintr-o atingere, fără să schimbe data sau ruta.
