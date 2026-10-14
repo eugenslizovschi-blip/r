@@ -104,7 +104,8 @@ class LBB_Tickets {
 				<?php foreach ( $rows as $label => $value ) : ?>
 					<tr>
 						<th style="text-align:left;padding:3px 10px 3px 0;vertical-align:top;white-space:nowrap;"><?php echo esc_html( $label ); ?></th>
-						<td style="text-align:left;padding:3px 0;vertical-align:top;"><?php echo esc_html( $value ); ?></td>
+						<?php // Un nume lung („Popescu-Vasilescu-Andronachescu”) se rupe pe telefonul îngust, nu iese din bilet. ?>
+						<td style="text-align:left;padding:3px 0;vertical-align:top;word-break:break-word;overflow-wrap:anywhere;"><?php echo esc_html( $value ); ?></td>
 					</tr>
 				<?php endforeach; ?>
 			</table>

@@ -259,6 +259,26 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (!/lbb_bilet=/.test(p6.url()) || !/achitați la urcare/.test(st6)) fail('fără e.submitter (Safari < 15.4) „Rezerv” nu duce la rezervare: ' + JSON.stringify({ url: p6.url(), st6 }));
     await p6.close();
   }
+  // Telefon îngust (320px) și un nume lung de pasager: textul se rupe în bilet, nu iese peste chenar.
+  {
+    const p7 = await guestCtx.newPage({ viewport: { width: 320, height: 640 } });
+    await p7.setViewportSize({ width: 320, height: 640 });
+    await fillForm(p7, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
+    await p7.fill('input[name="lbb_names[]"]', 'Maximilian-Constantin Popescu-Vasilescu-Andronachescu');
+    await Promise.all([p7.waitForNavigation(), p7.click('[data-lbb-submit][value="reserve"]')]);
+    const fit = await p7.evaluate(() => {
+      const t = document.querySelector('.lbb-ticket');
+      if (!t) { return { missing: true }; }
+      const inner = t.getBoundingClientRect().right - parseFloat(getComputedStyle(t).paddingRight) - parseFloat(getComputedStyle(t).borderRightWidth);
+      const out = [...t.querySelectorAll('td')].filter(td => {
+        const r = document.createRange(); r.selectNodeContents(td);
+        return [...r.getClientRects()].some(c => c.right > inner + 0.5);
+      }).map(td => td.textContent.trim());
+      return { out, page: document.documentElement.scrollWidth };
+    });
+    if (fit.missing || fit.out.length || fit.page > 320) fail('pe 320px un nume lung iese din bilet: ' + JSON.stringify(fit));
+    await p7.close();
+  }
   console.log(process.exitCode ? 'CURRENCY+RESERVE: PROBLEME' : 'CURRENCY+RESERVE: OK');
   await browser.close();
 })().catch(require('./crash')('currency-reserve', () => BROWSER));
