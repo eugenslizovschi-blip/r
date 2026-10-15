@@ -387,9 +387,10 @@ class LBB_Admin {
 			$days = 7 === count( $r['days'] ) ? __( 'zilnic', 'libertbus-bilete' ) : implode( ', ', array_map( function ( $d ) use ( $day_names ) {
 				return $day_names[ $d ];
 			}, $r['days'] ) );
-			$price = wc_format_decimal( $r['price'], 2 ) . ' ' . $r['currency'];
+			// Ca în formular, pe bilet și în email: „1.200 MDL ≈ 308 RON”, nu „1200.00 MDL ≈ 307.69 RON”.
+			$price = LBB_WooCommerce::money( $r['price'], $r['currency'] );
 			if ( $r['currency'] !== $currency ) {
-				$price .= ' ≈ ' . wc_format_decimal( LBB_Settings::convert( $r['price'], $r['currency'] ), 2 ) . ' ' . $currency;
+				$price .= ' ≈ ' . LBB_WooCommerce::money( round( LBB_Settings::convert( $r['price'], $r['currency'] ) ), $currency );
 			}
 			$edit = admin_url( 'admin.php?page=lbb-routes&edit=' . $r['id'] );
 			echo '<tr><td><a href="' . esc_url( $edit ) . '"><strong>' . esc_html( $r['origin'] . ' → ' . $r['destination'] ) . '</strong></a>'
