@@ -46,6 +46,16 @@ async function scan(page, label, include) {
   await page.waitForSelector('[data-lbb="groupNote"]:not([hidden])');
   await scan(page, 'formular cu nota pentru grupuri', [['.lbb-booking']]);
   await page.selectOption('[data-lbb="adults"]', '1');
+  // Eroare de la server (telefon „123”): mesajul de alertă și câmpul marcat greșit, verificate și ele.
+  await page.fill('input[name="lbb_names[]"]', 'Test Accesibil');
+  await page.fill('input[name="lbb_phone"]', '123');
+  await page.fill('input[name="lbb_email"]', 'a11y@example.com');
+  await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="reserve"]')]);
+  await page.waitForSelector('.lbb-alert');
+  await page.waitForSelector('input[name="lbb_phone"][aria-invalid="true"]', { state: 'attached' }).catch(() => fail('după eroare telefonul nu e marcat aria-invalid'));
+  await scan(page, 'formular cu eroare de la server', [['.lbb-booking']]);
+  await page.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0);
+  if (!(await page.inputValue('[data-lbb="time"]'))) await page.selectOption('[data-lbb="time"]', await page.$eval('[data-lbb="time"] option:not([disabled]):not([value=""])', o => o.value));
   await page.fill('input[name="lbb_names[]"]', 'Test Accesibil');
   await page.fill('input[name="lbb_phone"]', '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
   await page.fill('input[name="lbb_email"]', 'a11y@example.com');
@@ -60,6 +70,22 @@ async function scan(page, label, include) {
   // Linkul stricat (cheie greșită): pagina „Biletul nu a fost găsit” are aceleași repere și linkul spre telefon.
   await page.goto(page.url().replace(/([?&]k=)[^&]+/, '$1' + '0'.repeat(20)));
   await scan(page, 'bilet negăsit', [['body']]);
+
+  // Formularul compact (pagina de previzualizare, cu admin): fereastra pasului 2 e un dialog peste pagină.
+  {
+    const mctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await mctx.addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
+    const mp = await mctx.newPage();
+    await login(mp, BASE);
+    await mp.goto(BASE + '/previzualizare-bilete/');
+    const f = (await mp.$$('.lbb-booking'))[1];
+    await mp.waitForFunction(el => el.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0, f);
+    await f.$eval('[data-lbb="time"]', t => { t.value = [...t.options].find(o => o.value && !o.disabled).value; t.dispatchEvent(new Event('change')); });
+    await (await f.$('[data-lbb="next"]')).click();
+    await mp.waitForSelector('.lbb-overlay .lbb-booking');
+    await scan(mp, 'formular compact, pasul 2 (dialog)', [['.lbb-overlay']]);
+    await mctx.close();
+  }
 
   // Admin: doar conținutul nostru (.wrap), nu meniurile WordPress.
   const admin = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
