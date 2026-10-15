@@ -30,10 +30,17 @@ class LBB_Tickets {
 		// Ca pe pagina biletului: rezervarea cu plata la urcare nu e numită „bilet” (încă nu e plătită).
 		if ( isset( $booking['status'] ) && 'reserved' === $booking['status'] ) {
 			/* translators: 1: codul rezervării, 2: ruta, 3: ziua și data, 4: ora */
-			return vsprintf( __( 'Rezervare LibertBus %1$s: %2$s, %3$s, %4$s', 'libertbus-bilete' ), $args );
+			$text = vsprintf( __( 'Rezervare LibertBus %1$s: %2$s, %3$s, %4$s', 'libertbus-bilete' ), $args );
+		} else {
+			/* translators: 1: codul biletului, 2: ruta, 3: ziua și data, 4: ora */
+			$text = vsprintf( __( 'Bilet LibertBus %1$s: %2$s, %3$s, %4$s', 'libertbus-bilete' ), $args );
 		}
-		/* translators: 1: codul biletului, 2: ruta, 3: ziua și data, 4: ora */
-		return vsprintf( __( 'Bilet LibertBus %1$s: %2$s, %3$s, %4$s', 'libertbus-bilete' ), $args );
+		// Cine primește biletul (ex. copilul căruia i l-a trimis părintele) află și de unde urcă.
+		if ( $route && '' !== $route['boarding'] ) {
+			/* translators: %s: locul de urcare, ex. Autogara Nord, peronul 3 */
+			$text .= '. ' . sprintf( __( 'Urcare: %s', 'libertbus-bilete' ), $route['boarding'] );
+		}
+		return $text;
 	}
 
 	public static function signature( $code ) {
