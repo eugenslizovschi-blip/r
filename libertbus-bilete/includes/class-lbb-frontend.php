@@ -331,6 +331,21 @@ class LBB_Frontend {
 			}
 		}
 
+		if ( ! $reserve ) {
+			if ( ! WC()->cart ) {
+				wc_load_cart();
+			}
+			// Aceeași cursă trimisă din nou (dublu-tap, sau „Înapoi” de la plată și alt număr de pasageri): biletul nou îl
+			// înlocuiește pe cel din coș, altfel clientul ar plăti de două ori. Locurile vechi se eliberează înainte, ca
+			// pe un autocar aproape plin clientul să nu fie refuzat din cauza propriului bilet. Alte curse (ex. tur-retur)
+			// rămân în coș; biletele deja legate de o comandă nu se ating.
+			foreach ( WC()->cart->get_cart() as $key => $item ) {
+				$old = empty( $item['lbb']['token'] ) ? null : LBB_Bookings::get_by_token( $item['lbb']['token'] );
+				if ( $old && 'hold' === $old['status'] && (int) $old['route_id'] === (int) $route['id'] && $old['travel_date'] === $date && $old['dep_time'] === $time ) {
+					WC()->cart->remove_cart_item( $key );
+				}
+			}
+		}
 		$booking = LBB_Bookings::create_hold( $route, $date, $time, $adults, $children, $names, $phone, $email, $currency );
 		if ( is_wp_error( $booking ) ) {
 			return $booking;
@@ -345,18 +360,6 @@ class LBB_Frontend {
 			return LBB_Tickets::url( $booking['ticket_code'] );
 		}
 
-		if ( ! WC()->cart ) {
-			wc_load_cart();
-		}
-		// Aceeași cursă trimisă din nou (dublu-tap, sau „Înapoi” de la plată și alt număr de pasageri): biletul nou îl
-		// înlocuiește pe cel din coș, altfel clientul ar plăti de două ori. Alte curse (ex. tur-retur) rămân în coș;
-		// biletele deja legate de o comandă nu se ating.
-		foreach ( WC()->cart->get_cart() as $key => $item ) {
-			$old = empty( $item['lbb']['token'] ) ? null : LBB_Bookings::get_by_token( $item['lbb']['token'] );
-			if ( $old && 'hold' === $old['status'] && (int) $old['route_id'] === (int) $booking['route_id'] && $old['travel_date'] === $booking['travel_date'] && $old['dep_time'] === $booking['dep_time'] ) {
-				WC()->cart->remove_cart_item( $key );
-			}
-		}
 		$added = WC()->cart->add_to_cart( LBB_Install::product_id(), 1, 0, array(), array(
 			'lbb' => array( 'token' => $booking['token'] ),
 		) );
