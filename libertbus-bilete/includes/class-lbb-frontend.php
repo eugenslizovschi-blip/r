@@ -331,15 +331,16 @@ class LBB_Frontend {
 			}
 		}
 
-		if ( ! $reserve ) {
+		if ( function_exists( 'WC' ) ) {
 			if ( ! WC()->cart ) {
 				wc_load_cart();
 			}
-			// Aceeași rută în aceeași zi trimisă din nou (dublu-tap, sau „Înapoi” de la plată și altă oră ori alt număr
-			// de pasageri): biletul nou îl înlocuiește pe cel din coș, altfel clientul ar plăti și cursa greșită. Nimeni nu
-			// merge de două ori în aceeași direcție în aceeași zi. Locurile vechi se eliberează înainte, ca pe un autocar
-			// aproape plin clientul să nu fie refuzat din cauza propriului bilet. Alte curse (tur-retur, altă zi) rămân în
-			// coș; biletele deja legate de o comandă nu se ating.
+			// Aceeași rută în aceeași zi trimisă din nou (dublu-tap, sau „Înapoi” de la plată și altă oră, alt număr de
+			// pasageri ori „Rezerv, achit la urcare” în loc de plata online): biletul nou îl înlocuiește pe cel din coș,
+			// altfel clientul ar plăti și cursa greșită sau și cursa rezervată. Nimeni nu merge de două ori în aceeași
+			// direcție în aceeași zi. Locurile vechi se eliberează înainte, ca pe un autocar aproape plin clientul să nu
+			// fie refuzat din cauza propriului bilet. Alte curse (tur-retur, altă zi) rămân în coș; biletele deja legate
+			// de o comandă nu se ating.
 			foreach ( WC()->cart->get_cart() as $key => $item ) {
 				$old = empty( $item['lbb']['token'] ) ? null : LBB_Bookings::get_by_token( $item['lbb']['token'] );
 				if ( $old && 'hold' === $old['status'] && (int) $old['route_id'] === (int) $route['id'] && $old['travel_date'] === $date ) {

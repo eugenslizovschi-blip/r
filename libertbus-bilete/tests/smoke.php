@@ -455,12 +455,19 @@ if ( is_int( $cs_r ) && function_exists( 'WC' ) ) {
 	$cs_res['full1'] = LBB_Frontend::book( $cs_full );
 	$cs_res['full2'] = LBB_Frontend::book( $cs_full );
 	$cs_res['fulln'] = count( $cs_tok() );
+	// „Înapoi” de la plată și „Rezerv, achit la urcare” pentru aceeași cursă: rezervarea se face, iar biletul neplătit
+	// iese din coș (altfel clientul ar plăti și cursa rezervată, iar locurile ar fi ținute de două ori).
+	$cs_hold         = $cs_tok();
+	update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_reserve' => 1, 'reserve_limit' => 0 ) ) );
+	$cs_res['rsv']   = LBB_Frontend::book( array_merge( $cs_full, array( 'lbb_mode' => 'reserve' ) ) );
+	$cs_res['rsvn']  = count( $cs_tok() );
+	$cs_res['rsvo']  = $cs_hold ? LBB_Bookings::get_by_token( $cs_hold[0] )['status'] : null;
 	WC()->cart->empty_cart();
 	update_option( 'lbb_settings', $cs_keep );
 	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $cs_r ) );
 	LBB_Routes::delete( $cs_r );
 }
-lbb_t( 'aceeași cursă trimisă din nou cu „Achit online” înlocuiește biletul din coș (fără plată dublă), locurile vechi se eliberează, și pe autocarul plin cu propriul bilet; altă oră în aceeași zi înlocuiește și ea; altă zi sau tur-retur se adaugă', true === ( $cs_res['a'] ?? null ) && true === ( $cs_res['b'] ?? null ) && true === ( $cs_res['other'] ?? null ) && array( 1, 1, 2 ) === ( $cs_res['n'] ?? null ) && 'cancelled' === $cs_res['old'] && 2 === $cs_res['new'] && true === $cs_res['time'] && isset( $cs_t3 ) && 1 === count( $cs_t3 ) && '10:00' === $cs_res['timeb'] && true === $cs_res['full1'] && true === $cs_res['full2'] && 1 === $cs_res['fulln'], array_map( function ( $v ) {
+lbb_t( 'aceeași cursă trimisă din nou cu „Achit online” înlocuiește biletul din coș (fără plată dublă), locurile vechi se eliberează, și pe autocarul plin cu propriul bilet; altă oră în aceeași zi înlocuiește și ea, iar „Rezerv” scoate din coș biletul neplătit al aceleiași curse; altă zi sau tur-retur se adaugă', true === ( $cs_res['a'] ?? null ) && true === ( $cs_res['b'] ?? null ) && true === ( $cs_res['other'] ?? null ) && array( 1, 1, 2 ) === ( $cs_res['n'] ?? null ) && 'cancelled' === $cs_res['old'] && 2 === $cs_res['new'] && true === $cs_res['time'] && isset( $cs_t3 ) && 1 === count( $cs_t3 ) && '10:00' === $cs_res['timeb'] && true === $cs_res['full1'] && true === $cs_res['full2'] && 1 === $cs_res['fulln'] && is_string( $cs_res['rsv'] ) && false !== strpos( $cs_res['rsv'], 'lbb_bilet=' ) && 0 === $cs_res['rsvn'] && 'cancelled' === $cs_res['rsvo'], array_map( function ( $v ) {
 	return is_wp_error( $v ) ? $v->get_error_message() : $v;
 }, $cs_res ) );
 $desc = LBB_WooCommerce::describe( $rv );
