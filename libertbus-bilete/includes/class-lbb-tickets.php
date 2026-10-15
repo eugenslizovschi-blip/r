@@ -40,6 +40,12 @@ class LBB_Tickets {
 			/* translators: %s: locul de urcare, ex. Autogara Nord, peronul 3 */
 			$text .= '. ' . sprintf( __( 'Urcare: %s', 'libertbus-bilete' ), $route['boarding'] );
 		}
+		// La rezervarea cu plata la urcare: și suma, ca pasagerul să aibă banii pregătiți (ca în calendar).
+		if ( isset( $booking['status'] ) && 'reserved' === $booking['status'] && isset( $booking['amount'] ) ) {
+			list( $amount, $cur ) = LBB_Bookings::pay_amount( $booking );
+			/* translators: %s: suma, ex. 240 MDL */
+			$text .= '. ' . sprintf( __( 'De achitat la urcare: %s', 'libertbus-bilete' ), LBB_WooCommerce::money( $amount, $cur ) );
+		}
 		return $text;
 	}
 
