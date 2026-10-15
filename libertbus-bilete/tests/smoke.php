@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'LimitaA', 'LimitaB' ), array( 'PlinA', 'PlinB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ), array( 'CosA', 'CosB' ), array( 'PlataA', 'PlataB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'LimitaA', 'LimitaB' ), array( 'PlinA', 'PlinB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ), array( 'CosA', 'CosB' ), array( 'PlataA', 'PlataB' ), array( 'ParalelA', 'ParalelB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -1559,6 +1559,82 @@ $hp_r = $hp_post( 'http://spam.example' );
 lbb_t( 'robot (câmpul-capcană completat): refuzat, fără rezervare', ! is_wp_error( $hp_r ) && 200 === wp_remote_retrieve_response_code( $hp_r ) && false !== strpos( wp_remote_retrieve_body( $hp_r ), 'Cererea nu a putut fi procesată' ) && 0 === $hp_count(), is_wp_error( $hp_r ) ? $hp_r : wp_remote_retrieve_response_code( $hp_r ) );
 $hp_r = $hp_post( '' );
 lbb_t( 'aceeași cerere fără capcană (om): rezervarea trece și duce la bilet', ! is_wp_error( $hp_r ) && 302 === wp_remote_retrieve_response_code( $hp_r ) && false !== strpos( (string) wp_remote_retrieve_header( $hp_r, 'location' ), 'lbb_bilet=' ) && 1 === $hp_count(), is_wp_error( $hp_r ) ? $hp_r : array( wp_remote_retrieve_response_code( $hp_r ), wp_remote_retrieve_header( $hp_r, 'location' ), substr( wp_strip_all_tags( wp_remote_retrieve_body( $hp_r ) ), 0, 300 ) ) );
+// Ultimele locuri cerute în aceeași clipă: 6 rezervări trimise simultan (cereri HTTP paralele, serverul de test are
+// mai multe procese) pe o cursă cu 2 locuri. Lacătul pe cursă lasă să treacă exact 2; ceilalți află că s-au terminat.
+$pl_r   = LBB_Routes::save( array( 'origin' => 'ParalelA', 'destination' => 'ParalelB', 'departures' => '10:00', 'price' => 100, 'currency' => 'MDL', 'capacity' => 2, 'active' => 1 ) );
+$pl_res = array();
+if ( is_int( $pl_r ) && function_exists( 'curl_multi_init' ) ) {
+	$pl_keep = get_option( 'lbb_settings', array() );
+	update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_reserve' => 1, 'reserve_limit' => 0 ) ) );
+	$pl_mh = curl_multi_init();
+	$pl_hs = array();
+	for ( $pl_i = 0; $pl_i < 6; $pl_i++ ) {
+		$pl_h = curl_init( home_url( '/balti-iasi/' ) );
+		curl_setopt_array( $pl_h, array(
+			CURLOPT_POST           => true,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_FOLLOWLOCATION => false,
+			CURLOPT_TIMEOUT        => 30,
+			CURLOPT_POSTFIELDS     => http_build_query( array(
+				'lbb_action' => 'book', 'lbb_mode' => 'reserve', 'lbb_nonce' => isset( $hp_nonce[1] ) ? $hp_nonce[1] : '', 'lbb_form' => isset( $hp_form[1] ) ? $hp_form[1] : '',
+				'lbb_route' => $pl_r, 'lbb_date' => $tomorrow, 'lbb_time' => '10:00', 'lbb_adults' => 1, 'lbb_names' => array( 'Paralel ' . chr( 65 + $pl_i ) . 'x' ),
+				'lbb_phone' => '+3736900' . sprintf( '%04d', 5100 + $pl_i ), 'lbb_email' => 'paralel' . $pl_i . '@example.com', 'lbb_currency' => 'MDL',
+			) ),
+		) );
+		curl_multi_add_handle( $pl_mh, $pl_h );
+		$pl_hs[] = $pl_h;
+	}
+	do {
+		$pl_st = curl_multi_exec( $pl_mh, $pl_run );
+		if ( $pl_run ) {
+			curl_multi_select( $pl_mh, 1 );
+		}
+	} while ( $pl_run && CURLM_OK === $pl_st );
+	foreach ( $pl_hs as $pl_h ) {
+		$pl_code  = curl_getinfo( $pl_h, CURLINFO_HTTP_CODE );
+		$pl_body  = (string) curl_multi_getcontent( $pl_h );
+		$pl_res[] = 302 === $pl_code ? 'ok' : ( false !== strpos( $pl_body, 'tocmai s-au terminat' ) || false !== strpos( $pl_body, 'Au mai rămas' ) || false !== strpos( $pl_body, 'A mai rămas' ) ? 'plin' : 'alt:' . $pl_code );
+		curl_multi_remove_handle( $pl_mh, $pl_h );
+	}
+	curl_multi_close( $pl_mh );
+	$pl_db = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COALESCE(SUM(seats),0) FROM ' . LBB_Bookings::table() . " WHERE route_id = %d AND status IN ('reserved','hold','pending','confirmed')", $pl_r ) );
+	// Lacătul chiar ține pe loc: cu lacătul cursei luat din altă conexiune, o rezervare nouă așteaptă până la eliberare
+	// (fără lacăt ar trece imediat, iar două cereri ar putea vinde același loc).
+	$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $pl_r ) );
+	$pl_db2  = new mysqli( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME );
+	$pl_name = 'lbb_' . md5( $wpdb->prefix . $pl_r . $tomorrow . '10:00' );
+	$pl_got  = $pl_db2->query( "SELECT GET_LOCK('" . $pl_db2->real_escape_string( $pl_name ) . "', 0)" )->fetch_row()[0];
+	$pl_h    = curl_init( home_url( '/balti-iasi/' ) );
+	curl_setopt_array( $pl_h, array( CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => false, CURLOPT_TIMEOUT => 30, CURLOPT_POSTFIELDS => http_build_query( array(
+		'lbb_action' => 'book', 'lbb_mode' => 'reserve', 'lbb_nonce' => isset( $hp_nonce[1] ) ? $hp_nonce[1] : '', 'lbb_form' => isset( $hp_form[1] ) ? $hp_form[1] : '',
+		'lbb_route' => $pl_r, 'lbb_date' => $tomorrow, 'lbb_time' => '10:00', 'lbb_adults' => 1, 'lbb_names' => array( 'Lacat Test' ),
+		'lbb_phone' => '+37369005199', 'lbb_email' => 'lacat@example.com', 'lbb_currency' => 'MDL',
+	) ) ) );
+	$pl_mh = curl_multi_init();
+	curl_multi_add_handle( $pl_mh, $pl_h );
+	$pl_t0 = microtime( true );
+	do {
+		curl_multi_exec( $pl_mh, $pl_run );
+		curl_multi_select( $pl_mh, 0.1 );
+	} while ( $pl_run && microtime( true ) - $pl_t0 < 2 );
+	$pl_waiting = (bool) $pl_run; // încă în așteptare după 2 secunde
+	$pl_db2->query( "SELECT RELEASE_LOCK('" . $pl_db2->real_escape_string( $pl_name ) . "')" );
+	while ( $pl_run ) {
+		curl_multi_exec( $pl_mh, $pl_run );
+		curl_multi_select( $pl_mh, 0.1 );
+	}
+	$pl_after = curl_getinfo( $pl_h, CURLINFO_HTTP_CODE );
+	curl_multi_remove_handle( $pl_mh, $pl_h );
+	curl_multi_close( $pl_mh );
+	$pl_db2->close();
+	$pl_lock = array( 'luat' => '1' === (string) $pl_got, 'asteapta' => $pl_waiting, 'dupa' => $pl_after );
+	update_option( 'lbb_settings', $pl_keep );
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $pl_r ) );
+	LBB_Routes::delete( $pl_r );
+}
+$pl_ok = count( array_keys( $pl_res, 'ok', true ) );
+lbb_t( '6 rezervări simultane pe ultimele 2 locuri: trec exact 2, ceilalți primesc „locurile s-au terminat”; o rezervare așteaptă cât cursa e blocată de alta (lacăt), apoi trece', 2 === $pl_ok && 4 === count( array_keys( $pl_res, 'plin', true ) ) && 2 === ( $pl_db ?? -1 ) && array( 'luat' => true, 'asteapta' => true, 'dupa' => 302 ) === ( $pl_lock ?? null ), array( $pl_res, $pl_db ?? null, $pl_lock ?? null ) );
+
 // Biletul nu se poate pune în coș ocolind formularul (fără cursă, locuri ținute și preț calculat): nici cu
 // ?add-to-cart=ID, nici prin Store API (coșul și finalizarea cu blocuri). Cereri HTTP reale, cu cookie-urile sesiunii.
 $dc_pid  = LBB_Install::product_id();
