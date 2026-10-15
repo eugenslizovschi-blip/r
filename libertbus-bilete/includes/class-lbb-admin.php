@@ -194,8 +194,7 @@ class LBB_Admin {
 		$routes = array_filter( LBB_Routes::all( true ), function ( $r ) {
 			return $r['price'] > 0;
 		} );
-		/* translators: %d: numărul de rute active */
-		$add( 'routes', count( $routes ) > 0, __( 'Există rute active cu preț', 'libertbus-bilete' ), sprintf( __( '%d rute active', 'libertbus-bilete' ), count( $routes ) ), admin_url( 'admin.php?page=lbb-routes' ) );
+		$add( 'routes', count( $routes ) > 0, __( 'Există rute active cu preț', 'libertbus-bilete' ), LBB_Settings::ro_count( count( $routes ), __( 'rută activă', 'libertbus-bilete' ), __( 'rute active', 'libertbus-bilete' ) ), admin_url( 'admin.php?page=lbb-routes' ) );
 
 		$form_pages = self::pages_with_form();
 		$add( 'form', $form_pages ? true : false, __( 'Formularul de rezervare e pus pe o pagină publicată', 'libertbus-bilete' ),

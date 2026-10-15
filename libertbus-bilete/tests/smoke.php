@@ -1633,6 +1633,23 @@ foreach ( array( 'default_capacity', 'max_passengers', 'max_days_ahead', 'cart_h
 }
 lbb_t( 'Setări: câmpurile numerice au minimul real (1 loc/pasager/zi, 5 și 10 minute), 0 permis la închidere și limită', array( 'default_capacity' => '1!', 'max_passengers' => '1!', 'max_days_ahead' => '1!', 'cart_hold_minutes' => '5!', 'payment_minutes' => '10!', 'cutoff_minutes' => '0', 'reserve_limit' => '0' ) === $mn_found, $mn_found );
 
+// Numerele din texte acordate ca în română: „30 de minute” în nota formularului, „1 rută activă” / „20 de rute active” în panou.
+$mn_keep = get_option( 'lbb_settings', array() );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 1, 'cart_hold_minutes' => 30 ) ) );
+$mn_30 = wp_strip_all_tags( LBB_Frontend::shortcode( array() ) );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'cart_hold_minutes' => 15 ) ) );
+$mn_15 = wp_strip_all_tags( LBB_Frontend::shortcode( array() ) );
+update_option( 'lbb_settings', $mn_keep );
+$mn_rt = null;
+foreach ( LBB_Admin::checklist() as $mn_it ) {
+	if ( 'routes' === $mn_it['id'] ) {
+		$mn_rt = $mn_it['detail'];
+	}
+}
+$mn_n = count( array_filter( LBB_Routes::all( true ), function ( $r ) {
+	return $r['price'] > 0;
+} ) );
+lbb_t( 'nota de plată spune „30 de minute” / „15 minute”, iar panoul „N (de) rute active” acordat', false !== strpos( $mn_30, 'se păstrează 30 de minute cât' ) && false !== strpos( $mn_15, 'se păstrează 15 minute cât' ) && LBB_Settings::ro_count( $mn_n, 'rută activă', 'rute active' ) === $mn_rt && '1 rută activă' === LBB_Settings::ro_count( 1, 'rută activă', 'rute active' ), array( $mn_rt, $mn_n ) );
 // Panoul „Gata de plăți?” avertizează dacă bannerul de cookies e oprit (Legea 195/2024).
 $cl_keep = LBB_Settings::all();
 $cl_item = function () {

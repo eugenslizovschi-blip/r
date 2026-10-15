@@ -580,8 +580,9 @@ class LBB_Frontend {
 				<p class="lbb-note">
 					<?php
 					if ( $can_pay ) {
-						/* translators: 1: minute, 2: telefon */
-						echo sprintf( esc_html__( 'La plata online locurile se păstrează %1$d minute cât finalizați plata. Întrebări: %2$s', 'libertbus-bilete' ), (int) LBB_Settings::get( 'cart_hold_minutes' ), LBB_Settings::phone_link() ); // phpcs:ignore WordPress.Security.EscapeOutput
+						// „30 de minute”, nu „30 minute” (timpul se schimbă din Setări).
+						/* translators: 1: durata, ex. 15 minute / 30 de minute, 2: telefon */
+						echo sprintf( esc_html__( 'La plata online locurile se păstrează %1$s cât finalizați plata. Întrebări: %2$s', 'libertbus-bilete' ), esc_html( LBB_Settings::ro_count( LBB_Settings::get( 'cart_hold_minutes' ), __( 'minut', 'libertbus-bilete' ), __( 'minute', 'libertbus-bilete' ) ) ), LBB_Settings::phone_link() ); // phpcs:ignore WordPress.Security.EscapeOutput
 					} else {
 						/* translators: %s: telefon */
 						echo sprintf( esc_html__( 'Plata se face la urcare. Primiți confirmarea pe email. Întrebări: %s', 'libertbus-bilete' ), LBB_Settings::phone_link() ); // phpcs:ignore WordPress.Security.EscapeOutput
