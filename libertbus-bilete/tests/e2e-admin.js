@@ -212,7 +212,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (!(await page.$('#lbb-child'))) await page.goto(kidEdit);
     await page.fill('#lbb-child', kidOrig);
     await Promise.all([page.waitForNavigation(), page.click('#wpbody-content form:has(#lbb-times) #submit')]);
-    if (!/prețul pentru copii \(2500[^|]*mai mare/.test(kidMsg)) fail('prețul de copil mai mare decât cel de adult nu e semnalat: ' + kidMsg.trim().slice(0, 200));
+    if (!/prețul pentru copii \(2\.500\sMDL\)[^|]*mai mare/.test(kidMsg) || /\d\.00\s?MDL/.test(kidMsg)) fail('prețul de copil mai mare decât cel de adult nu e semnalat: ' + kidMsg.trim().slice(0, 200));
   } else fail('nu am găsit ruta Chișinău → Iași în Rute și orar');
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');
   const emptyLabel = await page.$eval('#wpbody-content table.widefat tbody td[colspan]', td => getComputedStyle(td, '::before').content);

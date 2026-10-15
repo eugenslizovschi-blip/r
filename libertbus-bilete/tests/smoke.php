@@ -1008,7 +1008,7 @@ $cp_hi  = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price
 $cp_ok  = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price' => 150.0, 'currency' => 'MDL' ) );
 $cp_eq  = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price' => 240.0, 'currency' => 'MDL' ) );
 $cp_non = LBB_Routes::child_price_warning( array( 'price' => 240.0, 'child_price' => null, 'currency' => 'MDL' ) );
-lbb_t( 'prețul de copil mai mare decât cel de adult e semnalat; egal, mai mic sau gol nu', false !== strpos( $cp_hi, '2400' ) && false !== strpos( $cp_hi, '240' ) && '' === $cp_ok && '' === $cp_eq && '' === $cp_non, array( $cp_hi, $cp_ok, $cp_eq, $cp_non ) );
+lbb_t( 'prețul de copil mai mare decât cel de adult e semnalat, cu prețurile ca pe bilet („2.400 MDL”, nu „2400.00”); egal, mai mic sau gol nu', false !== strpos( $cp_hi, '(' . LBB_WooCommerce::money( 2400, 'MDL' ) . ')' ) && false !== strpos( $cp_hi, '(' . LBB_WooCommerce::money( 240, 'MDL' ) . ')' ) && false === strpos( $cp_hi, '.00' ) && '' === $cp_ok && '' === $cp_eq && '' === $cp_non, array( $cp_hi, $cp_ok, $cp_eq, $cp_non ) );
 
 // Lista pentru șofer cu mai multe curse în aceeași zi: deasupra tabelului, locurile pe fiecare cursă.
 $dt_r = LBB_Routes::save( array( 'origin' => 'CurseA', 'destination' => 'CurseB', 'departures' => '07:00, 19:00', 'price' => 50, 'currency' => 'MDL', 'capacity' => 9, 'active' => 1 ) );

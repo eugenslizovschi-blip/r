@@ -277,8 +277,9 @@ class LBB_Routes {
 		if ( null === $route['child_price'] || $route['child_price'] <= $route['price'] ) {
 			return '';
 		}
-		/* translators: 1: prețul pentru copii, 2: prețul pentru adulți, 3: moneda */
-		return sprintf( __( 'Atenție: prețul pentru copii (%1$s %3$s) e mai mare decât cel pentru adulți (%2$s %3$s). Verificați prețurile.', 'libertbus-bilete' ), wc_format_decimal( $route['child_price'], 2 ), wc_format_decimal( $route['price'], 2 ), $route['currency'] );
+		// Prețurile în aceeași formă ca în lista de rute și pe bilet: „2.400 MDL”, nu „2400.00 MDL”.
+		/* translators: 1: prețul pentru copii, cu moneda, 2: prețul pentru adulți, cu moneda */
+		return sprintf( __( 'Atenție: prețul pentru copii (%1$s) e mai mare decât cel pentru adulți (%2$s). Verificați prețurile.', 'libertbus-bilete' ), LBB_WooCommerce::money( $route['child_price'], $route['currency'] ), LBB_WooCommerce::money( $route['price'], $route['currency'] ) );
 	}
 
 	/**
