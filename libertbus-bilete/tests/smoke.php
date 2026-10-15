@@ -441,9 +441,15 @@ if ( is_int( $cs_r ) && function_exists( 'WC' ) ) {
 	$cs_t2           = $cs_tok();
 	$cs_res['old']   = $cs_t1 ? LBB_Bookings::get_by_token( $cs_t1[0] )['status'] : null;
 	$cs_res['new']   = $cs_t2 ? LBB_Bookings::get_by_token( $cs_t2[0] )['seats'] : null;
+	// „Înapoi” și altă oră în aceeași zi (corectură): tot un singur bilet, cel nou.
+	$cs_res['time']  = LBB_Frontend::book( array_merge( $cs_d, array( 'lbb_time' => '10:00' ) ) );
+	$cs_t3           = $cs_tok();
+	$cs_res['timeb'] = $cs_t3 ? LBB_Bookings::get_by_token( $cs_t3[0] )['dep_time'] : null;
 	$cs_res['other'] = LBB_Frontend::book( array_merge( $cs_d, array( 'lbb_time' => '10:00', 'lbb_date' => ( new DateTimeImmutable( $tomorrow ) )->modify( '+1 day' )->format( 'Y-m-d' ) ) ) );
 	$cs_res['n']     = array( count( $cs_t1 ), count( $cs_t2 ), count( $cs_tok() ) );
 	// Autocar plin cu biletul din coș (5 din 5 locuri): același bilet trimis din nou nu e refuzat cu „s-au terminat”.
+	// empty_cart() nu eliberează locurile ținute: le eliberăm întâi, ca autocarul să fie gol.
+	array_map( array( 'LBB_Bookings', 'release' ), $cs_tok() );
 	WC()->cart->empty_cart();
 	$cs_full         = array_merge( $cs_d, array( 'lbb_time' => '10:00', 'lbb_adults' => 5, 'lbb_names' => array( 'Ion Cos', 'Ana Cos', 'Vlad Cos', 'Dan Cos', 'Eva Cos' ) ) );
 	$cs_res['full1'] = LBB_Frontend::book( $cs_full );
@@ -454,7 +460,7 @@ if ( is_int( $cs_r ) && function_exists( 'WC' ) ) {
 	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $cs_r ) );
 	LBB_Routes::delete( $cs_r );
 }
-lbb_t( 'aceeași cursă trimisă din nou cu „Achit online” înlocuiește biletul din coș (fără plată dublă), locurile vechi se eliberează, și pe autocarul plin cu propriul bilet; altă cursă (tur-retur) se adaugă', true === ( $cs_res['a'] ?? null ) && true === ( $cs_res['b'] ?? null ) && true === ( $cs_res['other'] ?? null ) && array( 1, 1, 2 ) === ( $cs_res['n'] ?? null ) && 'cancelled' === $cs_res['old'] && 2 === $cs_res['new'] && true === $cs_res['full1'] && true === $cs_res['full2'] && 1 === $cs_res['fulln'], array_map( function ( $v ) {
+lbb_t( 'aceeași cursă trimisă din nou cu „Achit online” înlocuiește biletul din coș (fără plată dublă), locurile vechi se eliberează, și pe autocarul plin cu propriul bilet; altă oră în aceeași zi înlocuiește și ea; altă zi sau tur-retur se adaugă', true === ( $cs_res['a'] ?? null ) && true === ( $cs_res['b'] ?? null ) && true === ( $cs_res['other'] ?? null ) && array( 1, 1, 2 ) === ( $cs_res['n'] ?? null ) && 'cancelled' === $cs_res['old'] && 2 === $cs_res['new'] && true === $cs_res['time'] && isset( $cs_t3 ) && 1 === count( $cs_t3 ) && '10:00' === $cs_res['timeb'] && true === $cs_res['full1'] && true === $cs_res['full2'] && 1 === $cs_res['fulln'], array_map( function ( $v ) {
 	return is_wp_error( $v ) ? $v->get_error_message() : $v;
 }, $cs_res ) );
 $desc = LBB_WooCommerce::describe( $rv );
