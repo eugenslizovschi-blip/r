@@ -104,6 +104,11 @@ echo "== Dispozitive (iPhone SE … desktop 1920), 5 browsere în paralel"
 OUT_DEV=$(BASE="$BASE" OUT="${OUT:-.}" PARALLEL=5 node "$DIR/tests/e2e-devices.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_DEV" | grep -E '^✗|^    -|FAIL' ; echo "$OUT_DEV" | grep -c '^✓' | sed 's/^/  dispozitive OK: /'
 echo "$OUT_DEV" | grep -qE '^✗|FAIL' && FAIL=1
+# Orice avertisment PHP din această rulare, și cele raportate în fișierele WordPress/WooCommerce (ex. esc_url( null )
+# apelat din plugin apare în formatting.php, fără „lbb” în cale). Excepție: un notice al WooCommerce însuși, la
+# anonimizarea clientului din Unelte → Șterge datele personale (WC_Admin Customers DataStore, nu codul nostru).
+PHP_ERR=$( [ -f "$LOG" ] && tail -n +$((LOG_START + 1)) "$LOG" | grep -E "PHP (Fatal|Warning|Notice|Deprecated)" | grep -v "wpdb::prepare was called .*Unsupported value type (object)" )
+if [ -n "$PHP_ERR" ]; then echo "== Avertismente PHP în debug.log:"; echo "$PHP_ERR" | sed -E 's/^\[[^]]*\] //' | sort | uniq -c | head -8; FAIL=1; fi
 MAIL_FAILED=$(cd "$WP_PATH" && $WP_CLI eval '$f = get_option( "lbb_mail_failed" ); echo is_array( $f ) ? $f["message"] : "";' 2>/dev/null)
 if [ -n "$MAIL_FAILED" ]; then echo "== Emailuri: un test a încercat o trimitere reală (eșuată): $MAIL_FAILED"; FAIL=1; fi
 echo "== Rezultat: $([ $FAIL = 0 ] && echo OK || echo PROBLEME)"
