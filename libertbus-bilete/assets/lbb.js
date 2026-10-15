@@ -129,10 +129,9 @@
 		var skipped = 0;
 		var shownDate = ''; // Data pentru care s-au cerut orele afișate.
 		var memoKey = 'lbbTime' + ( index || 0 );
+		var namesKey = 'lbbNames' + ( index || 0 );
 
-		// Ora aleasă se ține în istoricul paginii: la „Înapoi” browserul pune la loc data și numele,
-		// dar lista orelor se construiește din nou și alegerea s-ar pierde.
-		function rememberTime() {
+		function remember( key, value ) {
 			try {
 				var st = {};
 				var old = window.history.state;
@@ -143,9 +142,52 @@
 						}
 					}
 				}
-				st[ memoKey ] = el.date.value + '|' + el.time.value;
+				st[ key ] = value;
 				window.history.replaceState( st, '' );
 			} catch ( x ) {}
+		}
+
+		// Ora aleasă se ține în istoricul paginii: la „Înapoi” browserul pune la loc data,
+		// dar lista orelor se construiește din nou și alegerea s-ar pierde.
+		function rememberTime() {
+			remember( memoKey, el.date.value + '|' + el.time.value );
+		}
+
+		// La fel numele pasagerilor: câmpurile sunt create din JavaScript, iar la „Înapoi” de la plată browserul nu le
+		// pune la loc (clientul primea „Scrieți numele fiecărui pasager” și le scria din nou). Se țin la „change” (care
+		// vine și înainte de trimitere, la ieșirea din câmp sau la Enter), nu la fiecare literă: Safari limitează câte
+		// replaceState se pot face.
+		function rememberNames() {
+			var inputs = el.names.querySelectorAll( 'input' );
+			var names = [];
+			for ( var i = 0; i < inputs.length; i++ ) {
+				names.push( inputs[ i ].value );
+			}
+			remember( namesKey, names );
+		}
+
+		// Numele ținute minte se pun la loc doar cât formularul se reface după „Înapoi”: după ce clientul schimbă singur
+		// pasagerii sau scrie un nume, câmpurile rămân cum le-a lăsat el.
+		var namesTouched = false;
+		function touchNames( e ) {
+			var tg = e.target;
+			if ( tg === el.adults || tg === el.children || ( tg && tg.name === 'lbb_names[]' ) ) {
+				namesTouched = true;
+			}
+		}
+		root.addEventListener( 'change', touchNames, true );
+		root.addEventListener( 'input', touchNames, true );
+
+		function rememberedNames() {
+			if ( namesTouched ) {
+				return [];
+			}
+			try {
+				var v = window.history.state && window.history.state[ namesKey ];
+				return Object.prototype.toString.call( v ) === '[object Array]' ? v : [];
+			} catch ( x ) {
+				return [];
+			}
 		}
 
 		function rememberedTime() {
@@ -386,7 +428,7 @@
 		function fillNames( adults, children ) {
 			var total = adults + children;
 			var labels = el.names.querySelectorAll( 'label.lbb-field' );
-			var stored = ! labels.length && preset.names ? preset.names : [];
+			var stored = labels.length ? [] : ( preset.names && preset.names.length ? preset.names : rememberedNames() );
 			var regroup = !! ( nameCounts && labels.length && ( nameCounts[ 0 ] !== adults || nameCounts[ 1 ] !== children ) );
 			if ( regroup ) {
 				var old = [];
@@ -414,6 +456,20 @@
 			for ( var r = labels.length - 1; r >= total; r-- ) {
 				el.names.removeChild( labels[ r ] );
 			}
+			// La „Înapoi” formularul pornește cu 1 adult, iar browserul pune la loc „2 adulți” abia după: câmpurile goale
+			// își iau numele ținute minte, dacă lista are exact atâtea nume și nu contrazice ce e deja scris.
+			var memo = rememberedNames();
+			var cur = el.names.querySelectorAll( 'input' );
+			var fits = memo.length === cur.length;
+			for ( var m = 0; fits && m < cur.length; m++ ) {
+				fits = ! cur[ m ].value || cur[ m ].value === memo[ m ];
+			}
+			for ( var f = 0; fits && f < cur.length; f++ ) {
+				if ( ! cur[ f ].value && memo[ f ] ) {
+					cur[ f ].value = String( memo[ f ] );
+					checkName.call( cur[ f ] );
+				}
+			}
 			nameCounts = [ adults, children ];
 			el.names.hidden = total === 0;
 			summary();
@@ -436,6 +492,7 @@
 			input.required = cfg.requireNames;
 			input.value = value;
 			input.addEventListener( 'input', checkName );
+			input.addEventListener( 'change', rememberNames );
 			checkName.call( input );
 			if ( badField === 'names' && ( ! input.value.trim() || input.validity.customError ) ) {
 				markInvalid( input );

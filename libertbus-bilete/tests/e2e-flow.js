@@ -47,6 +47,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   console.log('after submit url:', page.url());
   const alert = await page.$('.lbb-alert'); if (alert) console.log('ALERT:', await alert.textContent());
   await page.waitForSelector('#payment', { timeout: 15000 });
+  // Clientul se răzgândește la plată: „Înapoi”, altă oră în aceeași zi, „Achit online” din nou. În comandă rămâne
+  // un singur bilet, cel nou (nu plătește și cursa greșită).
+  await page.goBack();
+  await page.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0 && !document.querySelector('[data-lbb-submit][value="pay"]').disabled, null, { timeout: 15000 });
+  const other = await page.$$eval('[data-lbb="time"] option', (o, cur) => (o.find(x => x.value && !x.disabled && x.value !== cur) || {}).value || cur, best);
+  await page.selectOption('[data-lbb="time"]', other);
+  await page.waitForFunction(() => !document.querySelector('[data-lbb-submit][value="pay"]').disabled);
+  await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
+  await page.waitForSelector('#payment', { timeout: 15000 });
+  // Doar biletele zilei alese (alte zile, ex. tur-retur, rămân în coș intenționat).
+  const dayRo = tomorrow.split('-').reverse().join('.');
+  const again = await page.$$eval('.woocommerce-checkout-review-order-table .cart_item', (rs, d) => rs.map(r => r.textContent.replace(/\s+/g, ' ')).filter(t => t.includes(d)), dayRo);
+  if (again.length !== 1 || !again[0].includes(other)) console.log('FAIL după „Înapoi” și altă oră, la plată trebuie un singur bilet, la ' + other + ': ' + JSON.stringify(again));
   console.log('address field present:', !!(await page.$('#billing_address_1')));
   console.log('prefill first/last/phone:', await page.inputValue('#billing_first_name'), '/', await page.inputValue('#billing_last_name'), '/', await page.inputValue('#billing_phone'));
   const review = (await page.textContent('.woocommerce-checkout-review-order-table')).replace(/\s+/g, ' ');
