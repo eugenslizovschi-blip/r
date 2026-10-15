@@ -56,9 +56,15 @@
 			document.body.appendChild( overlay );
 			document.documentElement.classList.add( 'lbb-lock' );
 			overlay.scrollTop = 0;
+			// Fereastra are o intrare proprie în istoric: „Înapoi” pe telefon (Android) o închide și revine la pasul 1,
+			// nu pleacă de pe pagină cu tot ce s-a completat.
+			try {
+				window.history.pushState( stateWith( 'lbbStep' + ( index || 0 ), 2 ), '' );
+				pushedStep = true;
+			} catch ( x ) {}
 		}
 
-		function closeOverlay() {
+		function closeOverlay( fromHistory ) {
 			if ( ! overlay ) {
 				return;
 			}
@@ -67,9 +73,24 @@
 			overlay.parentNode.removeChild( overlay );
 			overlay = null;
 			document.documentElement.classList.remove( 'lbb-lock' );
+			// Închisă din buton sau cu Escape: scoatem și intrarea ei din istoric, ca „Înapoi” să nu mai treacă prin ea.
+			if ( pushedStep && ! fromHistory ) {
+				try {
+					window.history.back();
+				} catch ( x ) {}
+			}
+			pushedStep = false;
 		}
 
-		function showStep( n ) {
+		var pushedStep = false;
+		window.addEventListener( 'popstate', function () {
+			if ( overlay ) {
+				showStep( 1, true );
+				el.time.focus();
+			}
+		} );
+
+		function showStep( n, fromHistory ) {
 			if ( ! compact ) {
 				return;
 			}
@@ -82,7 +103,7 @@
 			if ( n === 2 ) {
 				openOverlay();
 			} else {
-				closeOverlay();
+				closeOverlay( fromHistory );
 			}
 		}
 
@@ -131,19 +152,24 @@
 		var memoKey = 'lbbTime' + ( index || 0 );
 		var namesKey = 'lbbNames' + ( index || 0 );
 
-		function remember( key, value ) {
-			try {
-				var st = {};
-				var old = window.history.state;
-				if ( old && typeof old === 'object' ) {
-					for ( var k in old ) {
-						if ( Object.prototype.hasOwnProperty.call( old, k ) ) {
-							st[ k ] = old[ k ];
-						}
+		// Starea curentă din istoric, plus o cheie (ce au pus alte formulare de pe pagină rămâne).
+		function stateWith( key, value ) {
+			var st = {};
+			var old = window.history.state;
+			if ( old && typeof old === 'object' ) {
+				for ( var k in old ) {
+					if ( Object.prototype.hasOwnProperty.call( old, k ) ) {
+						st[ k ] = old[ k ];
 					}
 				}
-				st[ key ] = value;
-				window.history.replaceState( st, '' );
+			}
+			st[ key ] = value;
+			return st;
+		}
+
+		function remember( key, value ) {
+			try {
+				window.history.replaceState( stateWith( key, value ), '' );
 			} catch ( x ) {}
 		}
 

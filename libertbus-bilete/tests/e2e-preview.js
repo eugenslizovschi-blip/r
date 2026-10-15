@@ -92,6 +92,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (!(await admin.evaluate(() => document.activeElement.value === 'reserve'))) fail('Shift+Tab nu revine la ultimul buton');
   await admin.keyboard.press('Escape');
   if (await admin.$('.lbb-overlay')) fail('Escape nu închide fereastra');
+  // „Înapoi” pe telefon (Android) cu fereastra deschisă: revine la pasul 1 pe aceeași pagină, nu pleacă de pe ea;
+  // după Escape, „Înapoi” nu mai trece printr-o fereastră deja închisă.
+  await admin.waitForTimeout(300);
+  const pageUrl = admin.url();
+  await (await second.$('[data-lbb="next"]')).click();
+  await admin.goBack();
+  await admin.waitForTimeout(500);
+  const afterBack = { url: admin.url(), overlay: !!(await admin.$('.lbb-overlay')), step1: await second.$eval('[data-lbb="step1"]', e => !e.hidden).catch(() => null) };
+  if (afterBack.url !== pageUrl || afterBack.overlay || !afterBack.step1) fail('„Înapoi” cu pasul 2 deschis nu revine la pasul 1: ' + JSON.stringify(afterBack));
+  await (await second.$('[data-lbb="next"]')).click();
+  await admin.keyboard.press('Escape');
+  await admin.waitForTimeout(500);
+  if (admin.url() !== pageUrl || await admin.evaluate(() => !!(history.state && history.state.lbbStep1))) fail('după Escape a rămas intrarea ferestrei în istoric: ' + admin.url());
   await (await second.$('[data-lbb="next"]')).click();
   if (await second.$eval('[data-lbb="step1"]', e => !e.hidden)) fail('pasul 1 nu s-a ascuns după „Continuă”');
   console.log('înălțime pas 1:', Math.round(h1), 'px');
