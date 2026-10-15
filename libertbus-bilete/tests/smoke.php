@@ -1476,6 +1476,27 @@ $hp_r = $hp_post( 'http://spam.example' );
 lbb_t( 'robot (câmpul-capcană completat): refuzat, fără rezervare', ! is_wp_error( $hp_r ) && 200 === wp_remote_retrieve_response_code( $hp_r ) && false !== strpos( wp_remote_retrieve_body( $hp_r ), 'Cererea nu a putut fi procesată' ) && 0 === $hp_count(), is_wp_error( $hp_r ) ? $hp_r : wp_remote_retrieve_response_code( $hp_r ) );
 $hp_r = $hp_post( '' );
 lbb_t( 'aceeași cerere fără capcană (om): rezervarea trece și duce la bilet', ! is_wp_error( $hp_r ) && 302 === wp_remote_retrieve_response_code( $hp_r ) && false !== strpos( (string) wp_remote_retrieve_header( $hp_r, 'location' ), 'lbb_bilet=' ) && 1 === $hp_count(), is_wp_error( $hp_r ) ? $hp_r : array( wp_remote_retrieve_response_code( $hp_r ), wp_remote_retrieve_header( $hp_r, 'location' ), substr( wp_strip_all_tags( wp_remote_retrieve_body( $hp_r ) ), 0, 300 ) ) );
+// Biletul nu se poate pune în coș ocolind formularul (fără cursă, locuri ținute și preț calculat): nici cu
+// ?add-to-cart=ID, nici prin Store API (coșul și finalizarea cu blocuri). Cereri HTTP reale, cu cookie-urile sesiunii.
+$dc_pid  = LBB_Install::product_id();
+$dc_cart = function ( $cookies ) {
+	$r = wp_remote_get( rest_url( 'wc/store/v1/cart' ), array( 'timeout' => 20, 'cookies' => $cookies ) );
+	$d = is_wp_error( $r ) ? null : json_decode( wp_remote_retrieve_body( $r ), true );
+	return array( $r, is_array( $d ) && isset( $d['items'] ) ? count( $d['items'] ) : -1 );
+};
+$dc_get  = wp_remote_get( add_query_arg( 'add-to-cart', $dc_pid, home_url( '/' ) ), array( 'timeout' => 20, 'redirection' => 0 ) );
+$dc_ck   = is_wp_error( $dc_get ) ? array() : wp_remote_retrieve_cookies( $dc_get );
+list( $dc_c1, $dc_n1 ) = $dc_cart( $dc_ck );
+$dc_ck2  = is_wp_error( $dc_c1 ) ? array() : wp_remote_retrieve_cookies( $dc_c1 );
+$dc_add  = wp_remote_post( rest_url( 'wc/store/v1/cart/add-item' ), array(
+	'timeout' => 20,
+	'cookies' => $dc_ck2,
+	'headers' => array( 'Content-Type' => 'application/json', 'Nonce' => is_wp_error( $dc_c1 ) ? '' : (string) wp_remote_retrieve_header( $dc_c1, 'nonce' ) ),
+	'body'    => wp_json_encode( array( 'id' => $dc_pid, 'quantity' => 1 ) ),
+) );
+$dc_body = is_wp_error( $dc_add ) ? array() : (array) json_decode( wp_remote_retrieve_body( $dc_add ), true );
+list( , $dc_n2 ) = $dc_cart( $dc_ck2 );
+lbb_t( 'produsul „Bilet autocar” nu intră în coș direct: nici cu ?add-to-cart, nici prin Store API (coșul cu blocuri)', $dc_pid && 0 === $dc_n1 && 400 === wp_remote_retrieve_response_code( $dc_add ) && 'woocommerce_rest_add_to_cart_error' === ( $dc_body['code'] ?? '' ) && 0 === $dc_n2, array( $dc_n1, wp_remote_retrieve_response_code( $dc_add ), $dc_body, $dc_n2 ) );
 // Căutarea din „Rezervări” (clientul sună cu codul, telefonul sau numele).
 $sr_b   = LBB_Bookings::get( (int) $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $hp_rid ) ) );
 $sr_ids = function ( $q, $status = '' ) {
