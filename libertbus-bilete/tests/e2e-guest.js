@@ -347,9 +347,10 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     // Cu un copil la alt preț, rezumatul arată ambele prețuri (altfel „250 MDL / pasager” nu se potrivește cu totalul).
     const note = (await kid.textContent('.lbb-summary-note')).replace(/\s+/g, ' ');
     const total = (await kid.textContent('.lbb-summary-total')).replace(/\s+/g, ' ');
-    const m = note.match(/^(\d+) MDL.*?\/ adult · (\d+) MDL.*?\/ copil/);
-    const t = total.match(/(\d+) MDL/);
-    if (!m || !t || +m[1] + +m[2] !== +t[1]) fail('rezumatul nu explică totalul cu adult + copil: „' + total + '” / „' + note + '”');
+    const m = note.match(/^([\d.]+) MDL.*?\/ adult · ([\d.]+) MDL.*?\/ copil/);
+    const t = total.match(/([\d.]+) MDL/);
+    const nr = x => +x.replace(/\./g, '');
+    if (!m || !t || nr(m[1]) + nr(m[2]) !== nr(t[1])) fail('rezumatul nu explică totalul cu adult + copil: „' + total + '” / „' + note + '”');
     console.log('rezumat:', total, '|', note);
     await kid.selectOption('[data-lbb="adults"]', '2');
     const n2 = await names();

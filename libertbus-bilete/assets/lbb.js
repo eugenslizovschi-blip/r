@@ -269,9 +269,11 @@
 			return o;
 		}
 
+		// Ca pe bilet și în email (LBB_WooCommerce::money): „2.535 MDL”, „61,50 RON”.
 		function money( v, cur ) {
 			var n = Number( v );
-			var text = n % 1 === 0 ? String( n ) : n.toFixed( 2 ).replace( '.', ',' );
+			var parts = ( n % 1 === 0 ? String( n ) : n.toFixed( 2 ) ).split( '.' );
+			var text = parts[ 0 ].replace( /\B(?=(\d{3})+(?!\d))/g, '.' ) + ( parts[ 1 ] ? ',' + parts[ 1 ] : '' );
 			return text + '\u00a0' + cur; // nu se rupe între sumă și monedă
 		}
 

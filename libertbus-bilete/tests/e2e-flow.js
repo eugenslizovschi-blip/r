@@ -39,9 +39,11 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const summary = (await page.textContent('[data-lbb="summary"]')).replace(/\s+/g, ' ');
   console.log('summary:', summary);
   // Totalul = 2 × prețul pe pasager, cu echivalentul în RON afișat.
-  const sTotal = summary.match(/Total de plată: (\d+) MDL \(≈ \d+ RON\)/);
-  const sEach = summary.match(/(\d+) MDL \(≈ \d+ RON\) \/ pasager/);
-  if (!sTotal || !sEach || +sTotal[1] !== 2 * +sEach[1]) console.log('FAIL rezumatul prețului: ' + summary);
+  // Sumele ca pe bilet: „1.200 MDL” (punct la mii).
+  const num = x => +String(x).replace(/\./g, '');
+  const sTotal = summary.match(/Total de plată: ([\d.]+) MDL \(≈ [\d.]+ RON\)/);
+  const sEach = summary.match(/([\d.]+) MDL \(≈ [\d.]+ RON\) \/ pasager/);
+  if (!sTotal || !sEach || num(sTotal[1]) !== 2 * num(sEach[1])) console.log('FAIL rezumatul prețului: ' + summary);
   await page.screenshot({ path: (process.env.OUT || '.') + '/form.png', fullPage: true });
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
   console.log('after submit url:', page.url());
@@ -65,7 +67,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const review = (await page.textContent('.woocommerce-checkout-review-order-table')).replace(/\s+/g, ' ');
   console.log('review:', review.slice(0, 300));
   // În comandă: aceleași locuri, pasageri și total ca în formular.
-  if (!/Locuri: 2/.test(review) || !/Pasageri: Ion Popescu, Maria Popescu/.test(review) || !sTotal || !new RegExp('Total MDL' + sTotal[1] + '\\.00').test(review)) console.log('FAIL comanda nu are locurile, pasagerii sau totalul din formular: ' + review.slice(0, 300));
+  if (!/Locuri: 2/.test(review) || !/Pasageri: Ion Popescu, Maria Popescu/.test(review) || !sTotal || !new RegExp('Total MDL' + num(sTotal[1]) + '\\.00').test(review)) console.log('FAIL comanda nu are locurile, pasagerii sau totalul din formular: ' + review.slice(0, 300));
   await page.screenshot({ path: (process.env.OUT || '.') + '/checkout.png', fullPage: true });
   await page.check('#payment_method_lbb_test');
   // WooCommerce redesenează blocul de plată după alegerea metodei: căutăm bifa din nou, nu păstrăm elementul vechi.
