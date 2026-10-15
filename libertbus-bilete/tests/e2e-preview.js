@@ -137,6 +137,18 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   await Promise.all([admin.waitForNavigation(), (await resent.$('[data-lbb-submit][value="pay"]')).click()]);
   if (!/checkout/.test(admin.url())) fail('previzualizarea nu duce la plată: ' + admin.url() + ' ' + ((await admin.$('.lbb-alert')) ? await admin.textContent('.lbb-alert') : ''));
   await admin.waitForSelector('#payment');
+  // „Înapoi” de la plată: clientul revine în pasul 2, unde era, cu numele; încă un „Înapoi” îl duce la pasul 1 pe
+  // aceeași pagină (nu un „Înapoi” care nu face nimic).
+  const checkoutUrl = admin.url();
+  await admin.goBack();
+  await admin.waitForSelector('.lbb-overlay .lbb-booking', { timeout: 10000 }).catch(() => null);
+  const back1 = await admin.evaluate(() => ({ url: location.href, overlay: !!document.querySelector('.lbb-overlay'), names: [...document.querySelectorAll('.lbb-overlay input[name="lbb_names[]"]')].map(i => i.value).filter(Boolean).length }));
+  await admin.goBack();
+  await admin.waitForTimeout(600);
+  const back2 = await admin.evaluate(() => ({ url: location.href, overlay: !!document.querySelector('.lbb-overlay') }));
+  if (!back1.overlay || back1.names !== 5 || back2.overlay || back2.url !== back1.url) fail('„Înapoi” de la plată nu revine în pasul 2, apoi în pasul 1: ' + JSON.stringify({ back1, back2 }));
+  await admin.goto(checkoutUrl);
+  await admin.waitForSelector('#payment');
   await admin.waitForLoadState('networkidle');
   await admin.locator('#payment_method_lbb_test').check();
   if (await admin.locator('#terms').count()) await admin.locator('#terms').check();

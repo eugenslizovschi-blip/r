@@ -58,10 +58,21 @@
 			overlay.scrollTop = 0;
 			// Fereastra are o intrare proprie în istoric: „Înapoi” pe telefon (Android) o închide și revine la pasul 1,
 			// nu pleacă de pe pagină cu tot ce s-a completat.
+			// Revenit cu „Înapoi” de la plată pe intrarea ferestrei: ea există deja, nu mai adăugăm una.
 			try {
-				window.history.pushState( stateWith( 'lbbStep' + ( index || 0 ), 2 ), '' );
+				if ( ! stepInHistory() ) {
+					window.history.pushState( stateWith( 'lbbStep' + ( index || 0 ), 2 ), '' );
+				}
 				pushedStep = true;
 			} catch ( x ) {}
+		}
+
+		function stepInHistory() {
+			try {
+				return !! ( window.history.state && 2 === window.history.state[ 'lbbStep' + ( index || 0 ) ] );
+			} catch ( x ) {
+				return false;
+			}
 		}
 
 		function closeOverlay( fromHistory ) {
@@ -151,6 +162,7 @@
 		var shownDate = ''; // Data pentru care s-au cerut orele afișate.
 		var memoKey = 'lbbTime' + ( index || 0 );
 		var namesKey = 'lbbNames' + ( index || 0 );
+		var paxKey = 'lbbPax' + ( index || 0 );
 
 		// Starea curentă din istoric, plus o cheie (ce au pus alte formulare de pe pagină rămâne).
 		function stateWith( key, value ) {
@@ -183,6 +195,7 @@
 		// pune la loc (clientul primea „Scrieți numele fiecărui pasager” și le scria din nou). Se țin la „change” (care
 		// vine și înainte de trimitere, la ieșirea din câmp sau la Enter), nu la fiecare literă: Safari limitează câte
 		// replaceState se pot face.
+		// Cu numele se țin și câți adulți și copii sunt: o pagină refăcută pornește cu 1 adult.
 		function rememberNames() {
 			var inputs = el.names.querySelectorAll( 'input' );
 			var names = [];
@@ -190,6 +203,16 @@
 				names.push( inputs[ i ].value );
 			}
 			remember( namesKey, names );
+			remember( paxKey, [ parseInt( el.adults.value || 0, 10 ), el.children ? parseInt( el.children.value || 0, 10 ) : 0 ] );
+		}
+
+		function rememberedPax() {
+			try {
+				var v = window.history.state && window.history.state[ paxKey ];
+				return Object.prototype.toString.call( v ) === '[object Array]' && v.length === 2 ? v : null;
+			} catch ( x ) {
+				return null;
+			}
 		}
 
 		// Numele ținute minte se pun la loc doar cât formularul se reface după „Înapoi”: după ce clientul schimbă singur
@@ -747,7 +770,9 @@
 				} );
 		}
 
-		showStep( root.getAttribute( 'data-step' ) === '2' ? 2 : 1 );
+		// Pasul 2 se redeschide după o eroare de la server și la „Înapoi” de la plată, când clientul plecase din pasul 2
+		// (altfel intrarea ferestrei rămânea în istoric și următorul „Înapoi” nu făcea nimic vizibil).
+		showStep( root.getAttribute( 'data-step' ) === '2' || stepInHistory() ? 2 : 1 );
 
 		// După o eroare de la server pagina se reîncarcă sus: ducem clientul la mesaj (important pe telefon).
 		// După showStep, pentru că mutarea formularului în fereastră ar pierde focusul.
@@ -780,7 +805,17 @@
 		el.date.min = cfg.today;
 		el.date.max = cfg.maxDate;
 		el.date.value = preset.date && preset.date >= cfg.today ? preset.date : cfg.today;
+		// Pagina refăcută la „Înapoi” (fără date trimise de la server): pornește cu adulții și copiii ținuți minte.
+		var pax = preset.names && preset.names.length ? null : rememberedPax();
+		if ( pax ) {
+			preset.adults = pax[ 0 ];
+			preset.children = pax[ 1 ];
+		}
 		fillCounts();
+		// Datele venite de la server (după o eroare) se țin minte și ele, pentru un „Înapoi” de mai târziu de la plată.
+		if ( preset.names && preset.names.length ) {
+			rememberNames();
+		}
 		loadDepartures();
 
 		el.from.addEventListener( 'change', function () {
@@ -808,8 +843,10 @@
 			fillCounts();
 		} );
 		el.adults.addEventListener( 'change', fillCounts );
+		el.adults.addEventListener( 'change', rememberNames );
 		if ( el.children ) {
 			el.children.addEventListener( 'change', fillCounts );
+			el.children.addEventListener( 'change', rememberNames );
 		}
 		for ( var r = 0; r < radios.length; r++ ) {
 			radios[ r ].addEventListener( 'change', function () {
