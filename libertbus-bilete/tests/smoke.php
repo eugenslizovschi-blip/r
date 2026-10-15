@@ -272,6 +272,26 @@ lbb_t( 'plata întârziată peste capacitate: emailul de avertizare merge la bir
 $o2 = wc_get_order( $o2->get_id() );
 $notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $o2->get_id() ) ), 'content' );
 lbb_t( 'plata întârziată: biletul se emite', 'confirmed' === LBB_Bookings::get_by_token( $late['token'] )['status'] );
+// „Finalizare automată” (implicit pornită): comanda plătită doar cu bilete devine „Finalizată” (clientul primește
+// imediat emailul cu biletul); cu setarea oprită sau într-o comandă cu alte produse, rămâne cum o lasă WooCommerce.
+$ac_keep  = get_option( 'lbb_settings' );
+$ac_mixed = wc_create_order();
+$ac_mixed->add_item( ( function () use ( $late ) {
+	$it = new WC_Order_Item_Product();
+	$it->set_product( wc_get_product( LBB_Install::product_id() ) );
+	$it->add_meta_data( '_lbb_token', $late['token'], true );
+	return $it;
+} )() );
+$ac_mixed->add_item( new WC_Order_Item_Product() ); // alt produs, fără bilet
+$ac_mixed->update_meta_data( '_lbb_tickets', 'yes' );
+$ac_mixed->save();
+$ac_on    = LBB_WooCommerce::autocomplete( 'processing', $o2->get_id(), $o2 );
+$ac_mix   = LBB_WooCommerce::autocomplete( 'processing', $ac_mixed->get_id(), $ac_mixed );
+update_option( 'lbb_settings', array_merge( (array) $ac_keep, array( 'autocomplete' => 0 ) ) );
+$ac_off   = LBB_WooCommerce::autocomplete( 'processing', $o2->get_id(), $o2 );
+update_option( 'lbb_settings', $ac_keep );
+$ac_mixed->delete( true );
+lbb_t( 'finalizare automată: comanda plătită doar cu bilete devine „Finalizată”; oprită din Setări sau cu alte produse în comandă, rămâne „În procesare”', 'completed' === $o2->get_status() && 'completed' === $ac_on && 'processing' === $ac_off && 'processing' === $ac_mix, array( $o2->get_status(), $ac_on, $ac_off, $ac_mix ) );
 lbb_t( 'plata întârziată: notă de avertizare', (bool) preg_grep( '/ATENȚIE/u', $notes ), $notes );
 lbb_t( 'comanda doar cu bilete se finalizează automat', 'completed' === $o2->get_status(), $o2->get_status() );
 // Pe pagina comenzii din WooCommerce, biroul vede biletele comenzii, cu linkul spre fiecare (doar cu drepturi de admin).
