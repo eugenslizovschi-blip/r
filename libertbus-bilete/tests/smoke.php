@@ -399,6 +399,15 @@ $_POST   = $pd_post;
 $pd_err->setValue( null, null );
 $pd_cfg  = preg_match( '/data-lbb-config="([^"]+)"/', $pd_html, $pd_m ) ? json_decode( base64_decode( html_entity_decode( $pd_m[1], ENT_QUOTES ) ), true ) : null;
 lbb_t( 'după o eroare, data trimisă „25.12.2026” revine în formular ca 2026-12-25', isset( $pd_cfg['preset']['date'] ) && '2026-12-25' === $pd_cfg['preset']['date'], isset( $pd_cfg['preset'] ) ? $pd_cfg['preset'] : $pd_html );
+// După „ați vrut să scrieți ion@gmail.com?”, câmpul păstrează ce a scris clientul (sanitize_email îl golea), escapat.
+$pd_err->setValue( null, new WP_Error( 'lbb_email', 'test' ) );
+$_POST   = array( 'lbb_email' => ' ion@gmail ' );
+$pe_html = LBB_Frontend::shortcode( array() );
+$_POST   = array( 'lbb_email' => 'a"><b>x@gmail.con' );
+$pe_xss  = LBB_Frontend::shortcode( array() );
+$_POST   = $pd_post;
+$pd_err->setValue( null, null );
+lbb_t( 'după o eroare la email, câmpul păstrează adresa scrisă („ion@gmail”), ca s-o corecteze, nu-l golește; valoarea e escapată', (bool) preg_match( '/name="lbb_email"[^>]* value="ion@gmail"/', $pe_html ) && ! preg_match( '/"><b>x/', $pe_xss ), preg_match( '/<input type="email"[^>]*>/', $pe_html, $pe_m ) ? $pe_m[0] : '' );
 // Culoarea butoanelor aleasă deschisă (ex. galben): textul devine închis, ca „Rezerv” să se citească.
 $ai_keep = get_option( 'lbb_settings' );
 update_option( 'lbb_settings', array_merge( (array) $ai_keep, array( 'accent_color' => '#ffd700' ) ) );

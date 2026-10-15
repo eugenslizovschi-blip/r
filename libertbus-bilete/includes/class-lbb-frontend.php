@@ -557,7 +557,7 @@ class LBB_Frontend {
 						<input type="tel" name="lbb_phone" required autocomplete="tel" inputmode="tel" maxlength="30" placeholder="+373" value="<?php echo esc_attr( isset( $posted['lbb_phone'] ) ? sanitize_text_field( $posted['lbb_phone'] ) : '' ); ?>">
 					</label>
 					<label class="lbb-field"><span><?php esc_html_e( 'Email (aici primiți biletul)', 'libertbus-bilete' ); ?></span>
-						<input type="email" name="lbb_email" required autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="190" value="<?php echo esc_attr( isset( $posted['lbb_email'] ) ? sanitize_email( $posted['lbb_email'] ) : '' ); ?>">
+						<input type="email" name="lbb_email" required autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="190" value="<?php echo esc_attr( isset( $posted['lbb_email'] ) ? trim( sanitize_text_field( $posted['lbb_email'] ) ) : '' ); ?>">
 					</label>
 				</div>
 
