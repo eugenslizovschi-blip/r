@@ -28,7 +28,7 @@ $tomorrow = ( new DateTimeImmutable( 'tomorrow', $tz ) )->format( 'Y-m-d' );
 
 // O rulare oprită la jumătate (ex. o eroare fatală) nu-și face curățenia: rutele de test rămase cu rezervările lor
 // și rezervările fără rută ar face rularea următoare să pice (locuri ocupate, limita de rezervări pe telefon).
-foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'LimitaA', 'LimitaB' ), array( 'PlinA', 'PlinB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ), array( 'CosA', 'CosB' ) ) as $lbb_pair ) {
+foreach ( array( array( 'TestA', 'TestB' ), array( 'TestA', 'TestC' ), array( 'TestA', 'Orașul Nou' ), array( 'StergeA', 'StergeB' ), array( 'LungA', 'LungB' ), array( 'ReamintA', 'ReamintB' ), array( 'LimitaA', 'LimitaB' ), array( 'PlinA', 'PlinB' ), array( 'UrcareA', 'UrcareB' ), array( 'PretA', 'PretB' ), array( 'AziA', 'AziB' ), array( 'InchisA', 'InchisB' ), array( 'OrarA', 'OrarB' ), array( 'ZileA', 'ZileB' ), array( 'CurseA', 'CurseB' ), array( 'Fălești, centru', 'Târgu Mureș' ), array( 'HpA', 'HpB' ), array( 'TzA', 'TzB' ), array( 'StearsaA', 'StearsaB' ), array( 'CosA', 'CosB' ), array( 'PlataA', 'PlataB' ) ) as $lbb_pair ) {
 	$lbb_old = LBB_Routes::find( $lbb_pair[0], $lbb_pair[1] );
 	if ( $lbb_old ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . LBB_Bookings::table() . ' WHERE route_id = %d', $lbb_old['id'] ) );
@@ -180,6 +180,46 @@ $fr_page = wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $fr['ticket
 lbb_t( 'comanda plătită și rambursată, trecută înapoi în „așteaptă plata”: biletul nu cere o nouă plată', false === strpos( $fr_page, 'Achită acum' ) && false === strpos( $fr_page, 'Adaugă în calendar' ), substr( wp_strip_all_tags( $fr_page ), 0, 300 ) );
 $fo->update_status( 'cancelled' ); // eliberează locul ținut din nou, altfel testele de mai jos nu mai au locuri
 $fo->delete( true );
+// Plata reluată din „Plătește comanda” după ce locul a fost luat de altcineva: WooCommerce primește o eroare (și nu
+// încasează), iar rezervarea celuilalt client rămâne; cu locul liber din nou, plata reluată ține locul.
+$bp_r = LBB_Routes::save( array( 'origin' => 'PlataA', 'destination' => 'PlataB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'capacity' => 1, 'active' => 1 ) );
+$bp   = array();
+if ( is_int( $bp_r ) ) {
+	if ( ! WC()->session ) {
+		wc_load_cart();
+	}
+	$bp_route = LBB_Routes::get( $bp_r );
+	$bp_h     = LBB_Bookings::create_hold( $bp_route, $tomorrow, '10:00', 1, 0, array( 'Plata Veche' ), '+37369000066', 'bp@example.com', 'MDL' );
+	$bp_o     = wc_create_order();
+	$bp_i     = new WC_Order_Item_Product();
+	$bp_i->set_product( wc_get_product( LBB_Install::product_id() ) );
+	$bp_i->add_meta_data( '_lbb_token', $bp_h['token'], true );
+	$bp_o->add_item( $bp_i );
+	$bp_o->set_total( 50 );
+	$bp_o->save();
+	LBB_WooCommerce::attach_order( $bp_o );
+	$bp_o->update_status( 'failed' );
+	$bp_other = LBB_Bookings::create_hold( $bp_route, $tomorrow, '10:00', 1, 0, array( 'Alt Client' ), '+37369000065', 'alt@example.com', 'MDL' );
+	$bp_other = is_array( $bp_other ) ? LBB_Bookings::reserve( $bp_other['token'] ) : null;
+	wc_clear_notices();
+	LBB_WooCommerce::before_pay( wc_get_order( $bp_o->get_id() ) );
+	$bp['full_err']   = wc_notice_count( 'error' );
+	$bp['full_mine']  = LBB_Bookings::get_by_token( $bp_h['token'] )['status'];
+	$bp['full_other'] = $bp_other ? LBB_Bookings::get( $bp_other['id'] )['status'] : null;
+	if ( $bp_other ) {
+		LBB_Bookings::cancel( $bp_other['id'] );
+	}
+	wc_clear_notices();
+	LBB_WooCommerce::before_pay( wc_get_order( $bp_o->get_id() ) );
+	$bp['free_err']  = wc_notice_count( 'error' );
+	$bp['free_mine'] = LBB_Bookings::get_by_token( $bp_h['token'] )['status'];
+	wc_clear_notices();
+	$bp_o->update_status( 'cancelled' );
+	$bp_o->delete( true );
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $bp_r ) );
+	LBB_Routes::delete( $bp_r );
+}
+lbb_t( 'plata reluată când locul a fost luat între timp: eroare la plată, rezervarea celuilalt rămâne; cu loc liber, locul se ține din nou', 1 === ( $bp['full_err'] ?? null ) && 'cancelled' === $bp['full_mine'] && 'reserved' === $bp['full_other'] && 0 === $bp['free_err'] && 'pending' === $bp['free_mine'], $bp );
 
 // O comandă neplătită niciodată, cu bilet care are deja cod (ex. comandă refăcută de birou): „Achită acum” duce la plată.
 $pn_h = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 1, 0, array( 'Plata Noua' ), '+37369000087', 'pn@example.com', 'MDL' );
