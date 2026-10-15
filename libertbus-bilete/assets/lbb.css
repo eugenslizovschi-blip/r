@@ -146,6 +146,11 @@ html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
 	.lbb-overlay .lbb-actions { padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); }
 	.lbb-overlay .lbb-actions { grid-template-columns: 1fr; gap: 8px; }
 }
+/* Telefon ținut orizontal (ecran jos): butoanele stau alături, altfel bara lipită jos ia jumătate din ecran și, cu
+   tastatura deschisă, acoperă câmpul în care scrie clientul. */
+@media (max-height: 500px) and (min-width: 480px) {
+	.lbb-overlay .lbb-actions { grid-template-columns: 1fr 1fr; }
+}
 
 /* Ecrane mici (ex. iPhone SE): în fereastra pasului 2 rezumatul se strânge, ca să încapă numele. */
 @media (max-height: 740px) {

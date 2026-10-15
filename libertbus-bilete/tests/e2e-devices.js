@@ -11,6 +11,8 @@ const LIST = [
   ['iPhone 14 Pro Max', devices['iPhone 14 Pro Max']],
   ['Galaxy S9+ (360px)', devices['Galaxy S9+']],
   ['Pixel 7', devices['Pixel 7']],
+  ['iPhone SE landscape', devices['iPhone SE landscape']],
+  ['Pixel 7 landscape', devices['Pixel 7 landscape']],
   ['iPad Mini', devices['iPad Mini']],
   ['iPad landscape', devices['iPad (gen 7) landscape']],
   ['Laptop 1366', { viewport: { width: 1366, height: 768 } }],
@@ -71,7 +73,9 @@ async function check(browser, state, [name, dev]) {
       const phoneLines = phone ? phone.getClientRects().length : 0;
       const tot = ov.querySelector('.lbb-summary-total');
       const totalSplit = tot ? /\d [A-Z]{3}/.test(tot.textContent) : false;
-      return { bs, panelW: Math.round(panel.width), hScroll: ov.scrollWidth > ov.clientWidth + 1, backOk: !back || backColor === accent, backColor, phoneLines, totalSplit };
+      // Bara cu butoane lipită jos nu ia mai mult de 30% din ecran (pe telefon orizontal, cu tastatura, ar acoperi câmpurile).
+      const act = ov.querySelector('.lbb-actions'); const actH = act ? act.getBoundingClientRect().height : 0;
+      return { bs, panelW: Math.round(panel.width), hScroll: ov.scrollWidth > ov.clientWidth + 1, backOk: !back || backColor === accent, backColor, phoneLines, totalSplit, actPct: Math.round(100 * actH / innerHeight) };
     });
     if (!m2) r.issues.push('fereastra pasului 2 nu s-a deschis');
     else {
@@ -80,6 +84,7 @@ async function check(browser, state, [name, dev]) {
       if (!m2.backOk) r.issues.push('„Schimbă cursa” are altă culoare: ' + m2.backColor);
       if (m2.phoneLines !== 1) r.issues.push('telefonul de la final e rupt pe ' + m2.phoneLines + ' rânduri (sau lipsește)');
       if (m2.totalSplit) r.issues.push('suma și moneda se pot despărți pe rânduri diferite');
+      if (m2.actPct > 30) r.issues.push('butoanele de jos iau ' + m2.actPct + '% din înălțimea ecranului');
       r.step2 = 'panou ' + m2.panelW + 'px, butoane ' + m2.bs.map(b => b.w + '×' + b.h).join(' / ');
     }
     await p.screenshot({ path: `${OUT}/${name.replace(/\W+/g, '_')}-2.png` });
