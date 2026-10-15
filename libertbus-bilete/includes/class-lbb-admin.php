@@ -808,6 +808,14 @@ class LBB_Admin {
 			'cancelled' => __( 'Anulate', 'libertbus-bilete' ),
 			'hold'      => __( 'În coș', 'libertbus-bilete' ),
 		);
+		// Pe rând starea unei singure rezervări: „Plătită”, nu „Plătite” (pluralul e pentru filtre).
+		$row_labels = array(
+			'confirmed' => __( 'Plătită', 'libertbus-bilete' ),
+			'reserved'  => __( 'Rezervată (plata la urcare)', 'libertbus-bilete' ),
+			'pending'   => __( 'Așteaptă plata', 'libertbus-bilete' ),
+			'cancelled' => __( 'Anulată', 'libertbus-bilete' ),
+			'hold'      => __( 'În coș', 'libertbus-bilete' ),
+		);
 		echo '<ul class="subsubsub">';
 		$counts = LBB_Bookings::status_counts( $search );
 		$links  = array();
@@ -842,7 +850,7 @@ class LBB_Admin {
 		}
 		foreach ( $rows as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
-			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( LBB_Bookings::route_name( $b ) ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $labels[ $b['status'] ] ) ? $labels[ $b['status'] ] : $b['status'] ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . self::contact_links( $b ) . '</td><td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ticket_code_html() și payment_label() escapează singure.
+			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( LBB_Bookings::route_name( $b ) ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $row_labels[ $b['status'] ] ) ? $row_labels[ $b['status'] ] : $b['status'] ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . self::contact_links( $b ) . '</td><td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ticket_code_html() și payment_label() escapează singure.
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a> (' . esc_html( wc_get_order_status_name( $order->get_status() ) ) . ')';
 			}
