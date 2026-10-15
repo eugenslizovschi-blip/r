@@ -127,10 +127,20 @@ class LBB_Legal {
 		<p><?php esc_html_e( 'Butonul creează paginile care lipsesc, cu texte-model. Politica de confidențialitate și cea de cookies se publică imediat (bannerul de cookies trimite la ele); termenii, anularea și plata online rămân ciorne: completați întâi datele firmei mai sus, citiți textele, ajustați-le cu juristul și publicați-le. Le legați apoi în meniul de jos al site-ului.', 'libertbus-bilete' ); ?></p>
 		<table class="widefat striped" style="max-width:700px"><tbody>
 		<?php foreach ( self::pages() as $key => $page ) : ?>
-			<?php $id = self::page_id( $key ); ?>
+			<?php
+			$id = self::page_id( $key );
+			// Fără drept de editare a paginii (ex. alt rol decât administratorul) linkul de editare lipsește: rămâne titlul.
+			$edit   = $id ? get_edit_post_link( $id ) : '';
+			$status = $id ? get_post_status_object( (string) get_post_status( $id ) ) : null;
+			?>
 			<tr><td><?php echo esc_html( $page['title'] ); ?></td><td>
 				<?php if ( $id ) : ?>
-					<a href="<?php echo esc_url( get_edit_post_link( $id ) ); ?>"><?php echo esc_html( get_the_title( $id ) ); ?></a> — <?php echo esc_html( get_post_status_object( get_post_status( $id ) )->label ); ?>
+					<?php if ( $edit ) : ?>
+						<a href="<?php echo esc_url( $edit ); ?>"><?php echo esc_html( get_the_title( $id ) ); ?></a>
+					<?php else : ?>
+						<?php echo esc_html( get_the_title( $id ) ); ?>
+					<?php endif; ?>
+					— <?php echo esc_html( $status ? $status->label : (string) get_post_status( $id ) ); ?>
 				<?php else : ?>
 					<em><?php esc_html_e( 'nu există', 'libertbus-bilete' ); ?></em>
 				<?php endif; ?>

@@ -1303,6 +1303,28 @@ if ( is_int( $ln_n ) && $ln_n ) {
 }
 lbb_t( 'rută cu un câmp prea lung: eroare clară, nu „salvată”; 255 de caractere (cu diacritice) încap', is_wp_error( $ln_u ) && false !== strpos( $ln_u->get_error_message(), 'Locul de urcare e prea lung' ) && is_wp_error( $ln_n ) && false !== strpos( $ln_n->get_error_message(), 'Plecarea e prea lung' ) && $ln_ok === $ln_r && 255 === mb_strlen( $ln_b ), array( $ln_u, $ln_n, $ln_ok, mb_strlen( $ln_b ) ) );
 
+// Paginile legale din Setări pentru cine nu poate edita paginile: titlul fără link, fără avertismente PHP
+// (get_edit_post_link() dă null, iar esc_url( null ) scria „Deprecated” în debug.log); adminul vede linkul de editare.
+$lg_id   = LBB_Legal::page_id( 'privacy' );
+$lg_user = get_current_user_id();
+$lg_warn = array();
+set_error_handler( function ( $no, $str ) use ( &$lg_warn ) {
+	$lg_warn[] = $str;
+	return true;
+}, E_DEPRECATED | E_NOTICE | E_WARNING | E_USER_DEPRECATED | E_USER_NOTICE | E_USER_WARNING );
+wp_set_current_user( 0 );
+ob_start();
+LBB_Legal::settings_box();
+$lg_anon = ob_get_clean();
+restore_error_handler();
+$lg_admins = get_users( array( 'role' => 'administrator', 'number' => 1, 'fields' => 'ID' ) );
+wp_set_current_user( $lg_admins ? (int) $lg_admins[0] : 1 );
+ob_start();
+LBB_Legal::settings_box();
+$lg_adm = ob_get_clean();
+wp_set_current_user( $lg_user );
+lbb_t( 'paginile legale din Setări fără drept de editare: titlul fără link și fără avertismente PHP; adminul are linkul de editare', $lg_id && ! $lg_warn && false !== strpos( $lg_anon, esc_html( get_the_title( $lg_id ) ) ) && false === strpos( $lg_anon, 'post.php?post=' . $lg_id ) && false !== strpos( $lg_adm, 'post.php?post=' . $lg_id ), array( $lg_id, $lg_warn ) );
+
 // Accesibilitate în admin: explicația de sub un câmp e legată de el (aria-describedby), fiecare id o singură dată.
 ob_start();
 LBB_Admin::page_settings();
