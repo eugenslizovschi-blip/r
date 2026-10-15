@@ -919,6 +919,9 @@ $un_miss = array_values( array_filter( $un_opts, function ( $o ) use ( $un_file 
 	return false === strpos( $un_file, "'" . $o . "'" );
 } ) );
 lbb_t( 'dezinstalarea șterge toate opțiunile plugin-ului (' . count( $un_opts ) . ')', count( $un_opts ) >= 6 && ! $un_miss, $un_miss );
+// Și datele temporare lbb_* (set_transient), cu tot cu timpul lor de expirare.
+$un_tr = (bool) preg_match( "/set_transient\\(\\s*'lbb_/", $un_src );
+lbb_t( 'dezinstalarea șterge și datele temporare lbb_* (transient + timeout)', ! $un_tr || ( false !== strpos( $un_file, '\\\\_transient\\\\_lbb\\\\_%' ) && false !== strpos( $un_file, '\\\\_transient\\\\_timeout\\\\_lbb\\\\_%' ) ), array( $un_tr ) );
 
 // Pagina „comandă primită” înainte de confirmarea băncii: mesaj cu „Verifică din nou” spre aceeași pagină.
 $ty_h = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), gmdate( 'Y-m-d', time() + 5 * DAY_IN_SECONDS ), '10:00', 1, 0, array( 'Asteapta Banca' ), '+37369000096', 'ty@example.com', 'MDL' );
