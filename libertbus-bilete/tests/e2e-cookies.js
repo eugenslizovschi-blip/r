@@ -200,6 +200,26 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const body = await p.textContent('body');
   if (r.status() !== 200 || !/Google Analytics/.test(body) || !/Politica de cookies/.test(body)) fail('Politica de confidențialitate lipsește sau nu pomenește cookies');
   if (/completați în LibertBus/.test(body)) fail('Politica de confidențialitate are câmpuri necompletate');
+  // Ecran foarte jos (telefon orizontal cu barele browserului): cu „Setări” deschis bannerul rămâne în ecran și se
+  // derulează în el, ca „Detalii” de sus și „Salvez alegerea” să se poată atinge.
+  {
+    const ctx = await browser.newContext({ viewport: { width: 568, height: 260 } });
+    await offline(ctx);
+    const page = await ctx.newPage();
+    await page.goto(BASE + '/balti-iasi/');
+    await page.waitForSelector('#lbb-cc:not([hidden])');
+    await page.click('#lbb-cc [data-lbb-cc="settings"]');
+    await page.waitForTimeout(300);
+    const low = await page.evaluate(() => {
+      const cc = document.getElementById('lbb-cc'); const r = cc.getBoundingClientRect();
+      const inView = el => { const q = el.getBoundingClientRect(); return q.top >= r.top - 1 && q.bottom <= r.bottom + 1 && q.top >= 0 && q.bottom <= innerHeight; };
+      cc.scrollTop = 0; const link = cc.querySelector('.lbb-cc-text a'); const top = link && inView(link);
+      cc.scrollTop = cc.scrollHeight; const save = cc.querySelector('.lbb-cc-save'); const bottom = save && inView(save);
+      return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, linkReachable: !!top, saveReachable: !!bottom };
+    });
+    if (low.top < 0 || low.bottom > low.vh || !low.linkReachable || !low.saveReachable) fail('ecran jos (568×260): bannerul cu „Setări” iese din ecran sau nu se poate derula: ' + JSON.stringify(low));
+    await ctx.close();
+  }
   console.log(process.exitCode ? 'COOKIES: PROBLEME' : 'COOKIES: OK');
   await browser.close();
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

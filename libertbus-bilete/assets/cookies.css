@@ -15,6 +15,11 @@
 	box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
 	font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 	box-sizing: border-box;
+	/* Pe un ecran jos (telefon orizontal, text mărit) bannerul cu „Setări” deschis nu iese pe sus: se derulează în el. */
+	max-height: calc(100% - 24px);
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior: contain;
 }
 .lbb-cc[hidden] { display: none !important; }
 .lbb-cc *, .lbb-cc *::before, .lbb-cc *::after { box-sizing: border-box; }
