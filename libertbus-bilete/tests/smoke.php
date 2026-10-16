@@ -1762,6 +1762,21 @@ lbb_t( 'căutare după telefon scris local, cu spații', in_array( $sr_b['id'], 
 $sr_intl0 = '+373 0' . substr( $sr_b['phone'], 4, 2 ) . ' ' . substr( $sr_b['phone'], 6 ); // „+373 06x xxxxxx”
 lbb_t( 'căutare după telefon internațional scris cu 0 după prefix („+373 069 …”)', in_array( $sr_b['id'], $sr_ids( $sr_intl0 ), true ), $sr_intl0 );
 lbb_t( 'căutare după email', in_array( $sr_b['id'], $sr_ids( 'hp@example.com' ), true ) );
+// Fusul WordPress ca decalaj fix „UTC+2” (ca pe site-ul live): ora creării din Rezervări e cea din Chișinău
+// (vara UTC+3), nu cu o oră în urmă.
+$tz_keep = array( get_option( 'timezone_string' ), get_option( 'gmt_offset' ), $sr_b['created_at'] );
+update_option( 'timezone_string', '' );
+update_option( 'gmt_offset', 2 );
+$wpdb->update( LBB_Bookings::table(), array( 'created_at' => '2026-07-15 10:00:00' ), array( 'id' => $sr_b['id'] ) );
+$_GET = array( 'page' => 'lbb-bookings', 'q' => $sr_b['ticket_code'] );
+ob_start();
+LBB_Admin::page_bookings();
+$tz_html = ob_get_clean();
+$_GET = array();
+$wpdb->update( LBB_Bookings::table(), array( 'created_at' => $tz_keep[2] ), array( 'id' => $sr_b['id'] ) );
+update_option( 'timezone_string', $tz_keep[0] );
+update_option( 'gmt_offset', $tz_keep[1] );
+lbb_t( 'Rezervări: ora creării în ora Chișinăului și vara cu fusul WordPress „UTC+2” (15.07 10:00 UTC → 13:00)', false !== strpos( $tz_html, '15.07.2026 13:00' ) && false === strpos( $tz_html, '15.07.2026 12:00' ), preg_match( '/15\.07\.2026 \d\d:\d\d/', $tz_html, $tz_m ) ? $tz_m[0] : '' );
 lbb_t( 'căutare fără rezultat', array() === $sr_ids( 'zzqq-nimic' ) );
 $sr_h = LBB_Bookings::create_hold( LBB_Routes::get( $hp_rid ), $tomorrow, '10:00', 1, 0, array( 'Țîrdea Ștefan' ), '+37369555444', 'x@example.com' );
 lbb_t( 'căutare după nume cu diacritice', ! is_wp_error( $sr_h ) && in_array( (int) $sr_h['id'], $sr_ids( 'Țîrdea', 'hold' ), true ), $sr_h );

@@ -310,6 +310,14 @@ class LBB_Settings {
 	}
 
 	/**
+	 * Un moment (timestamp) afișat în fusul orar al orarului. Cu fusul WordPress pus ca decalaj fix „UTC+2”,
+	 * get_date_from_gmt()/wp_date() ar arăta vara ora cu o oră în urmă față de Chișinău.
+	 */
+	public static function local_time( $format, $timestamp ) {
+		return wp_date( $format, (int) $timestamp, self::tz() );
+	}
+
+	/**
 	 * Data de azi (Y-m-d) în fusul orar al orarului.
 	 */
 	public static function today() {

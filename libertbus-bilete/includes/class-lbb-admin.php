@@ -205,7 +205,7 @@ class LBB_Admin {
 		$recent = is_array( $failed ) && ! empty( $failed['time'] ) && time() - (int) $failed['time'] < 7 * DAY_IN_SECONDS;
 		$add( 'mail', $recent ? 'warn' : true, __( 'Emailurile pleacă fără erori (ultimele 7 zile)', 'libertbus-bilete' ),
 			/* translators: 1: data și ora erorii, 2: mesajul de eroare */
-			$recent ? sprintf( __( 'Ultima eroare: %1$s — %2$s. Clienții pot rămâne fără bilet pe email: verificați emailul hostingului sau instalați un plugin SMTP.', 'libertbus-bilete' ), wp_date( 'd.m.Y H:i', (int) $failed['time'] ), rtrim( (string) $failed['message'], '. ' ) ) : '',
+			$recent ? sprintf( __( 'Ultima eroare: %1$s — %2$s. Clienții pot rămâne fără bilet pe email: verificați emailul hostingului sau instalați un plugin SMTP.', 'libertbus-bilete' ), LBB_Settings::local_time( 'd.m.Y H:i', (int) $failed['time'] ), rtrim( (string) $failed['message'], '. ' ) ) : '',
 			admin_url( 'plugin-install.php?s=smtp&tab=search&type=term' ) );
 
 		// Programată nu înseamnă că rulează: WP-Cron pornește doar la vizite pe site și poate fi oprit (DISABLE_WP_CRON).
@@ -216,7 +216,7 @@ class LBB_Admin {
 			$stale ? sprintf(
 				/* translators: %s: data și ora ultimei rulări sau „niciodată” */
 				__( 'Ultima rulare: %s. Fără ea locurile din coșurile abandonate nu se eliberează, iar datele personale nu se șterg după 3 ani. WP-Cron rulează doar la vizite pe site: cereți hostingului un cron real care apelează wp-cron.php la câteva minute.', 'libertbus-bilete' ),
-				$last ? wp_date( 'd.m.Y H:i', $last ) : __( 'niciodată', 'libertbus-bilete' )
+				$last ? LBB_Settings::local_time( 'd.m.Y H:i', $last ) : __( 'niciodată', 'libertbus-bilete' )
 			) : '' );
 
 		return $items;
@@ -866,10 +866,10 @@ class LBB_Admin {
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a> (' . esc_html( wc_get_order_status_name( $order->get_status() ) ) . ')';
 			}
-			echo '</td><td>' . esc_html( get_date_from_gmt( $b['created_at'], 'd.m.Y H:i' ) );
+			echo '</td><td>' . esc_html( LBB_Settings::local_time( 'd.m.Y H:i', strtotime( $b['created_at'] . ' UTC' ) ) );
 			// Clientul spune „n-am primit nimic”: biroul vede dacă a plecat reamintirea de cu o zi înainte.
 			if ( ! empty( $b['reminded_at'] ) ) {
-				echo '<br><small class="lbb-reminded">' . esc_html__( 'reamintit', 'libertbus-bilete' ) . ' ' . esc_html( get_date_from_gmt( $b['reminded_at'], 'd.m H:i' ) ) . '</small>';
+				echo '<br><small class="lbb-reminded">' . esc_html__( 'reamintit', 'libertbus-bilete' ) . ' ' . esc_html( LBB_Settings::local_time( 'd.m H:i', strtotime( $b['reminded_at'] . ' UTC' ) ) ) . '</small>';
 			}
 			echo '</td><td>';
 			if ( 'reserved' === $b['status'] ) {
