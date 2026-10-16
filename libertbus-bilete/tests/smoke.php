@@ -994,6 +994,7 @@ LBB_Tickets::thankyou( $ty_o->get_id() );
 $ty_last = ob_get_clean();
 $_GET = array();
 lbb_t( 'comandă neconfirmată: pagina se reîncarcă singură la 5 s (lbb_wait=1, 2 …), de cel mult 6 ori; apoi rămâne doar butonul', false !== strpos( $ty_html, 'setTimeout(' ) && false !== strpos( $ty_html, 'lbb_wait=1' ) && false !== strpos( $ty_html, '5000' ) && false === strpos( $ty_last, 'setTimeout(' ) && false !== strpos( $ty_last, 'Verifică din nou' ), array( $ty_html, $ty_last ) );
+lbb_t( 'comandă neconfirmată: cât se reîncarcă scrie „Pagina se actualizează singură”; după ultima încercare dă telefonul biroului (link de apel)', false !== strpos( $ty_html, 'Pagina se actualizează singură' ) && false === strpos( $ty_html, 'sunați la' ) && false !== strpos( $ty_last, 'sunați la ' . LBB_Settings::phone_link() ) && false === strpos( $ty_last, 'se actualizează singură' ), array( wp_strip_all_tags( $ty_html ), wp_strip_all_tags( $ty_last ) ) );
 // Plata refuzată: pagina nu mai promite bilete (WooCommerce arată deja „plata nu a reușit”).
 $ty_o->update_status( 'failed' );
 ob_start();
