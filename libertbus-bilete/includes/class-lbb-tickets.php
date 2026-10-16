@@ -390,6 +390,13 @@ class LBB_Tickets {
 			// Confirmarea băncii poate veni la câteva secunde după revenirea pe site: clientul are ce apăsa.
 			echo '<div class="woocommerce-info lbb-awaiting">' . esc_html__( 'Biletele se emit imediat după confirmarea plății și vă vin pe email. De obicei durează câteva secunde.', 'libertbus-bilete' )
 				. ' <a class="button" href="' . esc_url( $order->get_checkout_order_received_url() ) . '">' . esc_html__( 'Verifică din nou', 'libertbus-bilete' ) . '</a></div>';
+			// Și singură: pagina se reîncarcă la 5 secunde, de cel mult 6 ori (cât durează de obicei confirmarea);
+			// apoi rămâne butonul, fără reîncărcări la nesfârșit.
+			$wait = isset( $_GET['lbb_wait'] ) ? absint( $_GET['lbb_wait'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
+			if ( $wait < 6 ) {
+				$next = add_query_arg( 'lbb_wait', $wait + 1, $order->get_checkout_order_received_url() );
+				wp_print_inline_script_tag( 'setTimeout(function(){window.location.replace(' . wp_json_encode( esc_url_raw( $next ) ) . ');},5000);' );
+			}
 			return;
 		}
 		echo '<h2>' . esc_html( _n( 'Biletul dumneavoastră', 'Biletele dumneavoastră', count( $tickets ), 'libertbus-bilete' ) ) . '</h2>';

@@ -988,6 +988,12 @@ ob_start();
 LBB_Tickets::thankyou( $ty_o->get_id() );
 $ty_html = ob_get_clean();
 lbb_t( 'comandă neconfirmată încă: „Verifică din nou” duce la aceeași pagină de comandă', false !== strpos( $ty_html, 'Verifică din nou' ) && false !== strpos( $ty_html, esc_url( $ty_o->get_checkout_order_received_url() ) ), $ty_html );
+$_GET = array( 'lbb_wait' => '6' );
+ob_start();
+LBB_Tickets::thankyou( $ty_o->get_id() );
+$ty_last = ob_get_clean();
+$_GET = array();
+lbb_t( 'comandă neconfirmată: pagina se reîncarcă singură la 5 s (lbb_wait=1, 2 …), de cel mult 6 ori; apoi rămâne doar butonul', false !== strpos( $ty_html, 'setTimeout(' ) && false !== strpos( $ty_html, 'lbb_wait=1' ) && false !== strpos( $ty_html, '5000' ) && false === strpos( $ty_last, 'setTimeout(' ) && false !== strpos( $ty_last, 'Verifică din nou' ), array( $ty_html, $ty_last ) );
 // Plata refuzată: pagina nu mai promite bilete (WooCommerce arată deja „plata nu a reușit”).
 $ty_o->update_status( 'failed' );
 ob_start();
