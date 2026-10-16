@@ -528,6 +528,12 @@ class LBB_Bookings {
 		if ( strlen( $digits ) >= 4 ) {
 			$or .= $wpdb->prepare( ' OR b.phone LIKE %s', '%' . $wpdb->esc_like( $digits ) . '%' );
 		}
+		// „+373 069 184 111”, „+40 (0)740 …”: cu 0-ul de după prefix cifrele nu se regăsesc în „+37369184111”;
+		// forma normalizată (ca la salvare) îl găsește.
+		$phone = LBB_Frontend::normalize_phone( $search );
+		if ( '+' === substr( $phone, 0, 1 ) && strlen( $phone ) >= 9 ) {
+			$or .= $wpdb->prepare( ' OR b.phone = %s', $phone );
+		}
 		// Numărul comenzii WooCommerce („#1234” din emailul de plată sau din Paynet) găsește biletele comenzii.
 		if ( preg_match( '/^#?\s*(\d{1,10})$/', $search, $m ) && (int) $m[1] > 0 ) {
 			$or .= $wpdb->prepare( ' OR b.order_id = %d', (int) $m[1] );

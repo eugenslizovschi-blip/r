@@ -1750,6 +1750,8 @@ $sr_ids = function ( $q, $status = '' ) {
 $sr_local = '0' . substr( $sr_b['phone'], 4, 2 ) . ' ' . substr( $sr_b['phone'], 6 ); // +3736xxxxxxx → „06x xxxxxx”
 lbb_t( 'căutare după codul biletului', array( $sr_b['id'] ) === $sr_ids( strtolower( $sr_b['ticket_code'] ) ), $sr_b['ticket_code'] );
 lbb_t( 'căutare după telefon scris local, cu spații', in_array( $sr_b['id'], $sr_ids( $sr_local ), true ), $sr_local );
+$sr_intl0 = '+373 0' . substr( $sr_b['phone'], 4, 2 ) . ' ' . substr( $sr_b['phone'], 6 ); // „+373 06x xxxxxx”
+lbb_t( 'căutare după telefon internațional scris cu 0 după prefix („+373 069 …”)', in_array( $sr_b['id'], $sr_ids( $sr_intl0 ), true ), $sr_intl0 );
 lbb_t( 'căutare după email', in_array( $sr_b['id'], $sr_ids( 'hp@example.com' ), true ) );
 lbb_t( 'căutare fără rezultat', array() === $sr_ids( 'zzqq-nimic' ) );
 $sr_h = LBB_Bookings::create_hold( LBB_Routes::get( $hp_rid ), $tomorrow, '10:00', 1, 0, array( 'Țîrdea Ștefan' ), '+37369555444', 'x@example.com' );
