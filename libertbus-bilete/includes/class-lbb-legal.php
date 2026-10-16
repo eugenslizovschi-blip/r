@@ -157,7 +157,7 @@ class LBB_Legal {
 
 	public static function create() {
 		if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
+			LBB_Admin::deny();
 		}
 		check_admin_referer( 'lbb_create_legal' );
 		$created = self::create_missing();

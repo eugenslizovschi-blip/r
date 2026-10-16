@@ -501,7 +501,7 @@ class LBB_Admin {
 
 	public static function save_route() {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_save_route' ) ) {
-			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
+			self::deny();
 		}
 		$data   = wp_unslash( $_POST );
 		$id     = isset( $data['id'] ) ? (int) $data['id'] : 0;
@@ -537,7 +537,7 @@ class LBB_Admin {
 
 	public static function delete_route() {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_delete_route' ) ) {
-			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
+			self::deny();
 		}
 		$id      = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
 		$waiting = LBB_Routes::upcoming_bookings( $id );
@@ -683,7 +683,7 @@ class LBB_Admin {
 
 	public static function new_preview_link() {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_new_preview_link' ) ) {
-			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
+			self::deny();
 		}
 		LBB_Settings::preview_token( true );
 		self::redirect( 'lbb-settings', __( 'Link nou de previzualizare creat. Linkul vechi nu mai funcționează.', 'libertbus-bilete' ) );
@@ -692,7 +692,7 @@ class LBB_Admin {
 	public static function cancel_booking() {
 		$id = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_cancel_booking_' . $id ) ) {
-			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
+			self::deny();
 		}
 		$ok = LBB_Bookings::cancel( $id );
 		$sent = $ok && LBB_Tickets::send_cancellation_email( LBB_Bookings::get( $id ) );
@@ -709,9 +709,16 @@ class LBB_Admin {
 		self::redirect( 'lbb-bookings', $ok ? __( 'Rezervarea a fost anulată, locurile sunt libere.', 'libertbus-bilete' ) . ( $sent ? ' ' . __( 'Clientul a fost anunțat prin email.', 'libertbus-bilete' ) : '' ) : __( 'Rezervarea nu a putut fi anulată (poate e deja plătită sau anulată).', 'libertbus-bilete' ), ! $ok, $back );
 	}
 
+	/**
+	 * Fără drept de acces: 403 (nu 500, ca o eroare a serverului), cu link înapoi.
+	 */
+	public static function deny() {
+		wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ), esc_html__( 'Acces interzis', 'libertbus-bilete' ), array( 'response' => 403, 'back_link' => true ) );
+	}
+
 	public static function manifest_csv() {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_manifest_csv' ) ) {
-			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
+			self::deny();
 		}
 		$date  = isset( $_GET['date'] ) ? LBB_Frontend::iso_date( sanitize_text_field( wp_unslash( $_GET['date'] ) ) ) : LBB_Settings::today();
 		$route = isset( $_GET['route'] ) ? (int) $_GET['route'] : 0;
@@ -981,7 +988,7 @@ class LBB_Admin {
 
 	public static function save_settings() {
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_save_settings' ) ) {
-			wp_die( esc_html__( 'Nu aveți acces.', 'libertbus-bilete' ) );
+			self::deny();
 		}
 		$data = wp_unslash( $_POST );
 		LBB_Settings::save( $data );

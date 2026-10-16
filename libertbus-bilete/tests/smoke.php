@@ -1125,6 +1125,27 @@ remove_filter( 'wp_die_handler', $cv_h );
 list( $_GET, $_REQUEST ) = $cv_keep;
 wp_set_current_user( $cv_user );
 lbb_t( 'CSV cu dată stricată: mesaj clar și traductibil, răspuns 400, link înapoi', is_array( $cv_die ) && false !== strpos( (string) $cv_die[0], 'Alegeți data din calendar' ) && isset( $cv_die[2]['response'], $cv_die[2]['back_link'] ) && 400 === $cv_die[2]['response'] && $cv_die[2]['back_link'], $cv_die );
+// Fără drept de acces (vizitator delogat): 403 cu link înapoi, nu 500 ca o eroare a serverului.
+$cv_403 = array();
+$cv_h2  = function () use ( &$cv_403 ) {
+	return function ( $message, $title, $args ) use ( &$cv_403 ) {
+		$cv_403[] = isset( $args['response'] ) ? $args['response'] : 500;
+		throw new Exception( 'wp_die' );
+	};
+};
+$cv_user = get_current_user_id();
+wp_set_current_user( 0 );
+add_filter( 'wp_die_handler', $cv_h2 );
+foreach ( array( array( 'LBB_Admin', 'manifest_csv' ), array( 'LBB_Admin', 'save_settings' ), array( 'LBB_Legal', 'create' ) ) as $cv_cb ) {
+	try {
+		call_user_func( $cv_cb );
+	} catch ( Exception $e ) {
+		unset( $e );
+	}
+}
+remove_filter( 'wp_die_handler', $cv_h2 );
+wp_set_current_user( $cv_user );
+lbb_t( 'acțiunile din panou (CSV, setări, pagini legale) fără drept de acces răspund 403, nu 500', array( 403, 403, 403 ) === $cv_403, $cv_403 );
 $cr_res  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[0], $cr_base, array( 'passengers' => array( 'Ion Pop', 'Ana Pop' ), 'currency' => 'RON', 'pay_currency' => 'RON', 'amount' => 30.5 ) ) );
 $cr_onl  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[1], $cr_base ) );
 lbb_t( 'CSV-ul listei de pasageri are suma de încasat și moneda în coloane separate (goale la plata online)', 13 === count( $cr_res ) && 'la urcare 30.5 RON' === $cr_res[9] && 30.5 === $cr_res[11] && 'RON' === $cr_res[12] && 'online' === $cr_onl[9] && '' === $cr_onl[11] && '' === $cr_onl[12], array( $cr_res, $cr_onl ) );
