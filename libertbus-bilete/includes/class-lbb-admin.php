@@ -405,7 +405,7 @@ class LBB_Admin {
 	}
 
 	private static function day_names() {
-		return array( 1 => 'Lu', 2 => 'Ma', 3 => 'Mi', 4 => 'Jo', 5 => 'Vi', 6 => 'Sâ', 7 => 'Du' );
+		return array( 1 => _x( 'Lu', 'luni, prescurtat', 'libertbus-bilete' ), 2 => _x( 'Ma', 'marți, prescurtat', 'libertbus-bilete' ), 3 => _x( 'Mi', 'miercuri, prescurtat', 'libertbus-bilete' ), 4 => _x( 'Jo', 'joi, prescurtat', 'libertbus-bilete' ), 5 => _x( 'Vi', 'vineri, prescurtat', 'libertbus-bilete' ), 6 => _x( 'Sâ', 'sâmbătă, prescurtat', 'libertbus-bilete' ), 7 => _x( 'Du', 'duminică, prescurtat', 'libertbus-bilete' ) );
 	}
 
 	private static function route_form( $route ) {
@@ -441,7 +441,7 @@ class LBB_Admin {
 				<tr><th><label for="lbb-origin"><?php esc_html_e( 'Plecare', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-origin" name="origin" class="regular-text" list="lbb-cities" maxlength="100" required value="<?php echo esc_attr( $route['origin'] ); ?>"></td></tr>
 				<tr><th><label for="lbb-dest"><?php esc_html_e( 'Destinație', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-dest" name="destination" class="regular-text" list="lbb-cities" maxlength="100" required value="<?php echo esc_attr( $route['destination'] ); ?>"></td></tr>
 				<tr><th><label for="lbb-times"><?php esc_html_e( 'Ore de plecare', 'libertbus-bilete' ); ?></label></th><td><input type="text" id="lbb-times" name="departures" class="regular-text" maxlength="255" required aria-describedby="lbb-times-desc" value="<?php echo esc_attr( $times_text ); ?>"><p class="description" id="lbb-times-desc"><?php esc_html_e( 'Separate prin virgulă, ex. 08:45, 17:45', 'libertbus-bilete' ); ?></p></td></tr>
-				<tr><th><?php esc_html_e( 'Zile', 'libertbus-bilete' ); ?></th><td class="lbb-days"><?php foreach ( self::day_names() as $n => $label ) : ?><label><input type="checkbox" name="days[]" value="<?php echo esc_attr( $n ); ?>" <?php checked( in_array( $n, $route['days'], true ) ); ?>> <?php echo esc_html( $label ); ?></label><?php endforeach; ?></td></tr>
+				<tr><th><?php esc_html_e( 'Zile', 'libertbus-bilete' ); ?></th><td class="lbb-days"><?php $full_days = LBB_Routes::day_names(); // Cititorul de ecran spune „luni”, nu „Lu”. ?><?php foreach ( self::day_names() as $n => $label ) : ?><label><input type="checkbox" name="days[]" value="<?php echo esc_attr( $n ); ?>" aria-label="<?php echo esc_attr( $full_days[ $n ] ); ?>" <?php checked( in_array( $n, $route['days'], true ) ); ?>> <?php echo esc_html( $label ); ?></label><?php endforeach; ?></td></tr>
 				<tr><th><label for="lbb-price"><?php esc_html_e( 'Preț adult', 'libertbus-bilete' ); ?></label></th><td><input id="lbb-price" name="price" type="number" inputmode="decimal" step="0.01" min="0" required value="<?php echo esc_attr( $route['price'] ); ?>">
 					<select name="currency" aria-label="<?php esc_attr_e( 'Moneda prețului', 'libertbus-bilete' ); ?>"><?php foreach ( LBB_Settings::currencies() as $cur ) : ?><option <?php selected( $route['currency'], $cur ); ?>><?php echo esc_html( $cur ); ?></option><?php endforeach; ?></select>
 					<p class="description"><?php esc_html_e( 'Cu prețul 0 ruta nu se vinde online.', 'libertbus-bilete' ); ?></p></td></tr>
