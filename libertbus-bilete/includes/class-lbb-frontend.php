@@ -189,6 +189,14 @@ class LBB_Frontend {
 		if ( preg_match( '/^(373\d{8}|40[237]\d{8})$/', $phone ) ) {
 			return '+' . $phone;
 		}
+		// Fără 0 și fără prefix („69 184 111”, „740 123 456”): altfel linkul de apel din lista șoferului și din
+		// email ar fi „tel:69184111”, care de pe un telefon din altă rețea sau din România nu sună unde trebuie.
+		if ( preg_match( '/^[267]\d{7}$/', $phone ) ) {
+			return '+373' . $phone; // Moldova: mobil 6x/7x, fix 22 (Chișinău) … fără 0.
+		}
+		if ( preg_match( '/^7\d{8}$/', $phone ) ) {
+			return '+40' . $phone; // România: mobil 7xx xxx xxx fără 0.
+		}
 		return $phone;
 	}
 
