@@ -350,7 +350,7 @@ class LBB_Tickets {
 		if ( $plain_text ) {
 			// Email text, nu HTML: fără entități (WooCommerce șterge „&#039;”, deci „D'Angelo” ar deveni „DAngelo”),
 			// iar majusculele țin cont de diacritice („DUMNEAVOASTRĂ”, nu „DUMNEAVOASTRă”).
-			$title = __( 'Biletele dumneavoastră', 'libertbus-bilete' );
+			$title = _n( 'Biletul dumneavoastră', 'Biletele dumneavoastră', count( $tickets ), 'libertbus-bilete' );
 			echo "\n" . wp_strip_all_tags( function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $title, 'UTF-8' ) : strtoupper( $title ) ) . "\n\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 			foreach ( $tickets as $booking ) {
 				echo wp_strip_all_tags( $booking['ticket_code'] ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
@@ -366,7 +366,8 @@ class LBB_Tickets {
 			echo wp_strip_all_tags( (string) LBB_Settings::get( 'ticket_notes' ) ) . "\n\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 			return;
 		}
-		echo '<h2>' . esc_html__( 'Biletele dumneavoastră', 'libertbus-bilete' ) . '</h2>';
+		// Un singur bilet (cazul obișnuit): „Biletul dumneavoastră”, nu pluralul.
+		echo '<h2>' . esc_html( _n( 'Biletul dumneavoastră', 'Biletele dumneavoastră', count( $tickets ), 'libertbus-bilete' ) ) . '</h2>';
 		foreach ( $tickets as $booking ) {
 			echo self::html( $booking ); // phpcs:ignore WordPress.Security.EscapeOutput
 		}
@@ -391,8 +392,8 @@ class LBB_Tickets {
 				. ' <a class="button" href="' . esc_url( $order->get_checkout_order_received_url() ) . '">' . esc_html__( 'Verifică din nou', 'libertbus-bilete' ) . '</a></div>';
 			return;
 		}
-		echo '<h2>' . esc_html__( 'Biletele dumneavoastră', 'libertbus-bilete' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Le-am trimis și pe email. Arătați codul șoferului la urcare.', 'libertbus-bilete' ) . '</p>';
+		echo '<h2>' . esc_html( _n( 'Biletul dumneavoastră', 'Biletele dumneavoastră', count( $tickets ), 'libertbus-bilete' ) ) . '</h2>';
+		echo '<p>' . esc_html( _n( 'L-am trimis și pe email. Arătați codul șoferului la urcare.', 'Le-am trimis și pe email. Arătați codul șoferului la urcare.', count( $tickets ), 'libertbus-bilete' ) ) . '</p>';
 		foreach ( $tickets as $booking ) {
 			echo self::html( $booking ); // phpcs:ignore WordPress.Security.EscapeOutput
 		}

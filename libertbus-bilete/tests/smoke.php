@@ -344,7 +344,14 @@ LBB_Tickets::email( $o2, false, true );
 $lbb_plain = ob_get_clean();
 $lbb_wce   = new WC_Email();
 $lbb_plain = preg_replace( $lbb_wce->plain_search, $lbb_wce->plain_replace, wp_strip_all_tags( $lbb_plain ) );
-lbb_t( 'emailul text: „Ana D\'Angelo” rămâne întreg, titlul „BILETELE DUMNEAVOASTRĂ”', false !== strpos( $lbb_plain, "Ana D'Angelo" ) && false !== strpos( $lbb_plain, 'BILETELE DUMNEAVOASTRĂ' ), $lbb_plain );
+ob_start();
+LBB_Tickets::email( $o2, false, false );
+$lbb_html1 = ob_get_clean();
+ob_start();
+LBB_Tickets::thankyou( $o2->get_id() );
+$lbb_ty1 = ob_get_clean();
+lbb_t( 'emailul text: „Ana D\'Angelo” rămâne întreg, titlul cu majuscule corecte, la singular pentru un bilet („BILETUL DUMNEAVOASTRĂ”)', false !== strpos( $lbb_plain, "Ana D'Angelo" ) && false !== strpos( $lbb_plain, 'BILETUL DUMNEAVOASTRĂ' ), $lbb_plain );
+lbb_t( 'un singur bilet: emailul HTML și pagina de după plată spun „Biletul dumneavoastră” / „L-am trimis”, nu pluralul', false !== strpos( $lbb_html1, '<h2>Biletul dumneavoastră</h2>' ) && false !== strpos( $lbb_ty1, '<h2>Biletul dumneavoastră</h2>' ) && false !== strpos( $lbb_ty1, 'L-am trimis și pe email' ), array( substr( wp_strip_all_tags( $lbb_html1 ), 0, 80 ), substr( wp_strip_all_tags( $lbb_ty1 ), 0, 120 ) ) );
 lbb_t( 'emailul text al comenzii are și „Adaugă în calendar” cu un link utilizabil (& nu &#038;)', (bool) preg_match( '#Adaugă în calendar: https?://\S+[?&]lbb_bilet=\S+&k=\w+&ics=1\n#u', $lbb_plain ), $lbb_plain );
 
 // Pagina biletului: semnătura.
