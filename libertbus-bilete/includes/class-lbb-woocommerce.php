@@ -173,13 +173,22 @@ class LBB_WooCommerce {
 	}
 
 	public static function item_name( $name, $item ) {
+		$plain = self::plain_name( $item );
+		return '' !== $plain ? esc_html( $plain ) : $name;
+	}
+
+	/**
+	 * „Bilet Bălți → Iași” ca text simplu, pentru linia comenzii: acolo nu se escapează (WooCommerce o escapează la
+	 * afișare), altfel un oraș cu apostrof sau „&” ar apărea în comandă, emailuri și la bancă ca „&#039;” / „&amp;”.
+	 */
+	private static function plain_name( $item ) {
 		if ( empty( $item['lbb']['token'] ) ) {
-			return $name;
+			return '';
 		}
 		$booking = self::booking( $item['lbb']['token'] );
 		$route   = $booking ? LBB_Routes::get( $booking['route_id'] ) : null;
 		/* translators: 1: oraș de plecare, 2: destinație */
-		return $route ? esc_html( sprintf( __( 'Bilet %1$s → %2$s', 'libertbus-bilete' ), $route['origin'], $route['destination'] ) ) : $name;
+		return $route ? sprintf( __( 'Bilet %1$s → %2$s', 'libertbus-bilete' ), $route['origin'], $route['destination'] ) : '';
 	}
 
 	public static function sold_individually( $value, $product ) {
@@ -218,7 +227,10 @@ class LBB_WooCommerce {
 			return;
 		}
 		$item->add_meta_data( '_lbb_token', $booking['token'], true );
-		$item->set_name( wp_strip_all_tags( self::item_name( $item->get_name(), $values ) ) );
+		$plain = self::plain_name( $values );
+		if ( '' !== $plain ) {
+			$item->set_name( $plain );
+		}
 		foreach ( self::describe( $booking ) as $label => $value ) {
 			$item->add_meta_data( $label, $value, true );
 		}

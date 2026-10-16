@@ -145,6 +145,24 @@ lbb_t( 'plata confirmă biletul și dă cod', 'confirmed' === $b['status'] && pr
 $order->update_status( 'cancelled' );
 lbb_t( 'anularea comenzii eliberează locurile', 'cancelled' === LBB_Bookings::get_by_token( $h3['token'] )['status'] );
 
+// Oraș cu apostrof sau „&”: linia comenzii are numele ca text („Sânt'Ana”), nu „Sânt&#039;Ana” (ajunge în
+// emailurile WooCommerce și la bancă); în coș (HTML) rămâne escapat.
+$ln_r = LBB_Routes::save( array( 'origin' => "Sânt'Ana", 'destination' => 'Vadul & Co', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'capacity' => 5, 'active' => 1 ) );
+$ln_h = is_int( $ln_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $ln_r ), $tomorrow, '10:00', 1, 0, array( 'Ion Nume' ), '+37369000071', 'nume@example.com', 'MDL' ) : null;
+$ln_i = new WC_Order_Item_Product();
+$ln_v = array( 'lbb' => array( 'token' => $ln_h ? $ln_h['token'] : '' ) );
+if ( $ln_h ) {
+	LBB_WooCommerce::line_item_meta( $ln_i, 'k', $ln_v );
+}
+$ln_cart = LBB_WooCommerce::item_name( 'x', $ln_v );
+if ( $ln_h ) {
+	LBB_Bookings::release( $ln_h['token'] );
+}
+if ( is_int( $ln_r ) ) {
+	LBB_Routes::delete( $ln_r );
+}
+lbb_t( "oraș cu apostrof și „&”: linia comenzii „Bilet Sânt'Ana → Vadul & Co”, fără &#039; / &amp;; în coș escapat", $ln_h && "Bilet Sânt'Ana → Vadul & Co" === $ln_i->get_name() && 'Bilet Sânt&#039;Ana → Vadul &amp; Co' === $ln_cart, array( $ln_r, $ln_i->get_name(), $ln_cart ) );
+
 // Card refuzat la bancă (Paynet: comanda „failed”), clientul încearcă din nou și plătește; apoi rambursare.
 $fh  = LBB_Bookings::create_hold( $route, $tomorrow, '10:00', 1, 0, array( 'Refuz Card' ), '+37360000077', 'r@example.com' );
 $fo  = wc_create_order();
