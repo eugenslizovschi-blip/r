@@ -1059,6 +1059,7 @@ $_GET   = array( 'page' => 'lbb-manifest', 'date' => $tomorrow, 'route' => $dt_r
 ob_start();
 LBB_Admin::page_manifest();
 $dt_html = ob_get_clean();
+lbb_t( 'lista pentru șofer are în titlu data cu ziua săptămânii, ca pe bilet („21.10.2026 (miercuri)”)', false !== strpos( $dt_html, esc_html( 'Pasageri — ' . LBB_WooCommerce::date_with_day( $tomorrow ) ) ), preg_match( '#<h1[^>]*>.*?</h1>#s', $dt_html, $dw_m ) ? $dw_m[0] : '' );
 // Peste 20 de locuri pe cursă, lista pentru șofer scrie „25 de locuri” (acordul din română).
 $ro_html = '';
 if ( isset( $dt_b[0]['id'] ) ) {

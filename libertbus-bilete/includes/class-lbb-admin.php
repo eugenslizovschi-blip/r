@@ -556,8 +556,10 @@ class LBB_Admin {
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
 			$date = LBB_Settings::today();
 		}
-		/* translators: %s: data cursei (zz.ll.aaaa) */
-		self::header( sprintf( __( 'Pasageri — %s', 'libertbus-bilete' ), wp_date( 'd.m.Y', strtotime( $date . ' 12:00' ) ) ) );
+		// Cu ziua săptămânii, ca pe bilet: biroul gândește cursele pe zile („cursa de marți”), iar pe foaia tipărită
+		// pentru șofer o dată fără zi se confundă ușor.
+		/* translators: %s: data cursei, ex. 21.10.2026 (miercuri) */
+		self::header( sprintf( __( 'Pasageri — %s', 'libertbus-bilete' ), LBB_WooCommerce::date_with_day( $date ) ) );
 		?>
 		<form method="get" class="lbb-noprint" style="margin:12px 0">
 			<input type="hidden" name="page" value="lbb-manifest">
