@@ -569,7 +569,7 @@ class LBB_Admin {
 			</select>
 			<button class="button"><?php esc_html_e( 'Arată', 'libertbus-bilete' ); ?></button>
 			<button type="button" class="button" onclick="window.print()"><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button>
-			<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=lbb_manifest_csv&date=' . $date . '&route=' . $route ), 'lbb_manifest_csv' ) ); ?>">CSV</a>
+			<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=lbb_manifest_csv&date=' . $date . '&route=' . $route ), 'lbb_manifest_csv' ) ); ?>" aria-label="<?php esc_attr_e( 'Descarcă lista de pasageri în CSV (Excel)', 'libertbus-bilete' ); ?>" title="<?php esc_attr_e( 'Descarcă lista de pasageri în CSV (Excel)', 'libertbus-bilete' ); ?>">CSV</a>
 		</form>
 		<?php
 		// Ziua de dinainte și de după dintr-o atingere (pe telefon calendarul e incomod), cu aceeași rută aleasă.

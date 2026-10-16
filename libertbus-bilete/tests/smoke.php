@@ -752,6 +752,26 @@ $to_office = array_values( array_filter( $lbb_mails, function ( $m ) {
 $office_plain = $to_office ? LBB_Tickets::plain_text( $to_office[0]['message'] ) : '';
 lbb_t( 'varianta text a emailului către birou: telefon și email fără linkuri dublate', false !== strpos( $office_plain, 'Telefon: +37369000077' ) && false !== strpos( $office_plain, 'Email: client-mail@example.com' ) && false === strpos( $office_plain, 'mailto:' ) && false === strpos( $office_plain, 'tel:' ), $office_plain );
 lbb_t( 'emailul către birou are telefonul și emailul clientului ca linkuri (apel / răspuns dintr-o atingere)', $to_office && false !== strpos( $to_office[0]['message'], 'href="tel:+37369000077"' ) && false !== strpos( $to_office[0]['message'], 'href="mailto:client-mail@example.com"' ), $to_office ? substr( $to_office[0]['message'], -400 ) : 'lipsă' );
+// Etichetele din emailul către birou sunt traductibile (și „Email”, nu doar „Telefon”).
+$em_tr = function ( $tr, $text, $domain ) {
+	return 'libertbus-bilete' === $domain && 'Email' === $text ? 'E-mail-tr' : $tr;
+};
+$em_m2 = array();
+$em_c2 = function ( $null, $atts ) use ( &$em_m2 ) {
+	$em_m2[] = $atts;
+	return true;
+};
+add_filter( 'gettext', $em_tr, 10, 3 );
+add_filter( 'pre_wp_mail', $em_c2, 1, 2 );
+if ( $em ) {
+	LBB_Tickets::send_reservation_emails( $em );
+}
+remove_filter( 'pre_wp_mail', $em_c2, 1 );
+remove_filter( 'gettext', $em_tr, 10 );
+$em_off = array_values( array_filter( $em_m2, function ( $m ) {
+	return 'client-mail@example.com' !== $m['to'];
+} ) );
+lbb_t( 'emailul către birou: eticheta „Email” e traductibilă, ca „Telefon”', $em_off && false !== strpos( $em_off[0]['message'], 'E-mail-tr: <a href="mailto:client-mail@example.com"' ), $em_off ? substr( wp_strip_all_tags( $em_off[0]['message'] ), -200 ) : $em_m2 );
 lbb_t( 'emailurile plugin-ului au font fără serife (ca pagina biletului) și limba site-ului (lang, pentru cititorul de ecran), pentru client și birou', '' !== get_bloginfo( 'language' ) && 2 === count( array_filter( $lbb_mails, function ( $m ) {
 	return 0 === strpos( $m['message'], '<div lang="' . esc_attr( get_bloginfo( 'language' ) ) . '" style="font-family:' ) && false !== strpos( substr( $m['message'], 0, 180 ), 'sans-serif' );
 } ) ), array_map( function ( $m ) {
@@ -1082,6 +1102,7 @@ ob_start();
 LBB_Admin::page_manifest();
 $dt_html = ob_get_clean();
 lbb_t( 'lista pentru șofer are în titlu data cu ziua săptămânii, ca pe bilet („21.10.2026 (miercuri)”)', false !== strpos( $dt_html, esc_html( 'Pasageri — ' . LBB_WooCommerce::date_with_day( $tomorrow ) ) ), preg_match( '#<h1[^>]*>.*?</h1>#s', $dt_html, $dw_m ) ? $dw_m[0] : '' );
+lbb_t( 'lista pentru șofer: butonul „CSV” are un nume care spune ce face (cititor de ecran), care conține textul vizibil', (bool) preg_match( '#<a class="button" href="[^"]*lbb_manifest_csv[^"]*" aria-label="Descarcă lista de pasageri în CSV \(Excel\)"[^>]*>CSV</a>#u', $dt_html ), preg_match( '#<a[^>]*lbb_manifest_csv[^>]*>CSV</a>#', $dt_html, $cv_m ) ? $cv_m[0] : '' );
 // Peste 20 de locuri pe cursă, lista pentru șofer scrie „25 de locuri” (acordul din română).
 $ro_html = '';
 if ( isset( $dt_b[0]['id'] ) ) {
