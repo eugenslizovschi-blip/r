@@ -263,7 +263,8 @@ class LBB_Tickets {
 		$text = self::plain_text( $html );
 		// Același font fără serife ca pe pagina biletului: altfel multe aplicații de email (și cele web) arată
 		// emailul cu fontul implicit, cu serife.
-		$html = '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1d2733;">' . $html . '</div>';
+		// lang: cititorul de ecran din aplicația de email citește textul cu pronunția limbii site-ului, nu în engleză.
+		$html = '<div lang="' . esc_attr( get_bloginfo( 'language' ) ) . '" style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1d2733;">' . $html . '</div>';
 		$alt  = function ( $mailer ) use ( $text ) {
 			$mailer->AltBody = $text; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		};

@@ -737,8 +737,8 @@ $to_office = array_values( array_filter( $lbb_mails, function ( $m ) {
 $office_plain = $to_office ? LBB_Tickets::plain_text( $to_office[0]['message'] ) : '';
 lbb_t( 'varianta text a emailului către birou: telefon și email fără linkuri dublate', false !== strpos( $office_plain, 'Telefon: +37369000077' ) && false !== strpos( $office_plain, 'Email: client-mail@example.com' ) && false === strpos( $office_plain, 'mailto:' ) && false === strpos( $office_plain, 'tel:' ), $office_plain );
 lbb_t( 'emailul către birou are telefonul și emailul clientului ca linkuri (apel / răspuns dintr-o atingere)', $to_office && false !== strpos( $to_office[0]['message'], 'href="tel:+37369000077"' ) && false !== strpos( $to_office[0]['message'], 'href="mailto:client-mail@example.com"' ), $to_office ? substr( $to_office[0]['message'], -400 ) : 'lipsă' );
-lbb_t( 'emailurile plugin-ului au font fără serife (ca pagina biletului), pentru client și birou', 2 === count( array_filter( $lbb_mails, function ( $m ) {
-	return 0 === strpos( $m['message'], '<div style="font-family:' ) && false !== strpos( substr( $m['message'], 0, 160 ), 'sans-serif' );
+lbb_t( 'emailurile plugin-ului au font fără serife (ca pagina biletului) și limba site-ului (lang, pentru cititorul de ecran), pentru client și birou', '' !== get_bloginfo( 'language' ) && 2 === count( array_filter( $lbb_mails, function ( $m ) {
+	return 0 === strpos( $m['message'], '<div lang="' . esc_attr( get_bloginfo( 'language' ) ) . '" style="font-family:' ) && false !== strpos( substr( $m['message'], 0, 180 ), 'sans-serif' );
 } ) ), array_map( function ( $m ) {
 	return substr( $m['message'], 0, 80 );
 }, $lbb_mails ) );
