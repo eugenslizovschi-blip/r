@@ -19,6 +19,8 @@ class LBB_Settings {
 		'cart_hold_minutes' => 120,
 		'payment_minutes'   => 240,
 		'max_days_ahead'    => 365,
+		// „6000” în loc de „60”: vânzarea s-ar închide pe tăcute cu peste 4 zile înainte de fiecare cursă.
+		'cutoff_minutes'    => 2880,
 	);
 
 	/**
