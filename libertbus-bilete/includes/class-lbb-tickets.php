@@ -110,6 +110,15 @@ class LBB_Tickets {
 		return 'reserved' === $booking['status'] || ( 'cancelled' === $booking['status'] && empty( $booking['order_id'] ) );
 	}
 
+	/**
+	 * „Adaugă în calendar” doar pentru un bilet valabil al unei curse care n-a plecat încă: după plecare (aceeași zi)
+	 * ar pune în calendar un eveniment deja trecut.
+	 */
+	public static function can_add_to_calendar( array $booking, $state = null ) {
+		$state = $state ? $state : self::state( $booking );
+		return 'ok' === $state['class'] && ! LBB_Bookings::departed( $booking );
+	}
+
 	public static function html( array $booking, $with_qr = false ) {
 		$rows  = LBB_WooCommerce::describe( $booking );
 		$state = self::state( $booking );
@@ -132,7 +141,7 @@ class LBB_Tickets {
 			</table>
 			<?php if ( ! $with_qr ) : ?>
 				<p style="margin:10px 0 0;"><a href="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php echo self::is_reservation( $booking ) ? esc_html__( 'Deschide rezervarea cu cod QR', 'libertbus-bilete' ) : esc_html__( 'Deschide biletul cu cod QR', 'libertbus-bilete' ); ?></a>
-				<?php if ( 'ok' === $state['class'] ) : ?> · <a href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?></p>
+				<?php if ( self::can_add_to_calendar( $booking, $state ) ) : ?> · <a href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?></p>
 			<?php endif; ?>
 		</div>
 		<?php
@@ -366,7 +375,7 @@ class LBB_Tickets {
 					echo wp_strip_all_tags( $label . ': ' . $value ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 				}
 				echo esc_url_raw( self::url( $booking['ticket_code'] ) ) . "\n";
-				if ( 'ok' === self::state( $booking )['class'] ) {
+				if ( self::can_add_to_calendar( $booking ) ) {
 					echo wp_strip_all_tags( __( 'Adaugă în calendar', 'libertbus-bilete' ) ) . ': ' . esc_url_raw( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 				}
 				echo "\n";
@@ -576,7 +585,7 @@ class LBB_Tickets {
 			$again_url = self::booking_page_url( LBB_Routes::get( $booking['route_id'] ) );
 		}
 		// &ics=1: cursa în calendarul telefonului, doar pentru un bilet valabil al unei curse care urmează.
-		if ( $booking && 'ok' === $state['class'] && isset( $_GET['ics'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( $booking && self::can_add_to_calendar( $booking, $state ) && isset( $_GET['ics'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$ics = self::ics( $booking );
 			if ( $ics ) {
 				header( 'Content-Type: text/calendar; charset=utf-8' );
@@ -617,7 +626,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<?php echo self::html( $booking, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<?php echo self::notes_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<div class="actions"><button type="button" onclick="window.print()"><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button>
-			<?php if ( 'ok' === $state['class'] ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a>
+			<?php if ( self::can_add_to_calendar( $booking, $state ) ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a>
 			<button type="button" class="share" hidden data-share-title="<?php echo esc_attr( $booking['ticket_code'] ); ?>" data-share-text="<?php echo esc_attr( self::share_text( $booking ) ); ?>" data-share-url="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php esc_html_e( 'Trimite biletul', 'libertbus-bilete' ); ?></button><?php endif; ?>
 			<?php if ( $pay_url ) : ?><a class="pay" href="<?php echo esc_url( $pay_url ); ?>"><?php esc_html_e( 'Achită acum', 'libertbus-bilete' ); ?></a><?php endif; ?>
 			<?php if ( $again_url ) : ?><a class="again" href="<?php echo esc_url( $again_url ); ?>"><?php esc_html_e( 'Rezervați din nou online', 'libertbus-bilete' ); ?></a><?php endif; ?></div>

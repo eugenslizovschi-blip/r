@@ -602,6 +602,13 @@ $tk_today = array( 'status' => 'confirmed', 'travel_date' => LBB_Settings::today
 lbb_t( 'în ziua cursei biletul rămâne valabil', 'ok' === LBB_Tickets::state( $tk_today )['class'] );
 lbb_t( 'biletul cu plata reluată (pending) nu apare „anulat”, ci neachitat', 'bad' === LBB_Tickets::state( array( 'status' => 'pending', 'travel_date' => LBB_Settings::today() ) )['class'] && 0 === strpos( LBB_Tickets::state( array( 'status' => 'pending', 'travel_date' => LBB_Settings::today() ) )['text'], 'Plata nu e finalizată' ) );
 lbb_t( 'un bilet anulat dintr-o zi trecută rămâne „anulat”', 'Bilet anulat' === LBB_Tickets::state( array( 'status' => 'cancelled', 'travel_date' => $tk_yday, 'order_id' => 123 ) )['text'] );
+// „Adaugă în calendar” doar până la plecare: deschis după ce autocarul a plecat (aceeași zi), linkul nu mai apare.
+$ac_now  = new DateTimeImmutable( 'now', LBB_Settings::tz() );
+$ac_gone = $ac_now->modify( '-1 minute' );
+$ac_base = array( 'status' => 'confirmed', 'order_id' => 77, 'ticket_code' => 'LB-TESTCA', 'route_id' => 0, 'seats' => 1, 'children' => 0, 'passengers' => array(), 'currency' => 'MDL', 'pay_currency' => 'MDL', 'amount' => 100 );
+$ac_left = array_merge( $ac_base, array( 'travel_date' => $ac_gone->format( 'Y-m-d' ), 'dep_time' => $ac_gone->format( 'H:i' ) ) );
+$ac_next = array_merge( $ac_base, array( 'travel_date' => $ac_now->modify( '+1 day' )->format( 'Y-m-d' ), 'dep_time' => '10:00' ) );
+lbb_t( '„Adaugă în calendar” lipsește după plecarea autocarului (aceeași zi) și apare pentru o cursă care urmează', false === strpos( LBB_Tickets::html( $ac_left ), 'ics=1' ) && false !== strpos( LBB_Tickets::html( $ac_next ), 'ics=1' ), array( $ac_left['travel_date'] . ' ' . $ac_left['dep_time'] ) );
 // Rezervarea cu plata la urcare anulată de birou (fără comandă) rămâne „rezervare”: clientul n-a avut bilet.
 $ra_b = array( 'status' => 'cancelled', 'travel_date' => $tk_yday, 'order_id' => 0, 'ticket_code' => 'LB-TESTRA', 'route_id' => 0, 'seats' => 1, 'children' => 0, 'passengers' => array(), 'dep_time' => '10:00' );
 $ra_h = LBB_Tickets::html( $ra_b );
