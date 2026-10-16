@@ -140,7 +140,13 @@ class LBB_Frontend {
 			return;
 		}
 		if ( ! empty( $_POST['lbb_website'] ) ) { // Câmp-capcană pentru roboți.
-			self::$error = new WP_Error( 'lbb_bot', __( 'Cererea nu a putut fi procesată.', 'libertbus-bilete' ) );
+			// Eticheta capcanei nu mai seamănă cu „Website” (completat automat de unele extensii), dar dacă un om
+			// ajunge totuși aici, are telefonul biroului (link de apel), nu un mesaj fără ieșire.
+			$phone       = LBB_Settings::phone_text();
+			self::$error = new WP_Error( 'lbb_bot', '' !== $phone
+				/* translators: %s: telefonul biroului */
+				? sprintf( __( 'Cererea nu a putut fi procesată. Pentru rezervare sunați la %s.', 'libertbus-bilete' ), $phone )
+				: __( 'Cererea nu a putut fi procesată.', 'libertbus-bilete' ) );
 			return;
 		}
 
@@ -511,7 +517,7 @@ class LBB_Frontend {
 				<input type="hidden" name="lbb_mode" value="<?php echo $can_pay ? 'pay' : 'reserve'; ?>" data-lbb="mode">
 				<input type="hidden" name="lbb_nonce" value="<?php echo esc_attr( wp_create_nonce( 'lbb_book' ) ); ?>">
 				<input type="hidden" name="lbb_form" value="<?php echo esc_attr( $form_key ); ?>">
-				<div class="lbb-hp" aria-hidden="true"><label>Website <input type="text" name="lbb_website" tabindex="-1" autocomplete="off"></label></div>
+				<div class="lbb-hp" aria-hidden="true"><label><?php esc_html_e( 'Nu completați', 'libertbus-bilete' ); ?> <input type="text" name="lbb_website" tabindex="-1" autocomplete="off"></label></div>
 
 				<div class="lbb-step1" data-lbb="step1">
 				<div class="lbb-grid">
