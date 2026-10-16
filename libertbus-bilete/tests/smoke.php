@@ -1060,6 +1060,7 @@ if ( $tl_b ) {
 	$wpdb->update( LBB_Bookings::table(), array( 'phone' => '+37369000094' ), array( 'id' => $tl_b['id'] ) );
 }
 lbb_t( 'telefonul clientului salvat local („069 000 095”) are link de apel cu +373 în lista pentru șofer și în Rezervări', $tl_b && false !== strpos( $tl_man, '<a href="tel:+37369000095">069 000 095</a>' ) && false !== strpos( $tl_list, '<a href="tel:+37369000095">069 000 095</a>' ) && false === strpos( $tl_man . $tl_list, 'tel:069' ), array( substr( wp_strip_all_tags( $tl_list ), 0, 400 ) ) );
+lbb_t( 'Rezervări: prima coloană se numește „Nr.” (nu „#”, citit „diez”), și în antet, și pe telefon', false !== strpos( $tl_list, '<thead><tr><th>Nr.</th>' ) && false !== strpos( $tl_list, 'td:nth-child(1)::before{content:"Nr.:"}' ) && false === strpos( $tl_list, '<th>#</th>' ), substr( $tl_list, 0, 400 ) );
 // Data scrisă de mână în lista pentru șofer (browser fără calendar): „zz.ll.aaaa” deschide ziua cerută, nu azi.
 $md_dmy = gmdate( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) );
 $_GET   = array( 'page' => 'lbb-manifest', 'date' => $md_dmy, 'route' => $dt_r );
