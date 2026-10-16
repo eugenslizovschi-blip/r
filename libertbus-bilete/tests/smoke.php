@@ -1102,6 +1102,29 @@ $dd_due = LBB_Bookings::departure_due( $dd_rows );
 lbb_t( 'suma de încasat pe cursă numără doar rezervările cu plata la urcare', array( '07:00 A → B' => array( 'MDL' => 100.0 ) ) == $dd_due, $dd_due ); // phpcs:ignore Universal.Operators.StrictComparisons -- 100 sau 100.0, după conversie.
 // CSV-ul listei de pasageri: suma de la urcare are coloane numerice proprii (se adună în Excel); online = goale.
 $cr_base = array( 'ticket_code' => 'LB-T1', 'passengers' => array( 'Ion Pop' ), 'phone' => '+37369000001', 'email' => 'c@example.com', 'order_id' => 0 );
+// CSV cerut cu o dată stricată (link trunchiat): mesaj traductibil, răspuns 400 și link înapoi, nu „Data invalidă” fără ieșire.
+$cv_user = get_current_user_id();
+wp_set_current_user( 1 );
+$cv_keep = array( $_GET, $_REQUEST );
+$_GET     = array( 'action' => 'lbb_manifest_csv', 'date' => '2026-13-45x' );
+$_REQUEST = array( '_wpnonce' => wp_create_nonce( 'lbb_manifest_csv' ) );
+$cv_die  = null;
+$cv_h    = function () use ( &$cv_die ) {
+	return function ( $message, $title, $args ) use ( &$cv_die ) {
+		$cv_die = array( $message, $title, $args );
+		throw new Exception( 'wp_die' );
+	};
+};
+add_filter( 'wp_die_handler', $cv_h );
+try {
+	LBB_Admin::manifest_csv();
+} catch ( Exception $e ) {
+	unset( $e );
+}
+remove_filter( 'wp_die_handler', $cv_h );
+list( $_GET, $_REQUEST ) = $cv_keep;
+wp_set_current_user( $cv_user );
+lbb_t( 'CSV cu dată stricată: mesaj clar și traductibil, răspuns 400, link înapoi', is_array( $cv_die ) && false !== strpos( (string) $cv_die[0], 'Alegeți data din calendar' ) && isset( $cv_die[2]['response'], $cv_die[2]['back_link'] ) && 400 === $cv_die[2]['response'] && $cv_die[2]['back_link'], $cv_die );
 $cr_res  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[0], $cr_base, array( 'passengers' => array( 'Ion Pop', 'Ana Pop' ), 'currency' => 'RON', 'pay_currency' => 'RON', 'amount' => 30.5 ) ) );
 $cr_onl  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[1], $cr_base ) );
 lbb_t( 'CSV-ul listei de pasageri are suma de încasat și moneda în coloane separate (goale la plata online)', 13 === count( $cr_res ) && 'la urcare 30.5 RON' === $cr_res[9] && 30.5 === $cr_res[11] && 'RON' === $cr_res[12] && 'online' === $cr_onl[9] && '' === $cr_onl[11] && '' === $cr_onl[12], array( $cr_res, $cr_onl ) );

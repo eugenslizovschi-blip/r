@@ -716,7 +716,8 @@ class LBB_Admin {
 		$date  = isset( $_GET['date'] ) ? LBB_Frontend::iso_date( sanitize_text_field( wp_unslash( $_GET['date'] ) ) ) : LBB_Settings::today();
 		$route = isset( $_GET['route'] ) ? (int) $_GET['route'] : 0;
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
-			wp_die( 'Data invalidă' );
+			// Link scris de mână sau trunchiat: mesaj traductibil, cu link înapoi la listă, nu o pagină fără ieșire.
+			wp_die( esc_html__( 'Data listei nu e validă. Alegeți data din calendar și descărcați din nou.', 'libertbus-bilete' ), esc_html__( 'Lista de pasageri', 'libertbus-bilete' ), array( 'response' => 400, 'back_link' => true ) );
 		}
 		// Cu ruta aleasă, numele fișierului o spune (ex. pasageri-2026-10-21-balti-iasi.csv): listele mai multor
 		// rute din aceeași zi nu se mai confundă în „Descărcări”.
