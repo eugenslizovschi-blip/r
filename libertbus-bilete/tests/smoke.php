@@ -1088,9 +1088,15 @@ while ( '2' !== $rd_tue->format( 'N' ) ) {
 	$rd_tue->modify( '+1 day' );
 }
 $rd_hold = is_int( $rd_r ) ? LBB_Bookings::create_hold( LBB_Routes::get( $rd_r ), $rd_tue->format( 'Y-m-d' ), '10:00', 1, 0, array( 'Zi Gresita' ), '+37369000095', 'rd@example.com', 'MDL' ) : null;
+$_GET = array( 'page' => 'lbb-routes' );
+ob_start();
+LBB_Admin::page_routes();
+$rd_list = ob_get_clean();
+$_GET = array();
 if ( is_int( $rd_r ) ) {
 	LBB_Routes::delete( $rd_r );
 }
+lbb_t( 'lista de rute din panou: zilele cu numele întreg („luni, joi”), nu „Lu, Jo” (citit literal de cititorul de ecran)', (bool) preg_match( '#ZileA → ZileB.*?<td>luni, joi</td>#su', $rd_list ) && false === strpos( $rd_list, 'Lu, Jo' ), preg_match( '#ZileA → ZileB.{0,200}#su', $rd_list, $rd_m ) ? wp_strip_all_tags( $rd_m[0] ) : '' );
 lbb_t( 'zi în care ruta nu circulă: mesajul spune „Ruta circulă doar: luni, joi.”', 'Ruta circulă doar: luni, joi.' === $rd_note && '' === $rd_on && '' === $rd_daily && is_wp_error( $rd_hold ) && false !== strpos( $rd_hold->get_error_message(), 'Ruta circulă doar: luni, joi.' ), array( $rd_note, $rd_on, $rd_daily, is_wp_error( $rd_hold ) ? $rd_hold->get_error_message() : $rd_hold ) );
 
 // Preț pentru copii mai mare decât pentru adulți (greșeală de tastare): biroul e avertizat la salvare.

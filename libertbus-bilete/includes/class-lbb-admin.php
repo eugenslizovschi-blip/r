@@ -382,7 +382,8 @@ class LBB_Admin {
 		}
 		self::stack_table_style( 'lbb-routes-table', array( __( 'Ruta', 'libertbus-bilete' ), __( 'Ore', 'libertbus-bilete' ), __( 'Zile', 'libertbus-bilete' ), __( 'Preț', 'libertbus-bilete' ), __( 'Locuri/cursă', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ) ) );
 		echo '<table class="widefat striped lbb-routes-table"><thead><tr><th>' . esc_html__( 'Ruta', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Ore', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Zile', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Preț', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri/cursă', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
-		$day_names = self::day_names();
+		// Numele întregi („luni, joi”): încap în coloană și sunt clare și pentru cititorul de ecran (nu „Lu, Jo”).
+		$day_names = LBB_Routes::day_names();
 		foreach ( LBB_Routes::all() as $r ) {
 			$days = 7 === count( $r['days'] ) ? __( 'zilnic', 'libertbus-bilete' ) : implode( ', ', array_map( function ( $d ) use ( $day_names ) {
 				return $day_names[ $d ];
