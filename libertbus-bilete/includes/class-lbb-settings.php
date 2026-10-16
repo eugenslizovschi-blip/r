@@ -12,6 +12,16 @@ class LBB_Settings {
 	const OPTION = 'lbb_settings';
 
 	/**
+	 * Maximul unor setări numerice (aplicat la salvare și pus pe câmp în formular): o greșeală de tastare
+	 * („1500” în loc de „15” minute) ar ține locurile blocate o zi și ar opri vânzarea cursei.
+	 */
+	const MAXES = array(
+		'cart_hold_minutes' => 120,
+		'payment_minutes'   => 240,
+		'max_days_ahead'    => 365,
+	);
+
+	/**
 	 * Valorile implicite.
 	 *
 	 * Cursurile valutare spun cât valorează 1 unitate din moneda respectivă în MDL.
@@ -117,6 +127,9 @@ class LBB_Settings {
 		}
 		$clean['cart_hold_minutes'] = max( 5, $clean['cart_hold_minutes'] );
 		$clean['payment_minutes'] = max( 10, $clean['payment_minutes'] );
+		foreach ( self::MAXES as $key => $max ) {
+			$clean[ $key ] = min( $max, $clean[ $key ] );
+		}
 		update_option( self::OPTION, $clean );
 	}
 

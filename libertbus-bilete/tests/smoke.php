@@ -640,6 +640,14 @@ LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'default_capacity' 
 $dc_zero = LBB_Settings::get( 'default_capacity' );
 LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'default_capacity' => '25' ) ) );
 lbb_t( 'locurile implicite goale sau 0 păstrează valoarea anterioară; 25 se salvează', 18 === (int) $dc_empty && 18 === (int) $dc_zero && 25 === (int) LBB_Settings::get( 'default_capacity' ), array( $dc_empty, $dc_zero, LBB_Settings::get( 'default_capacity' ) ) );
+// Greșeli de tastare în sus („1500” minute în loc de „15”): plafonate, altfel locurile ar sta blocate o zi.
+$mx_keep = get_option( 'lbb_settings' );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'cart_hold_minutes' => '1500', 'payment_minutes' => '5000', 'max_days_ahead' => '9999' ) ) );
+$mx_got = array( (int) LBB_Settings::get( 'cart_hold_minutes' ), (int) LBB_Settings::get( 'payment_minutes' ), (int) LBB_Settings::get( 'max_days_ahead' ) );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'cart_hold_minutes' => '45', 'payment_minutes' => '60', 'max_days_ahead' => '180' ) ) );
+$mx_ok = array( (int) LBB_Settings::get( 'cart_hold_minutes' ), (int) LBB_Settings::get( 'payment_minutes' ), (int) LBB_Settings::get( 'max_days_ahead' ) );
+update_option( 'lbb_settings', $mx_keep );
+lbb_t( 'Setări: minutele în coș / la plată și zilele înainte prea mari se plafonează (120, 240, 365); valorile normale rămân', array( 120, 240, 365 ) === $mx_got && array( 45, 60, 180 ) === $mx_ok, array( $mx_got, $mx_ok ) );
 // La fel pentru zilele de vânzare înainte și pasagerii pe rezervare (altfel devin 1: o zi, un pasager).
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'max_days_ahead' => 60, 'max_passengers' => 6 ) ) );
 LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'max_days_ahead' => '', 'max_passengers' => '0' ) ) );
@@ -1908,6 +1916,12 @@ foreach ( array( 'default_capacity', 'max_passengers', 'max_days_ahead', 'cart_h
 	$mn_el                = $mn_xpath->query( '//input[@name="' . $mn_key . '"]' )->item( 0 );
 	$mn_found[ $mn_key ] = $mn_el ? $mn_el->getAttribute( 'min' ) . ( $mn_el->hasAttribute( 'required' ) ? '!' : '' ) : null;
 }
+$mx_attr = array();
+foreach ( array( 'cart_hold_minutes', 'payment_minutes', 'max_days_ahead' ) as $mx_key ) {
+	$mx_el              = $mn_xpath->query( '//input[@name="' . $mx_key . '"]' )->item( 0 );
+	$mx_attr[ $mx_key ] = $mx_el ? $mx_el->getAttribute( 'max' ) : null;
+}
+lbb_t( 'Setări: câmpurile plafonate au și maximul pe câmp (browserul îl spune direct)', array( 'cart_hold_minutes' => '120', 'payment_minutes' => '240', 'max_days_ahead' => '365' ) === $mx_attr, $mx_attr );
 lbb_t( 'Setări: câmpurile numerice au minimul real (1 loc/pasager/zi, 5 și 10 minute), 0 permis la închidere și limită', array( 'default_capacity' => '1!', 'max_passengers' => '1!', 'max_days_ahead' => '1!', 'cart_hold_minutes' => '5!', 'payment_minutes' => '10!', 'cutoff_minutes' => '0', 'reserve_limit' => '0' ) === $mn_found, $mn_found );
 
 // Numerele din texte acordate ca în română: „30 de minute” în nota formularului, „1 rută activă” / „20 de rute active” în panou.

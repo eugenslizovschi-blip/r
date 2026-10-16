@@ -897,7 +897,9 @@ class LBB_Admin {
 		$mins = array( 'default_capacity' => 1, 'max_passengers' => 1, 'max_days_ahead' => 1, 'cart_hold_minutes' => 5, 'payment_minutes' => 10 );
 		$num  = function ( $key, $label, $help = '', $step = '1' ) use ( $s, $mins ) {
 			$min = isset( $mins[ $key ] ) ? $mins[ $key ] : 0;
-			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="number" inputmode="' . ( '1' === $step ? 'numeric' : 'decimal' ) . '" min="' . esc_attr( $min ) . '" step="' . esc_attr( $step ) . '" value="' . esc_attr( $s[ $key ] ) . '"' . ( $min ? ' required' : '' ) . ( $help ? ' aria-describedby="lbb-' . esc_attr( $key ) . '-desc"' : '' ) . '>';
+			$maxes = LBB_Settings::MAXES;
+			$max   = array_key_exists( $key, $maxes ) ? (int) $maxes[ $key ] : 0;
+			echo '<tr><th><label for="lbb-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td><input id="lbb-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" type="number" inputmode="' . ( '1' === $step ? 'numeric' : 'decimal' ) . '" min="' . esc_attr( $min ) . '"' . ( $max ? ' max="' . esc_attr( $max ) . '"' : '' ) . ' step="' . esc_attr( $step ) . '" value="' . esc_attr( $s[ $key ] ) . '"' . ( $min ? ' required' : '' ) . ( $help ? ' aria-describedby="lbb-' . esc_attr( $key ) . '-desc"' : '' ) . '>';
 			// Explicația legată de câmp: cititorul de ecran o spune odată cu eticheta.
 			if ( $help ) {
 				echo '<p class="description" id="lbb-' . esc_attr( $key ) . '-desc">' . esc_html( $help ) . '</p>';
