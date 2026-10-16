@@ -154,7 +154,8 @@ class LBB_Tickets {
 	public static function send_reservation_emails( array $booking ) {
 		$route   = LBB_Routes::get( $booking['route_id'] );
 		$name    = $route ? $route['origin'] . ' → ' . $route['destination'] : '';
-		$when    = wp_date( 'd.m.Y', strtotime( $booking['travel_date'] . ' 12:00' ) ) . ' ' . $booking['dep_time'];
+		// Cu ziua săptămânii, ca pe bilet: „21.10.2026 (miercuri) 10:00” — în lista de emailuri se vede din subiect.
+		$when    = LBB_WooCommerce::date_with_day( $booking['travel_date'] ) . ' ' . $booking['dep_time'];
 		$office  = LBB_Settings::office_email();
 		// Expeditor „LibertBus” (nu „WordPress”); răspunsul clientului ajunge la birou.
 		$headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header(), 'Reply-To: ' . $office );
@@ -249,7 +250,7 @@ class LBB_Tickets {
 		}
 		$route  = LBB_Routes::get( $booking['route_id'] );
 		$name   = LBB_Bookings::route_name( $route ? array( 'origin' => $route['origin'], 'destination' => $route['destination'] ) : array() );
-		$when   = wp_date( 'd.m.Y', strtotime( $booking['travel_date'] . ' 12:00' ) ) . ' ' . $booking['dep_time'];
+		$when   = LBB_WooCommerce::date_with_day( $booking['travel_date'] ) . ' ' . $booking['dep_time'];
 		$office = LBB_Settings::office_email();
 		$body   = '<p>' . sprintf(
 			/* translators: 1: codul rezervării, 2: ruta, 3: data și ora */

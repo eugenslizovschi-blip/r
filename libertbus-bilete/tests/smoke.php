@@ -757,6 +757,9 @@ $to_client = array_values( array_filter( $lbb_mails, function ( $m ) {
 	return 'client-mail@example.com' === $m['to'];
 } ) );
 lbb_t( 'rezervarea trimite 2 emailuri (client + birou)', 2 === count( $lbb_mails ), count( $lbb_mails ) );
+lbb_t( 'subiectele emailurilor de rezervare (client și birou) au data cu ziua săptămânii, ca pe bilet', 2 === count( array_filter( $lbb_mails, function ( $m ) use ( $tomorrow ) {
+	return false !== strpos( (string) $m['subject'], LBB_WooCommerce::date_with_day( $tomorrow ) . ' 10:00' );
+} ) ), wp_list_pluck( $lbb_mails, 'subject' ) );
 $to_office = array_values( array_filter( $lbb_mails, function ( $m ) {
 	return 'client-mail@example.com' !== $m['to'];
 } ) );
