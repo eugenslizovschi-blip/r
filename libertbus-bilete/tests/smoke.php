@@ -601,7 +601,11 @@ $wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $tk_b['travel_date
 $tk_today = array( 'status' => 'confirmed', 'travel_date' => LBB_Settings::today() );
 lbb_t( 'în ziua cursei biletul rămâne valabil', 'ok' === LBB_Tickets::state( $tk_today )['class'] );
 lbb_t( 'biletul cu plata reluată (pending) nu apare „anulat”, ci neachitat', 'bad' === LBB_Tickets::state( array( 'status' => 'pending', 'travel_date' => LBB_Settings::today() ) )['class'] && 0 === strpos( LBB_Tickets::state( array( 'status' => 'pending', 'travel_date' => LBB_Settings::today() ) )['text'], 'Plata nu e finalizată' ) );
-lbb_t( 'un bilet anulat dintr-o zi trecută rămâne „anulat”', 'Bilet anulat' === LBB_Tickets::state( array( 'status' => 'cancelled', 'travel_date' => $tk_yday ) )['text'] );
+lbb_t( 'un bilet anulat dintr-o zi trecută rămâne „anulat”', 'Bilet anulat' === LBB_Tickets::state( array( 'status' => 'cancelled', 'travel_date' => $tk_yday, 'order_id' => 123 ) )['text'] );
+// Rezervarea cu plata la urcare anulată de birou (fără comandă) rămâne „rezervare”: clientul n-a avut bilet.
+$ra_b = array( 'status' => 'cancelled', 'travel_date' => $tk_yday, 'order_id' => 0, 'ticket_code' => 'LB-TESTRA', 'route_id' => 0, 'seats' => 1, 'children' => 0, 'passengers' => array(), 'dep_time' => '10:00' );
+$ra_h = LBB_Tickets::html( $ra_b );
+lbb_t( 'rezervare anulată: „Rezervare anulată” și „Rezervare LibertBus”, nu „Bilet anulat”; biletul plătit anulat rămâne „Bilet”', 'Rezervare anulată' === LBB_Tickets::state( $ra_b )['text'] && false !== strpos( $ra_h, 'Rezervare LibertBus' ) && false === strpos( $ra_h, 'Bilet LibertBus' ) && LBB_Tickets::is_reservation( array( 'status' => 'reserved', 'order_id' => 0 ) ) && ! LBB_Tickets::is_reservation( array( 'status' => 'cancelled', 'order_id' => 55 ) ) && ! LBB_Tickets::is_reservation( array( 'status' => 'confirmed', 'order_id' => 55 ) ), array( LBB_Tickets::state( $ra_b ), substr( wp_strip_all_tags( $ra_h ), 0, 60 ) ) );
 // Alt pasager pe aceeași cursă = rezervare nouă (o rezervare identică e doar formularul trimis din nou, vezi mai jos).
 $res2 = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_phone' => '+37369000002', 'lbb_names' => array( 'Maria' ) ) ) );
 lbb_t( 'a doua rezervare neachitată pe același telefon e refuzată', is_wp_error( $res2 ) && 'lbb_limit' === $res2->get_error_code(), $res2 );

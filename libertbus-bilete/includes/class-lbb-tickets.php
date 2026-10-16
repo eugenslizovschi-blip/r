@@ -102,6 +102,14 @@ class LBB_Tickets {
 	/**
 	 * Un bilet ca tabel HTML simplu, cu stiluri inline ca să arate bine și în email.
 	 */
+	/**
+	 * Rezervare cu plata la urcare (activă sau anulată de birou): fără comandă WooCommerce. Biletele plătite au
+	 * mereu o comandă, așa că o rezervare anulată rămâne „rezervare”, nu devine „bilet anulat”.
+	 */
+	public static function is_reservation( array $booking ) {
+		return 'reserved' === $booking['status'] || ( 'cancelled' === $booking['status'] && empty( $booking['order_id'] ) );
+	}
+
 	public static function html( array $booking, $with_qr = false ) {
 		$rows  = LBB_WooCommerce::describe( $booking );
 		$state = self::state( $booking );
@@ -111,7 +119,7 @@ class LBB_Tickets {
 			<?php if ( $with_qr ) : ?>
 				<div class="lbb-ticket-qr" role="img" aria-label="<?php /* translators: %s: codul biletului */ echo esc_attr( sprintf( __( 'Cod QR al biletului %s', 'libertbus-bilete' ), $booking['ticket_code'] ) ); ?>" data-qr="<?php echo esc_attr( self::url( $booking['ticket_code'] ) ); ?>"></div>
 			<?php endif; ?>
-			<div style="font-size:13px;color:#5f6b7a;"><?php echo 'reserved' === $booking['status'] ? esc_html__( 'Rezervare LibertBus', 'libertbus-bilete' ) : esc_html__( 'Bilet LibertBus', 'libertbus-bilete' ); ?></div>
+			<div style="font-size:13px;color:#5f6b7a;"><?php echo self::is_reservation( $booking ) ? esc_html__( 'Rezervare LibertBus', 'libertbus-bilete' ) : esc_html__( 'Bilet LibertBus', 'libertbus-bilete' ); ?></div>
 			<div class="lbb-ticket-code" style="font-family:Menlo,Consolas,monospace;font-size:22px;font-weight:700;letter-spacing:1px;margin:2px 0 10px;"><?php echo esc_html( $booking['ticket_code'] ); ?></div>
 			<table style="width:100%;border-collapse:collapse;">
 				<?php foreach ( $rows as $label => $value ) : ?>
@@ -123,7 +131,7 @@ class LBB_Tickets {
 				<?php endforeach; ?>
 			</table>
 			<?php if ( ! $with_qr ) : ?>
-				<p style="margin:10px 0 0;"><a href="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php echo 'reserved' === $booking['status'] ? esc_html__( 'Deschide rezervarea cu cod QR', 'libertbus-bilete' ) : esc_html__( 'Deschide biletul cu cod QR', 'libertbus-bilete' ); ?></a>
+				<p style="margin:10px 0 0;"><a href="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php echo self::is_reservation( $booking ) ? esc_html__( 'Deschide rezervarea cu cod QR', 'libertbus-bilete' ) : esc_html__( 'Deschide biletul cu cod QR', 'libertbus-bilete' ); ?></a>
 				<?php if ( 'ok' === $state['class'] ) : ?> · <a href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?></p>
 			<?php endif; ?>
 		</div>
@@ -433,7 +441,7 @@ class LBB_Tickets {
 			return array( 'class' => 'bad', 'text' => __( 'Plata nu e finalizată — biletul nu e încă valabil', 'libertbus-bilete' ) );
 		}
 		if ( ! in_array( $booking['status'], array( 'confirmed', 'reserved' ), true ) ) {
-			return array( 'class' => 'bad', 'text' => __( 'Bilet anulat', 'libertbus-bilete' ) );
+			return array( 'class' => 'bad', 'text' => self::is_reservation( $booking ) ? __( 'Rezervare anulată', 'libertbus-bilete' ) : __( 'Bilet anulat', 'libertbus-bilete' ) );
 		}
 		if ( $booking['travel_date'] < LBB_Settings::today() ) {
 			$date = DateTimeImmutable::createFromFormat( '!Y-m-d', $booking['travel_date'], LBB_Settings::tz() );
