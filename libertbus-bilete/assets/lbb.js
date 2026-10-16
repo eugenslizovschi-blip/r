@@ -381,9 +381,25 @@
 			fillWithPhone( el.status, text );
 		}
 
+		// Conexiune blocată (semnal slab pe drum): fetch ar aștepta minute întregi cu „Se verifică locurile…”. După
+		// 8 secunde cererea se oprește și clientul vede „Încearcă din nou” și telefonul, fără alte reîncercări lungi.
+		var FETCH_TIMEOUT = 8000;
+
 		function getJSON( url, tries ) {
-			return fetch( url, { credentials: 'same-origin', headers: { Accept: 'application/json' } } )
+			var opts = { credentials: 'same-origin', headers: { Accept: 'application/json' } };
+			var timer = null;
+			var timedOut = false;
+			if ( typeof window.AbortController === 'function' ) {
+				var ctrl = new window.AbortController();
+				opts.signal = ctrl.signal;
+				timer = setTimeout( function () {
+					timedOut = true;
+					ctrl.abort();
+				}, FETCH_TIMEOUT );
+			}
+			return fetch( url, opts )
 				.then( function ( r ) {
+					clearTimeout( timer );
 					return r.text().then( function ( body ) {
 						var data = null;
 						try {
@@ -399,7 +415,12 @@
 					} );
 				} )
 				.catch( function ( err ) {
-					if ( tries <= 1 || err.notFound ) {
+					clearTimeout( timer );
+					if ( timedOut ) {
+						err = new Error( 'timeout' );
+						err.timeout = true;
+					}
+					if ( tries <= 1 || err.notFound || err.timeout ) {
 						throw err;
 					}
 					return new Promise( function ( resolve ) {
