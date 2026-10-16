@@ -90,14 +90,15 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (!/nu se mai rezervă online/.test(gs.text) || !gs.tel || calls !== 1) fail('ruta oprită (404) nu are mesajul potrivit: ' + JSON.stringify({ gs, calls }));
     await gone.close();
   }
-  // Lista de ore în română corectă: „1 loc liber”, „20 de locuri libere”, „7 locuri libere”.
+  // Lista de ore în română corectă: „1 loc liber”, „20 de locuri libere”, „7 locuri libere”; peste 100 contează
+  // ultimele două cifre: „105 locuri libere”, dar „120 de locuri libere”.
   {
     const gr = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await gr.route('**/lbb/v1/departures**', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ departures: [{ time: '06:00', free: 1, bookable: true, reason: '' }, { time: '08:45', free: 20, bookable: true, reason: '' }, { time: '17:45', free: 7, bookable: true, reason: '' }] }) }));
+    await gr.route('**/lbb/v1/departures**', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ departures: [{ time: '06:00', free: 1, bookable: true, reason: '' }, { time: '08:45', free: 20, bookable: true, reason: '' }, { time: '17:45', free: 7, bookable: true, reason: '' }, { time: '19:00', free: 105, bookable: true, reason: '' }, { time: '21:00', free: 120, bookable: true, reason: '' }] }) }));
     await gr.goto(BASE + '/balti-iasi/');
-    await gr.waitForFunction(() => document.querySelector('[data-lbb="time"]').options.length > 3);
+    await gr.waitForFunction(() => document.querySelector('[data-lbb="time"]').options.length > 5);
     const labels = await gr.$$eval('[data-lbb="time"] option', o => o.slice(1).map(x => x.textContent));
-    if (!/^06:00 — 1 loc liber$/.test(labels[0]) || !/^08:45 — 20 de locuri libere$/.test(labels[1]) || !/^17:45 — 7 locuri libere$/.test(labels[2])) fail('acordul la locurile libere: ' + JSON.stringify(labels));
+    if (!/^06:00 — 1 loc liber$/.test(labels[0]) || !/^08:45 — 20 de locuri libere$/.test(labels[1]) || !/^17:45 — 7 locuri libere$/.test(labels[2]) || !/^19:00 — 105 locuri libere$/.test(labels[3]) || !/^21:00 — 120 de locuri libere$/.test(labels[4])) fail('acordul la locurile libere: ' + JSON.stringify(labels));
     await gr.close();
   }
   // Sub dată, ziua în cuvinte: pe telefoanele în engleză câmpul arată 03/01/2027 (lună/zi), ușor de citit greșit.
