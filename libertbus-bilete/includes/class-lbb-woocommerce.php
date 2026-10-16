@@ -308,7 +308,8 @@ class LBB_WooCommerce {
 			if ( is_email( $email ) ) {
 				$headers[] = 'Reply-To: ' . $email;
 			}
-			LBB_Tickets::mail_html( LBB_Settings::office_email(), sprintf( '[LibertBus] Locuri depășite — comanda #%s', $order->get_order_number() ), $html, $headers );
+			/* translators: %s: numărul comenzii */
+			LBB_Tickets::mail_html( LBB_Settings::office_email(), sprintf( __( '[LibertBus] Locuri depășite — comanda #%s', 'libertbus-bilete' ), $order->get_order_number() ), $html, $headers );
 		}
 	}
 
