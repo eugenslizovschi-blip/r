@@ -763,6 +763,16 @@ $rp_y5 = LBB_Bookings::retention_years();
 remove_filter( 'lbb_retention_years', $rp_f );
 lbb_t( 'politica de confidențialitate spune termenul aplicat de curățenia automată (3 ani; 5 ani dacă filtrul îl schimbă)', 3 === LBB_Bookings::retention_years() && 5 === $rp_y5 && false !== strpos( $rp_3, 'Păstrare: 3 ani de la data călătoriei' ) && false !== strpos( $rp_5, 'Păstrare: 5 ani de la data călătoriei' ) && false === strpos( $rp_5, '3 ani de la data' ), preg_match( '/Păstrare: [^<]*călătoriei/u', $rp_5, $rp_m ) ? $rp_m[0] : '' );
 
+// Termenii: „se închide cu 60 de minute”, dar „cu 15 minute” (nu „15 de minute”), după închiderea din Setări.
+$tc_keep = get_option( 'lbb_settings' );
+$tc_txt  = array();
+foreach ( array( 15, 60 ) as $tc_n ) {
+	update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'cutoff_minutes' => $tc_n ) ) );
+	$tc_txt[ $tc_n ] = (string) $ck_m->invoke( null, 'terms' );
+}
+update_option( 'lbb_settings', $tc_keep );
+lbb_t( 'Termenii: închiderea vânzării în română corectă („cu 15 minute”, „cu 60 de minute”)', false !== strpos( $tc_txt[15], 'se închide cu 15 minute înainte' ) && false !== strpos( $tc_txt[60], 'se închide cu 60 de minute înainte' ), array( preg_match( '/se închide cu [^.]*/u', $tc_txt[15], $tc_m ) ? $tc_m[0] : '' ) );
+
 // Emailurile de rezervare: unul clientului, unul biroului, cu codul, suma de la urcare și telefonul.
 $lbb_mails = array();
 $lbb_catch = function ( $null, $atts ) use ( &$lbb_mails ) {

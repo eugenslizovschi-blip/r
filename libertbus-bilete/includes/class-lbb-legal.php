@@ -234,7 +234,8 @@ class LBB_Legal {
 		$email   = '[lbb_firma camp="email"]';
 		$telefon = '[lbb_firma camp="phone"]';
 		$site    = home_url( '/' );
-		$cutoff  = (int) LBB_Settings::get( 'cutoff_minutes' );
+		// „60 de minute”, dar „15 minute” și „1 minut” (acordul din română), ca în formular.
+		$cutoff  = LBB_Settings::ro_count( (int) LBB_Settings::get( 'cutoff_minutes' ), 'minut', 'minute' );
 
 		$date = "<h2>Date de identificare</h2>\n<p>$firma, IDNO $idno, adresa: $adresa.<br>Telefon: $telefon, email: $email.</p>";
 
@@ -248,7 +249,7 @@ $date
 <h2>Prețuri și plată</h2>
 <p>Prețurile sunt afișate pe site înainte de plată și includ toate taxele. Plata se face online cu cardul bancar (Visa, Mastercard) prin procesatorul de plăți al băncii partenere. Comanda se confirmă doar după autorizarea plății.</p>
 <h2>Emiterea biletului</h2>
-<p>După confirmarea plății primiți biletul electronic pe email (cod de bilet și link cu cod QR). Biletul se poate arăta de pe telefon sau tipărit. Vânzarea online se închide cu $cutoff de minute înainte de plecare.</p>
+<p>După confirmarea plății primiți biletul electronic pe email (cod de bilet și link cu cod QR). Biletul se poate arăta de pe telefon sau tipărit. Vânzarea online se închide cu $cutoff înainte de plecare.</p>
 <h2>Obligațiile pasagerului</h2>
 <ul>
 <li>să fie la locul de îmbarcare cu cel puțin 15 minute înainte de plecare;</li>
