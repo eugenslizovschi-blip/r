@@ -238,6 +238,10 @@ class LBB_Frontend {
 				return substr( $email, 0, $at + 1 ) . ( false === strpos( $right, '.' ) ? $right . '.com' : $right );
 			}
 		}
+		// Orice domeniu („ion@firma.con”): „.con”, „.cmo”, „.comm”… nu există ca terminații, deci e „.com” greșit tastat.
+		if ( preg_match( '/^(.+\.)(con|cmo|comm|coom|cpm|xom|vom)$/', $domain, $m ) ) {
+			return substr( $email, 0, $at + 1 ) . $m[1] . 'com';
+		}
 		return '';
 	}
 
