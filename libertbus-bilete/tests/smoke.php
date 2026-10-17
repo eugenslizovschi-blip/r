@@ -805,6 +805,16 @@ wp_set_current_user( $se_keep[3] );
 lbb_t( 'Setări: emailul biroului greșit e semnalat la salvare (nevalid: unde merg emailurile; „gmail.con”: adresa propusă); unul corect nu', false !== strpos( $se_bad[0], '„birou@gmail” de la „Email pentru clienți” nu e validă' ) && $se_bad[1] && false !== strpos( $se_typo[0], 'Ați vrut să scrieți birou@gmail.com?' ) && $se_typo[1] && false === strpos( $se_ok[0], 'Atenție' ) && ! $se_ok[1], array( $se_bad, $se_typo, $se_ok ) );
 lbb_t( 'Setări: cursul RON scris invers („0,256” în loc de 3,9) e semnalat la salvare; un curs normal nu', false !== strpos( $se_inv[0], 'cursul RON 0,256 pare scris invers' ) && $se_inv[1] && false === strpos( $se_norm[0], 'invers' ) && ! $se_norm[1], array( $se_inv, $se_norm ) );
 
+// Antetul plugin-ului: WordPress 6.5+ nu-l lasă activat fără WooCommerce; WooCommerce îl știe compatibil cu
+// comenzile HPOS și cu coșul / finalizarea pe blocuri (fără avertismentul „plugin incompatibil”).
+$hd_rp  = get_file_data( LBB_FILE, array( 'rp' => 'Requires Plugins', 'php' => 'Requires PHP' ) );
+$hd_cmp = array();
+foreach ( array( 'custom_order_tables', 'cart_checkout_blocks' ) as $hd_f ) {
+	$hd_c            = \Automattic\WooCommerce\Utilities\FeaturesUtil::get_compatible_plugins_for_feature( $hd_f );
+	$hd_cmp[ $hd_f ] = in_array( plugin_basename( LBB_FILE ), isset( $hd_c['compatible'] ) ? $hd_c['compatible'] : array(), true );
+}
+lbb_t( 'antetul plugin-ului cere WooCommerce și PHP 7.4; compatibil declarat cu HPOS și cu blocurile', 'woocommerce' === $hd_rp['rp'] && '7.4' === $hd_rp['php'] && $hd_cmp['custom_order_tables'] && $hd_cmp['cart_checkout_blocks'], array( $hd_rp, $hd_cmp ) );
+
 // Emailurile de rezervare: unul clientului, unul biroului, cu codul, suma de la urcare și telefonul.
 $lbb_mails = array();
 $lbb_catch = function ( $null, $atts ) use ( &$lbb_mails ) {

@@ -5,6 +5,7 @@
  * Version:           1.5.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
+ * Requires Plugins:  woocommerce
  * Author:            LibertBus
  * Text Domain:       libertbus-bilete
  * Domain Path:       /languages
