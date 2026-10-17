@@ -91,6 +91,9 @@ class LBB_Settings {
 				$list  = array_values( array_intersect( self::currencies(), array_map( 'strtoupper', array_map( 'trim', $list ) ) ) );
 				$value = implode( ',', $list ? $list : array( 'MDL' ) );
 			} elseif ( 'accent_color' === $key ) {
+				// Codul copiat fără „#” („1e40af”, des din programele de design) nu mai revine pe tăcute la verde.
+				$value = trim( (string) $value );
+				$value = preg_match( '/^([0-9a-f]{3}){1,2}$/i', $value ) ? '#' . $value : $value;
 				$value = sanitize_hex_color( $value ) ? sanitize_hex_color( $value ) : $default;
 			} elseif ( 'replace_cf7' === $key || 'preview_cf7' === $key ) {
 				$value = implode( ',', array_filter( array_map( 'absint', preg_split( '/[\s,;]+/', (string) $value ) ) ) );

@@ -815,6 +815,16 @@ lbb_t( 'Setări: IDNO-ul fără 13 cifre e semnalat la salvare; 13 cifre (și cu
 lbb_t( 'Setări: telefonul pentru clienți incomplet sau fără prefixul țării e semnalat la salvare; +373 … nu', false !== strpos( $se_tl[0], '„069 184 111” nu are prefixul țării' ) && $se_tl[1] && false !== strpos( $se_ts[0], '„+373 69” e incomplet' ) && $se_ts[1] && false === strpos( $se_ti[0], 'telefonul' ) && ! $se_ti[1], array( $se_tl, $se_ts, $se_ti ) );
 lbb_t( 'Setări: cursul RON scris invers („0,256” în loc de 3,9) e semnalat la salvare; un curs normal nu', false !== strpos( $se_inv[0], 'cursul RON 0,256 pare scris invers' ) && $se_inv[1] && false === strpos( $se_norm[0], 'invers' ) && ! $se_norm[1], array( $se_inv, $se_norm ) );
 
+// Culoarea butoanelor copiată fără „#” se păstrează; un cod stricat revine la culoarea implicită.
+$ac_keep = get_option( 'lbb_settings' );
+$ac_got  = array();
+foreach ( array( '1e40af', ' #B91C1C ', 'abc', 'zzz', '#12345' ) as $ac_in ) {
+	LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'accent_color' => $ac_in ) ) );
+	$ac_got[ $ac_in ] = LBB_Settings::get( 'accent_color' );
+}
+update_option( 'lbb_settings', $ac_keep );
+lbb_t( 'Setări: culoarea butoanelor fără „#” („1e40af”) se păstrează; un cod stricat revine la #00875a', array( '1e40af' => '#1e40af', ' #B91C1C ' => '#B91C1C', 'abc' => '#abc', 'zzz' => '#00875a', '#12345' => '#00875a' ) === $ac_got, $ac_got );
+
 // Antetul plugin-ului: WordPress 6.5+ nu-l lasă activat fără WooCommerce; WooCommerce îl știe compatibil cu
 // comenzile HPOS și cu coșul / finalizarea pe blocuri (fără avertismentul „plugin incompatibil”).
 $hd_rp  = get_file_data( LBB_FILE, array( 'rp' => 'Requires Plugins', 'php' => 'Requires PHP' ) );
