@@ -1025,6 +1025,19 @@ class LBB_Admin {
 			/* translators: 1: adresa scrisă, 2: adresa propusă */
 			$msg .= ' ' . sprintf( __( 'Atenție: „%1$s” de la „Email pentru clienți” pare scrisă greșit. Ați vrut să scrieți %2$s?', 'libertbus-bilete' ), $typed, $typo );
 		}
-		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold || $bad || $typo );
+		// Cursul scris invers („0,256” = câți RON dă 1 MDL): RON, EUR și USD valorează toate peste 1 MDL, deci un curs
+		// sub 1 e aproape sigur inversat, iar prețurile convertite ar ieși de zeci de ori greșite.
+		$inverted = array();
+		foreach ( LBB_Settings::currencies() as $cur ) {
+			$rate = (float) LBB_Settings::get( 'rate_' . $cur );
+			if ( 'MDL' !== $cur && $rate > 0 && $rate < 1 ) {
+				$inverted[] = $cur . ' ' . str_replace( '.', ',', (string) $rate );
+			}
+		}
+		if ( $inverted ) {
+			/* translators: %s: monedele și cursurile, ex. „RON 0,256” */
+			$msg .= ' ' . sprintf( __( 'Atenție: cursul %s pare scris invers. Aici se scrie câți lei moldovenești (MDL) valorează 1 unitate (ex. 1 RON ≈ 3,9 MDL).', 'libertbus-bilete' ), implode( ', ', $inverted ) );
+		}
+		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold || $bad || $typo || $inverted );
 	}
 }

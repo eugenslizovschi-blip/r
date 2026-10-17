@@ -775,8 +775,8 @@ lbb_t( 'Termenii: închiderea vânzării în română corectă („cu 15 minute�
 
 // Salvarea Setărilor cu „Email pentru clienți” greșit: mesaj de avertizare, nu golire pe tăcute.
 $se_keep = array( get_option( 'lbb_settings' ), $_POST, $_REQUEST, get_current_user_id() );
-$se_go   = function ( $email ) {
-	$_POST    = array_merge( LBB_Settings::all(), array( 'company_email' => $email, '_wpnonce' => wp_create_nonce( 'lbb_save_settings' ) ) );
+$se_go   = function ( $email, $more = array() ) {
+	$_POST    = array_merge( LBB_Settings::all(), array( 'company_email' => $email, '_wpnonce' => wp_create_nonce( 'lbb_save_settings' ) ), $more );
 	$_REQUEST = $_POST;
 	$loc      = '';
 	$cb       = function ( $l ) use ( &$loc ) {
@@ -797,10 +797,13 @@ wp_set_current_user( 1 );
 $se_bad  = $se_go( 'birou@gmail' );
 $se_typo = $se_go( 'birou@gmail.con' );
 $se_ok   = $se_go( 'birou@firma.md' );
+$se_inv  = $se_go( 'birou@firma.md', array( 'rate_RON' => '0,256' ) );
+$se_norm = $se_go( 'birou@firma.md', array( 'rate_RON' => '3,9' ) );
 update_option( 'lbb_settings', $se_keep[0] );
 list( , $_POST, $_REQUEST ) = $se_keep;
 wp_set_current_user( $se_keep[3] );
 lbb_t( 'Setări: emailul biroului greșit e semnalat la salvare (nevalid: unde merg emailurile; „gmail.con”: adresa propusă); unul corect nu', false !== strpos( $se_bad[0], '„birou@gmail” de la „Email pentru clienți” nu e validă' ) && $se_bad[1] && false !== strpos( $se_typo[0], 'Ați vrut să scrieți birou@gmail.com?' ) && $se_typo[1] && false === strpos( $se_ok[0], 'Atenție' ) && ! $se_ok[1], array( $se_bad, $se_typo, $se_ok ) );
+lbb_t( 'Setări: cursul RON scris invers („0,256” în loc de 3,9) e semnalat la salvare; un curs normal nu', false !== strpos( $se_inv[0], 'cursul RON 0,256 pare scris invers' ) && $se_inv[1] && false === strpos( $se_norm[0], 'invers' ) && ! $se_norm[1], array( $se_inv, $se_norm ) );
 
 // Emailurile de rezervare: unul clientului, unul biroului, cu codul, suma de la urcare și telefonul.
 $lbb_mails = array();
