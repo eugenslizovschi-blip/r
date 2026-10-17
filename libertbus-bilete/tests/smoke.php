@@ -1702,8 +1702,11 @@ $bl_page = function ( $limit ) {
 	return $html;
 };
 $bl_small = $bl_page( 1 );
+$bl_20    = $bl_page( 20 );
+$bl_3     = $bl_page( 3 );
 $bl_big   = $bl_page( 100000 );
-lbb_t( 'Rezervări: la limita listei apare „Se arată doar ultimele…”, sub limită nu', false !== strpos( $bl_small, 'Se arată doar ultimele 1.' ) && false === strpos( $bl_big, 'Se arată doar ultimele' ), substr( wp_strip_all_tags( $bl_small ), -200 ) );
+lbb_t( 'Rezervări: mesajul limitei în română corectă („ultima rezervare”, „ultimele 3 rezervări”, „ultimele 20 de rezervări”)', false !== strpos( $bl_small, 'Se arată doar ultima rezervare.' ) && false !== strpos( $bl_3, 'Se arată doar ultimele 3 rezervări.' ) && false !== strpos( $bl_20, 'Se arată doar ultimele 20 de rezervări.' ), array( LBB_Bookings::status_counts( '' ) ) );
+lbb_t( 'Rezervări: la limita listei apare „Se arată doar ultimele…”, sub limită nu', false !== strpos( $bl_small, 'Se arată doar ultima' ) && false === strpos( $bl_big, 'Se arată doar ultim' ), substr( wp_strip_all_tags( $bl_small ), -200 ) );
 
 // În lista de rute, „oprită” spune și de ce: debifată sau fără preț.
 $rs_ok   = LBB_Admin::route_state( array( 'active' => 1, 'price' => 240.0 ) );
