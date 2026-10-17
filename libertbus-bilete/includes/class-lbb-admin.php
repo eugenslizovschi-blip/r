@@ -578,7 +578,10 @@ class LBB_Admin {
 		$day_url = function ( $shift ) use ( $date, $route ) {
 			return add_query_arg( array( 'page' => 'lbb-manifest', 'date' => gmdate( 'Y-m-d', strtotime( $date . ' 12:00 UTC ' . $shift ) ), 'route' => $route ), admin_url( 'admin.php' ) );
 		};
-		echo '<p class="lbb-noprint lbb-day-nav"><a class="button" href="' . esc_url( $day_url( '-1 day' ) ) . '">‹ ' . esc_html__( 'Ziua precedentă', 'libertbus-bilete' ) . '</a> <a class="button" href="' . esc_url( $day_url( '+1 day' ) ) . '">' . esc_html__( 'Ziua următoare', 'libertbus-bilete' ) . ' ›</a></p>';
+		echo '<p class="lbb-noprint lbb-day-nav"><a class="button" href="' . esc_url( $day_url( '-1 day' ) ) . '">‹ ' . esc_html__( 'Ziua precedentă', 'libertbus-bilete' ) . '</a> <a class="button" href="' . esc_url( $day_url( '+1 day' ) ) . '">' . esc_html__( 'Ziua următoare', 'libertbus-bilete' ) . ' ›</a>'
+			// Înapoi la azi (după răsfoit zilele), tot cu ruta aleasă; pe lista de azi nu e nevoie.
+			. ( LBB_Settings::today() !== $date ? ' <a class="button lbb-today" href="' . esc_url( add_query_arg( array( 'page' => 'lbb-manifest', 'date' => LBB_Settings::today(), 'route' => $route ), admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Azi', 'libertbus-bilete' ) . '</a>' : '' )
+			. '</p>';
 		$rows = LBB_Bookings::manifest( $date, $route );
 		if ( ! $rows ) {
 			echo '<p>' . esc_html__( 'Nu sunt bilete vândute pentru această zi.', 'libertbus-bilete' );

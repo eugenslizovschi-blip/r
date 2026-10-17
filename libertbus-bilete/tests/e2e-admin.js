@@ -134,6 +134,11 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   await Promise.all([page.waitForNavigation(), page.click('.lbb-day-nav a:has-text("Ziua precedentă")')]);
   await Promise.all([page.waitForNavigation(), page.click('.lbb-day-nav a:has-text("Ziua precedentă")')]);
   const prevQ = new URL(page.url()).searchParams;
+  // „Azi” duce înapoi la lista de azi, cu aceeași rută; pe lista de azi butonul lipsește.
+  await Promise.all([page.waitForNavigation(), page.click('.lbb-day-nav a.lbb-today')]);
+  const todayQ = new URL(page.url()).searchParams;
+  const todayAgain = await page.$('.lbb-day-nav a.lbb-today');
+  if (!todayQ.get('date') || todayQ.get('date') === '2026-10-30' || todayQ.get('route') !== navRoute || todayAgain) fail('butonul „Azi” pe lista de pasageri: ' + JSON.stringify({ today: todayQ.toString(), again: !!todayAgain }));
   if (nextQ.get('date') !== '2026-11-01' || nextQ.get('route') !== navRoute || !/01\.11\.2026/.test(nextH) || prevQ.get('date') !== '2026-10-30' || prevQ.get('route') !== navRoute) fail('navigarea între zile pe lista de pasageri: ' + JSON.stringify({ next: nextQ.toString(), nextH, prev: prevQ.toString() }));
   // O zi fără pasageri trimite la următoarea zi cu pasageri, unde lista chiar are rânduri.
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&date=2000-01-01');
