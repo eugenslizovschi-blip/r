@@ -732,7 +732,16 @@ preg_match( '/data-lbb-config="([^"]+)"/', stripslashes( $html ), $cm );
 $cfg = $cm ? json_decode( base64_decode( html_entity_decode( $cm[1], ENT_QUOTES | ENT_HTML401, 'UTF-8' ) ), true ) : null;
 lbb_t( 'configurația cu diacritice supraviețuiește stripslashes()', is_array( $cfg ) && 'Alegeți orașul de plecare' === $cfg['i18n']['chooseFrom'], $cm ? substr( $cm[1], 0, 40 ) : 'lipsă' );
 lbb_t( 'mesajul „nu mai sunt locuri online” are telefonul', is_array( $cfg ) && false !== strpos( $cfg['i18n']['noneOpen'], LBB_Settings::phone_text() ), is_array( $cfg ) ? $cfg['i18n']['noneOpen'] : '' );
-update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 0, 'allow_reserve' => 0 ) ) );
+// Nota pentru grupuri în română corectă, oricare ar fi limita din Setări.
+$gn_txt = array();
+foreach ( array( 8, 20, 1 ) as $gn_n ) {
+	update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_reserve' => 1, 'max_passengers' => $gn_n ) ) );
+	preg_match( '/data-lbb-config="([^"]+)"/', LBB_Frontend::shortcode( array() ), $gn_m );
+	$gn_c = $gn_m ? json_decode( base64_decode( html_entity_decode( $gn_m[1], ENT_QUOTES | ENT_HTML401, 'UTF-8' ) ), true ) : null;
+	$gn_txt[ $gn_n ] = is_array( $gn_c ) ? $gn_c['i18n']['groupNote'] : '';
+}
+lbb_t( 'nota pentru grupuri: „mai mult de 8 persoane”, „20 de persoane”, „1 persoană”', 0 === strpos( $gn_txt[8], 'Sunteți mai mult de 8 persoane?' ) && 0 === strpos( $gn_txt[20], 'Sunteți mai mult de 20 de persoane?' ) && 0 === strpos( $gn_txt[1], 'Sunteți mai mult de 1 persoană?' ), $gn_txt );
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 0, 'allow_reserve' => 0, 'max_passengers' => $keep['max_passengers'] ?? 8 ) ) );
 lbb_t( 'fără niciun buton, formularul arată doar telefonul', false === strpos( LBB_Frontend::shortcode( array() ), '<form' ) );
 update_option( 'lbb_settings', $keep );
 
