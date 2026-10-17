@@ -1047,6 +1047,13 @@ class LBB_Admin {
 			/* translators: %s: monedele și cursurile, ex. „RON 0,256” */
 			$msg .= ' ' . sprintf( __( 'Atenție: cursul %s pare scris invers. Aici se scrie câți lei moldovenești (MDL) valorează 1 unitate (ex. 1 RON ≈ 3,9 MDL).', 'libertbus-bilete' ), implode( ', ', $inverted ) );
 		}
-		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold || $bad || $typo || $inverted );
+		// IDNO-ul din Moldova are 13 cifre: o cifră lipsă se vede acum, nu abia când banca verifică site-ul.
+		$idno     = (string) LBB_Settings::get( 'company_idno' );
+		$idno_bad = '' !== $idno && ! preg_match( '/^\d{13}$/', $idno );
+		if ( $idno_bad ) {
+			/* translators: 1: IDNO-ul salvat, 2: câte cifre are */
+			$msg .= ' ' . sprintf( __( 'Atenție: IDNO-ul „%1$s” are %2$d cifre, nu 13. Verificați-l în extrasul din registru: banca îl compară cu cel de pe site.', 'libertbus-bilete' ), $idno, strlen( preg_replace( '/\D/', '', $idno ) ) );
+		}
+		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold || $bad || $typo || $inverted || $idno_bad );
 	}
 }
