@@ -50,6 +50,15 @@ async function scan(page, label, include) {
   await page.fill('input[name="lbb_names[]"]', 'Test Accesibil');
   await page.fill('input[name="lbb_phone"]', '123');
   await page.fill('input[name="lbb_email"]', 'a11y@example.com');
+  // Focus vizibil pe butoane de la tastatură, și cu o temă care scoate conturul (button:focus { outline: none }).
+  await page.addStyleTag({ content: 'button:focus,button:focus-visible{outline:none!important}' });
+  await page.focus('input[name="lbb_email"]');
+  let kbFocus = null;
+  for (let i = 0; i < 6 && !kbFocus; i++) {
+    await page.keyboard.press('Tab');
+    kbFocus = await page.evaluate(() => { const a = document.activeElement; if (!a || !a.matches('[data-lbb-submit]')) return null; const s = getComputedStyle(a); return { style: s.outlineStyle, width: parseFloat(s.outlineWidth) }; });
+  }
+  if (!kbFocus || kbFocus.style === 'none' || kbFocus.width < 2) fail('butonul de trimitere nu are focus vizibil de la tastatură: ' + JSON.stringify(kbFocus));
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="reserve"]')]);
   await page.waitForSelector('.lbb-alert');
   await page.waitForSelector('input[name="lbb_phone"][aria-invalid="true"]', { state: 'attached' }).catch(() => fail('după eroare telefonul nu e marcat aria-invalid'));
