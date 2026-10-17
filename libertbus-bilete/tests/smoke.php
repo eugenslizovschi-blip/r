@@ -741,6 +741,17 @@ $tok2 = LBB_Settings::preview_token( true );
 lbb_t( 'link nou de previzualizare anulează cheia veche', $tok2 !== $tok && LBB_Settings::preview_token() === $tok2 );
 lbb_t( 'linkul de previzualizare conține cheia', false !== strpos( LBB_Settings::preview_url(), 'lbb_preview=' . $tok2 ) );
 
+// Politica de cookies spune adevărul despre cookie-ul de acord: același nume și aceeași durată ca în cookies.js
+// (dacă se schimbă durata în cod, testul cere și actualizarea paginii legale).
+$ck_js = (string) file_get_contents( LBB_DIR . 'assets/cookies.js' );
+$ck_nm = preg_match( "/var NAME = '([a-z_]+)'/", $ck_js, $ck_a ) ? $ck_a[1] : '';
+$ck_dd = preg_match( '/var DAYS = (\d+);/', $ck_js, $ck_b ) ? (int) $ck_b[1] : 0;
+$ck_m  = new ReflectionMethod( 'LBB_Legal', 'content' );
+$ck_m->setAccessible( true );
+$ck_tx = (string) $ck_m->invoke( null, 'cookies' );
+$ck_mo = (int) round( $ck_dd / 30 );
+lbb_t( 'Politica de cookies: cookie-ul de acord are numele și durata din cookies.js (' . $ck_nm . ', ' . $ck_dd . ' zile = ' . $ck_mo . ' luni)', '' !== $ck_nm && $ck_dd > 0 && (bool) preg_match( '#<strong>' . preg_quote( $ck_nm, '#' ) . '</strong>[^<]*Durata: ' . $ck_mo . ' luni#u', $ck_tx ), preg_match( '#<li><strong>' . preg_quote( $ck_nm, '#' ) . '.*?</li>#u', $ck_tx, $ck_c ) ? $ck_c[0] : '' );
+
 // Emailurile de rezervare: unul clientului, unul biroului, cu codul, suma de la urcare și telefonul.
 $lbb_mails = array();
 $lbb_catch = function ( $null, $atts ) use ( &$lbb_mails ) {
