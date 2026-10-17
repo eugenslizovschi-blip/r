@@ -187,7 +187,8 @@ class LBB_Admin {
 				$set
 					/* translators: 1: număr, 2: unitate (ani, luni…) */
 					? sprintf( __( 'După %1$d %2$s.', 'libertbus-bilete' ), (int) $anon['number'], isset( $units[ $anon['unit'] ] ) ? $units[ $anon['unit'] ] : $anon['unit'] )
-					: __( 'Acum: niciodată. Politica de confidențialitate promite păstrarea datelor 3 ani: în WooCommerce → Setări → Conturi și confidențialitate, la „Comenzi finalizate”, alegeți 3 ani.', 'libertbus-bilete' ),
+					/* translators: %s: durata din politica de confidențialitate, ex. 3 ani */
+					: sprintf( __( 'Acum: niciodată. Politica de confidențialitate promite păstrarea datelor %1$s: în WooCommerce → Setări → Conturi și confidențialitate, la „Comenzi finalizate”, alegeți %1$s.', 'libertbus-bilete' ), LBB_Settings::ro_count( LBB_Bookings::retention_years(), __( 'an', 'libertbus-bilete' ), __( 'ani', 'libertbus-bilete' ) ) ),
 				admin_url( 'admin.php?page=wc-settings&tab=account' ) );
 		}
 

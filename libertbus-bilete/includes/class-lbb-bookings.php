@@ -589,6 +589,14 @@ class LBB_Bookings {
 	/**
 	 * WooCommerce a anonimizat o comandă (la cererea clientului sau după perioada setată): la fel și rezervările ei.
 	 */
+	/**
+	 * Câți ani se păstrează datele pasagerilor după cursă (3, sau altă valoare prin filtrul lbb_retention_years).
+	 * Același număr apare în politica de confidențialitate și în panou, ca textul să spună ce face codul.
+	 */
+	public static function retention_years() {
+		return max( 1, (int) apply_filters( 'lbb_retention_years', 3 ) );
+	}
+
 	public static function on_order_anonymized( $order ) {
 		global $wpdb;
 		if ( ! $order instanceof WC_Order ) {
@@ -677,7 +685,7 @@ class LBB_Bookings {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::table() . " WHERE status IN ('hold','cancelled') AND order_id = 0 AND ticket_code = '' AND updated_at < %s", gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		// Politica de confidențialitate: datele pasagerilor se păstrează 3 ani de la data călătoriei. După aceea rămân
 		// doar codul, ruta, data și locurile (pentru statistici); numele, telefonul și emailul se șterg.
-		$years = max( 1, (int) apply_filters( 'lbb_retention_years', 3 ) );
+		$years = self::retention_years();
 		$until = ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '-' . $years . ' years' )->format( 'Y-m-d' );
 		$todo  = " AND ( phone <> '' OR email <> '' OR passengers IS NULL OR passengers <> '[]' )";
 		// Cu comandă: întâi numele de pe comandă (câte 50 pe rulare), apoi rezervarea; restul rămân pentru rularea următoare.

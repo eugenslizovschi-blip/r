@@ -31,7 +31,7 @@ class LBB_Legal {
 		}
 		$id   = self::page_id( 'privacy' );
 		$text = '<p>' . esc_html__( 'Rezervarea și biletul: numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri și codul biletului. Scop: rezervarea locului, emiterea biletului, reamintirea cursei (dacă e pornită) și lista de îmbarcare. Temei: executarea contractului de transport.', 'libertbus-bilete' ) . '</p>'
-			. '<p>' . esc_html__( 'Păstrare: la 3 ani după data cursei, numele, telefonul și emailul se șterg automat din rezervare. La cererea clientului, datele se exportă sau se șterg din Unelte → Exportă / Șterge datele personale; un bilet valabil pentru o cursă viitoare se păstrează până după cursă.', 'libertbus-bilete' ) . '</p>'
+			. '<p>' . esc_html( sprintf( /* translators: %s: durata, ex. 3 ani */ __( 'Păstrare: la %s după data cursei, numele, telefonul și emailul se șterg automat din rezervare. La cererea clientului, datele se exportă sau se șterg din Unelte → Exportă / Șterge datele personale; un bilet valabil pentru o cursă viitoare se păstrează până după cursă.', 'libertbus-bilete' ), LBB_Settings::ro_count( LBB_Bookings::retention_years(), __( 'an', 'libertbus-bilete' ), __( 'ani', 'libertbus-bilete' ) ) ) ) . '</p>'
 			. '<p>' . esc_html__( 'Datele cardului nu ajung pe site: se introduc doar pe pagina procesatorului de plăți.', 'libertbus-bilete' ) . '</p>';
 		if ( $id ) {
 			/* translators: %s: link spre politica de confidențialitate */
@@ -302,13 +302,15 @@ HTML;
 			case 'privacy':
 				$cookies = home_url( '/politica-de-cookies/' );
 				$updated = wp_date( 'd.m.Y' );
+				// Termenul din politică e cel aplicat de curățenia automată (LBB_Bookings::retention_years).
+				$keep    = LBB_Settings::ro_count( LBB_Bookings::retention_years(), 'an', 'ani' );
 				return <<<HTML
 <p>Această politică explică ce date personale prelucrăm pe <a href="$site">$site</a> și în legătură cu călătoriile, de ce, pe ce temei, cui le transmitem și cât le păstrăm. Respectăm Legea nr. 195/2024 privind protecția datelor cu caracter personal (aplicabilă din 23 august 2026) și, pentru persoanele din Uniunea Europeană, Regulamentul (UE) 2016/679 (GDPR).</p>
 <h2>1. Operatorul datelor</h2>
 <p>[lbb_firma_date]</p>
 <h2>2. Ce date prelucrăm, de ce, pe ce temei și cât timp</h2>
 <ul>
-<li><strong>Rezervarea și biletul:</strong> numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri, codul biletului. Scop: rezervarea locului, emiterea biletului, lista de îmbarcare, reamintirea cursei cu o zi înainte, anunțarea schimbărilor de cursă. Temei: executarea contractului de transport. Păstrare: 3 ani de la data călătoriei, cu excepția documentelor contabile.</li>
+<li><strong>Rezervarea și biletul:</strong> numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri, codul biletului. Scop: rezervarea locului, emiterea biletului, lista de îmbarcare, reamintirea cursei cu o zi înainte, anunțarea schimbărilor de cursă. Temei: executarea contractului de transport. Păstrare: $keep de la data călătoriei, cu excepția documentelor contabile.</li>
 <li><strong>Plata:</strong> suma, moneda, data și rezultatul plății, codul tranzacției. Datele cardului nu ajung la noi: le introduceți doar pe pagina procesatorului de plăți. Temei: executarea contractului și obligația legală (contabilitate, fiscalitate). Păstrare: cât cere legislația contabilă și fiscală.</li>
 <li><strong>Mesajele trimise prin formularele site-ului, telefon sau Viber:</strong> numele, telefonul, emailul și conținutul mesajului. Scop: să vă răspundem și să pregătim rezervarea. Temei: demersuri la cererea dumneavoastră înainte de contract și interesul nostru legitim de a răspunde. Păstrare: cel mult 1 an.</li>
 <li><strong>Securitatea site-ului:</strong> adresa IP, tipul browserului, paginile accesate, încercările de autentificare. Scop: protecția împotriva atacurilor și a abuzurilor. Temei: interes legitim. Păstrare: cel mult 90 de zile.</li>

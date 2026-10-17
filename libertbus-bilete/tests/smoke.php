@@ -752,6 +752,17 @@ $ck_tx = (string) $ck_m->invoke( null, 'cookies' );
 $ck_mo = (int) round( $ck_dd / 30 );
 lbb_t( 'Politica de cookies: cookie-ul de acord are numele și durata din cookies.js (' . $ck_nm . ', ' . $ck_dd . ' zile = ' . $ck_mo . ' luni)', '' !== $ck_nm && $ck_dd > 0 && (bool) preg_match( '#<strong>' . preg_quote( $ck_nm, '#' ) . '</strong>[^<]*Durata: ' . $ck_mo . ' luni#u', $ck_tx ), preg_match( '#<li><strong>' . preg_quote( $ck_nm, '#' ) . '.*?</li>#u', $ck_tx, $ck_c ) ? $ck_c[0] : '' );
 
+// Termenul de păstrare din politica de confidențialitate e cel aplicat de curățenie (filtrul lbb_retention_years).
+$rp_3 = (string) $ck_m->invoke( null, 'privacy' );
+$rp_f = function () {
+	return 5;
+};
+add_filter( 'lbb_retention_years', $rp_f );
+$rp_5  = (string) $ck_m->invoke( null, 'privacy' );
+$rp_y5 = LBB_Bookings::retention_years();
+remove_filter( 'lbb_retention_years', $rp_f );
+lbb_t( 'politica de confidențialitate spune termenul aplicat de curățenia automată (3 ani; 5 ani dacă filtrul îl schimbă)', 3 === LBB_Bookings::retention_years() && 5 === $rp_y5 && false !== strpos( $rp_3, 'Păstrare: 3 ani de la data călătoriei' ) && false !== strpos( $rp_5, 'Păstrare: 5 ani de la data călătoriei' ) && false === strpos( $rp_5, '3 ani de la data' ), preg_match( '/Păstrare: [^<]*călătoriei/u', $rp_5, $rp_m ) ? $rp_m[0] : '' );
+
 // Emailurile de rezervare: unul clientului, unul biroului, cu codul, suma de la urcare și telefonul.
 $lbb_mails = array();
 $lbb_catch = function ( $null, $atts ) use ( &$lbb_mails ) {
