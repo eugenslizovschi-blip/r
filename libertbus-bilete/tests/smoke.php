@@ -610,6 +610,7 @@ $ac_base = array( 'status' => 'confirmed', 'order_id' => 77, 'ticket_code' => 'L
 $ac_left = array_merge( $ac_base, array( 'travel_date' => $ac_gone->format( 'Y-m-d' ), 'dep_time' => $ac_gone->format( 'H:i' ) ) );
 $ac_next = array_merge( $ac_base, array( 'travel_date' => $ac_now->modify( '+1 day' )->format( 'Y-m-d' ), 'dep_time' => '10:00' ) );
 lbb_t( '„Adaugă în calendar” lipsește după plecarea autocarului (aceeași zi) și apare pentru o cursă care urmează', false === strpos( LBB_Tickets::html( $ac_left ), 'ics=1' ) && false !== strpos( LBB_Tickets::html( $ac_next ), 'ics=1' ), array( $ac_left['travel_date'] . ' ' . $ac_left['dep_time'] ) );
+lbb_t( 'la printare biletul nu se rupe între două pagini (și în email, cu stil inline)', 1 === preg_match( '/<div class="lbb-ticket" style="[^"]*page-break-inside:avoid;break-inside:avoid;/', LBB_Tickets::html( $ac_next ) ) );
 // Rezervarea cu plata la urcare anulată de birou (fără comandă) rămâne „rezervare”: clientul n-a avut bilet.
 $ra_b = array( 'status' => 'cancelled', 'travel_date' => $tk_yday, 'order_id' => 0, 'ticket_code' => 'LB-TESTRA', 'route_id' => 0, 'seats' => 1, 'children' => 0, 'passengers' => array(), 'dep_time' => '10:00' );
 $ra_h = LBB_Tickets::html( $ra_b );

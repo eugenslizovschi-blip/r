@@ -123,8 +123,9 @@ class LBB_Tickets {
 		$rows  = LBB_WooCommerce::describe( $booking );
 		$state = self::state( $booking );
 		ob_start();
+		// break-inside: la printarea mai multor bilete (pagina de mulțumire, emailul) un bilet nu se rupe între două pagini.
 		?>
-		<div class="lbb-ticket" style="border:2px dashed #c9ced6;border-radius:12px;padding:16px;margin:0 0 16px;background:#fff;color:#1d2733;">
+		<div class="lbb-ticket" style="border:2px dashed #c9ced6;border-radius:12px;padding:16px;margin:0 0 16px;background:#fff;color:#1d2733;page-break-inside:avoid;break-inside:avoid;">
 			<?php if ( $with_qr ) : ?>
 				<div class="lbb-ticket-qr" role="img" aria-label="<?php /* translators: %s: codul biletului */ echo esc_attr( sprintf( __( 'Cod QR al biletului %s', 'libertbus-bilete' ), $booking['ticket_code'] ) ); ?>" data-qr="<?php echo esc_attr( self::url( $booking['ticket_code'] ) ); ?>"></div>
 			<?php endif; ?>
