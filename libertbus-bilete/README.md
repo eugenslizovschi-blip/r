@@ -44,7 +44,7 @@ Clientul alege cursa, plătește cu cardul și primește biletul pe email.
 
 ## Instalare
 
-1. Arhivați folderul `libertbus-bilete` ca `.zip` și încărcați-l din Module → Adaugă → Încarcă modul. Apoi activați-l.
+1. Faceți arhiva cu `tests/build-zip.sh` (iese `libertbus-bilete-<versiune>.zip` lângă folder, fără teste, capturi de ecran și notițe) și încărcați-o din Module → Adaugă → Încarcă modul. Apoi activați-l.
 2. Mergeți la **LibertBus → Panou** și rezolvați ce e marcat cu ✘.
 
 ## Conectarea băncii

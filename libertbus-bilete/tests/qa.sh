@@ -46,6 +46,14 @@ fi
 # Pe site-ul de test toate emailurile se opresc înainte de trimitere (mu-plugin mail-dump). Pornim fără eroare
 # de email salvată: la final, una nouă înseamnă că un test sau codul a încercat să trimită un email real.
 (cd "$WP_PATH" && $WP_CLI option delete lbb_mail_failed >/dev/null 2>&1) || true
+echo "== Arhiva de instalare (fără teste, capturi și notițe)"
+ZIP_DIR=$(mktemp -d); ZIP=$("$DIR/tests/build-zip.sh" "$ZIP_DIR" 2>&1)
+ZIP_LIST=$( [ -f "$ZIP" ] && unzip -Z1 "$ZIP" )
+if [ -z "$ZIP_LIST" ] || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/libertbus-bilete.php' || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/includes/class-lbb-tickets.php' || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/assets/lbb.js' \
+  || echo "$ZIP_LIST" | grep -qE '(^|/)tests/|\.png$|PLAN\.md$' || [ "$(basename "$ZIP")" != "libertbus-bilete-$(sed -n 's/^ \* Version: *//p' "$DIR/libertbus-bilete.php" | tr -d '[:space:]').zip" ]; then
+  echo "  arhivă greșită: $ZIP"; echo "$ZIP_LIST" | grep -E 'tests/|\.png$|PLAN' | head -3; FAIL=1
+else echo "  ok ($(basename "$ZIP"), $(echo "$ZIP_LIST" | grep -vc '/$') fișiere, $(du -k "$ZIP" | cut -f1) KB)"; fi
+rm -rf "$ZIP_DIR"
 echo "== Teste automate"
 OUT_SMOKE=$(cd "$WP_PATH" && $WP_CLI eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
 echo "$OUT_SMOKE" | grep -E "FAIL|eșuate|Fatal"
