@@ -112,11 +112,12 @@ class LBB_Tickets {
 
 	/**
 	 * „Adaugă în calendar” doar pentru un bilet valabil al unei curse care n-a plecat încă: după plecare (aceeași zi)
-	 * ar pune în calendar un eveniment deja trecut.
+	 * ar pune în calendar un eveniment deja trecut. Nici pentru o rută ștearsă din admin: fișierul de calendar
+	 * n-ar avea ce cursă să descrie, iar linkul doar ar reîncărca pagina.
 	 */
 	public static function can_add_to_calendar( array $booking, $state = null ) {
 		$state = $state ? $state : self::state( $booking );
-		return 'ok' === $state['class'] && ! LBB_Bookings::departed( $booking );
+		return 'ok' === $state['class'] && ! LBB_Bookings::departed( $booking ) && null !== LBB_Routes::get( $booking['route_id'] );
 	}
 
 	public static function html( array $booking, $with_qr = false ) {
