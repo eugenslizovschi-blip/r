@@ -1480,6 +1480,20 @@ $_GET = array( 'page' => 'lbb-bookings', 'q' => 'rm2@example.com' );
 ob_start();
 LBB_Admin::page_bookings();
 $rm_list2 = ob_get_clean();
+// Căutare cu un filtru de stare fără rezultate (ex. „Anulate” rămas ales): link spre toate stările, cu aceeași căutare.
+$sf_counts = LBB_Bookings::status_counts( 'rm@example.com' );
+$sf_status = '';
+foreach ( array( 'cancelled', 'hold', 'pending', 'confirmed', 'reserved' ) as $sf_k ) {
+	if ( empty( $sf_counts[ $sf_k ] ) ) {
+		$sf_status = $sf_k;
+		break;
+	}
+}
+$_GET = array( 'page' => 'lbb-bookings', 'q' => 'rm@example.com', 'status' => $sf_status );
+ob_start();
+LBB_Admin::page_bookings();
+$sf_list = ob_get_clean();
+lbb_t( 'căutare fără rezultate în filtrul ales: link „Vezi rezultatele din toate stările (N)” cu aceeași căutare', '' !== $sf_status && ! empty( $sf_counts[''] ) && false !== strpos( $sf_list, 'Vezi rezultatele din toate stările (' . (int) $sf_counts[''] . ')' ) && false !== strpos( $sf_list, 'q=rm%40example.com"' ) && false === strpos( $rm_list, 'Vezi rezultatele din toate stările' ), array( $sf_status, $sf_counts ) );
 $_GET = array();
 $rm_claim = $rm_b && is_array( $rm_b ) ? array( LBB_Bookings::claim_reminder( $rm_b['id'] ), LBB_Bookings::claim_reminder( $rm_b['id'] ) ) : array();
 // Zi închisă sau oră scoasă din orar: fără „vă reamintim de cursa de mâine”.

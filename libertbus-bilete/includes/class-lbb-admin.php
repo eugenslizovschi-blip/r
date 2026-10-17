@@ -863,7 +863,13 @@ class LBB_Admin {
 		self::stack_table_style( 'lbb-bookings-table', array( __( 'Nr.', 'libertbus-bilete' ), __( 'Cursa', 'libertbus-bilete' ), __( 'Locuri', 'libertbus-bilete' ), __( 'Stare', 'libertbus-bilete' ), __( 'Bilet', 'libertbus-bilete' ), __( 'Client', 'libertbus-bilete' ), __( 'Comanda', 'libertbus-bilete' ), __( 'Creată', 'libertbus-bilete' ) ) );
 		echo '<table class="widefat striped lbb-bookings-table"><thead><tr><th>' . esc_html__( 'Nr.', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Cursa', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Locuri', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Stare', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Bilet', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Client', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Comanda', 'libertbus-bilete' ) . '</th><th>' . esc_html__( 'Creată', 'libertbus-bilete' ) . '</th><th><span class="screen-reader-text">' . esc_html__( 'Acțiuni', 'libertbus-bilete' ) . '</span></th></tr></thead><tbody>';
 		if ( ! $rows ) {
-			echo '<tr><td colspan="9">' . esc_html( '' !== $search ? __( 'Nicio rezervare găsită pentru această căutare.', 'libertbus-bilete' ) : __( 'Nicio rezervare.', 'libertbus-bilete' ) ) . '</td></tr>';
+			echo '<tr><td colspan="9">' . esc_html( '' !== $search ? __( 'Nicio rezervare găsită pentru această căutare.', 'libertbus-bilete' ) : __( 'Nicio rezervare.', 'libertbus-bilete' ) );
+			// Căutarea are rezultate, dar în alt filtru (ex. „Anulate” rămas ales): un link spre toate, cu aceeași căutare.
+			if ( '' !== $search && $status && ! empty( $counts[''] ) ) {
+				/* translators: %d: numărul de rezervări găsite în toate stările */
+				echo ' <a href="' . esc_url( add_query_arg( array( 'page' => 'lbb-bookings', 'q' => rawurlencode( $search ) ), admin_url( 'admin.php' ) ) ) . '">' . esc_html( sprintf( __( 'Vezi rezultatele din toate stările (%d)', 'libertbus-bilete' ), (int) $counts[''] ) ) . '</a>';
+			}
+			echo '</td></tr>';
 		}
 		foreach ( $rows as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
