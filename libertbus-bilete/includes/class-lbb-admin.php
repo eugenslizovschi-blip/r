@@ -1014,6 +1014,17 @@ class LBB_Admin {
 			/* translators: %s: zilele cu bilete, ex. „25.12.2026 (3)” */
 			$msg .= ' ' . sprintf( __( 'Atenție: în aceste zile fără curse există deja bilete sau rezervări: %s. Anunțați pasagerii (lista e în Pasageri).', 'libertbus-bilete' ), implode( ', ', $list ) );
 		}
-		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold );
+		// Adresa biroului scrisă greșit („birou@gmail”) se golea pe tăcute, iar emailurile mergeau la administrator.
+		$typed = isset( $data['company_email'] ) ? trim( sanitize_text_field( $data['company_email'] ) ) : '';
+		$bad   = '' !== $typed && ! is_email( $typed );
+		$typo  = '' !== $typed && ! $bad ? LBB_Frontend::email_typo( $typed ) : '';
+		if ( $bad ) {
+			/* translators: 1: adresa scrisă, 2: adresa la care merg acum emailurile */
+			$msg .= ' ' . sprintf( __( 'Atenție: adresa „%1$s” de la „Email pentru clienți” nu e validă și nu s-a salvat. Emailurile pentru birou merg acum la %2$s.', 'libertbus-bilete' ), $typed, LBB_Settings::office_email() );
+		} elseif ( $typo ) {
+			/* translators: 1: adresa scrisă, 2: adresa propusă */
+			$msg .= ' ' . sprintf( __( 'Atenție: „%1$s” de la „Email pentru clienți” pare scrisă greșit. Ați vrut să scrieți %2$s?', 'libertbus-bilete' ), $typed, $typo );
+		}
+		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold || $bad || $typo );
 	}
 }

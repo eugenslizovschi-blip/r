@@ -773,6 +773,35 @@ foreach ( array( 15, 60 ) as $tc_n ) {
 update_option( 'lbb_settings', $tc_keep );
 lbb_t( 'Termenii: închiderea vânzării în română corectă („cu 15 minute”, „cu 60 de minute”)', false !== strpos( $tc_txt[15], 'se închide cu 15 minute înainte' ) && false !== strpos( $tc_txt[60], 'se închide cu 60 de minute înainte' ), array( preg_match( '/se închide cu [^.]*/u', $tc_txt[15], $tc_m ) ? $tc_m[0] : '' ) );
 
+// Salvarea Setărilor cu „Email pentru clienți” greșit: mesaj de avertizare, nu golire pe tăcute.
+$se_keep = array( get_option( 'lbb_settings' ), $_POST, $_REQUEST, get_current_user_id() );
+$se_go   = function ( $email ) {
+	$_POST    = array_merge( LBB_Settings::all(), array( 'company_email' => $email, '_wpnonce' => wp_create_nonce( 'lbb_save_settings' ) ) );
+	$_REQUEST = $_POST;
+	$loc      = '';
+	$cb       = function ( $l ) use ( &$loc ) {
+		$loc = $l;
+		throw new Exception( 'redirect' );
+	};
+	add_filter( 'wp_redirect', $cb, 1 );
+	try {
+		LBB_Admin::save_settings();
+	} catch ( Exception $e ) {
+		unset( $e );
+	}
+	remove_filter( 'wp_redirect', $cb, 1 );
+	parse_str( (string) wp_parse_url( $loc, PHP_URL_QUERY ), $q );
+	return array( isset( $q['lbb_msg'] ) ? rawurldecode( $q['lbb_msg'] ) : '', ! empty( $q['lbb_err'] ) );
+};
+wp_set_current_user( 1 );
+$se_bad  = $se_go( 'birou@gmail' );
+$se_typo = $se_go( 'birou@gmail.con' );
+$se_ok   = $se_go( 'birou@firma.md' );
+update_option( 'lbb_settings', $se_keep[0] );
+list( , $_POST, $_REQUEST ) = $se_keep;
+wp_set_current_user( $se_keep[3] );
+lbb_t( 'Setări: emailul biroului greșit e semnalat la salvare (nevalid: unde merg emailurile; „gmail.con”: adresa propusă); unul corect nu', false !== strpos( $se_bad[0], '„birou@gmail” de la „Email pentru clienți” nu e validă' ) && $se_bad[1] && false !== strpos( $se_typo[0], 'Ați vrut să scrieți birou@gmail.com?' ) && $se_typo[1] && false === strpos( $se_ok[0], 'Atenție' ) && ! $se_ok[1], array( $se_bad, $se_typo, $se_ok ) );
+
 // Emailurile de rezervare: unul clientului, unul biroului, cu codul, suma de la urcare și telefonul.
 $lbb_mails = array();
 $lbb_catch = function ( $null, $atts ) use ( &$lbb_mails ) {
