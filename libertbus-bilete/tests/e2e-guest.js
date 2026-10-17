@@ -129,6 +129,15 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const tel = retry ? await p3.$eval('[data-lbb="status"] a.lbb-phone', a => a.getAttribute('href')).catch(() => '') : '';
     if (!retry || !/Încearcă din nou/.test(msg) || !/sunați la \+373/.test(msg) || !/^tel:\+373\d{8}$/.test(tel)) fail('fără „Încearcă din nou” și telefonul ca link când verificarea locurilor eșuează: „' + msg + '” ' + tel);
     else {
+      // „Încearcă din nou” și telefonul se văd la focus de la tastatură, și cu o temă care scoate conturul.
+      await p3.addStyleTag({ content: 'a:focus,a:focus-visible,button:focus,button:focus-visible{outline:none!important}' });
+      const ring = () => p3.evaluate(() => { const a = document.activeElement, s = getComputedStyle(a); return a.className + ':' + (s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) >= 2); });
+      await p3.focus('[data-lbb="status"] button.lbb-retry');
+      await p3.keyboard.press('Tab');
+      const ringTel = await ring();
+      await p3.keyboard.press('Shift+Tab');
+      const ringRetry = await ring();
+      if (ringTel !== 'lbb-phone:true' || ringRetry !== 'lbb-retry:true') fail('focus invizibil de la tastatură pe „Încearcă din nou” / telefon: ' + ringRetry + ' ' + ringTel);
       down = false;
       await retry.click();
       const loaded = await p3.waitForFunction(() => !document.querySelector('[data-lbb="time"]').disabled && document.querySelectorAll('[data-lbb="time"] option:not([value=""])').length > 0, null, { timeout: 15000 }).then(() => true).catch(() => false);
