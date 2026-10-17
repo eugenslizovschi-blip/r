@@ -174,8 +174,9 @@ class LBB_Tickets {
 			// Linkul deschide direct rezervarea aceasta (căutare după cod), nu lista cu ultimele 200.
 			. '<p><a href="' . esc_url( add_query_arg( array( 'page' => 'lbb-bookings', 'q' => rawurlencode( $booking['ticket_code'] ) ), admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Deschide rezervarea în admin', 'libertbus-bilete' ) . '</a></p>';
 		/* translators: 1: cod, 2: ruta, 3: data și ora */
-		// Biroul răspunde direct clientului.
-		$office_headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header() );
+		// Biroul răspunde direct clientului. Auto-Submitted (RFC 3834): răspunsul automat de concediu al biroului nu
+		// pleacă la client (Reply-To e adresa clientului).
+		$office_headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header(), 'Auto-Submitted: auto-generated' );
 		if ( is_email( $booking['email'] ) ) {
 			$office_headers[] = 'Reply-To: ' . $booking['email'];
 		}

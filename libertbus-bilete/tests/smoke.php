@@ -891,6 +891,8 @@ lbb_t( 'denumirea firmei nu poate injecta antete în email', false === strpos( L
 update_option( 'lbb_settings', $keep_name );
 lbb_t( 'răspunsul clientului ajunge la birou (Reply-To)', false !== strpos( $h_client, 'Reply-To: ' . $office ), $h_client );
 lbb_t( 'biroul răspunde direct clientului (Reply-To)', false !== strpos( $h_office, 'Reply-To: client-mail@example.com' ), $h_office );
+// Răspunsul automat de concediu al biroului (Reply-To = clientul) nu pleacă la client; emailul clientului rămâne normal.
+lbb_t( 'notificările pentru birou au Auto-Submitted (rezervare nouă, locuri depășite), emailul clientului nu', false !== strpos( $h_office, 'Auto-Submitted: auto-generated' ) && false !== strpos( $ob_h, 'Auto-Submitted: auto-generated' ) && false === strpos( $h_client, 'Auto-Submitted' ), array( $h_office, $ob_h ) );
 
 // Biroul anulează rezervarea: clientul primește un email (să nu vină degeaba la autocar).
 $lbb_mails = array();

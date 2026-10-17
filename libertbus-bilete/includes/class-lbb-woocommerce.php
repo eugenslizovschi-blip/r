@@ -316,7 +316,8 @@ class LBB_WooCommerce {
 					. ( '' !== $phone ? '<a href="' . esc_attr( LBB_Frontend::tel_href( $phone ) ) . '">' . esc_html( $phone ) . '</a>' : '' )
 					. ( '' !== $phone && is_email( $email ) ? ' · ' : '' )
 					. ( is_email( $email ) ? '<a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>' : '' ) . '</p>' : '' );
-			$headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . LBB_Tickets::from_header() );
+			// Auto-Submitted: răspunsul automat de concediu al biroului nu pleacă la client (Reply-To).
+			$headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . LBB_Tickets::from_header(), 'Auto-Submitted: auto-generated' );
 			if ( is_email( $email ) ) {
 				$headers[] = 'Reply-To: ' . $email;
 			}
