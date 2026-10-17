@@ -741,6 +741,14 @@ foreach ( array( 8, 20, 1 ) as $gn_n ) {
 	$gn_txt[ $gn_n ] = is_array( $gn_c ) ? $gn_c['i18n']['groupNote'] : '';
 }
 lbb_t( 'nota pentru grupuri: „mai mult de 8 persoane”, „20 de persoane”, „1 persoană”', 0 === strpos( $gn_txt[8], 'Sunteți mai mult de 8 persoane?' ) && 0 === strpos( $gn_txt[20], 'Sunteți mai mult de 20 de persoane?' ) && 0 === strpos( $gn_txt[1], 'Sunteți mai mult de 1 persoană?' ), $gn_txt );
+// Refuzul de pe server pentru prea mulți pasageri, tot în română corectă („20 de locuri”, „1 loc”).
+$ms_txt = array();
+foreach ( array( 20, 1 ) as $ms_n ) {
+	update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_reserve' => 1, 'max_passengers' => $ms_n ) ) );
+	$ms_r            = LBB_Frontend::book( array_merge( $base, array( 'lbb_mode' => 'reserve', 'lbb_adults' => $ms_n + 1, 'lbb_children' => 0, 'lbb_names' => array_fill( 0, $ms_n + 1, 'Ion Popescu' ) ) ) );
+	$ms_txt[ $ms_n ] = is_wp_error( $ms_r ) ? $ms_r->get_error_message() : 'nerefuzat';
+}
+lbb_t( 'prea mulți pasageri: „cel mult 20 de locuri odată”, „cel mult 1 loc odată”', 0 === strpos( $ms_txt[20], 'Online se pot rezerva cel mult 20 de locuri odată.' ) && 0 === strpos( $ms_txt[1], 'Online se pot rezerva cel mult 1 loc odată.' ), $ms_txt );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 0, 'allow_reserve' => 0, 'max_passengers' => $keep['max_passengers'] ?? 8 ) ) );
 lbb_t( 'fără niciun buton, formularul arată doar telefonul', false === strpos( LBB_Frontend::shortcode( array() ), '<form' ) );
 update_option( 'lbb_settings', $keep );
@@ -812,6 +820,8 @@ $se_inv  = $se_go( 'birou@firma.md', array( 'rate_RON' => '0,256' ) );
 $se_norm = $se_go( 'birou@firma.md', array( 'rate_RON' => '3,9' ) );
 $se_id12 = $se_go( 'birou@firma.md', array( 'company_idno' => '100360012345' ) );
 $se_id13 = $se_go( 'birou@firma.md', array( 'company_idno' => '1003 600 123 456' ) );
+$se_id1  = $se_go( 'birou@firma.md', array( 'company_idno' => '7' ) );
+$se_id21 = $se_go( 'birou@firma.md', array( 'company_idno' => '100360012345612345678' ) );
 $se_id0  = $se_go( 'birou@firma.md', array( 'company_idno' => '' ) );
 $se_tl   = $se_go( 'birou@firma.md', array( 'support_phone' => '069 184 111' ) );
 $se_ts   = $se_go( 'birou@firma.md', array( 'support_phone' => '+373 69' ) );
@@ -821,6 +831,7 @@ list( , $_POST, $_REQUEST ) = $se_keep;
 wp_set_current_user( $se_keep[3] );
 lbb_t( 'Setări: emailul biroului greșit e semnalat la salvare (nevalid: unde merg emailurile; „gmail.con”: adresa propusă); unul corect nu', false !== strpos( $se_bad[0], '„birou@gmail” de la „Email pentru clienți” nu e validă' ) && $se_bad[1] && false !== strpos( $se_typo[0], 'Ați vrut să scrieți birou@gmail.com?' ) && $se_typo[1] && false === strpos( $se_ok[0], 'Atenție' ) && ! $se_ok[1], array( $se_bad, $se_typo, $se_ok ) );
 lbb_t( 'Setări: IDNO-ul fără 13 cifre e semnalat la salvare; 13 cifre (și cu spații) sau gol nu', false !== strpos( $se_id12[0], 'IDNO-ul „100360012345” are 12 cifre, nu 13' ) && $se_id12[1] && false === strpos( $se_id13[0], 'IDNO' ) && ! $se_id13[1] && false === strpos( $se_id0[0], 'IDNO' ) && ! $se_id0[1], array( $se_id12, $se_id13, $se_id0 ) );
+lbb_t( 'Setări: avertizarea IDNO în română corectă („1 cifră”, „21 de cifre”)', false !== strpos( $se_id1[0], '„7” are 1 cifră, nu 13' ) && false !== strpos( $se_id21[0], 'are 21 de cifre, nu 13' ), array( $se_id1[0], $se_id21[0] ) );
 lbb_t( 'Setări: telefonul pentru clienți incomplet sau fără prefixul țării e semnalat la salvare; +373 … nu', false !== strpos( $se_tl[0], '„069 184 111” nu are prefixul țării' ) && $se_tl[1] && false !== strpos( $se_ts[0], '„+373 69” e incomplet' ) && $se_ts[1] && false === strpos( $se_ti[0], 'telefonul' ) && ! $se_ti[1], array( $se_tl, $se_ts, $se_ti ) );
 lbb_t( 'Setări: cursul RON scris invers („0,256” în loc de 3,9) e semnalat la salvare; un curs normal nu', false !== strpos( $se_inv[0], 'cursul RON 0,256 pare scris invers' ) && $se_inv[1] && false === strpos( $se_norm[0], 'invers' ) && ! $se_norm[1], array( $se_inv, $se_norm ) );
 

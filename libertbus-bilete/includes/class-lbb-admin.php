@@ -1051,8 +1051,8 @@ class LBB_Admin {
 		$idno     = (string) LBB_Settings::get( 'company_idno' );
 		$idno_bad = '' !== $idno && ! preg_match( '/^\d{13}$/', $idno );
 		if ( $idno_bad ) {
-			/* translators: 1: IDNO-ul salvat, 2: câte cifre are */
-			$msg .= ' ' . sprintf( __( 'Atenție: IDNO-ul „%1$s” are %2$d cifre, nu 13. Verificați-l în extrasul din registru: banca îl compară cu cel de pe site.', 'libertbus-bilete' ), $idno, strlen( preg_replace( '/\D/', '', $idno ) ) );
+			/* translators: 1: IDNO-ul salvat, 2: câte cifre are, ex. 12 cifre / 1 cifră / 21 de cifre */
+			$msg .= ' ' . sprintf( __( 'Atenție: IDNO-ul „%1$s” are %2$s, nu 13. Verificați-l în extrasul din registru: banca îl compară cu cel de pe site.', 'libertbus-bilete' ), $idno, LBB_Settings::ro_count( strlen( preg_replace( '/\D/', '', $idno ) ), __( 'cifră', 'libertbus-bilete' ), __( 'cifre', 'libertbus-bilete' ) ) );
 		}
 		// Telefonul pentru clienți apare în formular, pe bilet și în emailuri: incomplet nu sună nicăieri, iar fără
 		// prefixul țării clienții din România nu pot suna (aceeași regulă ca în Panou).
