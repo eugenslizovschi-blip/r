@@ -804,11 +804,15 @@ $se_norm = $se_go( 'birou@firma.md', array( 'rate_RON' => '3,9' ) );
 $se_id12 = $se_go( 'birou@firma.md', array( 'company_idno' => '100360012345' ) );
 $se_id13 = $se_go( 'birou@firma.md', array( 'company_idno' => '1003 600 123 456' ) );
 $se_id0  = $se_go( 'birou@firma.md', array( 'company_idno' => '' ) );
+$se_tl   = $se_go( 'birou@firma.md', array( 'support_phone' => '069 184 111' ) );
+$se_ts   = $se_go( 'birou@firma.md', array( 'support_phone' => '+373 69' ) );
+$se_ti   = $se_go( 'birou@firma.md', array( 'support_phone' => '+373 691 84 111' ) );
 update_option( 'lbb_settings', $se_keep[0] );
 list( , $_POST, $_REQUEST ) = $se_keep;
 wp_set_current_user( $se_keep[3] );
 lbb_t( 'Setări: emailul biroului greșit e semnalat la salvare (nevalid: unde merg emailurile; „gmail.con”: adresa propusă); unul corect nu', false !== strpos( $se_bad[0], '„birou@gmail” de la „Email pentru clienți” nu e validă' ) && $se_bad[1] && false !== strpos( $se_typo[0], 'Ați vrut să scrieți birou@gmail.com?' ) && $se_typo[1] && false === strpos( $se_ok[0], 'Atenție' ) && ! $se_ok[1], array( $se_bad, $se_typo, $se_ok ) );
 lbb_t( 'Setări: IDNO-ul fără 13 cifre e semnalat la salvare; 13 cifre (și cu spații) sau gol nu', false !== strpos( $se_id12[0], 'IDNO-ul „100360012345” are 12 cifre, nu 13' ) && $se_id12[1] && false === strpos( $se_id13[0], 'IDNO' ) && ! $se_id13[1] && false === strpos( $se_id0[0], 'IDNO' ) && ! $se_id0[1], array( $se_id12, $se_id13, $se_id0 ) );
+lbb_t( 'Setări: telefonul pentru clienți incomplet sau fără prefixul țării e semnalat la salvare; +373 … nu', false !== strpos( $se_tl[0], '„069 184 111” nu are prefixul țării' ) && $se_tl[1] && false !== strpos( $se_ts[0], '„+373 69” e incomplet' ) && $se_ts[1] && false === strpos( $se_ti[0], 'telefonul' ) && ! $se_ti[1], array( $se_tl, $se_ts, $se_ti ) );
 lbb_t( 'Setări: cursul RON scris invers („0,256” în loc de 3,9) e semnalat la salvare; un curs normal nu', false !== strpos( $se_inv[0], 'cursul RON 0,256 pare scris invers' ) && $se_inv[1] && false === strpos( $se_norm[0], 'invers' ) && ! $se_norm[1], array( $se_inv, $se_norm ) );
 
 // Antetul plugin-ului: WordPress 6.5+ nu-l lasă activat fără WooCommerce; WooCommerce îl știe compatibil cu

@@ -1054,6 +1054,18 @@ class LBB_Admin {
 			/* translators: 1: IDNO-ul salvat, 2: câte cifre are */
 			$msg .= ' ' . sprintf( __( 'Atenție: IDNO-ul „%1$s” are %2$d cifre, nu 13. Verificați-l în extrasul din registru: banca îl compară cu cel de pe site.', 'libertbus-bilete' ), $idno, strlen( preg_replace( '/\D/', '', $idno ) ) );
 		}
-		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold || $bad || $typo || $inverted || $idno_bad );
+		// Telefonul pentru clienți apare în formular, pe bilet și în emailuri: incomplet nu sună nicăieri, iar fără
+		// prefixul țării clienții din România nu pot suna (aceeași regulă ca în Panou).
+		$tel       = trim( (string) LBB_Settings::get( 'support_phone' ) );
+		$tel_short = '' !== $tel && strlen( preg_replace( '/\D/', '', $tel ) ) < 8;
+		$tel_local = '' !== $tel && ! $tel_short && ! preg_match( '/^\s*(\+|00)/', $tel );
+		if ( $tel_short ) {
+			/* translators: %s: telefonul salvat */
+			$msg .= ' ' . sprintf( __( 'Atenție: telefonul pentru clienți „%s” e incomplet (are mai puțin de 8 cifre).', 'libertbus-bilete' ), $tel );
+		} elseif ( $tel_local ) {
+			/* translators: %s: telefonul salvat */
+			$msg .= ' ' . sprintf( __( 'Atenție: telefonul pentru clienți „%s” nu are prefixul țării. Scrieți-l ca +373 …: altfel clienții din România nu vă pot suna.', 'libertbus-bilete' ), $tel );
+		}
+		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold || $bad || $typo || $inverted || $idno_bad || $tel_short || $tel_local );
 	}
 }
