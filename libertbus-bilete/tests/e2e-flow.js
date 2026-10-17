@@ -44,6 +44,9 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const sTotal = summary.match(/Total de plată: ([\d.]+) MDL \(≈ [\d.]+ RON\)/);
   const sEach = summary.match(/([\d.]+) MDL \(≈ [\d.]+ RON\) \/ pasager/);
   if (!sTotal || !sEach || num(sTotal[1]) !== 2 * num(sEach[1])) console.log('FAIL rezumatul prețului: ' + summary);
+  // Data din rezumat cu ziua săptămânii, ca pe bilet: „21.10.2026 (miercuri) 08:45”.
+  const sumDay = ['duminică', 'luni', 'marți', 'miercuri', 'joi', 'vineri', 'sâmbătă'][new Date(tomorrow + 'T12:00:00Z').getUTCDay()];
+  if (summary.indexOf(tomorrow.split('-').reverse().join('.') + ' (' + sumDay + ') ' + best) < 0) console.log('FAIL rezumatul nu are ziua săptămânii (' + sumDay + '): ' + summary);
   await page.screenshot({ path: (process.env.OUT || '.') + '/form.png', fullPage: true });
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
   console.log('after submit url:', page.url());

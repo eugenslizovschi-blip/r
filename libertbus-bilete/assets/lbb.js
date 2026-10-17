@@ -619,7 +619,12 @@
 			el.summary.textContent = '';
 			var line = document.createElement( 'div' );
 			line.className = 'lbb-summary-route';
-			line.textContent = el.from.value + ' → ' + route.to + ( dep ? ', ' + el.date.value.split( '-' ).reverse().join( '.' ) + ' ' + dep.time : '' );
+			// Data cu ziua săptămânii, ca pe bilet și în email: „21.10.2026 (miercuri) 08:45”.
+			var dayOf = '';
+			if ( /^\d{4}-\d{2}-\d{2}$/.test( el.date.value ) ) {
+				dayOf = ' (' + t.dayNames[ new Date( el.date.value + 'T12:00:00Z' ).getUTCDay() || 7 ] + ')';
+			}
+			line.textContent = el.from.value + ' → ' + route.to + ( dep ? ', ' + el.date.value.split( '-' ).reverse().join( '.' ) + dayOf + ' ' + dep.time : '' );
 			var price = document.createElement( 'div' );
 			price.className = 'lbb-summary-total';
 			price.textContent = t.total + ': ' + money( total, cur );
