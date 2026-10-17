@@ -776,7 +776,7 @@ class LBB_Admin {
 		foreach ( $rows as $b ) {
 			$r     = LBB_Routes::get( $b['route_id'] );
 			$route = LBB_Bookings::route_name( $r ? array_merge( $b, array( 'origin' => $r['origin'], 'destination' => $r['destination'] ) ) : $b );
-			$when  = wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'];
+			$when  = LBB_WooCommerce::date_with_day( $b['travel_date'] ) . ' ' . $b['dep_time'];
 			$code  = $b['ticket_code'] ? '<a href="' . esc_url( LBB_Tickets::url( $b['ticket_code'] ) ) . '" target="_blank" rel="noopener">' . esc_html( $b['ticket_code'] ) . '</a>' : esc_html__( '(fără cod încă)', 'libertbus-bilete' );
 			/* translators: %d: numărul de locuri */
 			$seats = LBB_Settings::ro_count( $b['seats'], __( 'loc', 'libertbus-bilete' ), __( 'locuri', 'libertbus-bilete' ) );
@@ -863,7 +863,7 @@ class LBB_Admin {
 		}
 		foreach ( $rows as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
-			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( LBB_Bookings::route_name( $b ) ) . '<br>' . esc_html( wp_date( 'd.m.Y', strtotime( $b['travel_date'] . ' 12:00' ) ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $row_labels[ $b['status'] ] ) ? $row_labels[ $b['status'] ] : $b['status'] ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . self::contact_links( $b ) . '</td><td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ticket_code_html() și payment_label() escapează singure.
+			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( LBB_Bookings::route_name( $b ) ) . '<br>' . esc_html( LBB_WooCommerce::date_with_day( $b['travel_date'] ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $row_labels[ $b['status'] ] ) ? $row_labels[ $b['status'] ] : $b['status'] ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . self::contact_links( $b ) . '</td><td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ticket_code_html() și payment_label() escapează singure.
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a> (' . esc_html( wc_get_order_status_name( $order->get_status() ) ) . ')';
 			}

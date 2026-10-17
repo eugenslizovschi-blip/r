@@ -109,7 +109,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   for (const st of ['confirmed', 'reserved']) {
     if (boxDate) break;
     await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&status=' + st);
-    boxDate = await page.$$eval('#wpbody-content table.widefat tbody td', tds => { for (const td of tds) { const m = td.textContent.match(/(\d\d)\.(\d\d)\.(\d{4}) \d\d:\d\d/); if (m) return m[3] + '-' + m[2] + '-' + m[1]; } return ''; });
+    boxDate = await page.$$eval('#wpbody-content table.widefat tbody td', tds => { for (const td of tds) { const m = td.textContent.match(/(\d\d)\.(\d\d)\.(\d{4})(?: \([^)]*\))? \d\d:\d\d/); if (m) return m[3] + '-' + m[2] + '-' + m[1]; } return ''; });
   }
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&date=' + boxDate);
   const boxCol = () => page.evaluate(() => {
@@ -152,7 +152,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   for (const st of ['confirmed', 'reserved']) {
     if (firstDate) break;
     await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&status=' + st);
-    firstDate = await page.$$eval('#wpbody-content table.widefat tbody td', tds => { for (const td of tds) { const m = td.textContent.match(/(\d\d)\.(\d\d)\.(\d{4}) \d\d:\d\d/); if (m) return m[3] + '-' + m[2] + '-' + m[1]; } return ''; });
+    firstDate = await page.$$eval('#wpbody-content table.widefat tbody td', tds => { for (const td of tds) { const m = td.textContent.match(/(\d\d)\.(\d\d)\.(\d{4})(?: \([^)]*\))? \d\d:\d\d/); if (m) return m[3] + '-' + m[2] + '-' + m[1]; } return ''; });
   }
   if (!firstDate) fail('nu am găsit o rezervare pentru testul pe telefon');
   for (const slug of ['lbb', 'lbb-routes', 'lbb-settings']) {

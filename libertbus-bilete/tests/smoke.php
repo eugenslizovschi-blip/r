@@ -334,7 +334,8 @@ LBB_Admin::order_tickets( $ot_eo );
 $ot_empty = ob_get_clean();
 $ot_eo->delete( true );
 wp_set_current_user( $ot_user );
-lbb_t( 'pagina comenzii WooCommerce arată biletele comenzii (cod cu link, cursă, locuri, stare)', '' === $ot_none && '' === $ot_empty && false !== strpos( $ot_html, 'Bilete LibertBus' ) && false !== strpos( $ot_html, 'href="' . LBB_Tickets::url( $ot_late['ticket_code'] ) . '"' ) && false !== strpos( $ot_html, $route['origin'] . ' → ' . $route['destination'] . ', ' . wp_date( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) ) . ' 10:00, 3 locuri' ) && false !== strpos( $ot_html, LBB_Tickets::state( $ot_late )['text'] ), array( $ot_none, $ot_empty, wp_strip_all_tags( $ot_html ) ) );
+lbb_t( 'pagina comenzii WooCommerce arată biletele comenzii (cod cu link, cursă, locuri, stare)', '' === $ot_none && '' === $ot_empty && false !== strpos( $ot_html, 'Bilete LibertBus' ) && false !== strpos( $ot_html, 'href="' . LBB_Tickets::url( $ot_late['ticket_code'] ) . '"' ) && false !== strpos( $ot_html, $route['origin'] . ' → ' . $route['destination'] . ', ' . LBB_WooCommerce::date_with_day( $tomorrow ) . ' 10:00, 3 locuri' ) && false !== strpos( $ot_html, LBB_Tickets::state( $ot_late )['text'] ), array( $ot_none, $ot_empty, wp_strip_all_tags( $ot_html ) ) );
+lbb_t( 'pagina comenzii WooCommerce: cursa biletului are data cu ziua săptămânii, ca pe bilet', $ot_late && false !== strpos( $ot_html, LBB_WooCommerce::date_with_day( $ot_late['travel_date'] ) . ' ' . $ot_late['dep_time'] ), wp_strip_all_tags( $ot_html ) );
 
 // Emailul text al comenzii (clienți cu emailuri „doar text”): numele cu apostrof rămâne întreg după
 // curățarea făcută de WooCommerce, iar titlul e cu majuscule corecte.
@@ -1152,6 +1153,7 @@ if ( $tl_b ) {
 	$wpdb->update( LBB_Bookings::table(), array( 'phone' => '+37369000094' ), array( 'id' => $tl_b['id'] ) );
 }
 lbb_t( 'telefonul clientului salvat local („069 000 095”) are link de apel cu +373 în lista pentru șofer și în Rezervări', $tl_b && false !== strpos( $tl_man, '<a href="tel:+37369000095">069 000 095</a>' ) && false !== strpos( $tl_list, '<a href="tel:+37369000095">069 000 095</a>' ) && false === strpos( $tl_man . $tl_list, 'tel:069' ), array( substr( wp_strip_all_tags( $tl_list ), 0, 400 ) ) );
+lbb_t( 'Rezervări: coloana „Cursa” are data cu ziua săptămânii, ca pe bilet', $tl_b && false !== strpos( $tl_list, esc_html( LBB_WooCommerce::date_with_day( $tl_b['travel_date'] ) . ' ' . $tl_b['dep_time'] ) ), $tl_b ? LBB_WooCommerce::date_with_day( $tl_b['travel_date'] ) : '' );
 lbb_t( 'Rezervări: prima coloană se numește „Nr.” (nu „#”, citit „diez”), și în antet, și pe telefon', false !== strpos( $tl_list, '<thead><tr><th>Nr.</th>' ) && false !== strpos( $tl_list, 'td:nth-child(1)::before{content:"Nr.:"}' ) && false === strpos( $tl_list, '<th>#</th>' ), substr( $tl_list, 0, 400 ) );
 // Data scrisă de mână în lista pentru șofer (browser fără calendar): „zz.ll.aaaa” deschide ziua cerută, nu azi.
 $md_dmy = gmdate( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) );
