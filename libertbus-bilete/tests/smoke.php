@@ -848,6 +848,22 @@ foreach ( array( '1e40af', ' #B91C1C ', 'abc', 'zzz', '#12345' ) as $ac_in ) {
 update_option( 'lbb_settings', $ac_keep );
 lbb_t( 'Setări: culoarea butoanelor fără „#” („1e40af”) se păstrează; un cod stricat revine la #00875a', array( '1e40af' => '#1e40af', ' #B91C1C ' => '#B91C1C', 'abc' => '#abc', 'zzz' => '#00875a', '#12345' => '#00875a' ) === $ac_got, $ac_got );
 
+// Fără extensia mbstring (unele găzduiri PHP 7.4) WordPress înlocuiește doar mb_substr și mb_strlen: orice altă
+// funcție mb_* se folosește doar după function_exists, altfel site-ul ar da eroare fatală.
+$mb_bad = array();
+foreach ( array_merge( glob( LBB_DIR . 'includes/*.php' ), array( LBB_FILE, LBB_DIR . 'uninstall.php' ) ) as $mb_f ) {
+	foreach ( file( $mb_f ) as $mb_n => $mb_line ) {
+		if ( preg_match_all( '/\b(mb_[a-z_]+)\s*\(/', $mb_line, $mb_m ) ) {
+			foreach ( array_unique( $mb_m[1] ) as $mb_fn ) {
+				if ( ! in_array( $mb_fn, array( 'mb_substr', 'mb_strlen' ), true ) && false === strpos( $mb_line, "function_exists( '" . $mb_fn . "' )" ) ) {
+					$mb_bad[] = basename( $mb_f ) . ':' . ( $mb_n + 1 ) . ' ' . $mb_fn;
+				}
+			}
+		}
+	}
+}
+lbb_t( 'funcțiile mb_* fără înlocuitor în WordPress sunt folosite doar după function_exists (găzduiri fără mbstring)', ! $mb_bad, $mb_bad );
+
 // Antetul plugin-ului: WordPress 6.5+ nu-l lasă activat fără WooCommerce; WooCommerce îl știe compatibil cu
 // comenzile HPOS și cu coșul / finalizarea pe blocuri (fără avertismentul „plugin incompatibil”).
 $hd_rp  = get_file_data( LBB_FILE, array( 'rp' => 'Requires Plugins', 'php' => 'Requires PHP' ) );
