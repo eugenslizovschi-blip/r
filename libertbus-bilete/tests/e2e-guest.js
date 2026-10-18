@@ -146,10 +146,12 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await p3.close();
   }
   // Conexiune blocată (răspunsul nu mai vine): după câteva secunde apare „Încearcă din nou” cu telefonul, nu
-  // „Se verifică locurile…” la nesfârșit; după ce revine conexiunea, butonul încarcă orele.
-  {
+  // „Se verifică locurile…” la nesfârșit; după ce revine conexiunea, butonul încarcă orele. Și pe telefoanele
+  // fără AbortController (iOS < 11.3), unde cererea nu se poate opri.
+  for (const noAbort of [false, true]) {
     const ph = await browser.newPage({ viewport: { width: 390, height: 844 } });
     ph.on('pageerror', e => fail('pageerror: ' + e.message));
+    if (noAbort) await ph.addInitScript(() => { delete window.AbortController; });
     let hang = true;
     await ph.route('**/lbb/v1/departures**', route => { if (!hang) route.continue(); });
     const t0 = Date.now();
@@ -157,7 +159,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const retry = await ph.waitForSelector('[data-lbb="status"] button.lbb-retry', { timeout: 14000 }).catch(() => null);
     const secs = Math.round((Date.now() - t0) / 1000);
     const msg = retry ? (await ph.textContent('[data-lbb="status"]')).replace(/\s+/g, ' ') : (await ph.textContent('[data-lbb="status"]').catch(() => ''));
-    if (!retry || !/sunați la \+373/.test(msg)) fail('conexiune blocată: după ' + secs + ' s încă fără „Încearcă din nou” și telefon: „' + msg + '”');
+    if (!retry || !/sunați la \+373/.test(msg)) fail('conexiune blocată' + (noAbort ? ' (fără AbortController)' : '') + ': după ' + secs + ' s încă fără „Încearcă din nou” și telefon: „' + msg + '”');
     else {
       hang = false;
       await retry.click();

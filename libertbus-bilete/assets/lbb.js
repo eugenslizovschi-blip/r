@@ -397,7 +397,18 @@
 					ctrl.abort();
 				}, FETCH_TIMEOUT );
 			}
-			return fetch( url, opts )
+			var req = fetch( url, opts );
+			// Fără AbortController (iOS < 11.3, Android vechi) cererea nu se poate opri, dar nici nu mai așteptăm
+			// după ea: după aceleași 8 secunde clientul vede „Încearcă din nou”.
+			if ( ! opts.signal ) {
+				req = Promise.race( [ req, new Promise( function ( resolve, reject ) {
+					timer = setTimeout( function () {
+						timedOut = true;
+						reject( new Error( 'timeout' ) );
+					}, FETCH_TIMEOUT );
+				} ) ] );
+			}
+			return req
 				.then( function ( r ) {
 					clearTimeout( timer );
 					return r.text().then( function ( body ) {
