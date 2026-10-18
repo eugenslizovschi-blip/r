@@ -42,6 +42,7 @@
     - pentru o rută care nu circulă zilnic, într-o zi fără curse mesajul spune și zilele de circulație („Ruta circulă doar: luni, joi.”), inclusiv în eroarea de la server (telefoane vechi, fără JavaScript).
     - o rută oprită și apoi pornită din nou apare imediat în formular: nici răspunsurile de eroare ale serverului („ruta nu există”) nu mai rămân în cache-ul site-ului;
     - pe iPhone-uri cu iOS mai vechi de 14.5 (Safari < 14.1), fereastra cu formularul deschisă peste pagină acoperă corect ecranul;
+    - pe aceleași telefoane vechi și pe Safari < 15.4, cine folosește tastatura vede conturul pe butoane, pe alegerea monedei și în bannerul de cookies;
   - **Bilet și liste:**
     - copiii sunt marcați „(copil)” pe bilet, în lista pentru șofer și în CSV;
     - CSV-ul cu pasageri pentru o singură rută are ruta în numele fișierului (ex. pasageri-2026-10-21-balti-iasi.csv);

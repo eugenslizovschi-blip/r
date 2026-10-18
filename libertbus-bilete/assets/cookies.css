@@ -54,6 +54,8 @@
 	cursor: pointer;
 }
 .lbb-cc .lbb-cc-btn.lbb-cc-accept { background: #00875a !important; color: #fff !important; }
+.lbb-cc .lbb-cc-btn:focus { outline: 3px solid #1d2733 !important; outline-offset: 2px; }
+.lbb-cc .lbb-cc-btn:focus:not(:focus-visible) { outline: none !important; }
 .lbb-cc .lbb-cc-btn:focus-visible { outline: 3px solid #1d2733 !important; outline-offset: 2px; }
 .lbb-cc .lbb-cc-btn::before, .lbb-cc .lbb-cc-btn::after { display: none !important; }
 @media (max-width: 440px) {

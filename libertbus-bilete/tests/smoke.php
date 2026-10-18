@@ -476,6 +476,29 @@ foreach ( array( 'assets/lbb.css', 'assets/cookies.css', 'includes/class-lbb-tic
 	}
 }
 lbb_t( 'nicio regulă CSS nu folosește „inset” (Safari < 14.1): fereastra peste pagină are top/right/bottom/left', ! $in_bad, $in_bad );
+// Safari < 15.4 nu știe :focus-visible: fiecare contur de focus are și varianta :focus, altfel de la tastatură nu se vede unde ești
+// (la monede, butonul radio e ascuns și conturul e singurul semn).
+$fv_bad = array();
+foreach ( array( 'assets/lbb.css', 'assets/cookies.css' ) as $fv_f ) {
+	$fv_css = (string) preg_replace( '#/\*.*?\*/#s', '', (string) file_get_contents( LBB_DIR . $fv_f ) );
+	preg_match_all( '/([^{}]+)\{[^{}]*\}/', $fv_css, $fv_m );
+	$fv_sel = array();
+	foreach ( $fv_m[1] as $fv_s ) {
+		foreach ( explode( ',', $fv_s ) as $fv_one ) {
+			$fv_sel[] = trim( $fv_one );
+		}
+	}
+	foreach ( $fv_sel as $fv_one ) {
+		if ( false !== strpos( $fv_one, ':focus-visible' ) && false === strpos( $fv_one, ':not(:focus-visible)' ) ) {
+			$fv_plain = str_replace( ':focus-visible', ':focus', $fv_one );
+			$fv_reset = str_replace( ':focus-visible', ':focus:not(:focus-visible)', $fv_one );
+			if ( ! in_array( $fv_plain, $fv_sel, true ) || ! in_array( $fv_reset, $fv_sel, true ) ) {
+				$fv_bad[] = $fv_f . ': ' . $fv_one;
+			}
+		}
+	}
+}
+lbb_t( 'contururile de focus merg și fără :focus-visible (Safari < 15.4): fiecare are varianta :focus, ascunsă la clic unde :focus-visible există', ! $fv_bad, $fv_bad );
 // Pe telefon: tastatura nu pune majusculă la început și nu „corectează” adresa (ex. „gmail” → „Gmail”, „mail” → „mai”).
 lbb_t( 'câmpul de email: fără majusculă automată și fără corector', false !== strpos( LBB_Frontend::shortcode( array() ), 'name="lbb_email" required autocomplete="email" autocapitalize="off" spellcheck="false"' ) );
 lbb_t( 'câmpul de telefon are limită de lungime', false !== strpos( LBB_Frontend::shortcode( array() ), 'name="lbb_phone" required autocomplete="tel" inputmode="tel" maxlength="30"' ) );

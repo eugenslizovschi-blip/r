@@ -89,6 +89,10 @@
 .lbb-booking .lbb-submit.lbb-submit-alt:hover, .lbb-booking .lbb-submit.lbb-submit-alt:focus, .lbb-booking .lbb-submit.lbb-submit-alt:active { background: #fff !important; color: var(--lbb-accent-text) !important; border-color: var(--lbb-accent-text) !important; }
 .lbb-booking .lbb-submit:hover:not(:disabled) { box-shadow: 0 0 0 3px rgba(0, 0, 0, .12) !important; }
 /* Focus vizibil de la tastatură și când tema scoate conturul butoanelor (button:focus { outline: none }). */
+/* Safari < 15.4 nu știe :focus-visible și ar ignora regula: acolo conturul vine din :focus; unde :focus-visible
+   există, conturul dispare la clic cu mouse-ul, ca înainte. */
+.lbb-booking .lbb-submit:focus, .lbb-booking button.lbb-back:focus, .lbb-booking button.lbb-retry:focus, .lbb-booking a.lbb-phone:focus { outline: 3px solid var(--lbb-accent-text) !important; outline-offset: 2px !important; }
+.lbb-booking .lbb-submit:focus:not(:focus-visible), .lbb-booking button.lbb-back:focus:not(:focus-visible), .lbb-booking button.lbb-retry:focus:not(:focus-visible), .lbb-booking a.lbb-phone:focus:not(:focus-visible) { outline: none !important; }
 .lbb-booking .lbb-submit:focus-visible, .lbb-booking button.lbb-back:focus-visible, .lbb-booking button.lbb-retry:focus-visible, .lbb-booking a.lbb-phone:focus-visible { outline: 3px solid var(--lbb-accent-text) !important; outline-offset: 2px !important; }
 .lbb-booking .lbb-submit::after, .lbb-booking .lbb-submit::before { display: none !important; }
 .lbb-booking .lbb-submit:disabled { opacity: .45 !important; cursor: not-allowed; }
@@ -100,6 +104,8 @@
 .lbb-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .lbb-chip span { display: inline-block; min-width: 64px; min-height: 40px; line-height: 38px; padding: 0 14px; text-align: center; border: 1px solid var(--lbb-border); border-radius: 20px; font-weight: 700; }
 .lbb-chip input:checked + span { background: var(--lbb-accent); border-color: var(--lbb-accent); color: var(--lbb-accent-ink); }
+.lbb-chip input:focus + span { outline: 2px solid var(--lbb-accent-text); outline-offset: 2px; }
+.lbb-chip input:focus:not(:focus-visible) + span { outline: none; }
 .lbb-chip input:focus-visible + span { outline: 2px solid var(--lbb-accent-text); outline-offset: 2px; }
 .lbb-submit:disabled { opacity: .45; cursor: not-allowed; }
 .lbb-submit.is-busy { opacity: .7; cursor: progress; }
