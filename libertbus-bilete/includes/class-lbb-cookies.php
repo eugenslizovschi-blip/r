@@ -145,7 +145,7 @@ class LBB_Cookies {
 		$page = LBB_Legal::page_id( 'cookies' );
 		$link = $page && 'publish' === get_post_status( $page ) ? get_permalink( $page ) : '';
 		?>
-		<div class="lbb-cc" id="lbb-cc" role="region" aria-label="<?php esc_attr_e( 'Cookies', 'libertbus-bilete' ); ?>" hidden>
+		<div class="lbb-cc" id="lbb-cc" lang="<?php echo esc_attr( LBB_Settings::text_lang() ); ?>" role="region" aria-label="<?php esc_attr_e( 'Cookies', 'libertbus-bilete' ); ?>" hidden>
 			<p class="lbb-cc-text">
 				<?php esc_html_e( 'Folosim cookies necesare pentru funcționarea site-ului. Cu acordul dumneavoastră folosim și cookies de statistică (Google Analytics) și de marketing.', 'libertbus-bilete' ); ?>
 				<?php if ( $link ) : ?>
@@ -188,7 +188,7 @@ class LBB_Cookies {
 		if ( ! $links ) {
 			return;
 		}
-		echo '<p class="lbb-legal-links" id="lbb-legal-links">' . implode( ' <span aria-hidden="true">·</span> ', $links ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput
+		echo '<p class="lbb-legal-links" id="lbb-legal-links" lang="' . esc_attr( LBB_Settings::text_lang() ) . '">' . implode( ' <span aria-hidden="true">·</span> ', $links ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput
 		// Selectorii pe rând, în ordinea preferinței (o listă „a,b,c” ar lua primul element din pagină,
 		// ex. <footer> dintr-un citat); la final, ultimul <footer> care nu e în conținut.
 		echo "<script>(function(){var n=document.getElementById('lbb-legal-links');if(!n)return;var s=['#Footer .copyright','#colophon .site-info','.site-footer .site-info','body>footer','.wp-site-blocks>footer','footer.site-footer','#colophon'],t=null,i,f;for(i=0;i<s.length&&!t;i++){t=document.querySelector(s[i]);}if(!t){f=document.querySelectorAll('footer');for(i=f.length-1;i>=0&&!t;i--){if(!f[i].closest('blockquote,article,figure,aside'))t=f[i];}}if(t){t.appendChild(n);n.className+=' is-in-footer';}})();</script>\n";

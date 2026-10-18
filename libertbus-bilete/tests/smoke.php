@@ -1980,7 +1980,7 @@ $cc_page = function () {
 	return is_wp_error( $r ) ? '' : wp_remote_retrieve_body( $r );
 };
 $on = $cc_page();
-lbb_t( 'cookies pornite: banner, linkuri în subsol și Google Analytics blocat', false !== strpos( $on, 'id="lbb-cc"' ) && false !== strpos( $on, 'id="lbb-legal-links"' ) && false !== strpos( $on, 'data-lbb-consent="statistics" async src="https://www.googletagmanager.com' ), strlen( $on ) );
+lbb_t( 'cookies pornite: banner, linkuri în subsol și Google Analytics blocat; bannerul și linkurile au limba textului (lang)', false !== strpos( $on, 'id="lbb-cc" lang="' . LBB_Settings::text_lang() . '"' ) && false !== strpos( $on, 'id="lbb-legal-links" lang="' . LBB_Settings::text_lang() . '"' ) && false !== strpos( $on, 'data-lbb-consent="statistics" async src="https://www.googletagmanager.com' ), strlen( $on ) );
 update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'cookie_banner' => 0 ) ) );
 $off = $cc_page();
 lbb_t( 'banner oprit: fără banner, fără „Setări cookies”, Google Analytics nemodificat', false === strpos( $off, 'id="lbb-cc"' ) && false === strpos( $off, '#lbb-cookies' ) && false === strpos( $off, 'data-lbb-consent' ) && false !== strpos( $off, '<script async src="https://www.googletagmanager.com' ), strlen( $off ) );
