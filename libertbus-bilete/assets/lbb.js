@@ -498,6 +498,17 @@
 				if ( atLimit ) {
 					fillWithPhone( el.groupNote, t.groupNote );
 				}
+				// Cititorul de ecran o spune la listele de pasageri, dar doar cât se vede (un text ascuns legat
+				// prin aria-describedby s-ar citi oricum).
+				[ el.adults, el.children ].forEach( function ( s ) {
+					if ( s && el.groupNote.id ) {
+						if ( atLimit ) {
+							s.setAttribute( 'aria-describedby', el.groupNote.id );
+						} else {
+							s.removeAttribute( 'aria-describedby' );
+						}
+					}
+				} );
 			}
 		}
 

@@ -229,7 +229,16 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await pg.goto(BASE + '/balti-iasi/');
     await pg.waitForFunction(() => document.querySelector('[data-lbb="adults"]').options.length > 1);
     const before = await pg.isVisible('[data-lbb="groupNote"]');
+    const descBefore = await pg.$eval('[data-lbb="adults"]', s => s.getAttribute('aria-describedby'));
     const max = await pg.$eval('[data-lbb="adults"]', s => s.options[s.options.length - 1].value);
+    await pg.selectOption('[data-lbb="adults"]', max);
+    await pg.waitForTimeout(200);
+    // Lista „Adulți” e legată de notă (cititorul de ecran o spune) doar cât nota se vede.
+    const desc = await pg.$eval('[data-lbb="adults"]', s => { const id = s.getAttribute('aria-describedby'); const n = id && document.getElementById(id); return n ? n.getAttribute('data-lbb') : null; });
+    await pg.selectOption('[data-lbb="adults"]', '1');
+    await pg.waitForTimeout(200);
+    const descAfter = await pg.$eval('[data-lbb="adults"]', s => s.getAttribute('aria-describedby'));
+    if (descBefore || desc !== 'groupNote' || descAfter) fail('nota pentru grupuri nu e legată de lista „Adulți” doar cât se vede: ' + JSON.stringify({ descBefore, desc, descAfter }));
     await pg.selectOption('[data-lbb="adults"]', max);
     await pg.waitForTimeout(200);
     const note = await pg.$eval('[data-lbb="groupNote"]', e => ({ visible: e.getClientRects().length > 0, text: e.textContent, tel: (e.querySelector('a[href^="tel:"]') || {}).href || '' }));

@@ -552,7 +552,7 @@ class LBB_Frontend {
 					</label>
 					<?php endif; ?>
 				</div>
-				<p class="lbb-group-note" data-lbb="groupNote" hidden></p>
+				<p class="lbb-group-note" data-lbb="groupNote" id="<?php echo esc_attr( $uid ); ?>-group" hidden></p>
 				</div>
 
 				<div class="lbb-summary" data-lbb="summary" aria-live="polite" aria-atomic="true" hidden></div>
