@@ -649,6 +649,13 @@ class LBB_Admin {
 	/**
 	 * Codul biletului; rezervările fără cod (coș abandonat, anulate înainte de plată) arată „—”.
 	 */
+	/**
+	 * Pentru linkurile care se deschid într-o filă nouă: cititorul de ecran o spune (WCAG G201), vizual nu apare.
+	 */
+	private static function new_tab_note() {
+		return '<span class="screen-reader-text"> ' . esc_html__( '(se deschide într-o filă nouă)', 'libertbus-bilete' ) . '</span>';
+	}
+
 	private static function ticket_code_html( $code ) {
 		return '' === (string) $code ? '—' : '<code>' . esc_html( $code ) . '</code>';
 	}
@@ -781,7 +788,7 @@ class LBB_Admin {
 			$r     = LBB_Routes::get( $b['route_id'] );
 			$route = LBB_Bookings::route_name( $r ? array_merge( $b, array( 'origin' => $r['origin'], 'destination' => $r['destination'] ) ) : $b );
 			$when  = LBB_WooCommerce::date_with_day( $b['travel_date'] ) . ' ' . $b['dep_time'];
-			$code  = $b['ticket_code'] ? '<a href="' . esc_url( LBB_Tickets::url( $b['ticket_code'] ) ) . '" target="_blank" rel="noopener">' . esc_html( $b['ticket_code'] ) . '</a>' : esc_html__( '(fără cod încă)', 'libertbus-bilete' );
+			$code  = $b['ticket_code'] ? '<a href="' . esc_url( LBB_Tickets::url( $b['ticket_code'] ) ) . '" target="_blank" rel="noopener">' . esc_html( $b['ticket_code'] ) . self::new_tab_note() . '</a>' : esc_html__( '(fără cod încă)', 'libertbus-bilete' );
 			/* translators: %d: numărul de locuri */
 			$seats = LBB_Settings::ro_count( $b['seats'], __( 'loc', 'libertbus-bilete' ), __( 'locuri', 'libertbus-bilete' ) );
 			echo '<li>' . $code . ' — ' . esc_html( $route . ', ' . $when . ', ' . $seats ) . '<br><small>' . esc_html( LBB_Tickets::state( $b )['text'] ) . '</small></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $code e escapat mai sus.
@@ -957,7 +964,7 @@ class LBB_Admin {
 				$text( 'replace_cf7', __( 'Înlocuiește formularele Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'ID-urile formularelor de rezervare (ex. de pe pagina principală) care se afișează ca formularul de rezervare cu plată. Paginile nu se modifică; ștergeți ID-ul ca să reveniți.', 'libertbus-bilete' ) );
 				$text( 'preview_cf7', __( 'Previzualizare: formulare Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'În previzualizare (pagini private pentru admin sau linkul secret de mai jos) aceste formulare și cele de rută se înlocuiesc, cu butonul de plată vizibil. Ceilalți vizitatori nu văd nimic schimbat.', 'libertbus-bilete' ) );
 				$preview = LBB_Settings::preview_url();
-				echo '<tr><th>' . esc_html__( 'Link de previzualizare (fără login)', 'libertbus-bilete' ) . '</th><td><input type="text" class="large-text code" readonly onclick="this.select()" aria-label="' . esc_attr__( 'Link de previzualizare (fără login)', 'libertbus-bilete' ) . '" value="' . esc_attr( $preview ) . '"> <p class="description">' . esc_html__( 'Deschideți-l pe telefon sau trimiteți-l cuiva. Merge pe orice pagină: adăugați ?lbb_preview=… și la paginile de rută. Butonul de mai jos (sub formular) creează un link nou și îl anulează pe cel vechi.', 'libertbus-bilete' ) . ' <a href="' . esc_url( $preview ) . '" target="_blank" rel="noopener">' . esc_html__( 'Deschide', 'libertbus-bilete' ) . '</a></p></td></tr>';
+				echo '<tr><th>' . esc_html__( 'Link de previzualizare (fără login)', 'libertbus-bilete' ) . '</th><td><input type="text" class="large-text code" readonly onclick="this.select()" aria-label="' . esc_attr__( 'Link de previzualizare (fără login)', 'libertbus-bilete' ) . '" value="' . esc_attr( $preview ) . '"> <p class="description">' . esc_html__( 'Deschideți-l pe telefon sau trimiteți-l cuiva. Merge pe orice pagină: adăugați ?lbb_preview=… și la paginile de rută. Butonul de mai jos (sub formular) creează un link nou și îl anulează pe cel vechi.', 'libertbus-bilete' ) . ' <a href="' . esc_url( $preview ) . '" target="_blank" rel="noopener">' . esc_html__( 'Deschide', 'libertbus-bilete' ) . '<span class="screen-reader-text"> ' . esc_html__( '(se deschide într-o filă nouă)', 'libertbus-bilete' ) . '</span></a></p></td></tr>';
 				$text( 'accent_color', __( 'Culoarea butoanelor', 'libertbus-bilete' ), __( 'Cod hex, ex. #00875a (verdele site-ului). Pe o culoare deschisă textul butoanelor devine automat închis, ca să se citească.', 'libertbus-bilete' ) );
 				$check( 'replace_cf7_routes', __( 'Formularele de rută', 'libertbus-bilete' ), __( 'Formularele Contact Form 7 cu titlul „Oraș - Oraș” (ex. „Balti - Iasi”) devin formularul rutei respective, dacă ruta există.', 'libertbus-bilete' ) );
 				$check( 'show_approx', __( 'Echivalent în altă monedă', 'libertbus-bilete' ), __( 'Arată lângă preț „≈ 62 RON” (sau „≈ 234 MDL”), doar informativ.', 'libertbus-bilete' ) );

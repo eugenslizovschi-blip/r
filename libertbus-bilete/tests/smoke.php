@@ -1615,6 +1615,12 @@ lbb_t( 'paginile legale din Setări fără drept de editare: titlul fără link 
 ob_start();
 LBB_Admin::page_settings();
 $ad_set = ob_get_clean();
+// Linkurile care se deschid într-o filă nouă (Setări: previzualizarea; comanda: biletul) o spun cititorului de ecran.
+preg_match_all( '#<a [^>]*target="_blank"[^>]*>.*?</a>#s', $ad_set . $ot_html, $nt_links );
+$nt_bad = array_filter( $nt_links[0], function ( $a ) {
+	return false === strpos( $a, '<span class="screen-reader-text"> (se deschide într-o filă nouă)</span>' );
+} );
+lbb_t( 'admin: linkurile cu target="_blank" anunță cititorului de ecran fila nouă', count( $nt_links[0] ) >= 2 && ! $nt_bad, array( count( $nt_links[0] ), array_values( $nt_bad ) ) );
 $_GET = array( 'page' => 'lbb-routes', 'add' => 1 );
 ob_start();
 LBB_Admin::page_routes();
