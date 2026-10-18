@@ -57,6 +57,7 @@
     - un link de bilet stricat sau incomplet arată „Biletul nu a fost găsit” cu telefonul firmei, ca clientul să poată suna;
     - pe pagina de după plată, dacă banca n-a confirmat încă plata, clientul vede „De obicei durează câteva secunde” și un buton „Verifică din nou” (nu și la plata refuzată, unde WooCommerce oferă „Plătește din nou”);
     - la printare, starea biletului rămâne pe foaie: un bilet anulat, neplătit sau dintr-o cursă trecută nu mai arată pe hârtie ca unul valabil.
+    - lista pentru șofer printată pe mai multe foi repetă capul tabelului pe fiecare foaie și nu rupe o rezervare (cu toți pasagerii ei) între două foi;
   - **„Locuri online pe cursă (implicit)” în Setări:** golit din greșeală sau 0 păstrează numărul de dinainte (înainte toate rutele fără număr propriu de locuri apăreau „complet” și nu se mai vindea nimic).
   - **Cursuri valutare în Setări:** un câmp golit din greșeală sau 0 păstrează cursul de dinainte (înainte devenea 0,0001, iar un bilet de 60 RON ar fi costat 0,01 MDL la plata în MDL).
   - **„Zile înainte” și „Pasageri pe rezervare” în Setări:** goliți din greșeală sau 0 păstrează valoarea de dinainte (înainte deveneau 1: vânzare doar pentru o zi și un singur pasager); la fel minutele de așteptare la coș și la plată. În formular, aceste câmpuri au acum minimul real (1, respectiv 5 și 10 minute), iar browserul îl spune direct pe câmp.

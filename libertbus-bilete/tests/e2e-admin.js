@@ -130,13 +130,17 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const head = [...document.querySelectorAll('.lbb-manifest-table thead th')].filter(vis).map(t => t.textContent.trim());
     const rows = [...document.querySelectorAll('.lbb-manifest-table tbody tr')].filter(r => r.cells.length > 1);
     const boxes = rows.filter(r => { const b = r.querySelector('.lbb-box'); return b && vis(b) && b.getBoundingClientRect().width >= 12; }).length;
-    return { head, rows: rows.length, boxes };
+    const t = document.querySelector('.lbb-manifest-table');
+    const keep = rows.length && rows.every(r => getComputedStyle(r).breakInside === 'avoid') && getComputedStyle(t.tHead).display === 'table-header-group';
+    return { head, rows: rows.length, boxes, keep };
   });
   await page.emulateMedia({ media: 'print' });
   const onPrint = await boxCol();
   await page.emulateMedia({ media: 'screen' });
   const onScreen = await boxCol();
   if (onPrint.head[onPrint.head.length - 1] !== 'Urcat' || !onPrint.rows || onPrint.boxes !== onPrint.rows) fail('foaia printată fără căsuța „Urcat” pe fiecare rând (' + boxDate + '): ' + JSON.stringify(onPrint));
+  // Pe mai multe foi: capul tabelului se repetă și un rând (o rezervare cu mai mulți pasageri) nu se rupe între foi.
+  if (!onPrint.keep) fail('foaia printată: rândurile se pot rupe între pagini sau capul tabelului nu se repetă');
   if (onScreen.head.includes('Urcat') || onScreen.boxes) fail('coloana „Urcat” apare și pe ecran: ' + JSON.stringify(onScreen));
   // „Ziua următoare ›” / „‹ Ziua precedentă” schimbă ziua cu una și păstrează ruta aleasă (inclusiv peste sfârșitul lunii).
   const navRoute = await page.$eval('select[name="route"] option:nth-child(2)', o => o.value);
