@@ -535,6 +535,10 @@ class LBB_Bookings {
 		if ( '+' === substr( $phone, 0, 1 ) && strlen( $phone ) >= 9 ) {
 			$or .= $wpdb->prepare( ' OR b.phone = %s', $phone );
 		}
+		// Codul dictat la telefon e scris des fără liniuță sau cu spațiu („LB3KVU8W”, „lb 3kvu8w”).
+		if ( preg_match( '/^LB[\s\-_.]*([A-Z0-9]{3,})$/i', $search, $m ) ) {
+			$or .= $wpdb->prepare( ' OR b.ticket_code LIKE %s', 'LB-' . $wpdb->esc_like( strtoupper( $m[1] ) ) . '%' );
+		}
 		// Numărul comenzii WooCommerce („#1234” din emailul de plată sau din Paynet) găsește biletele comenzii.
 		if ( preg_match( '/^#?\s*(\d{1,10})$/', $search, $m ) && (int) $m[1] > 0 ) {
 			$or .= $wpdb->prepare( ' OR b.order_id = %d', (int) $m[1] );

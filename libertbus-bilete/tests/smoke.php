@@ -1562,6 +1562,14 @@ $_GET = array( 'page' => 'lbb-bookings', 'q' => 'rm2@example.com' );
 ob_start();
 LBB_Admin::page_bookings();
 $rm_list2 = ob_get_clean();
+// Codul dictat la telefon, scris fără liniuță sau cu spațiu, găsește rezervarea.
+$cd_code = (string) $wpdb->get_var( 'SELECT ticket_code FROM ' . LBB_Bookings::table() . " WHERE ticket_code LIKE 'LB-%' LIMIT 1" ); // phpcs:ignore WordPress.DB
+$cd_bare = substr( $cd_code, 3 );
+$cd_got  = array();
+foreach ( array( 'LB' . $cd_bare, 'lb ' . strtolower( $cd_bare ), 'LB_' . $cd_bare ) as $cd_q ) {
+	$cd_got[ $cd_q ] = in_array( $cd_code, wp_list_pluck( LBB_Bookings::recent( 50, '', $cd_q ), 'ticket_code' ), true );
+}
+lbb_t( 'Rezervări: codul scris fără liniuță („LB3KVU8W”, „lb 3kvu8w”) găsește biletul', '' !== $cd_bare && ! in_array( false, $cd_got, true ), $cd_got );
 // Căutare cu un filtru de stare fără rezultate (ex. „Anulate” rămas ales): link spre toate stările, cu aceeași căutare.
 $sf_counts = LBB_Bookings::status_counts( 'rm@example.com' );
 $sf_status = '';
