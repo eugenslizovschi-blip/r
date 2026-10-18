@@ -118,6 +118,16 @@
 			}
 		}
 
+		// Câmpul-capcană pentru boți nu primește focus. Fără Element.closest: lipsește pe Android 4.4 și iOS 8.
+		function inHoneypot( n ) {
+			for ( ; n && n !== overlay; n = n.parentNode ) {
+				if ( n.className && ( ' ' + n.className + ' ' ).indexOf( ' lbb-hp ' ) !== -1 ) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		document.addEventListener( 'keydown', function ( e ) {
 			if ( ! overlay ) {
 				return;
@@ -132,7 +142,7 @@
 				var items = Array.prototype.filter.call(
 					overlay.querySelectorAll( 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])' ),
 					function ( n ) {
-						return ! n.disabled && n.type !== 'hidden' && n.offsetParent !== null && ! n.closest( '.lbb-hp' );
+						return ! n.disabled && n.type !== 'hidden' && n.offsetParent !== null && ! inHoneypot( n );
 					}
 				);
 				if ( ! items.length ) {

@@ -90,6 +90,17 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (!(await admin.evaluate(() => !!document.activeElement.closest('.lbb-overlay')))) fail('Tab iese din fereastră');
   await admin.keyboard.press('Shift+Tab');
   if (!(await admin.evaluate(() => document.activeElement.value === 'reserve'))) fail('Shift+Tab nu revine la ultimul buton');
+  // Și pe browserele fără Element.closest (Android 4.4, iOS 8): Tab nu aruncă eroare, focusul rămâne în fereastră.
+  const noClosestErr = [];
+  const onErr = e => noClosestErr.push(e.message);
+  admin.on('pageerror', onErr);
+  await admin.evaluate(() => { window.__lbbClosest = Element.prototype.closest; delete Element.prototype.closest; });
+  await admin.keyboard.press('Tab');
+  const inside = await admin.evaluate(() => document.querySelector('.lbb-overlay').contains(document.activeElement));
+  await admin.evaluate(() => { Element.prototype.closest = window.__lbbClosest; });
+  admin.off('pageerror', onErr);
+  if (noClosestErr.length || !inside) fail('fără Element.closest, Tab în fereastră: ' + JSON.stringify({ noClosestErr, inside }));
+  await admin.keyboard.press('Shift+Tab');
   await admin.keyboard.press('Escape');
   if (await admin.$('.lbb-overlay')) fail('Escape nu închide fereastra');
   // „Înapoi” pe telefon (Android) cu fereastra deschisă: revine la pasul 1 pe aceeași pagină, nu pleacă de pe ea;
