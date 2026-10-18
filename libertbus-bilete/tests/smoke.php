@@ -1397,6 +1397,22 @@ $cr_res  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[0], 
 $cr_onl  = LBB_Admin::manifest_csv_row( '2026-10-21', array_merge( $dd_rows[1], $cr_base ) );
 lbb_t( 'CSV-ul listei de pasageri are suma de încasat și moneda în coloane separate (goale la plata online)', 13 === count( $cr_res ) && 'la urcare 30.5 RON' === $cr_res[9] && 30.5 === $cr_res[11] && 'RON' === $cr_res[12] && 'online' === $cr_onl[9] && '' === $cr_onl[11] && '' === $cr_onl[12], array( $cr_res, $cr_onl ) );
 
+// Separatorul CSV din Setări: „;” pentru Excel în română, cu virgulă zecimală la sume; altceva revine la „,”.
+$cs_keep = get_option( 'lbb_settings' );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'csv_separator' => ';' ) ) );
+$cs_semi = LBB_Settings::get( 'csv_separator' );
+LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'csv_separator' => '|' ) ) );
+$cs_bad = LBB_Settings::get( 'csv_separator' );
+update_option( 'lbb_settings', $cs_keep );
+$cs_f1 = LBB_Admin::csv_fields( $cr_res, ';' );
+$cs_f2 = LBB_Admin::csv_fields( $cr_res, ',' );
+$_GET  = array( 'page' => 'lbb-settings' );
+ob_start();
+LBB_Admin::page_settings();
+$cs_page = ob_get_clean();
+$_GET = array();
+lbb_t( 'CSV: separatorul „;” se poate alege în Setări (alt semn revine la „,”); cu „;” suma are virgulă zecimală (30,5), cu „,” rămâne 30.5', ';' === $cs_semi && ',' === $cs_bad && '30,5' === $cs_f1[11] && '30.5' === (string) $cs_f2[11] && 'la urcare 30.5 RON' === $cs_f1[9] && false !== strpos( $cs_page, 'name="csv_separator"' ) && ',' === LBB_Settings::get( 'csv_separator' ), array( $cs_semi, $cs_bad, $cs_f1[11], $cs_f2[11] ) );
+
 // Zile fără curse (sărbători): în setări, cu date scrise ca 25.12.2026 / 2026-12-25; în aceste zile nu se vinde nimic.
 // Fără an („25.12, 1.1”) sau cu anul scurt („25.12.99”): următoarea apariție, respectiv 2099.
 $zy_today = LBB_Settings::today();

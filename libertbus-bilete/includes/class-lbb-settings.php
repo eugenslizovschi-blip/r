@@ -47,6 +47,7 @@ class LBB_Settings {
 			'preview_cf7'        => '',
 			'accent_color'       => '#00875a',
 			'replace_cf7_routes' => 0,
+			'csv_separator'      => ',',
 			'allow_pay'          => 0,
 			'allow_reserve'      => 1,
 			'cookie_banner'      => 1,
@@ -86,7 +87,9 @@ class LBB_Settings {
 				continue;
 			}
 			$value = $values[ $key ];
-			if ( 'pay_currencies' === $key ) {
+			if ( 'csv_separator' === $key ) {
+				$value = ';' === $value ? ';' : ',';
+			} elseif ( 'pay_currencies' === $key ) {
 				$list  = is_array( $value ) ? $value : explode( ',', (string) $value );
 				$list  = array_values( array_intersect( self::currencies(), array_map( 'strtoupper', array_map( 'trim', $list ) ) ) );
 				$value = implode( ',', $list ? $list : array( 'MDL' ) );

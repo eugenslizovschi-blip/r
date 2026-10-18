@@ -760,9 +760,10 @@ class LBB_Admin {
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" );
 		// Separator, ghilimele și fără caracter de escape (RFC 4180), explicit: implicitul se schimbă în PHP 8.4+.
-		fputcsv( $out, array( 'Data', 'Ora', 'Plecare', 'Destinatie', 'Bilet', 'Locuri', 'Pasageri', 'Telefon', 'Email', 'Plata', 'Comanda', 'De incasat', 'Moneda' ), ',', '"', '' );
+		$sep = LBB_Settings::get( 'csv_separator' );
+		fputcsv( $out, array( 'Data', 'Ora', 'Plecare', 'Destinatie', 'Bilet', 'Locuri', 'Pasageri', 'Telefon', 'Email', 'Plata', 'Comanda', 'De incasat', 'Moneda' ), ';' === $sep ? ';' : ',', '"', '' );
 		foreach ( LBB_Bookings::manifest( $date, $route ) as $b ) {
-			fputcsv( $out, array_map( array( __CLASS__, 'csv_safe' ), self::manifest_csv_row( $date, $b ) ), ',', '"', '' );
+			fputcsv( $out, self::csv_fields( self::manifest_csv_row( $date, $b ), $sep ), ';' === $sep ? ';' : ',', '"', '' );
 		}
 		fclose( $out );
 		exit;
@@ -822,6 +823,22 @@ class LBB_Admin {
 	 * Previne formulele în Excel când un client își scrie numele „=…”.
 	 * Un „+” la început rămâne doar la un telefon curat (+373 69 …); „+1+cmd|…” e tot formulă.
 	 */
+	/**
+	 * Câmpurile unui rând din CSV, gata de scris: fără formule pentru Excel; cu separatorul „;” (Excel cu setări
+	 * regionale românești) sumele au virgulă zecimală (30,5), altfel Excel le citește ca text sau ca dată.
+	 *
+	 * @param array  $row Valorile rândului.
+	 * @param string $sep Separatorul din Setări („,” sau „;”).
+	 */
+	public static function csv_fields( array $row, $sep ) {
+		return array_map( function ( $v ) use ( $sep ) {
+			if ( ';' === $sep && ( is_float( $v ) || is_int( $v ) ) ) {
+				$v = str_replace( '.', ',', (string) $v );
+			}
+			return self::csv_safe( $v );
+		}, $row );
+	}
+
 	public static function csv_safe( $value ) {
 		$value = (string) $value;
 		return preg_match( '/^[=+\-@\t\r]/', $value ) && ! preg_match( '/^\+[\d\s().\-]+$/', $value ) ? "'" . $value : $value;
@@ -969,6 +986,11 @@ class LBB_Admin {
 					echo '<label style="margin-right:12px"><input type="checkbox" name="pay_currencies[]" value="' . esc_attr( $cur ) . '" ' . checked( in_array( $cur, LBB_Settings::pay_currencies(), true ), true, false ) . '> ' . esc_html( $cur ) . '</label>';
 				}
 				echo '<p class="description">' . esc_html__( 'Implicit se propune moneda rutei (MDL spre România, RON spre Moldova); clientul poate schimba. Prețul se convertește după cursurile de mai jos.', 'libertbus-bilete' ) . '</p></td></tr>';
+				// Excel cu setări regionale românești/moldovenești desparte coloanele cu „;”: cu „,” tot rândul ar ieși într-o coloană.
+				echo '<tr><th><label for="lbb-csv_separator">' . esc_html__( 'Separator în CSV (lista de pasageri)', 'libertbus-bilete' ) . '</label></th><td><select id="lbb-csv_separator" name="csv_separator" aria-describedby="lbb-csv_separator-desc">'
+					. '<option value=","' . selected( $s['csv_separator'], ',', false ) . '>' . esc_html__( 'virgulă (,)', 'libertbus-bilete' ) . '</option>'
+					. '<option value=";"' . selected( $s['csv_separator'], ';', false ) . '>' . esc_html__( 'punct și virgulă (;) — Excel în română', 'libertbus-bilete' ) . '</option>'
+					. '</select><p class="description" id="lbb-csv_separator-desc">' . esc_html__( 'Dacă la deschiderea în Excel tot rândul apare într-o singură coloană, alegeți „punct și virgulă”.', 'libertbus-bilete' ) . '</p></td></tr>';
 				$text( 'replace_cf7', __( 'Înlocuiește formularele Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'ID-urile formularelor de rezervare (ex. de pe pagina principală) care se afișează ca formularul de rezervare cu plată. Paginile nu se modifică; ștergeți ID-ul ca să reveniți.', 'libertbus-bilete' ) );
 				$text( 'preview_cf7', __( 'Previzualizare: formulare Contact Form 7 (ID-uri)', 'libertbus-bilete' ), __( 'În previzualizare (pagini private pentru admin sau linkul secret de mai jos) aceste formulare și cele de rută se înlocuiesc, cu butonul de plată vizibil. Ceilalți vizitatori nu văd nimic schimbat.', 'libertbus-bilete' ) );
 				$preview = LBB_Settings::preview_url();
