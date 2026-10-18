@@ -1852,6 +1852,16 @@ lbb_t( 'API: cheia formularului, ziua de azi și prețul rutei vin proaspete (pa
 lbb_t( 'API: data în alt format e refuzată (400)', 400 === $api( array( 'route_id' => $rid2, 'date' => '07.10.2026' ) )->get_status() );
 lbb_t( 'API: fără rută e refuzat (400)', 400 === $api( array( 'date' => $tomorrow ) )->get_status() );
 lbb_t( 'API: ruta inexistentă dă 404', 404 === $api( array( 'route_id' => 999999, 'date' => $tomorrow ) )->get_status() );
+// Erorile trec prin același filtru ca la o cerere HTTP adevărată: și ele sunt fără cache (un 404 păstrat într-un cache de pagini ar ascunde ruta pornită din nou).
+$api_nc = function ( $params ) use ( $api ) {
+	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
+	$req->set_query_params( $params );
+	$res = apply_filters( 'rest_post_dispatch', rest_ensure_response( $api( $params ) ), rest_get_server(), $req );
+	return array( $res->get_status(), $res->get_headers()['Cache-Control'] ?? '' );
+};
+$api_nc_404 = $api_nc( array( 'route_id' => 999999, 'date' => $tomorrow ) );
+$api_nc_400 = $api_nc( array( 'route_id' => $rid2, 'date' => '07.10.2026' ) );
+lbb_t( 'API: și răspunsurile de eroare (404, 400) sunt fără cache', array( 404, 'no-store' ) === $api_nc_404 && array( 400, 'no-store' ) === $api_nc_400, array( $api_nc_404, $api_nc_400 ) );
 lbb_t( 'API: o dată imposibilă (31 februarie) nu are plecări', 200 === ( $api_imp = $api( array( 'route_id' => $rid2, 'date' => ( (int) gmdate( 'Y' ) + 1 ) . '-02-31' ) ) )->get_status() && array() === array_filter( $api_imp->get_data()['departures'], function ( $d ) { return ! empty( $d['bookable'] ); } ), $api_imp->get_data() );
 $wpdb->update( LBB_Routes::table(), array( 'active' => 0 ), array( 'id' => $rid2 ) );
 $api_off  = $api( array( 'route_id' => $rid2, 'date' => $tomorrow ) )->get_status();

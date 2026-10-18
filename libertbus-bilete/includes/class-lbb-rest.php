@@ -11,6 +11,18 @@ class LBB_Rest {
 
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'routes' ) );
+		add_filter( 'rest_post_dispatch', array( __CLASS__, 'no_cache_errors' ), 10, 3 );
+	}
+
+	/**
+	 * Și erorile API-ului („Ruta nu există”, dată greșită) sunt fără cache: altfel un cache de pagini
+	 * ar păstra 404-ul și după ce ruta e pornită din nou, iar formularul ar arăta „ruta nu există” ore întregi.
+	 */
+	public static function no_cache_errors( $response, $server, $request ) {
+		if ( $response instanceof WP_HTTP_Response && 0 === strpos( (string) $request->get_route(), '/lbb/v1/' ) ) {
+			$response->header( 'Cache-Control', 'no-store' );
+		}
+		return $response;
 	}
 
 	public static function routes() {
