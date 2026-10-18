@@ -95,6 +95,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (csv.charCodeAt(0) !== 0xFEFF) fail('CSV fără BOM: diacriticele se strică în Excel');
   if (!/^﻿?Data,Ora,Plecare,Destinatie,Bilet,Locuri,Pasageri,Telefon,Email,Plata,Comanda,"De incasat",Moneda\r?\n/.test(csv)) fail('antet CSV greșit: ' + csv.slice(0, 80));
   if (!/^pasageri-\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename())) fail('nume de fișier CSV greșit: ' + dl.suggestedFilename());
+  // Cu „punct și virgulă” ales în Setări (Excel în română), fișierul descărcat folosește „;”; apoi revine la „,”.
+  const setSep = async (v) => {
+    await page.goto(BASE + '/wp-admin/admin.php?page=lbb-settings');
+    await page.selectOption('#lbb-csv_separator', v);
+    await Promise.all([page.waitForNavigation(), page.click('form[action*="admin-post.php"] #submit')]);
+  };
+  await setSep(';');
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest');
+  const [dlSemi] = await Promise.all([page.waitForEvent('download'), page.click('a.button:text-is("CSV")')]);
+  const csvSemi = fs.readFileSync(await dlSemi.path(), 'utf8');
+  await setSep(',');
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest');
+  if (!/^﻿?Data;Ora;Plecare;Destinatie;Bilet;Locuri;Pasageri;Telefon;Email;Plata;Comanda;"De incasat";Moneda\r?\n/.test(csvSemi)) fail('CSV cu „;” din Setări: antet greșit: ' + csvSemi.slice(0, 80));
   // Cu o rută aleasă, numele fișierului o conține (listele mai multor rute din aceeași zi nu se confundă).
   const rid = await page.$eval('select[name="route"] option:nth-child(2)', o => ({ id: o.value, text: o.textContent }));
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&route=' + rid.id);
