@@ -58,6 +58,14 @@ echo "== Teste automate"
 OUT_SMOKE=$(cd "$WP_PATH" && $WP_CLI eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
 echo "$OUT_SMOKE" | grep -E "FAIL|eșuate|Fatal"
 echo "$OUT_SMOKE" | grep -q " 0 eșuate" || FAIL=1
+# README spune câte verificări și câte dispozitive sunt: dacă se adaugă un test și nu se actualizează, QA pică.
+SMOKE_N=$(echo "$OUT_SMOKE" | sed -n 's/^\([0-9]*\) ok, \([0-9]*\) eșuate.*/\1 \2/p' | awk '{print $1+$2}')
+README_N=$(sed -n 's/.*`tests\/smoke.php`: \([0-9]*\) de verificări.*/\1/p' "$DIR/README.md")
+DEV_N=$(sed -n '/^const LIST = \[/,/^\];/p' "$DIR/tests/e2e-devices.js" | grep -c "^  \['")
+README_DEV=$(sed -n 's/.*\*\*\([0-9]*\) dispozitive\*\*.*/\1/p' "$DIR/README.md")
+if [ -z "$SMOKE_N" ] || [ "$SMOKE_N" != "$README_N" ] || [ "$DEV_N" != "$README_DEV" ]; then
+  echo "  README nesincronizat: $README_N verificări în README, $SMOKE_N rulate; $README_DEV dispozitive în README, $DEV_N în tests/e2e-devices.js"; FAIL=1
+fi
 # Încălzire: după repornirea containerului prima comandă WooCommerce poate dura peste 30 s (cache-uri reci)
 # și testele din browser ar pica din timeout, nu din cauza codului.
 for u in / /balti-iasi/ /checkout/ /wp-login.php; do curl -s -o /dev/null -m 60 "$BASE$u" || true; done
