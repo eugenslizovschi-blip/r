@@ -206,6 +206,17 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await nd.waitForTimeout(300);
     const v2 = await nd.inputValue('[data-lbb="date"]');
     if (v2 !== iso) fail('data scrisă „zz.ll.aa” nu e înțeleasă: ' + v2);
+    // O zi care nu există („31.11”), scrisă de mână: API-ul real răspunde fără plecări, iar formularul spune să
+    // alegeți altă dată, nu „Nu am putut verifica locurile” (ca la o problemă de internet). Prima lună cu 30 de zile
+    // care urmează: e mereu în intervalul de vânzare.
+    await nd.unroute('**/lbb/v1/departures**');
+    let ny = new Date().getUTCFullYear(), nm = new Date().getUTCMonth() + 1;
+    while (new Date(Date.UTC(ny, nm, 0)).getUTCDate() !== 30) { nm++; if (nm > 12) { nm = 1; ny++; } }
+    await nd.fill('[data-lbb="date"]', '31.' + String(nm).padStart(2, '0') + '.' + ny);
+    await nd.dispatchEvent('[data-lbb="date"]', 'change');
+    await nd.waitForFunction(() => { const s = document.querySelector('[data-lbb="status"]').textContent; return s && !/Se verifică/.test(s); }, null, { timeout: 15000 }).catch(() => {});
+    const bad = await nd.evaluate(() => ({ status: document.querySelector('[data-lbb="status"]').textContent, retry: !!document.querySelector('[data-lbb="status"] button.lbb-retry'), times: document.querySelectorAll('[data-lbb="time"] option:not([value=""]):not([disabled])').length }));
+    if (bad.retry || /Nu am putut verifica/.test(bad.status) || !/Alegeți altă dată/.test(bad.status) || bad.times) fail('o zi care nu există (31 într-o lună cu 30 de zile) arată eroare de rețea sau ore: ' + JSON.stringify(bad));
     await nd.close();
   }
   // Grup mai mare decât limita online: la numărul maxim de pasageri apare „pentru grupuri sunați la …” cu link de apel.
