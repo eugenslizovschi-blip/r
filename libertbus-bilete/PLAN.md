@@ -96,7 +96,21 @@
   - **Zile fără curse (sărbători):** în Setări → „Zile fără curse” (ex. 25.12.2026, 01.01.2027): în acele zile formularul nu arată plecări pe nicio rută și nu se poate rezerva. Dacă există deja bilete în ziua închisă, salvarea avertizează cu numărul lor, ca biroul să anunțe pasagerii. Clientul care alege o zi închisă vede „În ziua aleasă nu sunt curse (zi liberă). Alegeți altă dată.”; data aleasă automat sare peste zilele închise. Lista Pasageri pentru o astfel de zi, dacă are bilete, arată sus un avertisment cu link spre Setări.
   - **Emailul către birou** la o rezervare nouă are linkul „Deschide rezervarea în admin”, care o arată direct, căutată după cod.
   - **Panoul „Gata de plăți?”** avertizează dacă bannerul de cookies e oprit sau dacă telefonul pentru clienți e incomplet; arată și dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani), cu link direct la setare; verifică și că IDNO-ul firmei are 13 cifre (banca îl compară cu cel de pe site); avertizează dacă pagina de finalizare a comenzii folosește blocul „Checkout”, unde plata băncii poate lipsi dacă modulul ei nu are varianta pentru blocuri (soluția: [woocommerce_checkout]); arată și ultima eroare la trimiterea emailurilor din ultimele 7 zile (ex. hostingul blochează emailul și clienții nu primesc biletele), cu link spre un plugin SMTP (adresele de email din mesajul de eroare nu se păstrează).
+  - **Setări mai sigure la salvare** (avertizarea apare imediat, nu doar în Panou):
+    - IDNO-ul care nu are 13 cifre („are 12 cifre, nu 13”);
+    - telefonul pentru clienți incomplet sau fără prefixul țării (clienții din România n-ar putea suna);
+    - culoarea butoanelor scrisă fără „#” („1e40af”) se păstrează, nu mai revine pe tăcute la verde.
+  - **Emailuri:**
+    - un email terminat în „.con”, „.cmo”, „.comm” (la orice domeniu, ex. „ion@firma.con”) e oprit cu „.com” propus;
+    - răspunsul automat de concediu al biroului nu mai pleacă la client (notificările interne sunt marcate „automate”).
+  - **Pentru birou:**
+    - pe lista de pasageri, butonul „Azi” lângă „Ziua precedentă / următoare”;
+    - în „Rezervări”, dacă un filtru (ex. „Anulate”) ascunde rezultatele căutării, apare „Vezi rezultatele din toate stările (N)”.
+  - **Bilet:** la printare, un bilet nu se mai rupe între două pagini; fără „Adaugă în calendar” la o rută ștearsă (linkul nu mergea).
+  - **Accesibilitate:** butoanele formularului au contur vizibil la navigarea cu tastatura, și pe teme care îl ascund; linkurile din admin care se deschid într-o filă nouă o spun cititorului de ecran.
+  - **Română corectă** la numere: „cel mult 20 de locuri”, „mai mult de 20 de persoane”, „ultimele 200 de rezervări”; data din politici după ora Chișinăului și cu fusul „UTC+2” fix.
   - **Altele:**
+    - arhiva de instalare se face cu `tests/build-zip.sh` (~120 KB, doar ce rulează pe site; fără teste și capturi de ecran);
     - dezinstalarea cu setarea „Șterge datele” bifată șterge și linkul secret de previzualizare (rămânea în baza de date);
     - ziua de azi după ora Chișinăului;
     - expeditorul corect în emailurile de rezervare;
@@ -120,7 +134,7 @@ Vezi `README.md`. Pe scurt:
 4. **Câte locuri pe cursă** se vând online.
 
 ### Ce pot face eu, cu acordul dumneavoastră
-1. ~~Instalarea și activarea plugin-ului pe site.~~ Făcut. Rămâne actualizarea la versiunea de pe branch.
+1. ~~Instalarea și activarea plugin-ului pe site.~~ Făcut. Rămâne actualizarea la versiunea de pe branch, cu arhiva făcută de `tests/build-zip.sh`.
 2. Fusul orar → Chișinău. Moneda WooCommerce → MDL.
 3. Paginile legale: confidențialitate și cookies sunt publicate și legate în subsol. Termenii, rambursarea și plata așteaptă verificarea dumneavoastră.
 4. Pagină nouă „Rezervă bilet” cu formularul. Pe paginile de rută, formularul de contact se înlocuiește cu `[libertbus_rezervare from=".." to=".."]`. Butoanele „Rezervă” din „Orar Curse” vor duce spre formular.
