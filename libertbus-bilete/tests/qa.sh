@@ -49,11 +49,21 @@ fi
 echo "== Arhiva de instalare (fără teste, capturi și notițe)"
 ZIP_DIR=$(mktemp -d); ZIP=$("$DIR/tests/build-zip.sh" "$ZIP_DIR" 2>&1)
 ZIP_LIST=$( [ -f "$ZIP" ] && unzip -Z1 "$ZIP" )
-if [ -z "$ZIP_LIST" ] || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/libertbus-bilete.php' || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/includes/class-lbb-tickets.php' || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/assets/lbb.js' \
+if [ -z "$ZIP_LIST" ] || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/libertbus-bilete.php' || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/includes/class-lbb-tickets.php' || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/assets/lbb.js' || ! echo "$ZIP_LIST" | grep -qx 'libertbus-bilete/languages/libertbus-bilete.pot' \
   || echo "$ZIP_LIST" | grep -qE '(^|/)tests/|\.png$|PLAN\.md$' || [ "$(basename "$ZIP")" != "libertbus-bilete-$(sed -n 's/^ \* Version: *//p' "$DIR/libertbus-bilete.php" | tr -d '[:space:]').zip" ]; then
   echo "  arhivă greșită: $ZIP"; echo "$ZIP_LIST" | grep -E 'tests/|\.png$|PLAN' | head -3; FAIL=1
 else echo "  ok ($(basename "$ZIP"), $(echo "$ZIP_LIST" | grep -vc '/$') fișiere, $(du -k "$ZIP" | cut -f1) KB)"; fi
 rm -rf "$ZIP_DIR"
+echo "== Traduceri (languages/libertbus-bilete.pot la zi, fără avertismente)"
+# Șablonul pentru traducători (ex. versiunea rusă a site-ului): aceleași texte ca în cod. După ce se schimbă un text:
+# php wp-cli.phar i18n make-pot . languages/libertbus-bilete.pot --exclude=tests --slug=libertbus-bilete
+POT_TMP=$(mktemp -d)
+POT_OUT=$(cd "$DIR" && $WP_CLI i18n make-pot . "$POT_TMP/new.pot" --exclude=tests --slug=libertbus-bilete 2>&1 | grep -i "warning")
+pot_ids() { grep -E '^(msgctxt|msgid|msgid_plural) ' "$1" | sort; }
+if [ -n "$POT_OUT" ] || [ ! -f "$POT_TMP/new.pot" ] || ! diff -q <(pot_ids "$DIR/languages/libertbus-bilete.pot") <(pot_ids "$POT_TMP/new.pot") >/dev/null; then
+  echo "$POT_OUT" | head -5; diff <(pot_ids "$DIR/languages/libertbus-bilete.pot") <(pot_ids "$POT_TMP/new.pot") | head -6; echo "  PROBLEME (regenerați .pot)"; FAIL=1
+else echo "  ok ($(grep -c '^msgid ' "$DIR/languages/libertbus-bilete.pot") texte)"; fi
+rm -rf "$POT_TMP"
 echo "== Teste automate"
 OUT_SMOKE=$(cd "$WP_PATH" && $WP_CLI eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
 echo "$OUT_SMOKE" | grep -E "FAIL|eșuate|Fatal"

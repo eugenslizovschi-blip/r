@@ -30,8 +30,9 @@ class LBB_Legal {
 			return;
 		}
 		$id   = self::page_id( 'privacy' );
+		$keep = LBB_Settings::ro_count( LBB_Bookings::retention_years(), __( 'an', 'libertbus-bilete' ), __( 'ani', 'libertbus-bilete' ) );
 		$text = '<p>' . esc_html__( 'Rezervarea și biletul: numele și prenumele pasagerilor, telefonul, emailul, ruta, data și ora călătoriei, numărul de locuri și codul biletului. Scop: rezervarea locului, emiterea biletului, reamintirea cursei (dacă e pornită) și lista de îmbarcare. Temei: executarea contractului de transport.', 'libertbus-bilete' ) . '</p>'
-			. '<p>' . esc_html( sprintf( /* translators: %s: durata, ex. 3 ani */ __( 'Păstrare: la %s după data cursei, numele, telefonul și emailul se șterg automat din rezervare. La cererea clientului, datele se exportă sau se șterg din Unelte → Exportă / Șterge datele personale; un bilet valabil pentru o cursă viitoare se păstrează până după cursă.', 'libertbus-bilete' ), LBB_Settings::ro_count( LBB_Bookings::retention_years(), __( 'an', 'libertbus-bilete' ), __( 'ani', 'libertbus-bilete' ) ) ) ) . '</p>'
+			. '<p>' . esc_html( sprintf( /* translators: %s: durata, ex. 3 ani */ __( 'Păstrare: la %s după data cursei, numele, telefonul și emailul se șterg automat din rezervare. La cererea clientului, datele se exportă sau se șterg din Unelte → Exportă / Șterge datele personale; un bilet valabil pentru o cursă viitoare se păstrează până după cursă.', 'libertbus-bilete' ), $keep ) ) . '</p>'
 			. '<p>' . esc_html__( 'Datele cardului nu ajung pe site: se introduc doar pe pagina procesatorului de plăți.', 'libertbus-bilete' ) . '</p>';
 		if ( $id ) {
 			/* translators: %s: link spre politica de confidențialitate */

@@ -82,8 +82,9 @@ class LBB_Bookings {
 		}
 		if ( $seats > (int) LBB_Settings::get( 'max_passengers' ) ) {
 			// „20 de locuri”, „1 loc” (limita se schimbă din Setări), nu „20 locuri” / „1 locuri”.
+			$most = LBB_Settings::ro_count( LBB_Settings::get( 'max_passengers' ), __( 'loc', 'libertbus-bilete' ), __( 'locuri', 'libertbus-bilete' ) );
 			/* translators: 1: număr maxim de locuri, ex. 8 locuri / 20 de locuri, 2: telefonul de suport */
-			return new WP_Error( 'lbb_seats', sprintf( __( 'Online se pot rezerva cel mult %1$s odată. Pentru grupuri sunați la %2$s.', 'libertbus-bilete' ), LBB_Settings::ro_count( LBB_Settings::get( 'max_passengers' ), __( 'loc', 'libertbus-bilete' ), __( 'locuri', 'libertbus-bilete' ) ), LBB_Settings::phone_text() ) );
+			return new WP_Error( 'lbb_seats', sprintf( __( 'Online se pot rezerva cel mult %1$s odată. Pentru grupuri sunați la %2$s.', 'libertbus-bilete' ), $most, LBB_Settings::phone_text() ) );
 		}
 		if ( $children && null === $route['child_price'] ) {
 			$adults  += $children;

@@ -183,12 +183,14 @@ class LBB_Admin {
 			$anon  = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
 			$units = array( 'days' => __( 'zile', 'libertbus-bilete' ), 'weeks' => __( 'săptămâni', 'libertbus-bilete' ), 'months' => __( 'luni', 'libertbus-bilete' ), 'years' => __( 'ani', 'libertbus-bilete' ) );
 			$set   = ! empty( $anon['number'] );
+			// „3 ani” separat: comentariul pentru traducători de mai jos e doar pentru frază, nu și pentru „an/ani”.
+			$keep  = LBB_Settings::ro_count( LBB_Bookings::retention_years(), __( 'an', 'libertbus-bilete' ), __( 'ani', 'libertbus-bilete' ) );
 			$add( 'order_retention', $set ? true : 'warn', __( 'Comenzile finalizate se anonimizează automat', 'libertbus-bilete' ),
 				$set
 					/* translators: 1: număr, 2: unitate (ani, luni…) */
 					? sprintf( __( 'După %1$d %2$s.', 'libertbus-bilete' ), (int) $anon['number'], isset( $units[ $anon['unit'] ] ) ? $units[ $anon['unit'] ] : $anon['unit'] )
 					/* translators: %s: durata din politica de confidențialitate, ex. 3 ani */
-					: sprintf( __( 'Acum: niciodată. Politica de confidențialitate promite păstrarea datelor %1$s: în WooCommerce → Setări → Conturi și confidențialitate, la „Comenzi finalizate”, alegeți %1$s.', 'libertbus-bilete' ), LBB_Settings::ro_count( LBB_Bookings::retention_years(), __( 'an', 'libertbus-bilete' ), __( 'ani', 'libertbus-bilete' ) ) ),
+					: sprintf( __( 'Acum: niciodată. Politica de confidențialitate promite păstrarea datelor %1$s: în WooCommerce → Setări → Conturi și confidențialitate, la „Comenzi finalizate”, alegeți %1$s.', 'libertbus-bilete' ), $keep ),
 				admin_url( 'admin.php?page=wc-settings&tab=account' ) );
 		}
 
@@ -611,7 +613,6 @@ class LBB_Admin {
 			echo '<div class="lbb-trip-totals"><strong>' . esc_html__( 'Pe curse', 'libertbus-bilete' ) . ':</strong><ul style="margin:4px 0 12px 1.2em;list-style:disc">';
 			$per_due = LBB_Bookings::departure_due( $rows );
 			foreach ( $per_trip as $trip => $seats ) {
-				/* translators: 1: ora și ruta cursei, 2: numărul de locuri */
 				// „25 de locuri”, nu „25 locuri”: acordul din română (LBB_Settings::ro_count).
 				$line = $trip . ': ' . LBB_Settings::ro_count( $seats, __( 'loc', 'libertbus-bilete' ), __( 'locuri', 'libertbus-bilete' ) );
 				if ( ! empty( $per_due[ $trip ] ) ) {
