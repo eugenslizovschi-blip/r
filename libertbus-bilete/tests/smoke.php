@@ -1611,6 +1611,27 @@ $lg_adm = ob_get_clean();
 wp_set_current_user( $lg_user );
 lbb_t( 'paginile legale din Setări fără drept de editare: titlul fără link și fără avertismente PHP; adminul are linkul de editare', $lg_id && ! $lg_warn && false !== strpos( $lg_anon, esc_html( get_the_title( $lg_id ) ) ) && false === strpos( $lg_anon, 'post.php?post=' . $lg_id ) && false !== strpos( $lg_adm, 'post.php?post=' . $lg_id ), array( $lg_id, $lg_warn ) );
 
+// Data „actualizată la” din politici e în fusul orarului (Chișinău), și cu fusul WordPress pus „UTC+2” fix.
+$tzl_keep = array( get_option( 'timezone_string' ), get_option( 'gmt_offset' ) );
+update_option( 'timezone_string', '' );
+update_option( 'gmt_offset', 2 );
+$tzl_seen = array();
+$tzl_cb   = function ( $out, $format, $ts, $tz ) use ( &$tzl_seen ) {
+	if ( 'd.m.Y' === $format ) {
+		$tzl_seen[] = $tz->getName();
+	}
+	return $out;
+};
+add_filter( 'wp_date', $tzl_cb, 10, 4 );
+$tzl_m = new ReflectionMethod( 'LBB_Legal', 'content' );
+$tzl_m->setAccessible( true );
+$tzl_m->invoke( null, 'privacy' );
+$tzl_m->invoke( null, 'cookies' );
+remove_filter( 'wp_date', $tzl_cb, 10 );
+update_option( 'timezone_string', $tzl_keep[0] );
+update_option( 'gmt_offset', $tzl_keep[1] );
+lbb_t( 'politici: data „actualizată la” în ora Chișinăului, nu în decalajul fix UTC+2', array( 'Europe/Chisinau', 'Europe/Chisinau' ) === $tzl_seen, $tzl_seen );
+
 // Accesibilitate în admin: explicația de sub un câmp e legată de el (aria-describedby), fiecare id o singură dată.
 ob_start();
 LBB_Admin::page_settings();

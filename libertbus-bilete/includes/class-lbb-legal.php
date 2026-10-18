@@ -302,7 +302,9 @@ $date
 HTML;
 			case 'privacy':
 				$cookies = home_url( '/politica-de-cookies/' );
-				$updated = wp_date( 'd.m.Y' );
+				// Data în fusul orarului (Chișinău), nu decalajul fix „UTC+2” din WordPress: vara, după miezul nopții,
+				// ar ieși ziua de ieri.
+				$updated = LBB_Settings::local_time( 'd.m.Y', time() );
 				// Termenul din politică e cel aplicat de curățenia automată (LBB_Bookings::retention_years).
 				$keep    = LBB_Settings::ro_count( LBB_Bookings::retention_years(), 'an', 'ani' );
 				return <<<HTML
@@ -352,7 +354,7 @@ HTML;
 HTML;
 			case 'cookies':
 				$privacy = self::page_id( 'privacy' ) ? get_permalink( self::page_id( 'privacy' ) ) : home_url( '/politica-de-confidentialitate/' );
-				$updated = wp_date( 'd.m.Y' );
+				$updated = LBB_Settings::local_time( 'd.m.Y', time() );
 				return <<<HTML
 <p>Cookies sunt fișiere mici pe care site-ul le salvează în browser. Pe <a href="$site">$site</a> folosim cookies necesare și, doar dacă vă dați acordul, cookies de statistică și de marketing. Până nu acceptați, scripturile de statistică și marketing nu se încarcă deloc. Respectăm Legea nr. 195/2024 privind protecția datelor cu caracter personal și Legea nr. 284/2004 privind comerțul electronic.</p>
 <h2>Cookies necesare</h2>
