@@ -306,6 +306,15 @@ class LBB_Settings {
 	}
 
 	/**
+	 * Limba în care e scris textul plugin-ului (atributul lang), pentru cititoarele de ecran. Textele sunt scrise
+	 * în română; altă limbă doar dacă WordPress a încărcat traducerea lor. Pe un site în engleză fără traducere,
+	 * „lang=en-US” ar face cititorul de ecran să pronunțe textul românesc ca pe unul englezesc.
+	 */
+	public static function text_lang() {
+		return is_textdomain_loaded( 'libertbus-bilete' ) ? str_replace( '_', '-', get_locale() ) : 'ro-RO';
+	}
+
+	/**
 	 * Fusul orar al orarului. Dacă în WordPress e doar un decalaj fix de +2 sau +3 (ex. „UTC+2”, ca pe
 	 * libertbus.md), folosim Europe/Chisinau: altfel vara ora ar fi greșită cu o oră și vânzarea s-ar închide
 	 * prea târziu. Un oraș ales în WordPress are întâietate.

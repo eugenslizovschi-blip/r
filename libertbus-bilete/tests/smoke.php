@@ -253,6 +253,20 @@ LBB_WooCommerce::attach_order( $pn_o );
 $pn_o->update_status( 'pending' );
 $wpdb->update( LBB_Bookings::table(), array( 'ticket_code' => 'LB-PNTEST', 'status' => 'pending' ), array( 'token' => $pn_h['token'] ) );
 $pn_page = wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( 'LB-PNTEST' ), array( 'timeout' => 20 ) ) );
+// Textele plugin-ului sunt în română: fără traducerea lor, lang e „ro-RO” și pe un site în engleză (cititorul de ecran
+// ar pronunța altfel textul românesc ca pe unul englezesc); cu traducere, limba site-ului.
+$tl_site  = get_locale();
+$tl_none  = LBB_Settings::text_lang();
+$tl_keep  = isset( $GLOBALS['l10n']['libertbus-bilete'] ) ? $GLOBALS['l10n']['libertbus-bilete'] : null;
+$GLOBALS['l10n']['libertbus-bilete'] = new MO();
+$tl_trans = LBB_Settings::text_lang();
+if ( null === $tl_keep ) {
+	unset( $GLOBALS['l10n']['libertbus-bilete'] );
+} else {
+	$GLOBALS['l10n']['libertbus-bilete'] = $tl_keep;
+}
+$tl_form  = LBB_Frontend::shortcode( array() );
+lbb_t( 'limba textului (lang) pe pagina biletului și în formular: „ro-RO” fără traducere, chiar pe un site în engleză; cu traducere, limba ei', 0 !== strpos( $tl_site, 'ro' ) && 'ro-RO' === $tl_none && str_replace( '_', '-', $tl_site ) === $tl_trans && false !== strpos( $pn_page, '<html lang="ro-RO">' ) && preg_match( '/class="lbb-booking[^"]*" lang="ro-RO"/', $tl_form ), array( $tl_site, $tl_none, $tl_trans, substr( $pn_page, 0, 60 ) ) );
 lbb_t( 'biletul unei comenzi neplătite niciodată are „Achită acum” spre plata comenzii', false !== strpos( $pn_page, 'Achită acum' ) && false !== strpos( $pn_page, esc_url( $pn_o->get_checkout_payment_url() ) ), substr( wp_strip_all_tags( $pn_page ), 0, 300 ) );
 $pn_o->update_status( 'cancelled' );
 $pn_o->delete( true );
@@ -953,8 +967,8 @@ $em_off = array_values( array_filter( $em_m2, function ( $m ) {
 	return 'client-mail@example.com' !== $m['to'];
 } ) );
 lbb_t( 'emailul către birou: eticheta „Email” e traductibilă, ca „Telefon”', $em_off && false !== strpos( $em_off[0]['message'], 'E-mail-tr: <a href="mailto:client-mail@example.com"' ), $em_off ? substr( wp_strip_all_tags( $em_off[0]['message'] ), -200 ) : $em_m2 );
-lbb_t( 'emailurile plugin-ului au font fără serife (ca pagina biletului) și limba site-ului (lang, pentru cititorul de ecran), pentru client și birou', '' !== get_bloginfo( 'language' ) && 2 === count( array_filter( $lbb_mails, function ( $m ) {
-	return 0 === strpos( $m['message'], '<div lang="' . esc_attr( get_bloginfo( 'language' ) ) . '" style="font-family:' ) && false !== strpos( substr( $m['message'], 0, 180 ), 'sans-serif' );
+lbb_t( 'emailurile plugin-ului au font fără serife (ca pagina biletului) și limba textului (lang, pentru cititorul de ecran), pentru client și birou', 2 === count( array_filter( $lbb_mails, function ( $m ) {
+	return 0 === strpos( $m['message'], '<div lang="' . esc_attr( LBB_Settings::text_lang() ) . '" style="font-family:' ) && false !== strpos( substr( $m['message'], 0, 180 ), 'sans-serif' );
 } ) ), array_map( function ( $m ) {
 	return substr( $m['message'], 0, 80 );
 }, $lbb_mails ) );
