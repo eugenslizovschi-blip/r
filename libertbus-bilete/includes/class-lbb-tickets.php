@@ -415,7 +415,8 @@ class LBB_Tickets {
 				? esc_html__( 'Pagina se actualizează singură.', 'libertbus-bilete' )
 				/* translators: %s: telefonul biroului (link de apel) */
 				: sprintf( esc_html__( 'Dacă biletul nu apare în câteva minute, sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_link() );
-			echo '<div class="woocommerce-info lbb-awaiting">' . esc_html__( 'Biletele se emit imediat după confirmarea plății și vă vin pe email. De obicei durează câteva secunde.', 'libertbus-bilete' )
+			// role="status": cititorul de ecran anunță că biletele încă se emit (altfel clientul nevăzător nu știe de ce lipsesc).
+			echo '<div class="woocommerce-info lbb-awaiting" role="status">' . esc_html__( 'Biletele se emit imediat după confirmarea plății și vă vin pe email. De obicei durează câteva secunde.', 'libertbus-bilete' )
 				. ' ' . $more // phpcs:ignore WordPress.Security.EscapeOutput -- escapat mai sus; phone_link() e HTML sigur.
 				. ' <a class="button" href="' . esc_url( $order->get_checkout_order_received_url() ) . '">' . esc_html__( 'Verifică din nou', 'libertbus-bilete' ) . '</a></div>';
 			if ( $wait < 6 ) {
