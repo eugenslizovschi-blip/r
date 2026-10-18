@@ -466,6 +466,16 @@ foreach ( array( 'assets/lbb.css', 'assets/cookies.css', 'includes/class-lbb-tic
 	}
 }
 lbb_t( 'nicio regulă flex nu folosește gap (Safari < 14.1): formular, banner cookies, pagina biletului', ! $fg_bad, $fg_bad );
+// Tot Safari < 14.1 nu știe „inset: 0”: fereastra peste pagină ar rămâne fără poziție; se scrie cu top/right/bottom/left.
+$in_bad = array();
+foreach ( array( 'assets/lbb.css', 'assets/cookies.css', 'includes/class-lbb-tickets.php' ) as $in_f ) {
+	if ( preg_match_all( '/(?<![\w-])inset(-(block|inline)(-(start|end))?)?\s*:[^;}]*/', (string) file_get_contents( LBB_DIR . $in_f ), $in_m ) ) {
+		foreach ( $in_m[0] as $in_r ) {
+			$in_bad[] = $in_f . ': ' . trim( $in_r );
+		}
+	}
+}
+lbb_t( 'nicio regulă CSS nu folosește „inset” (Safari < 14.1): fereastra peste pagină are top/right/bottom/left', ! $in_bad, $in_bad );
 // Pe telefon: tastatura nu pune majusculă la început și nu „corectează” adresa (ex. „gmail” → „Gmail”, „mail” → „mai”).
 lbb_t( 'câmpul de email: fără majusculă automată și fără corector', false !== strpos( LBB_Frontend::shortcode( array() ), 'name="lbb_email" required autocomplete="email" autocapitalize="off" spellcheck="false"' ) );
 lbb_t( 'câmpul de telefon are limită de lungime', false !== strpos( LBB_Frontend::shortcode( array() ), 'name="lbb_phone" required autocomplete="tel" inputmode="tel" maxlength="30"' ) );

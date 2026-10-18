@@ -135,7 +135,7 @@
 
 /* Pasul 2 al formularului compact: fereastră peste pagină */
 html.lbb-lock, html.lbb-lock body { overflow: hidden !important; }
-.lbb-overlay { position: fixed; inset: 0; z-index: 2147483000; background: rgba(15, 23, 32, .6); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; display: flex; justify-content: center; align-items: flex-start; padding: 32px 16px; box-sizing: border-box; }
+.lbb-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 2147483000; background: rgba(15, 23, 32, .6); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; display: flex; justify-content: center; align-items: flex-start; padding: 32px 16px; box-sizing: border-box; }
 .lbb-overlay .lbb-booking { width: 100%; max-width: 560px; margin: auto 0; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); padding: 18px 18px 0; }
 .lbb-overlay .lbb-passengers { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .lbb-overlay .lbb-passengers > legend { grid-column: 1 / -1; }
