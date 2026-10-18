@@ -105,9 +105,13 @@
     - răspunsul automat de concediu al biroului nu mai pleacă la client (notificările interne sunt marcate „automate”).
   - **Pentru birou:**
     - pe lista de pasageri, butonul „Azi” lângă „Ziua precedentă / următoare”;
-    - în „Rezervări”, dacă un filtru (ex. „Anulate”) ascunde rezultatele căutării, apare „Vezi rezultatele din toate stările (N)”.
+    - în „Rezervări”, dacă un filtru (ex. „Anulate”) ascunde rezultatele căutării, apare „Vezi rezultatele din toate stările (N)”;
+    - căutarea din „Rezervări” găsește numele scrise fără diacritice („Stefan Turcanu” → „Ștefan Țurcanu”) și codul dictat la telefon fără liniuță („LB3KVU8W”, „lb 3kvu8w”);
+    - în Setări, „Separator în CSV”: „punct și virgulă” pentru Excel în română (altfel tot rândul apare într-o coloană), cu sumele scrise 30,5;
+    - pe lista de pasageri, o dată scrisă greșit de mână („31.11.2026”) nu mai arată „01.12.2026” fără pasageri, ci revine la ziua de azi.
   - **Bilet:** la printare, un bilet nu se mai rupe între două pagini; fără „Adaugă în calendar” la o rută ștearsă (linkul nu mergea).
-  - **Accesibilitate:** butoanele formularului au contur vizibil la navigarea cu tastatura, și pe teme care îl ascund; linkurile din admin care se deschid într-o filă nouă o spun cititorului de ecran.
+  - **Accesibilitate:** butoanele formularului au contur vizibil la navigarea cu tastatura, și pe teme care îl ascund; linkurile din admin care se deschid într-o filă nouă o spun cititorului de ecran; cititorul de ecran anunță „Biletele se emit…” pe pagina de mulțumire și nota pentru grupuri de la listele de pasageri.
+  - **Telefoane vechi** (iPhone cu iOS sub 11.3, Android 4.4): după 8 secunde fără răspuns apare „Încearcă din nou” (nu „Se verifică locurile…” la nesfârșit); tasta Tab în fereastra pasului 2 nu mai dă eroare.
   - **Română corectă** la numere: „cel mult 20 de locuri”, „mai mult de 20 de persoane”, „ultimele 200 de rezervări”; data din politici după ora Chișinăului și cu fusul „UTC+2” fix.
   - **Altele:**
     - arhiva de instalare se face cu `tests/build-zip.sh` (~120 KB, doar ce rulează pe site; fără teste și capturi de ecran);
