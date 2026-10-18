@@ -524,6 +524,17 @@ class LBB_Bookings {
 		// Numele sunt în JSON, unde diacriticele apar ca \u021a…: căutăm și forma aceasta.
 		$json = '%' . $wpdb->esc_like( trim( wp_json_encode( $search ), '"' ) ) . '%';
 		$or   = $wpdb->prepare( 'b.ticket_code LIKE %s OR b.email LIKE %s OR b.passengers LIKE %s OR b.passengers LIKE %s', $like, $like, $like, $json );
+		// Biroul scrie des numele fără diacritice („Stefan Turcanu” pentru „Ștefan Țurcanu”), sau cu altă literă mică/mare
+		// („ștefan”, iar în JSON Ș și ș au coduri diferite): numele și căutarea se compară fără diacritice.
+		$ascii = remove_accents( $search );
+		if ( ! preg_match( '/[^\x20-\x7e]/', $ascii ) && preg_match( '/[a-z]/i', $ascii ) ) {
+			$plain = 'b.passengers';
+			$map   = array( '0103' => 'a', '0102' => 'A', '00e2' => 'a', '00c2' => 'A', '00ee' => 'i', '00ce' => 'I', '0219' => 's', '0218' => 'S', '015f' => 's', '015e' => 'S', '021b' => 't', '021a' => 'T', '0163' => 't', '0162' => 'T' );
+			foreach ( $map as $hex => $letter ) {
+				$plain = $wpdb->prepare( "REPLACE($plain, %s, %s)", '\\u' . $hex, $letter ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $plain e construit doar din prepare().
+			}
+			$or .= $wpdb->prepare( " OR $plain LIKE %s", '%' . $wpdb->esc_like( $ascii ) . '%' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- idem.
+		}
 		// Telefonul e salvat ca +373…/+40…: „069 184 111” se găsește după cifrele fără 0-ul de la început.
 		$digits = ltrim( preg_replace( '/\D/', '', $search ), '0' );
 		if ( strlen( $digits ) >= 4 ) {

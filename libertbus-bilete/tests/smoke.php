@@ -1570,6 +1570,24 @@ foreach ( array( 'LB' . $cd_bare, 'lb ' . strtolower( $cd_bare ), 'LB_' . $cd_ba
 	$cd_got[ $cd_q ] = in_array( $cd_code, wp_list_pluck( LBB_Bookings::recent( 50, '', $cd_q ), 'ticket_code' ), true );
 }
 lbb_t( 'Rezervări: codul scris fără liniuță („LB3KVU8W”, „lb 3kvu8w”) găsește biletul', '' !== $cd_bare && ! in_array( false, $cd_got, true ), $cd_got );
+// Numele căutat fără diacritice („Stefan Turcanu”) găsește pasagerul salvat „Ștefan Țurcanu”.
+$dn_r  = LBB_Routes::save( array( 'origin' => 'DiacrA', 'destination' => 'DiacrB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$dn_rt = is_int( $dn_r ) ? LBB_Routes::get( $dn_r ) : null;
+$dn_h  = $dn_rt ? LBB_Bookings::create_hold( $dn_rt, $tomorrow, '10:00', 1, 0, array( 'Ștefan Țurcanu-Bălan' ), '+37369000077', 'dn@example.com', 'MDL' ) : null;
+$dn_b  = is_array( $dn_h ) ? LBB_Bookings::reserve( $dn_h['token'] ) : $dn_h;
+$dn_id = is_array( $dn_b ) ? (int) $dn_b['id'] : 0;
+$dn_got = array();
+foreach ( array( 'Stefan', 'turcanu', 'Turcanu-Balan', 'Ștefan', 'ștefan' ) as $dn_q ) {
+	$dn_got[ $dn_q ] = in_array( $dn_id, array_map( 'intval', wp_list_pluck( LBB_Bookings::recent( 200, '', $dn_q ), 'id' ) ), true );
+}
+$dn_none = in_array( $dn_id, array_map( 'intval', wp_list_pluck( LBB_Bookings::recent( 200, '', 'Stefanescu' ), 'id' ) ), true );
+if ( $dn_id ) {
+	$wpdb->delete( LBB_Bookings::table(), array( 'id' => $dn_id ) );
+}
+if ( is_int( $dn_r ) ) {
+	LBB_Routes::delete( $dn_r );
+}
+lbb_t( 'Rezervări: numele căutat fără diacritice sau cu altă literă mică/mare („Stefan”, „turcanu”, „Turcanu-Balan”, „ștefan”) găsește „Ștefan Țurcanu-Bălan”; „Stefanescu” nu', $dn_id && ! in_array( false, $dn_got, true ) && ! $dn_none, array( $dn_got, $dn_none ) );
 // Căutare cu un filtru de stare fără rezultate (ex. „Anulate” rămas ales): link spre toate stările, cu aceeași căutare.
 $sf_counts = LBB_Bookings::status_counts( 'rm@example.com' );
 $sf_status = '';
