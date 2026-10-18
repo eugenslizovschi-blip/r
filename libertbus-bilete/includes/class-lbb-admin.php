@@ -555,7 +555,7 @@ class LBB_Admin {
 		// Fără calendar pentru dată (Safari pe Mac < 14.1) câmpul e text: „25.10.2026” se înțelege, nu devine „azi”.
 		$date  = isset( $_GET['date'] ) ? LBB_Frontend::iso_date( sanitize_text_field( wp_unslash( $_GET['date'] ) ) ) : LBB_Settings::today(); // phpcs:ignore WordPress.Security.NonceVerification
 		$route = isset( $_GET['route'] ) ? (int) $_GET['route'] : 0; // phpcs:ignore WordPress.Security.NonceVerification
-		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
+		if ( ! self::valid_ymd( $date ) ) {
 			$date = LBB_Settings::today();
 		}
 		// Cu ziua săptămânii, ca pe bilet: biroul gândește cursele pe zile („cursa de marți”), iar pe foaia tipărită
@@ -656,6 +656,14 @@ class LBB_Admin {
 		return '<span class="screen-reader-text"> ' . esc_html__( '(se deschide într-o filă nouă)', 'libertbus-bilete' ) . '</span>';
 	}
 
+	/**
+	 * Data Y-m-d există în calendar. „31.11.2026” scris de mână (câmp de dată text, Safari vechi) devine 2026-11-31:
+	 * lista ar căuta pasageri pe o zi inexistentă, iar titlul ar arăta 01.12.2026, ca și cum acea zi n-ar avea pe nimeni.
+	 */
+	private static function valid_ymd( $date ) {
+		return (bool) preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', (string) $date, $m ) && checkdate( (int) $m[2], (int) $m[3], (int) $m[1] );
+	}
+
 	private static function ticket_code_html( $code ) {
 		return '' === (string) $code ? '—' : '<code>' . esc_html( $code ) . '</code>';
 	}
@@ -736,7 +744,7 @@ class LBB_Admin {
 		}
 		$date  = isset( $_GET['date'] ) ? LBB_Frontend::iso_date( sanitize_text_field( wp_unslash( $_GET['date'] ) ) ) : LBB_Settings::today();
 		$route = isset( $_GET['route'] ) ? (int) $_GET['route'] : 0;
-		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
+		if ( ! self::valid_ymd( $date ) ) {
 			// Link scris de mână sau trunchiat: mesaj traductibil, cu link înapoi la listă, nu o pagină fără ieșire.
 			wp_die( esc_html__( 'Data listei nu e validă. Alegeți data din calendar și descărcați din nou.', 'libertbus-bilete' ), esc_html__( 'Lista de pasageri', 'libertbus-bilete' ), array( 'response' => 400, 'back_link' => true ) );
 		}

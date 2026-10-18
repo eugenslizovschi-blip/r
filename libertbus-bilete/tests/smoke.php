@@ -1332,6 +1332,29 @@ remove_filter( 'wp_die_handler', $cv_h );
 list( $_GET, $_REQUEST ) = $cv_keep;
 wp_set_current_user( $cv_user );
 lbb_t( 'CSV cu dată stricată: mesaj clar și traductibil, răspuns 400, link înapoi', is_array( $cv_die ) && false !== strpos( (string) $cv_die[0], 'Alegeți data din calendar' ) && isset( $cv_die[2]['response'], $cv_die[2]['back_link'] ) && 400 === $cv_die[2]['response'] && $cv_die[2]['back_link'], $cv_die );
+// O zi care nu există („31.11.2026”, scrisă de mână): lista revine la azi, CSV-ul cere altă dată; nu 01.12 fără pasageri.
+$vd_user = get_current_user_id();
+wp_set_current_user( 1 );
+$vd_keep = array( $_GET, $_REQUEST );
+$_GET    = array( 'page' => 'lbb-manifest', 'date' => '31.11.2026' );
+ob_start();
+LBB_Admin::page_manifest();
+$vd_page = ob_get_clean();
+$_GET     = array( 'action' => 'lbb_manifest_csv', 'date' => '2026-11-31' );
+$_REQUEST = array( '_wpnonce' => wp_create_nonce( 'lbb_manifest_csv' ) );
+$cv_die   = null;
+add_filter( 'wp_die_handler', $cv_h );
+ob_start();
+try {
+	LBB_Admin::manifest_csv();
+} catch ( Exception $e ) {
+	unset( $e );
+}
+$vd_csv = ob_get_clean();
+remove_filter( 'wp_die_handler', $cv_h );
+list( $_GET, $_REQUEST ) = $vd_keep;
+wp_set_current_user( $vd_user );
+lbb_t( 'o zi care nu există (31.11): lista arată ziua de azi, nu 01.12.2026; CSV-ul cere altă dată', false !== strpos( $vd_page, esc_html( LBB_WooCommerce::date_with_day( LBB_Settings::today() ) ) ) && false === strpos( $vd_page, '01.12.2026' ) && is_array( $cv_die ) && false !== strpos( (string) $cv_die[0], 'Alegeți data din calendar' ) && '' === $vd_csv, array( is_array( $cv_die ), substr( $vd_csv, 0, 60 ) ) );
 // Fără drept de acces (vizitator delogat): 403 cu link înapoi, nu 500 ca o eroare a serverului.
 $cv_403 = array();
 $cv_h2  = function () use ( &$cv_403 ) {
