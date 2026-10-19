@@ -343,7 +343,9 @@ class LBB_Tickets {
 		$host = wp_parse_url( network_home_url(), PHP_URL_HOST );
 		$host = $host && 0 === strpos( $host, 'www.' ) ? substr( $host, 4 ) : $host;
 		$from = apply_filters( 'wp_mail_from', 'wordpress@' . $host );
-		$name = trim( preg_replace( '/[\r\n"<>]+/', ' ', (string) LBB_Settings::get( 'company_name' ) ) );
+		// Fără caractere care ar strica antetul; denumirea scrisă cu ghilimele (SC "LibertBus" SRL) rămâne cu un singur
+		// spațiu între cuvinte, nu „SC  LibertBus  SRL”.
+		$name = trim( preg_replace( '/\s+/', ' ', preg_replace( '/[\r\n"<>]+/', ' ', (string) LBB_Settings::get( 'company_name' ) ) ) );
 		return ( '' !== $name ? $name : 'LibertBus' ) . ' <' . $from . '>';
 	}
 

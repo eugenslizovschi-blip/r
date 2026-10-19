@@ -993,6 +993,8 @@ update_option( 'lbb_settings', array_merge( $keep_name, array( 'company_name' =>
 lbb_t( 'fără denumirea firmei, expeditorul e „LibertBus”', 0 === strpos( LBB_Tickets::from_header(), 'LibertBus <' ), LBB_Tickets::from_header() );
 update_option( 'lbb_settings', array_merge( $keep_name, array( 'company_name' => "Rău\r\nBcc: x@y.z" ) ) );
 lbb_t( 'denumirea firmei nu poate injecta antete în email', false === strpos( LBB_Tickets::from_header(), "\n" ), LBB_Tickets::from_header() );
+update_option( 'lbb_settings', array_merge( $keep_name, array( 'company_name' => 'SC "LibertBus" SRL' ) ) );
+lbb_t( 'denumirea firmei cu ghilimele (SC "LibertBus" SRL) apare la expeditor cu un singur spațiu între cuvinte', 0 === strpos( LBB_Tickets::from_header(), 'SC LibertBus SRL <' ), LBB_Tickets::from_header() );
 update_option( 'lbb_settings', $keep_name );
 lbb_t( 'răspunsul clientului ajunge la birou (Reply-To)', false !== strpos( $h_client, 'Reply-To: ' . $office ), $h_client );
 lbb_t( 'biroul răspunde direct clientului (Reply-To)', false !== strpos( $h_office, 'Reply-To: client-mail@example.com' ), $h_office );
