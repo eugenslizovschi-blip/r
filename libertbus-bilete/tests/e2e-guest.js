@@ -276,6 +276,23 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
       await p2.waitForFunction(() => /plecări/.test(document.querySelector('[data-lbb="status"]').textContent), null, { timeout: 15000 }).catch(() => {});
       const st = await p2.textContent('[data-lbb="status"]');
       if (!/nu sunt plecări[\s\S]*Ruta circulă doar: luni, joi\./.test(st)) fail('ruta care nu circulă zilnic nu spune zilele: „' + st + '”');
+      // „Ziua următoare →” lângă mesaj: marți → miercuri (tot fără curse) → joi, cu plecări; butonul dispare.
+      const ymd = d => d.toISOString().slice(0, 10);
+      const plus = n => { const d = new Date(tue); d.setUTCDate(d.getUTCDate() + n); return ymd(d); };
+      const step = async () => {
+        const b = await p2.$('[data-lbb="status"] button.lbb-next-day');
+        if (!b) return null;
+        const h = (await b.boundingBox()).height;
+        const before = await p2.inputValue('[data-lbb="date"]');
+        await b.click();
+        await p2.waitForFunction(v => document.querySelector('[data-lbb="date"]').value !== v && !/Se verifică/.test(document.querySelector('[data-lbb="status"]').textContent), before, { timeout: 15000 }).catch(() => {});
+        await p2.waitForTimeout(300);
+        return { h, date: await p2.inputValue('[data-lbb="date"]'), focus: await p2.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-lbb')) };
+      };
+      const s1 = await step();
+      const s2 = s1 && await step();
+      const thu = { opts: await p2.$$eval('[data-lbb="time"] option:not([disabled]):not([value=""])', o => o.length), btn: !!(await p2.$('[data-lbb="status"] button.lbb-next-day')) };
+      if (!s1 || !s2 || s1.date !== plus(1) || s2.date !== plus(2) || s1.h < 40 || s1.focus !== 'date' || !thu.opts || thu.btn) fail('„Ziua următoare” nu trece la ziua cu plecări: ' + JSON.stringify({ s1, s2, thu, want: [plus(1), plus(2)] }));
     }
     await p2.close();
   }

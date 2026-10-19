@@ -711,6 +711,12 @@
 			el.dateHint.textContent = t.dayNames[ d.getUTCDay() || 7 ] + ', ' + d.getUTCDate() + ' ' + t.monthNames[ d.getUTCMonth() ];
 		}
 
+		function nextDay( ymd ) {
+			var d = new Date( ymd + 'T12:00:00Z' );
+			d.setUTCDate( d.getUTCDate() + 1 );
+			return d.toISOString().slice( 0, 10 );
+		}
+
 		function loadDepartures() {
 			var route = currentRoute();
 			dateHint();
@@ -779,13 +785,26 @@
 					// Data aleasă automat nu are plecări deschise (ex. seara): trecem la următoarea zi cu locuri.
 					if ( ! open.length && ! dateTouched && skipped < 14 && el.date.value < cfg.maxDate ) {
 						skipped++;
-						var next = new Date( el.date.value + 'T12:00:00Z' );
-						next.setUTCDate( next.getUTCDate() + 1 );
-						el.date.value = next.toISOString().slice( 0, 10 );
+						el.date.value = nextDay( el.date.value );
 						loadDepartures();
 						return;
 					}
 					setStatus( departures.length ? ( open.length ? '' : t.noneOpen ) : ( data.closed ? t.closedDay : t.noDeparture + runsOn( route ) ) );
+					// Fără locuri în ziua aleasă: pe telefon calendarul se redeschide greu, „Ziua următoare” e la o atingere.
+					if ( ! open.length && t.nextDay && el.date.value < cfg.maxDate ) {
+						el.status.appendChild( document.createTextNode( ' ' ) );
+						var dayBtn = document.createElement( 'button' );
+						dayBtn.type = 'button';
+						dayBtn.className = 'lbb-next-day';
+						dayBtn.textContent = t.nextDay + ' →';
+						dayBtn.addEventListener( 'click', function () {
+							dateTouched = true;
+							el.date.value = nextDay( el.date.value );
+							el.date.focus();
+							loadDepartures();
+						} );
+						el.status.appendChild( dayBtn );
+					}
 					departures.forEach( function ( d ) {
 						// În formularul compact lista e îngustă: doar ora; locurile libere apar sub câmpuri.
 						var label = compact
