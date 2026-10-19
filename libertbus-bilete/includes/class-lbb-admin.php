@@ -241,7 +241,36 @@ class LBB_Admin {
 			/* translators: %s: versiunea PHP, ex. 7.4.33 */
 			self::php_outdated( PHP_VERSION ) ? sprintf( __( 'Serverul folosește PHP %s, fără actualizări de securitate. Alegeți PHP 8.2 sau mai nou din panoul de hosting (după o copie de siguranță a site-ului).', 'libertbus-bilete' ), PHP_VERSION ) : '' );
 
+		// Actualizări în așteptare (WordPress, pluginuri, teme): versiunile vechi au breșe cunoscute, iar un site cu plăți
+		// e o țintă. Numărul vine din ce a aflat WordPress la ultima verificare a actualizărilor.
+		if ( ! function_exists( 'wp_get_update_data' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/update.php';
+		}
+		$pending = self::updates_pending( wp_get_update_data() );
+		$add( 'updates', '' === $pending ? true : 'warn', __( 'WordPress, pluginurile și temele sunt actualizate', 'libertbus-bilete' ),
+			/* translators: %s: lista actualizărilor, ex. „WordPress, 3 pluginuri” */
+			'' === $pending ? '' : sprintf( __( 'Actualizări în așteptare: %s. Versiunile vechi au breșe de securitate cunoscute; actualizați după o copie de siguranță a site-ului.', 'libertbus-bilete' ), $pending ),
+			admin_url( 'update-core.php' ) );
+
 		return $items;
+	}
+
+	/**
+	 * Actualizările în așteptare ca text („WordPress, 3 pluginuri, 1 temă”); gol dacă nu sunt.
+	 */
+	public static function updates_pending( $data ) {
+		$counts = isset( $data['counts'] ) ? (array) $data['counts'] : array();
+		$parts  = array();
+		if ( ! empty( $counts['wordpress'] ) ) {
+			$parts[] = 'WordPress';
+		}
+		if ( ! empty( $counts['plugins'] ) ) {
+			$parts[] = LBB_Settings::ro_count( (int) $counts['plugins'], __( 'plugin', 'libertbus-bilete' ), __( 'pluginuri', 'libertbus-bilete' ) );
+		}
+		if ( ! empty( $counts['themes'] ) ) {
+			$parts[] = LBB_Settings::ro_count( (int) $counts['themes'], __( 'temă', 'libertbus-bilete' ), __( 'teme', 'libertbus-bilete' ) );
+		}
+		return implode( ', ', $parts );
 	}
 
 	/**

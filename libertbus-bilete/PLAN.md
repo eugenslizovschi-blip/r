@@ -158,7 +158,7 @@ Vezi `README.md`. Pe scurt:
 
 ### Recomandat separat (securitate)
 - Actualizare PHP 7.4 → 8.2 sau mai nou, din panoul de hosting (după instalarea versiunii 1.5.0, panoul „Gata de plăți?” o semnalează cu galben până atunci).
-- Actualizarea WordPress, WooCommerce, Elementor și Slider Revolution. Versiunea 6.3.3 de Slider Revolution are breșe cunoscute.
+- Actualizarea WordPress, WooCommerce, Elementor și Slider Revolution. Versiunea 6.3.3 de Slider Revolution are breșe cunoscute. După instalarea versiunii 1.5.0, panoul „Gata de plăți?” arată câte actualizări sunt în așteptare.
 - Schimbarea parolei de administrator.
 - Dacă schimbați și cheile de securitate WordPress (din wp-config.php sau cu un plugin de securitate): biletele emise cu 1.5.0 rămân valabile, au cheie proprie. Linkurile trimise de 1.4.1, aflată acum pe site, nu mai merg după schimbare. Faceți schimbarea după trecerea la 1.5.0 și după ce trec cursele deja vândute.
 
