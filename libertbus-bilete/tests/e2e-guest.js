@@ -245,6 +245,21 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (before || !note.visible || !new RegExp('mai mult de ' + max + ' persoane').test(note.text) || !/^tel:\+373/.test(note.tel)) fail('nota pentru grupuri lipsește sau apare greșit: ' + JSON.stringify({ before, max, note }));
     await pg.close();
   }
+  // O oră cu doar 2 locuri: lista se oprește la 2, iar nota spune de ce („mai sunt doar 2 locuri libere”) și ce se poate face.
+  {
+    const ps = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    ps.on('pageerror', e => fail('pageerror: ' + e.message));
+    await ps.route('**/lbb/v1/departures**', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ departures: [{ time: '08:45', free: 2, bookable: true, reason: '' }] }) }));
+    await ps.goto(BASE + '/balti-iasi/');
+    await ps.waitForFunction(() => document.querySelector('[data-lbb="time"]').value === '08:45');
+    const one = await ps.isVisible('[data-lbb="groupNote"]');
+    const opts = await ps.$$eval('[data-lbb="adults"] option', o => o.map(x => x.value));
+    await ps.selectOption('[data-lbb="adults"]', '2');
+    await ps.waitForTimeout(200);
+    const sn = await ps.$eval('[data-lbb="groupNote"]', e => ({ visible: e.getClientRects().length > 0, text: e.textContent, tel: (e.querySelector('a[href^="tel:"]') || {}).href || '' }));
+    if (one || opts[opts.length - 1] !== '2' || !sn.visible || !/mai sunt doar 2 locuri libere online/.test(sn.text) || /grupuri/.test(sn.text) || !/^tel:\+373/.test(sn.tel)) fail('la o oră cu 2 locuri, nota nu explică de ce lista se oprește la 2: ' + JSON.stringify({ one, opts, sn }));
+    await ps.close();
+  }
   // Toate cursele zilei pline: mesajul „nu mai sunt locuri online” are telefonul ca link de apel.
   {
     const p4 = await browser.newPage({ viewport: { width: 390, height: 844 } });

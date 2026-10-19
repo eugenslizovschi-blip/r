@@ -483,6 +483,8 @@ class LBB_Frontend {
 				// „20 de persoane”, „1 persoană” (limita se schimbă din Setări), nu „20 persoane” / „1 persoane”.
 				/* translators: 1: numărul maxim de pasageri, ex. 8 persoane / 20 de persoane, 2: telefon */
 				'groupNote'   => sprintf( __( 'Sunteți mai mult de %1$s? Pentru grupuri sunați la %2$s.', 'libertbus-bilete' ), LBB_Settings::ro_count( LBB_Settings::get( 'max_passengers' ), __( 'persoană', 'libertbus-bilete' ), __( 'persoane', 'libertbus-bilete' ) ), LBB_Settings::phone_text() ),
+				/* translators: {seats} rămâne așa (devine ex. „2 locuri libere”); %s: telefon */
+				'seatsNote'   => sprintf( __( 'La ora aleasă mai sunt doar {seats} online. Pentru mai mulți pasageri alegeți altă oră sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
 				'total'       => __( 'Total de plată', 'libertbus-bilete' ),
 				'approxNote'  => __( 'echivalent orientativ, plata se face în moneda afișată', 'libertbus-bilete' ),
 				'payBoard'    => __( 'Se achită la urcare', 'libertbus-bilete' ),

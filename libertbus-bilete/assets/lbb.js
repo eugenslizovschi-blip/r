@@ -496,11 +496,13 @@
 			}
 			fillNames( adults, children );
 			// La limita de pasageri pe rezervare: un grup mai mare află că poate suna (altfel pleacă fără bilet).
+			// La o oră cu mai puține locuri decât limita, lista se oprește mai devreme: clientul află de ce și ce poate face.
 			if ( el.groupNote && t.groupNote && t.phone ) {
-				var atLimit = adults + children >= cfg.maxPassengers;
+				var bySeats = !! ( t.seatsNote && dep && dep.bookable && dep.free < cfg.maxPassengers && adults + children >= max );
+				var atLimit = bySeats || adults + children >= cfg.maxPassengers;
 				el.groupNote.hidden = ! atLimit;
 				if ( atLimit ) {
-					fillWithPhone( el.groupNote, t.groupNote );
+					fillWithPhone( el.groupNote, bySeats ? t.seatsNote.replace( '{seats}', freeLabel( dep.free ) ) : t.groupNote );
 				}
 				// Cititorul de ecran o spune la listele de pasageri, dar doar cât se vede (un text ascuns legat
 				// prin aria-describedby s-ar citi oricum).
