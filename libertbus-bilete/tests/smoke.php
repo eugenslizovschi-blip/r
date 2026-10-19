@@ -843,6 +843,14 @@ foreach ( array( 15, 60 ) as $tc_n ) {
 update_option( 'lbb_settings', $tc_keep );
 lbb_t( 'Termenii: închiderea vânzării în română corectă („cu 15 minute”, „cu 60 de minute”)', false !== strpos( $tc_txt[15], 'se închide cu 15 minute înainte' ) && false !== strpos( $tc_txt[60], 'se închide cu 60 de minute înainte' ), array( preg_match( '/se închide cu [^.]*/u', $tc_txt[15], $tc_m ) ? $tc_m[0] : '' ) );
 
+// Panoul semnalează erorile PHP afișate vizitatorilor (WP_DEBUG cu WP_DEBUG_DISPLAY, implicit pornit).
+$dbg_row = null;
+foreach ( LBB_Admin::checklist() as $dbg_it ) {
+	if ( 'debug' === $dbg_it['id'] ) {
+		$dbg_row = $dbg_it;
+	}
+}
+lbb_t( 'panoul semnalează erorile PHP afișate vizitatorilor: WP_DEBUG cu afișare (și implicit, fără WP_DEBUG_DISPLAY) da; afișare oprită sau WP_DEBUG oprit nu', LBB_Admin::errors_shown( true, true ) && LBB_Admin::errors_shown( true, 1 ) && ! LBB_Admin::errors_shown( true, false ) && ! LBB_Admin::errors_shown( false, true ) && $dbg_row && true === $dbg_row['ok'], $dbg_row );
 // „Trimite un email de test”: reușit → mesaj verde cu adresa biroului; email care nu pleacă → mesaj de eroare.
 $tm_keep = array( $_POST, $_REQUEST, get_current_user_id() );
 $tm_go   = function ( $ok ) {

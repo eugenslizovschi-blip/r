@@ -153,7 +153,7 @@ Vezi `README.md`. Pe scurt:
 3. Paginile legale: confidențialitate și cookies sunt publicate și legate în subsol. Termenii, rambursarea și plata așteaptă verificarea dumneavoastră.
 4. Pagină nouă „Rezervă bilet” cu formularul. Pe paginile de rută, formularul de contact se înlocuiește cu `[libertbus_rezervare from=".." to=".."]`. Butoanele „Rezervă” din „Orar Curse” vor duce spre formular.
 5. Oprirea WooPayments, care nu funcționează în Moldova.
-6. Test complet cu plata de test, apoi cu modul de test al băncii.
+6. Test complet cu plata de test, apoi cu modul de test al băncii. Înainte: în Setări „Trimite un email de test”, iar în panoul „Gata de plăți?” toate rândurile verzi (inclusiv „Erorile PHP nu se afișează vizitatorilor”).
 7. Scoaterea textului `[wbtm-...]` rămas pe pagini de la plugin-ul vechi.
 
 ### Recomandat separat (securitate)

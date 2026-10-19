@@ -229,7 +229,21 @@ class LBB_Admin {
 				$last ? LBB_Settings::local_time( 'd.m.Y H:i', $last ) : __( 'niciodată', 'libertbus-bilete' )
 			) : '' );
 
+		// Erorile PHP afișate în pagină: un avertisment poate apărea clientului la plată sau poate strica răspunsul
+		// trimis băncii (confirmarea plății), iar comanda rămâne neplătită deși banii s-au luat.
+		$shown = self::errors_shown( defined( 'WP_DEBUG' ) && WP_DEBUG, defined( 'WP_DEBUG_DISPLAY' ) ? WP_DEBUG_DISPLAY : true );
+		$add( 'debug', $shown ? 'warn' : true, __( 'Erorile PHP nu se afișează vizitatorilor', 'libertbus-bilete' ),
+			$shown ? __( 'În wp-config.php e pornit WP_DEBUG cu afișarea erorilor: un avertisment PHP poate apărea în pagina de plată sau poate strica confirmarea trimisă de bancă. Puneți define( \'WP_DEBUG_DISPLAY\', false ); (erorile merg în debug.log) sau opriți WP_DEBUG.', 'libertbus-bilete' ) : '' );
+
 		return $items;
+	}
+
+	/**
+	 * WordPress afișează erorile în pagină doar cu WP_DEBUG pornit și WP_DEBUG_DISPLAY nelăsat pe false
+	 * (implicit e true când lipsește din wp-config.php).
+	 */
+	public static function errors_shown( $debug, $display ) {
+		return (bool) $debug && false !== $display && null !== $display;
 	}
 
 	public static function pages_with_form() {
