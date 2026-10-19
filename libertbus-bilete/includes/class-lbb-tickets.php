@@ -608,6 +608,8 @@ class LBB_Tickets {
 <meta charset="<?php bloginfo( 'charset' ); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
+<?php // Biletul se arată șoferului: fără „temă întunecată automată” (Chrome pe Android, Samsung Internet), care ar recolora pagina, starea biletului și chenarul codului QR. ?>
+<meta name="color-scheme" content="only light">
 <title><?php echo esc_html( $booking ? $booking['ticket_code'] . ' — ' . get_bloginfo( 'name' ) : __( 'Bilet negăsit', 'libertbus-bilete' ) ); ?></title>
 <link rel="stylesheet" href="<?php echo esc_url( LBB_URL . 'assets/lbb.css?ver=' . LBB_Frontend::asset_ver( 'lbb.css' ) ); ?>">
 <style>

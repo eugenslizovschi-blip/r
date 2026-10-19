@@ -267,6 +267,7 @@ if ( null === $tl_keep ) {
 }
 $tl_form  = LBB_Frontend::shortcode( array() );
 lbb_t( 'limba textului (lang) pe pagina biletului și în formular: „ro-RO” fără traducere, chiar pe un site în engleză; cu traducere, limba ei', 0 !== strpos( $tl_site, 'ro' ) && 'ro-RO' === $tl_none && str_replace( '_', '-', $tl_site ) === $tl_trans && false !== strpos( $pn_page, '<html lang="ro-RO">' ) && preg_match( '/class="lbb-booking[^"]*" lang="ro-RO"/', $tl_form ), array( $tl_site, $tl_none, $tl_trans, substr( $pn_page, 0, 60 ) ) );
+lbb_t( 'pagina biletului cere culori deschise (fără tema întunecată automată a telefonului, care ar recolora biletul arătat șoferului)', false !== strpos( $pn_page, '<meta name="color-scheme" content="only light">' ), substr( $pn_page, 0, 400 ) );
 lbb_t( 'biletul unei comenzi neplătite niciodată are „Achită acum” spre plata comenzii', false !== strpos( $pn_page, 'Achită acum' ) && false !== strpos( $pn_page, esc_url( $pn_o->get_checkout_payment_url() ) ), substr( wp_strip_all_tags( $pn_page ), 0, 300 ) );
 $pn_o->update_status( 'cancelled' );
 $pn_o->delete( true );

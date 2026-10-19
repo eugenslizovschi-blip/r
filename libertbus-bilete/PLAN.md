@@ -55,6 +55,7 @@
     - codul QR are text pentru cititoarele de ecran;
     - ziua săptămânii de pe bilet e mereu în română (nu „Tuesday” când biroul confirmă comanda cu adminul în engleză);
     - pagina biletului nu mai rămâne în cache;
+    - pagina biletului rămâne deschisă la culoare și pe telefoanele cu „temă întunecată automată” (Chrome pe Android, Samsung Internet), ca biletul și codul QR să arate la fel când sunt arătate șoferului;
     - biletul unei curse din zi trecută apare gri „Cursa a avut loc pe …”, nu verde „valabil” (șoferul nu poate fi păcălit cu un bilet vechi);
     - dacă plata unui bilet e reluată (ex. după un card refuzat), pagina lui spune „Plata nu e finalizată”, nu „Bilet anulat”.
     - un link de bilet stricat sau incomplet arată „Biletul nu a fost găsit” cu telefonul firmei, ca clientul să poată suna;
