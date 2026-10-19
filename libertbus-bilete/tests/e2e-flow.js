@@ -96,5 +96,38 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (!/^Bilet valabil/.test(state)) console.log('FAIL pagina biletului nu spune „Bilet valabil”: ' + state);
   if (!qr) console.log('FAIL codul QR nu apare pe pagina biletului');
   if (errors.length) console.log('FAIL erori JS: ' + errors.join(' | '));
+
+  // Finalizarea comenzii cu blocuri („Checkout” din editorul de blocuri) plătește prin Store API, nu prin formularul clasic:
+  // rezervarea trebuie legată de comandă și acolo, altfel plata trece și clientul rămâne fără bilet.
+  {
+    await page.goto(BASE + '/balti-iasi/');
+    await page.waitForSelector('[data-lbb="from"]');
+    const bDay = new Date(Date.now() + 86400000 * (1 + Math.floor(Math.random() * 20))).toISOString().slice(0, 10);
+    await page.fill('[data-lbb="date"]', bDay);
+    await page.dispatchEvent('[data-lbb="date"]', 'change');
+    await page.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0);
+    await page.selectOption('[data-lbb="time"]', await page.$$eval('[data-lbb="time"] option', o => o.find(x => x.value && !x.disabled).value));
+    await page.fill('input[name="lbb_names[]"]', 'Blocuri Test');
+    await page.fill('input[name="lbb_phone"]', '+37369184111');
+    await page.fill('input[name="lbb_email"]', 'blocks@example.com');
+    await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
+    // Store API: cheia REST a utilizatorului logat și cheia „Nonce” a coșului, ca în blocul Checkout.
+    const rest = (await (await page.request.get(BASE + '/wp-admin/admin-ajax.php?action=rest-nonce')).text()).trim();
+    const cartRes = await page.request.get(BASE + '/wp-json/wc/store/v1/cart', { headers: { 'X-WP-Nonce': rest } });
+    const cart = await cartRes.json();
+    const res = await page.request.post(BASE + '/wp-json/wc/store/v1/checkout', {
+      headers: { 'X-WP-Nonce': rest, Nonce: cartRes.headers()['nonce'] || '' },
+      data: { billing_address: cart.billing_address, shipping_address: cart.shipping_address, payment_method: 'lbb_test' },
+    });
+    const done = await res.json().catch(() => ({}));
+    const back = done.payment_result && done.payment_result.redirect_url;
+    let bTicket = '';
+    if (back) {
+      await page.goto(back);
+      bTicket = (await page.$('.lbb-ticket')) ? (await page.textContent('.lbb-ticket')).replace(/\s+/g, ' ') : '';
+    }
+    console.log('blocks checkout:', res.status(), done.status || '', '| ticket:', bTicket.slice(0, 120));
+    if (res.status() !== 200 || !/Blocuri Test/.test(bTicket) || !/Achitat online/.test(bTicket)) console.log('FAIL plata prin finalizarea cu blocuri (Store API) nu dă biletul: ' + res.status() + ' ' + JSON.stringify(done).slice(0, 200) + ' | ' + bTicket.slice(0, 200));
+  }
   await browser.close();
 })().catch(require('./crash')('flow', () => BROWSER));

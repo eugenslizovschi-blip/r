@@ -160,7 +160,7 @@ Vezi `README.md`. Pe scurt:
 ## Verificare automată (QA)
 
 O sesiune programată la 30 de minute verifică:
-- testele locale: teste automate, plus o rezervare cap-coadă cu plata de test;
+- testele locale: teste automate, plus o rezervare cap-coadă cu plata de test, atât prin pagina de plată clasică, cât și prin cea „cu blocuri”;
 - starea site-ului live: pagina principală, „Orar Curse”, panoul „Gata de plăți?”.
 
 Ea face îmbunătățiri mici și sigure în cod, pe acest branch. Pe site-ul live nu modifică nimic fără acordul dumneavoastră.
