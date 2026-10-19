@@ -206,10 +206,16 @@ class LBB_Admin {
 			admin_url( 'edit.php?post_type=page' ) );
 
 		$failed = get_option( 'lbb_mail_failed' );
+		// „Fără erori” înseamnă doar că nicio trimitere n-a eșuat: spunem și dacă emailul a fost verificat cu adevărat.
+		$tested    = get_option( 'lbb_mail_test' );
+		$mail_test = is_array( $tested ) && ! empty( $tested['time'] )
+			/* translators: 1: data și ora, 2: adresa de email */
+			? sprintf( __( 'Ultimul email de test: %1$s, la %2$s.', 'libertbus-bilete' ), LBB_Settings::local_time( 'd.m.Y H:i', (int) $tested['time'] ), (string) $tested['to'] )
+			: __( 'Încă netestat: apăsați „Trimite un email de test” în Setări înainte de lansare.', 'libertbus-bilete' );
 		$recent = is_array( $failed ) && ! empty( $failed['time'] ) && time() - (int) $failed['time'] < 7 * DAY_IN_SECONDS;
 		$add( 'mail', $recent ? 'warn' : true, __( 'Emailurile pleacă fără erori (ultimele 7 zile)', 'libertbus-bilete' ),
 			/* translators: 1: data și ora erorii, 2: mesajul de eroare */
-			$recent ? sprintf( __( 'Ultima eroare: %1$s — %2$s. Clienții pot rămâne fără bilet pe email: verificați emailul hostingului sau instalați un plugin SMTP.', 'libertbus-bilete' ), LBB_Settings::local_time( 'd.m.Y H:i', (int) $failed['time'] ), rtrim( (string) $failed['message'], '. ' ) ) : '',
+			$recent ? sprintf( __( 'Ultima eroare: %1$s — %2$s. Clienții pot rămâne fără bilet pe email: verificați emailul hostingului sau instalați un plugin SMTP.', 'libertbus-bilete' ), LBB_Settings::local_time( 'd.m.Y H:i', (int) $failed['time'] ), rtrim( (string) $failed['message'], '. ' ) ) : $mail_test,
 			admin_url( 'plugin-install.php?s=smtp&tab=search&type=term' ) );
 
 		// Programată nu înseamnă că rulează: WP-Cron pornește doar la vizite pe site și poate fi oprit (DISABLE_WP_CRON).
@@ -730,6 +736,7 @@ class LBB_Admin {
 		$subject = sprintf( __( '[LibertBus] Email de test — %s', 'libertbus-bilete' ), LBB_Settings::local_time( 'd.m.Y H:i', time() ) );
 		$sent    = LBB_Tickets::mail_html( $to, $subject, $body, array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . LBB_Tickets::from_header(), 'Auto-Submitted: auto-generated' ) );
 		if ( $sent ) {
+			update_option( 'lbb_mail_test', array( 'time' => time(), 'to' => $to ), false );
 			/* translators: %s: adresa de email a biroului */
 			self::redirect( 'lbb-settings', sprintf( __( 'Emailul de test a fost trimis la %s. Dacă nu ajunge în câteva minute (verificați și Spam), emailurile site-ului nu pleacă: verificați emailul hostingului sau instalați un plugin SMTP.', 'libertbus-bilete' ), $to ) );
 		}

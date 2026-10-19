@@ -869,12 +869,27 @@ $tm_go   = function ( $ok ) {
 	parse_str( (string) wp_parse_url( $loc, PHP_URL_QUERY ), $q );
 	return array( isset( $q['lbb_msg'] ) ? rawurldecode( $q['lbb_msg'] ) : '', ! empty( $q['lbb_err'] ), $sent );
 };
+$tm_opt  = get_option( 'lbb_mail_test' );
+$tm_row  = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'mail' === $it['id'] ) {
+			return $it['detail'];
+		}
+	}
+	return '';
+};
+delete_option( 'lbb_mail_test' );
+$tm_none = $tm_row();
 wp_set_current_user( 1 );
-$tm_ok  = $tm_go( true );
-$tm_bad = $tm_go( false );
+$tm_ok   = $tm_go( true );
+$tm_done = $tm_row();
+$tm_bad  = $tm_go( false );
+$tm_kept = $tm_row();
+false === $tm_opt ? delete_option( 'lbb_mail_test' ) : update_option( 'lbb_mail_test', $tm_opt, false );
 list( $_POST, $_REQUEST ) = $tm_keep;
 wp_set_current_user( $tm_keep[2] );
 $tm_to = LBB_Settings::office_email();
+lbb_t( 'panoul spune dacă emailul a fost testat: „Încă netestat” până la primul email de test reușit, apoi data și adresa (un test eșuat nu le schimbă)', false !== strpos( $tm_none, 'Încă netestat' ) && false !== strpos( $tm_done, 'Ultimul email de test: ' ) && false !== strpos( $tm_done, ', la ' . $tm_to . '.' ) && $tm_kept === $tm_done, array( $tm_none, $tm_done, $tm_kept ) );
 lbb_t( 'email de test din Setări: pleacă la birou, de la firmă; reușit → mesaj cu adresa, eșuat → eroare cu ce de verificat', 1 === count( $tm_ok[2] ) && $tm_to === $tm_ok[2][0]['to'] && false !== strpos( $tm_ok[2][0]['subject'], '[LibertBus] Email de test' ) && preg_grep( '/^From: /', (array) $tm_ok[2][0]['headers'] ) && false !== strpos( $tm_ok[0], 'Emailul de test a fost trimis la ' . $tm_to ) && ! $tm_ok[1] && false !== strpos( $tm_bad[0], 'nu a putut fi trimis' ) && false !== strpos( $tm_bad[0], 'SMTP' ) && $tm_bad[1], array( $tm_ok[0], $tm_ok[1], $tm_bad[0], $tm_bad[1] ) );
 // Salvarea Setărilor cu „Email pentru clienți” greșit: mesaj de avertizare, nu golire pe tăcute.
 $se_keep = array( get_option( 'lbb_settings' ), $_POST, $_REQUEST, get_current_user_id() );
