@@ -19,6 +19,7 @@ class LBB_Admin {
 		add_action( 'admin_post_lbb_manifest_csv', array( __CLASS__, 'manifest_csv' ) );
 		add_action( 'admin_post_lbb_cancel_booking', array( __CLASS__, 'cancel_booking' ) );
 		add_action( 'admin_post_lbb_new_preview_link', array( __CLASS__, 'new_preview_link' ) );
+		add_action( 'admin_post_lbb_test_mail', array( __CLASS__, 'test_mail' ) );
 		add_action( 'woocommerce_admin_order_data_after_order_details', array( __CLASS__, 'order_tickets' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'rest' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( LBB_FILE ), function ( $links ) {
@@ -715,6 +716,27 @@ class LBB_Admin {
 		self::redirect( 'lbb-settings', __( 'Link nou de previzualizare creat. Linkul vechi nu mai funcționează.', 'libertbus-bilete' ) );
 	}
 
+	/**
+	 * Email de test la adresa biroului: pe multe găzduiri emailurile WordPress nu pleacă, iar biroul ar afla abia
+	 * de la primul client fără bilet. Trimis la fel ca biletele (expeditor, format), ca testul să spună adevărul.
+	 */
+	public static function test_mail() {
+		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_test_mail' ) ) {
+			self::deny();
+		}
+		$to   = LBB_Settings::office_email();
+		$body = '<p>' . esc_html__( 'Acesta este un email de test trimis din panoul LibertBus. Dacă l-ați primit, biletele și rezervările ajung la clienți și la birou.', 'libertbus-bilete' ) . '</p>';
+		/* translators: %s: data și ora */
+		$subject = sprintf( __( '[LibertBus] Email de test — %s', 'libertbus-bilete' ), LBB_Settings::local_time( 'd.m.Y H:i', time() ) );
+		$sent    = LBB_Tickets::mail_html( $to, $subject, $body, array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . LBB_Tickets::from_header(), 'Auto-Submitted: auto-generated' ) );
+		if ( $sent ) {
+			/* translators: %s: adresa de email a biroului */
+			self::redirect( 'lbb-settings', sprintf( __( 'Emailul de test a fost trimis la %s. Dacă nu ajunge în câteva minute (verificați și Spam), emailurile site-ului nu pleacă: verificați emailul hostingului sau instalați un plugin SMTP.', 'libertbus-bilete' ), $to ) );
+		}
+		/* translators: %s: adresa de email a biroului */
+		self::redirect( 'lbb-settings', sprintf( __( 'Emailul de test către %s nu a putut fi trimis. Verificați emailul hostingului sau instalați un plugin SMTP.', 'libertbus-bilete' ), $to ), true );
+	}
+
 	public static function cancel_booking() {
 		$id = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
 		if ( ! current_user_can( self::cap() ) || ! check_admin_referer( 'lbb_cancel_booking_' . $id ) ) {
@@ -1040,6 +1062,11 @@ class LBB_Admin {
 			<input type="hidden" name="action" value="lbb_new_preview_link">
 			<?php wp_nonce_field( 'lbb_new_preview_link' ); ?>
 			<?php submit_button( __( 'Link nou de previzualizare', 'libertbus-bilete' ), 'secondary', 'submit', false ); ?>
+		</form>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:0 0 16px">
+			<input type="hidden" name="action" value="lbb_test_mail">
+			<?php wp_nonce_field( 'lbb_test_mail' ); ?>
+			<?php /* translators: %s: adresa de email a biroului */ submit_button( sprintf( __( 'Trimite un email de test la %s', 'libertbus-bilete' ), LBB_Settings::office_email() ), 'secondary', 'lbb-test-mail', false ); ?>
 		</form>
 		<?php LBB_Legal::settings_box(); ?>
 		</div>

@@ -108,6 +108,21 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   await setSep(',');
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest');
   if (!/^﻿?Data;Ora;Plecare;Destinatie;Bilet;Locuri;Pasageri;Telefon;Email;Plata;Comanda;"De incasat";Moneda\r?\n/.test(csvSemi)) fail('CSV cu „;” din Setări: antet greșit: ' + csvSemi.slice(0, 80));
+  // „Trimite un email de test” din Setări: emailul pleacă la birou (cu expeditorul și formatul biletelor), iar
+  // pagina spune unde a fost trimis și ce înseamnă dacă nu ajunge.
+  {
+    const mailDir = process.env.WP_PATH ? require('path').join(process.env.WP_PATH, 'wp-content', 'mail') : '';
+    const mails = () => (mailDir && fs.existsSync(mailDir) ? fs.readdirSync(mailDir) : []);
+    const before = new Set(mails());
+    await page.goto(BASE + '/wp-admin/admin.php?page=lbb-settings');
+    const btn = (await page.textContent('#lbb-test-mail').catch(() => '')) || (await page.inputValue('#lbb-test-mail').catch(() => ''));
+    await Promise.all([page.waitForNavigation(), page.click('#lbb-test-mail')]);
+    const noticeEl = page.locator('.notice', { hasText: 'Emailul de test' }).first();
+    const notice = ((await noticeEl.textContent().catch(() => '')) || '').replace(/\s+/g, ' ');
+    const fresh = mails().filter(f => !before.has(f)).map(f => fs.readFileSync(require('path').join(mailDir, f), 'utf8')).filter(m => /SUBJECT: \[LibertBus\] Email de test/.test(m));
+    if (!/Trimite un email de test la \S+@\S+/.test(btn) || !/Emailul de test a fost trimis la \S+@\S+/.test(notice) || !/notice-success/.test(await noticeEl.getAttribute('class').catch(() => '')) || (mailDir && fresh.length !== 1)) fail('„Trimite un email de test” din Setări: ' + JSON.stringify({ btn, notice: notice.slice(0, 160), mailDir: !!mailDir, fresh: fresh.length }));
+  }
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest');
   // Cu o rută aleasă, numele fișierului o conține (listele mai multor rute din aceeași zi nu se confundă).
   const rid = await page.$eval('select[name="route"] option:nth-child(2)', o => ({ id: o.value, text: o.textContent }));
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&route=' + rid.id);
