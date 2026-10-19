@@ -22,6 +22,10 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   ];
   for (const [slug, title] of pages) {
     const r = await page.goto(BASE + '/wp-admin/admin.php?page=' + slug);
+    // Fără id-uri duplicate la elementele vizibile (ex. trei butoane „submit” pe Setări): HTML invalid, iar etichetele,
+    // cititoarele de ecran și scripturile pot nimeri alt element. Câmpurile ascunse „_wpnonce” ale WordPress nu contează.
+    const dupIds = await page.$$eval('#wpbody-content [id]:not([type="hidden"])', es => { const c = {}; es.forEach(e => { c[e.id] = (c[e.id] || 0) + 1; }); return Object.keys(c).filter(k => c[k] > 1); });
+    if (dupIds.length) fail(slug + ': id-uri duplicate: ' + dupIds.join(', '));
     const body = await page.textContent('#wpbody-content');
     if (r.status() !== 200) fail(slug + ': status ' + r.status());
     const h1 = await page.textContent('#wpbody-content .wrap h1').catch(() => '');

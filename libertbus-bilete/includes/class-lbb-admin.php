@@ -1131,7 +1131,7 @@ class LBB_Admin {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:-8px 0 16px">
 			<input type="hidden" name="action" value="lbb_new_preview_link">
 			<?php wp_nonce_field( 'lbb_new_preview_link' ); ?>
-			<?php submit_button( __( 'Link nou de previzualizare', 'libertbus-bilete' ), 'secondary', 'submit', false ); ?>
+			<?php submit_button( __( 'Link nou de previzualizare', 'libertbus-bilete' ), 'secondary', 'lbb-new-preview', false ); ?>
 		</form>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:0 0 16px">
 			<input type="hidden" name="action" value="lbb_test_mail">

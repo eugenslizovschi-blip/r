@@ -151,7 +151,7 @@ class LBB_Legal {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-top:12px">
 			<input type="hidden" name="action" value="lbb_create_legal">
 			<?php wp_nonce_field( 'lbb_create_legal' ); ?>
-			<?php submit_button( __( 'Creează paginile care lipsesc', 'libertbus-bilete' ), 'secondary', 'submit', false ); ?>
+			<?php submit_button( __( 'Creează paginile care lipsesc', 'libertbus-bilete' ), 'secondary', 'lbb-create-legal', false ); ?>
 		</form>
 		<?php
 	}
