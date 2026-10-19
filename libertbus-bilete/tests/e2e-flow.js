@@ -115,6 +115,10 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const rest = (await (await page.request.get(BASE + '/wp-admin/admin-ajax.php?action=rest-nonce')).text()).trim();
     const cartRes = await page.request.get(BASE + '/wp-json/wc/store/v1/cart', { headers: { 'X-WP-Nonce': rest } });
     const cart = await cartRes.json();
+    // Coșul cu blocuri arată cursa (ruta, data, pasagerii) și nu lasă schimbată cantitatea (un bilet = o rezervare).
+    const bItem = (cart.items || [])[0] || {};
+    const bData = (bItem.item_data || []).map(d => d.key + ': ' + d.value).join(' | ');
+    if ((cart.items || []).length !== 1 || !/Ruta: Bălți → Iași/.test(bData) || !/Pasageri: Blocuri Test/.test(bData) || !bItem.quantity_limits || bItem.quantity_limits.editable !== false || bItem.permalink) console.log('FAIL coșul cu blocuri (Store API): cursa nu apare sau cantitatea se poate schimba: ' + JSON.stringify({ n: (cart.items || []).length, bData, q: bItem.quantity_limits, link: bItem.permalink }));
     const res = await page.request.post(BASE + '/wp-json/wc/store/v1/checkout', {
       headers: { 'X-WP-Nonce': rest, Nonce: cartRes.headers()['nonce'] || '' },
       data: { billing_address: cart.billing_address, shipping_address: cart.shipping_address, payment_method: 'lbb_test' },
