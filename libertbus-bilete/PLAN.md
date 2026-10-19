@@ -61,6 +61,7 @@
     - un link de bilet stricat sau incomplet arată „Biletul nu a fost găsit” cu telefonul firmei, ca clientul să poată suna;
     - pe pagina de după plată, dacă banca n-a confirmat încă plata, clientul vede „De obicei durează câteva secunde” și un buton „Verifică din nou” (nu și la plata refuzată, unde WooCommerce oferă „Plătește din nou”);
     - la printare, starea biletului rămâne pe foaie: un bilet anulat, neplătit sau dintr-o cursă trecută nu mai arată pe hârtie ca unul valabil.
+    - butonul „Printează” de pe pagina biletului apare doar când poate funcționa (cu JavaScript); pagina se poate printa oricum din meniul browserului;
     - lista pentru șofer printată pe mai multe foi repetă capul tabelului pe fiecare foaie și nu rupe o rezervare (cu toți pasagerii ei) între două foi;
   - **Panoul „Gata de plăți?” cu cititor de ecran:** starea fiecărui rând se aude în cuvinte („Gata”, „De verificat”, „Lipsește”), nu doar ca ✔ ! ✘ colorate, iar fiecare buton „Rezolvă” spune ce rezolvă.
   - **Email de test în Setări:** butonul „Trimite un email de test la …” verifică înainte de lansare că emailurile site-ului (biletele, rezervările) chiar pleacă; dacă nu ajunge, pagina spune ce de făcut (emailul hostingului sau un plugin SMTP).

@@ -93,6 +93,16 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const tr = await guest.request.get(guest.url());
   const h = tr.headers();
   if (!/no-store/.test(h['cache-control'] || '') || !/noindex/.test(h['x-robots-tag'] || '') || h['referrer-policy'] !== 'no-referrer') fail('pagina biletului: antete greșite ' + JSON.stringify({ cc: h['cache-control'], robots: h['x-robots-tag'], ref: h['referrer-policy'] }));
+  // „Printează” se vede (și deschide printarea) doar cu JavaScript; fără el butonul n-ar face nimic, deci lipsește.
+  {
+    const printBtn = await guest.evaluate(() => { const b = document.querySelector('.actions .print'); let called = 0; window.print = () => { called++; }; if (b) b.click(); return { shown: !!b && b.getClientRects().length > 0, called }; });
+    const nj = await browser.newContext({ javaScriptEnabled: false });
+    const np = await nj.newPage();
+    await np.goto(guest.url());
+    const noJs = await np.evaluate(() => { const b = document.querySelector('.actions .print'); return !!b && b.getClientRects().length > 0; });
+    await nj.close();
+    if (!printBtn.shown || printBtn.called !== 1 || noJs) fail('butonul „Printează” pe pagina biletului: ' + JSON.stringify({ printBtn, noJs }));
+  }
   // Pe hârtie starea rămâne vizibilă (un bilet anulat printat nu trebuie să pară valabil); butonul „Printează” nu.
   await guest.emulateMedia({ media: 'print' });
   const printed = await guest.evaluate(() => ({ state: getComputedStyle(document.querySelector('.state')).display, actions: getComputedStyle(document.querySelector('.actions')).display }));
