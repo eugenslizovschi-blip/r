@@ -43,7 +43,7 @@
     - o rută oprită și apoi pornită din nou apare imediat în formular: nici răspunsurile de eroare ale serverului („ruta nu există”) nu mai rămân în cache-ul site-ului;
     - pe iPhone-uri cu iOS mai vechi de 14.5 (Safari < 14.1), fereastra cu formularul deschisă peste pagină acoperă corect ecranul;
     - pe aceleași telefoane vechi și pe Safari < 15.4, cine folosește tastatura vede conturul pe butoane, pe alegerea monedei și în bannerul de cookies;
-    - formularul, pagina biletului, emailurile, bannerul de cookies și linkurile din subsol spun cititorului de ecran că textul e în română și când WordPress e pus în engleză (dacă plugin-ul nu e tradus), ca să nu fie pronunțat englezește;
+    - formularul (și fereastra lui pe telefon), pagina biletului, emailurile, bannerul de cookies și linkurile din subsol spun cititorului de ecran că textul e în română și când WordPress e pus în engleză (dacă plugin-ul nu e tradus), ca să nu fie pronunțat englezește;
   - **Bilet și liste:**
     - copiii sunt marcați „(copil)” pe bilet, în lista pentru șofer și în CSV;
     - CSV-ul cu pasageri pentru o singură rută are ruta în numele fișierului (ex. pasageri-2026-10-21-balti-iasi.csv);

@@ -52,6 +52,10 @@
 			overlay.setAttribute( 'role', 'dialog' );
 			overlay.setAttribute( 'aria-modal', 'true' );
 			overlay.setAttribute( 'aria-label', t.dialogLabel );
+			// Fereastra stă direct în pagină, în afara formularului: eticheta ei e textul plugin-ului, deci limba lui.
+			if ( root.getAttribute( 'lang' ) ) {
+				overlay.setAttribute( 'lang', root.getAttribute( 'lang' ) );
+			}
 			overlay.appendChild( root );
 			document.body.appendChild( overlay );
 			document.documentElement.classList.add( 'lbb-lock' );

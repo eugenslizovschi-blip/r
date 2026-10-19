@@ -92,6 +92,9 @@ async function scan(page, label, include) {
     await f.$eval('[data-lbb="time"]', t => { t.value = [...t.options].find(o => o.value && !o.disabled).value; t.dispatchEvent(new Event('change')); });
     await (await f.$('[data-lbb="next"]')).click();
     await mp.waitForSelector('.lbb-overlay .lbb-booking');
+    // Eticheta ferestrei e textul plugin-ului: fereastra are limba formularului, nu doar a paginii.
+    const ovLang = await mp.$eval('.lbb-overlay', o => [o.getAttribute('lang'), o.querySelector('.lbb-booking').getAttribute('lang')]);
+    if (!ovLang[0] || ovLang[0] !== ovLang[1]) fail('fereastra formularului fără limba textului: ' + JSON.stringify(ovLang));
     await scan(mp, 'formular compact, pasul 2 (dialog)', [['.lbb-overlay']]);
     await mctx.close();
   }
