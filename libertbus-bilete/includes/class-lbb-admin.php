@@ -246,11 +246,14 @@ class LBB_Admin {
 		if ( ! function_exists( 'wp_get_update_data' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/update.php';
 		}
-		$pending = self::updates_pending( wp_get_update_data() );
-		$add( 'updates', '' === $pending ? true : 'warn', __( 'WordPress, pluginurile și temele sunt actualizate', 'libertbus-bilete' ),
-			/* translators: %s: lista actualizărilor, ex. „WordPress, 3 pluginuri” */
-			'' === $pending ? '' : sprintf( __( 'Actualizări în așteptare: %s. Versiunile vechi au breșe de securitate cunoscute; actualizați după o copie de siguranță a site-ului.', 'libertbus-bilete' ), $pending ),
-			admin_url( 'update-core.php' ) );
+		// WordPress numără actualizările doar pentru cine le poate face: altcuiva rândul ar apărea verde pe nedrept.
+		if ( current_user_can( 'update_core' ) || current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) {
+			$pending = self::updates_pending( wp_get_update_data() );
+			$add( 'updates', '' === $pending ? true : 'warn', __( 'WordPress, pluginurile și temele sunt actualizate', 'libertbus-bilete' ),
+				/* translators: %s: lista actualizărilor, ex. „WordPress, 3 pluginuri” */
+				'' === $pending ? '' : sprintf( __( 'Actualizări în așteptare: %s. Versiunile vechi au breșe de securitate cunoscute; actualizați după o copie de siguranță a site-ului.', 'libertbus-bilete' ), $pending ),
+				admin_url( 'update-core.php' ) );
+		}
 
 		return $items;
 	}

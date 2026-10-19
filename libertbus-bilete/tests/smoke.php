@@ -852,7 +852,14 @@ foreach ( LBB_Admin::checklist() as $dbg_it ) {
 }
 lbb_t( 'panoul semnalează erorile PHP afișate vizitatorilor: WP_DEBUG cu afișare (și implicit, fără WP_DEBUG_DISPLAY) da; afișare oprită sau WP_DEBUG oprit nu', LBB_Admin::errors_shown( true, true ) && LBB_Admin::errors_shown( true, 1 ) && ! LBB_Admin::errors_shown( true, false ) && ! LBB_Admin::errors_shown( false, true ) && $dbg_row && true === $dbg_row['ok'], $dbg_row );
 lbb_t( 'panoul semnalează PHP fără actualizări de securitate (7.4, 8.0); 8.1 și mai nou nu', LBB_Admin::php_outdated( '7.4.33' ) && LBB_Admin::php_outdated( '8.0.30' ) && ! LBB_Admin::php_outdated( '8.1.0' ) && ! LBB_Admin::php_outdated( '8.3.6' ) && in_array( 'php', wp_list_pluck( LBB_Admin::checklist(), 'id' ), true ) );
-lbb_t( 'panoul semnalează actualizările în așteptare în română corectă („WordPress, 3 pluginuri, 1 temă”, „20 de pluginuri”); fără ele, nimic', 'WordPress, 3 pluginuri, 1 temă' === LBB_Admin::updates_pending( array( 'counts' => array( 'wordpress' => 1, 'plugins' => 3, 'themes' => 1 ) ) ) && '20 de pluginuri' === LBB_Admin::updates_pending( array( 'counts' => array( 'plugins' => 20 ) ) ) && '' === LBB_Admin::updates_pending( array( 'counts' => array( 'wordpress' => 0, 'plugins' => 0, 'themes' => 0, 'translations' => 2 ) ) ) && in_array( 'updates', wp_list_pluck( LBB_Admin::checklist(), 'id' ), true ), LBB_Admin::updates_pending( array( 'counts' => array( 'wordpress' => 1, 'plugins' => 3, 'themes' => 1 ) ) ) );
+// Rândul apare doar cui poate face actualizările (altora WordPress le arată 0 actualizări, deci „verde” pe nedrept).
+$upd_user = get_current_user_id();
+wp_set_current_user( 1 );
+$upd_rows = array( in_array( 'updates', wp_list_pluck( LBB_Admin::checklist(), 'id' ), true ) );
+wp_set_current_user( 0 );
+$upd_rows[] = in_array( 'updates', wp_list_pluck( LBB_Admin::checklist(), 'id' ), true );
+wp_set_current_user( $upd_user );
+lbb_t( 'panoul semnalează actualizările în așteptare în română corectă („WordPress, 3 pluginuri, 1 temă”, „20 de pluginuri”); fără ele, nimic; rândul doar pentru cine poate actualiza', 'WordPress, 3 pluginuri, 1 temă' === LBB_Admin::updates_pending( array( 'counts' => array( 'wordpress' => 1, 'plugins' => 3, 'themes' => 1 ) ) ) && '20 de pluginuri' === LBB_Admin::updates_pending( array( 'counts' => array( 'plugins' => 20 ) ) ) && '' === LBB_Admin::updates_pending( array( 'counts' => array( 'wordpress' => 0, 'plugins' => 0, 'themes' => 0, 'translations' => 2 ) ) ) && $upd_rows[0] && ! $upd_rows[1], LBB_Admin::updates_pending( array( 'counts' => array( 'wordpress' => 1, 'plugins' => 3, 'themes' => 1 ) ) ) );
 // „Trimite un email de test”: reușit → mesaj verde cu adresa biroului; email care nu pleacă → mesaj de eroare.
 $tm_keep = array( $_POST, $_REQUEST, get_current_user_id() );
 $tm_go   = function ( $ok ) {
