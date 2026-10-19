@@ -235,7 +235,20 @@ class LBB_Admin {
 		$add( 'debug', $shown ? 'warn' : true, __( 'Erorile PHP nu se afișează vizitatorilor', 'libertbus-bilete' ),
 			$shown ? __( 'În wp-config.php e pornit WP_DEBUG cu afișarea erorilor: un avertisment PHP poate apărea în pagina de plată sau poate strica confirmarea trimisă de bancă. Puneți define( \'WP_DEBUG_DISPLAY\', false ); (erorile merg în debug.log) sau opriți WP_DEBUG.', 'libertbus-bilete' ) : '' );
 
+		// PHP fără actualizări de securitate (7.4 din noiembrie 2022, 8.0 din noiembrie 2023): plățile cu cardul cer un
+		// server întreținut; se schimbă din panoul de hosting.
+		$add( 'php', self::php_outdated( PHP_VERSION ) ? 'warn' : true, __( 'Versiunea PHP primește actualizări de securitate', 'libertbus-bilete' ),
+			/* translators: %s: versiunea PHP, ex. 7.4.33 */
+			self::php_outdated( PHP_VERSION ) ? sprintf( __( 'Serverul folosește PHP %s, fără actualizări de securitate. Alegeți PHP 8.2 sau mai nou din panoul de hosting (după o copie de siguranță a site-ului).', 'libertbus-bilete' ), PHP_VERSION ) : '' );
+
 		return $items;
+	}
+
+	/**
+	 * PHP 8.0 și mai vechi nu mai primesc actualizări de securitate.
+	 */
+	public static function php_outdated( $version ) {
+		return version_compare( (string) $version, '8.1', '<' );
 	}
 
 	/**

@@ -851,6 +851,7 @@ foreach ( LBB_Admin::checklist() as $dbg_it ) {
 	}
 }
 lbb_t( 'panoul semnalează erorile PHP afișate vizitatorilor: WP_DEBUG cu afișare (și implicit, fără WP_DEBUG_DISPLAY) da; afișare oprită sau WP_DEBUG oprit nu', LBB_Admin::errors_shown( true, true ) && LBB_Admin::errors_shown( true, 1 ) && ! LBB_Admin::errors_shown( true, false ) && ! LBB_Admin::errors_shown( false, true ) && $dbg_row && true === $dbg_row['ok'], $dbg_row );
+lbb_t( 'panoul semnalează PHP fără actualizări de securitate (7.4, 8.0); 8.1 și mai nou nu', LBB_Admin::php_outdated( '7.4.33' ) && LBB_Admin::php_outdated( '8.0.30' ) && ! LBB_Admin::php_outdated( '8.1.0' ) && ! LBB_Admin::php_outdated( '8.3.6' ) && in_array( 'php', wp_list_pluck( LBB_Admin::checklist(), 'id' ), true ) );
 // „Trimite un email de test”: reușit → mesaj verde cu adresa biroului; email care nu pleacă → mesaj de eroare.
 $tm_keep = array( $_POST, $_REQUEST, get_current_user_id() );
 $tm_go   = function ( $ok ) {
