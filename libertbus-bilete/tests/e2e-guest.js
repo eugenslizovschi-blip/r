@@ -445,6 +445,22 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     console.log('adulți/copii:', n1, '→', n2);
     await kid.close();
   }
+  // Cu JavaScript oprit formularul nu poate funcționa: se vede mesajul „activați JavaScript sau sunați la …”, cu
+  // telefonul ca link de apel, iar butoanele de trimitere rămân dezactivate (nu pleacă un formular gol).
+  {
+    const nj = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+    const np = await nj.newPage();
+    await np.goto(BASE + '/balti-iasi/');
+    const nojs = await np.evaluate(() => {
+      const root = document.querySelector('.lbb-booking');
+      const msg = root && [...root.querySelectorAll('p')].find(e => /activați JavaScript/.test(e.textContent) && e.getClientRects().length);
+      const tel = msg && msg.querySelector('a[href^="tel:"]');
+      return { msg: !!msg, tel: tel ? tel.getAttribute('href') : '', enabled: root ? [...root.querySelectorAll('[data-lbb-submit]')].filter(b => !b.disabled).length : -1 };
+    });
+    if (!nojs.msg || !/^tel:\+\d{8,}$/.test(nojs.tel) || nojs.enabled !== 0) fail('cu JavaScript oprit: lipsește mesajul cu telefonul sau butoanele se pot apăsa: ' + JSON.stringify(nojs));
+    await nj.close();
+  }
+
   console.log(process.exitCode ? 'GUEST: PROBLEME' : 'GUEST: OK');
   await browser.close();
 })().catch(require('./crash')('guest', () => BROWSER));
