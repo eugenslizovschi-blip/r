@@ -100,19 +100,36 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   // Finalizarea comenzii cu blocuri („Checkout” din editorul de blocuri) plătește prin Store API, nu prin formularul clasic:
   // rezervarea trebuie legată de comandă și acolo, altfel plata trece și clientul rămâne fără bilet.
   {
-    await page.goto(BASE + '/balti-iasi/');
-    await page.waitForSelector('[data-lbb="from"]');
     const bDay = new Date(Date.now() + 86400000 * (1 + Math.floor(Math.random() * 20))).toISOString().slice(0, 10);
-    await page.fill('[data-lbb="date"]', bDay);
-    await page.dispatchEvent('[data-lbb="date"]', 'change');
-    await page.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0);
-    await page.selectOption('[data-lbb="time"]', await page.$$eval('[data-lbb="time"] option', o => o.find(x => x.value && !x.disabled).value));
-    await page.fill('input[name="lbb_names[]"]', 'Blocuri Test');
-    await page.fill('input[name="lbb_phone"]', '+37369184111');
-    await page.fill('input[name="lbb_email"]', 'blocks@example.com');
-    await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
+    // Rezervarea cu „Achit online”; întoarce ora aleasă (aceeași de fiecare dată: prima cu locuri).
+    const bookPay = async () => {
+      await page.goto(BASE + '/balti-iasi/');
+      await page.waitForSelector('[data-lbb="from"]');
+      await page.fill('[data-lbb="date"]', bDay);
+      await page.dispatchEvent('[data-lbb="date"]', 'change');
+      await page.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0);
+      const time = await page.$$eval('[data-lbb="time"] option', o => o.find(x => x.value && !x.disabled).value);
+      await page.selectOption('[data-lbb="time"]', time);
+      await page.fill('input[name="lbb_names[]"]', 'Blocuri Test');
+      await page.fill('input[name="lbb_phone"]', '+37369184111');
+      await page.fill('input[name="lbb_email"]', 'blocks@example.com');
+      await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
+      return time;
+    };
+    const routeId = await (async () => { await page.goto(BASE + '/balti-iasi/'); await page.waitForSelector('[data-lbb="route"] option:checked', { state: 'attached' }); return page.inputValue('[data-lbb="route"]'); })();
+    const free = async time => ((await (await page.request.get(`${BASE}/wp-json/lbb/v1/departures?route_id=${routeId}&date=${bDay}`)).json()).departures.find(d => d.time === time) || {}).free;
     // Store API: cheia REST a utilizatorului logat și cheia „Nonce” a coșului, ca în blocul Checkout.
     const rest = (await (await page.request.get(BASE + '/wp-admin/admin-ajax.php?action=rest-nonce')).text()).trim();
+    // „Șterge” din coșul cu blocuri merge tot prin Store API: locul ținut se eliberează imediat, nu abia la expirare.
+    const rTime = await bookPay();
+    const fDuring = await free(rTime);
+    const rCart = await page.request.get(BASE + '/wp-json/wc/store/v1/cart', { headers: { 'X-WP-Nonce': rest } });
+    const rKey = (((await rCart.json()).items || [])[0] || {}).key;
+    const rRes = await page.request.post(BASE + '/wp-json/wc/store/v1/cart/remove-item', { headers: { 'X-WP-Nonce': rest, Nonce: rCart.headers()['nonce'] || '' }, data: { key: rKey } });
+    const fAfter = await free(rTime);
+    console.log(`blocks remove: ${rRes.status()} locuri ${fDuring} → ${fAfter}`);
+    if (!rKey || rRes.status() !== 200 || !(fAfter === fDuring + 1)) console.log('FAIL scos din coșul cu blocuri (Store API): locul nu se eliberează: ' + JSON.stringify({ rKey, status: rRes.status(), fDuring, fAfter }));
+    await bookPay();
     const cartRes = await page.request.get(BASE + '/wp-json/wc/store/v1/cart', { headers: { 'X-WP-Nonce': rest } });
     const cart = await cartRes.json();
     // Coșul cu blocuri arată cursa (ruta, data, pasagerii) și nu lasă schimbată cantitatea (un bilet = o rezervare).
