@@ -798,7 +798,12 @@
 						var dayBtn = document.createElement( 'button' );
 						dayBtn.type = 'button';
 						dayBtn.className = 'lbb-next-day';
-						dayBtn.textContent = t.nextDay + ' →';
+						dayBtn.textContent = t.nextDay + ' ';
+						// Săgeata e decor: cititorul de ecran spune doar „Ziua următoare”, nu și „săgeată dreapta”.
+						var arrow = document.createElement( 'span' );
+						arrow.setAttribute( 'aria-hidden', 'true' );
+						arrow.textContent = '→';
+						dayBtn.appendChild( arrow );
 						dayBtn.addEventListener( 'click', function () {
 							dateTouched = true;
 							el.date.value = nextDay( el.date.value );

@@ -298,6 +298,8 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
         const b = await p2.$('[data-lbb="status"] button.lbb-next-day');
         if (!b) return null;
         const h = (await b.boundingBox()).height;
+        // Săgeata e decor: cititorul de ecran spune „Ziua următoare”, fără „săgeată dreapta”.
+        if (await p2.getByRole('button', { name: 'Ziua următoare', exact: true }).count() !== 1) fail('butonul „Ziua următoare →” are săgeata în numele citit de cititorul de ecran');
         const before = await p2.inputValue('[data-lbb="date"]');
         await b.click();
         await p2.waitForFunction(v => document.querySelector('[data-lbb="date"]').value !== v && !/Se verifică/.test(document.querySelector('[data-lbb="status"]').textContent), before, { timeout: 15000 }).catch(() => {});

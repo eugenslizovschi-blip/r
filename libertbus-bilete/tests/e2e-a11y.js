@@ -95,6 +95,8 @@ async function scan(page, label, include) {
     // Eticheta ferestrei e textul plugin-ului: fereastra are limba formularului, nu doar a paginii.
     const ovLang = await mp.$eval('.lbb-overlay', o => [o.getAttribute('lang'), o.querySelector('.lbb-booking').getAttribute('lang')]);
     if (!ovLang[0] || ovLang[0] !== ovLang[1]) fail('fereastra formularului fără limba textului: ' + JSON.stringify(ovLang));
+    // „← Schimbă cursa”: săgeata e decor, numele butonului pentru cititorul de ecran e doar „Schimbă cursa”.
+    if (await mp.getByRole('button', { name: 'Schimbă cursa', exact: true }).count() !== 1) fail('butonul „← Schimbă cursa” are săgeata în numele citit de cititorul de ecran');
     await scan(mp, 'formular compact, pasul 2 (dialog)', [['.lbb-overlay']]);
     await mctx.close();
   }

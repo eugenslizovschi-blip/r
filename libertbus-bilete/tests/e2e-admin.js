@@ -145,6 +145,9 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   // „Ziua următoare ›” / „‹ Ziua precedentă” schimbă ziua cu una și păstrează ruta aleasă (inclusiv peste sfârșitul lunii).
   const navRoute = await page.$eval('select[name="route"] option:nth-child(2)', o => o.value);
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&date=2026-10-31&route=' + navRoute);
+  // Săgețile „‹ ›” sunt decor: numele linkurilor pentru cititorul de ecran e doar „Ziua precedentă” / „Ziua următoare”.
+  const arrowNames = [await page.getByRole('link', { name: 'Ziua precedentă', exact: true }).count(), await page.getByRole('link', { name: 'Ziua următoare', exact: true }).count()];
+  if (arrowNames[0] !== 1 || arrowNames[1] !== 1) fail('săgețile din „‹ Ziua precedentă” / „Ziua următoare ›” sunt citite de cititorul de ecran: ' + JSON.stringify(arrowNames));
   await Promise.all([page.waitForNavigation(), page.click('.lbb-day-nav a:has-text("Ziua următoare")')]);
   const nextQ = new URL(page.url()).searchParams;
   const nextH = (await page.textContent('#wpbody-content h1')).trim();

@@ -582,7 +582,8 @@ class LBB_Admin {
 		$day_url = function ( $shift ) use ( $date, $route ) {
 			return add_query_arg( array( 'page' => 'lbb-manifest', 'date' => gmdate( 'Y-m-d', strtotime( $date . ' 12:00 UTC ' . $shift ) ), 'route' => $route ), admin_url( 'admin.php' ) );
 		};
-		echo '<p class="lbb-noprint lbb-day-nav"><a class="button" href="' . esc_url( $day_url( '-1 day' ) ) . '">‹ ' . esc_html__( 'Ziua precedentă', 'libertbus-bilete' ) . '</a> <a class="button" href="' . esc_url( $day_url( '+1 day' ) ) . '">' . esc_html__( 'Ziua următoare', 'libertbus-bilete' ) . ' ›</a>'
+		// Săgețile sunt doar decor: ascunse pentru cititorul de ecran, care altfel spune „ghilimea unghiulară”.
+		echo '<p class="lbb-noprint lbb-day-nav"><a class="button" href="' . esc_url( $day_url( '-1 day' ) ) . '"><span aria-hidden="true">‹</span> ' . esc_html__( 'Ziua precedentă', 'libertbus-bilete' ) . '</a> <a class="button" href="' . esc_url( $day_url( '+1 day' ) ) . '">' . esc_html__( 'Ziua următoare', 'libertbus-bilete' ) . ' <span aria-hidden="true">›</span></a>'
 			// Înapoi la azi (după răsfoit zilele), tot cu ruta aleasă; pe lista de azi nu e nevoie.
 			. ( LBB_Settings::today() !== $date ? ' <a class="button lbb-today" href="' . esc_url( add_query_arg( array( 'page' => 'lbb-manifest', 'date' => LBB_Settings::today(), 'route' => $route ), admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Azi', 'libertbus-bilete' ) . '</a>' : '' )
 			. '</p>';
@@ -592,7 +593,7 @@ class LBB_Admin {
 			$next = LBB_Bookings::next_manifest_date( $date, $route );
 			if ( $next ) {
 				/* translators: %s: data (zz.ll.aaaa) */
-				echo ' <a class="lbb-next-day" href="' . esc_url( add_query_arg( array( 'page' => 'lbb-manifest', 'date' => $next, 'route' => $route ), admin_url( 'admin.php' ) ) ) . '">' . esc_html( sprintf( __( 'Următoarea zi cu pasageri: %s', 'libertbus-bilete' ), wp_date( 'd.m.Y', strtotime( $next . ' 12:00' ) ) ) ) . ' ›</a>';
+				echo ' <a class="lbb-next-day" href="' . esc_url( add_query_arg( array( 'page' => 'lbb-manifest', 'date' => $next, 'route' => $route ), admin_url( 'admin.php' ) ) ) . '">' . esc_html( sprintf( __( 'Următoarea zi cu pasageri: %s', 'libertbus-bilete' ), wp_date( 'd.m.Y', strtotime( $next . ' 12:00' ) ) ) ) . ' <span aria-hidden="true">›</span></a>';
 			}
 			echo '</p></div>';
 			return;

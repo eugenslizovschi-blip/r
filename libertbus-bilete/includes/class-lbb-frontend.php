@@ -568,7 +568,7 @@ class LBB_Frontend {
 
 				<div class="lbb-step2" data-lbb="step2">
 				<?php if ( $compact ) : ?>
-					<button type="button" class="lbb-back" data-lbb="back">← <?php esc_html_e( 'Schimbă cursa', 'libertbus-bilete' ); ?></button>
+					<button type="button" class="lbb-back" data-lbb="back"><span aria-hidden="true">←</span> <?php esc_html_e( 'Schimbă cursa', 'libertbus-bilete' ); ?></button>
 				<?php endif; ?>
 				<fieldset class="lbb-passengers" data-lbb="names">
 					<legend><?php esc_html_e( 'Pasageri', 'libertbus-bilete' ); ?> <span class="lbb-legend-hint"><?php esc_html_e( '(numele ca în pașaport)', 'libertbus-bilete' ); ?></span></legend>
