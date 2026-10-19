@@ -15,6 +15,16 @@ async function scan(page, label, include) {
     const r = await window.axe.run({ include: inc }, { resultTypes: ['violations'] });
     return r.violations.map(v => v.id + ' (' + v.impact + '): ' + v.nodes.slice(0, 3).map(n => n.target.join(' ')).join(', '));
   }, include);
+  // Id-uri duplicate în zona verificată (axe nu le mai caută din versiunea 4.7): o etichetă sau un aria-describedby
+  // ar nimeri alt câmp, ex. cu două formulare pe aceeași pagină. Câmpurile ascunse „_wpnonce” ale WordPress nu contează.
+  const dup = await page.evaluate((inc) => {
+    const c = {};
+    inc.forEach(sel => document.querySelectorAll(sel[0]).forEach(root => [root, ...root.querySelectorAll('[id]')].forEach(e => {
+      if (e.id && e.type !== 'hidden') c[e.id] = (c[e.id] || 0) + 1;
+    })));
+    return Object.keys(c).filter(k => c[k] > 1);
+  }, include);
+  if (dup.length) found.push('id-uri duplicate: ' + dup.join(', '));
   found.forEach(v => fail(label + ': ' + v));
   console.log(label + ': ' + (found.length ? found.length + ' probleme' : 'ok'));
 }
