@@ -62,6 +62,7 @@
     - pe pagina de după plată, dacă banca n-a confirmat încă plata, clientul vede „De obicei durează câteva secunde” și un buton „Verifică din nou” (nu și la plata refuzată, unde WooCommerce oferă „Plătește din nou”);
     - la printare, starea biletului rămâne pe foaie: un bilet anulat, neplătit sau dintr-o cursă trecută nu mai arată pe hârtie ca unul valabil.
     - lista pentru șofer printată pe mai multe foi repetă capul tabelului pe fiecare foaie și nu rupe o rezervare (cu toți pasagerii ei) între două foi;
+  - **Panoul „Gata de plăți?” cu cititor de ecran:** starea fiecărui rând se aude în cuvinte („Gata”, „De verificat”, „Lipsește”), nu doar ca ✔ ! ✘ colorate, iar fiecare buton „Rezolvă” spune ce rezolvă.
   - **Email de test în Setări:** butonul „Trimite un email de test la …” verifică înainte de lansare că emailurile site-ului (biletele, rezervările) chiar pleacă; dacă nu ajunge, pagina spune ce de făcut (emailul hostingului sau un plugin SMTP).
   - **„Locuri online pe cursă (implicit)” în Setări:** golit din greșeală sau 0 păstrează numărul de dinainte (înainte toate rutele fără număr propriu de locuri apăreau „complet” și nu se mai vindea nimic).
   - **Cursuri valutare în Setări:** un câmp golit din greșeală sau 0 păstrează cursul de dinainte (înainte devenea 0,0001, iar un bilet de 60 RON ar fi costat 0,01 MDL la plata în MDL).

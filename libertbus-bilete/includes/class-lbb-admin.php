@@ -400,13 +400,17 @@ class LBB_Admin {
 		foreach ( self::checklist() as $item ) {
 			$cls  = true === $item['ok'] ? 'lbb-ok' : ( 'warn' === $item['ok'] ? 'lbb-warn' : 'lbb-bad' );
 			$icon = true === $item['ok'] ? '✔' : ( 'warn' === $item['ok'] ? '!' : '✘' );
-			echo '<tr><td style="width:24px" class="' . esc_attr( $cls ) . '">' . esc_html( $icon ) . '</td><td><strong>' . esc_html( $item['title'] ) . '</strong>';
+			// Simbolul e doar pentru ochi; cititorul de ecran spune starea în cuvinte („bifă grea” nu spune nimic).
+			$said = true === $item['ok'] ? __( 'Gata', 'libertbus-bilete' ) : ( 'warn' === $item['ok'] ? __( 'De verificat', 'libertbus-bilete' ) : __( 'Lipsește', 'libertbus-bilete' ) );
+			echo '<tr><td style="width:24px" class="' . esc_attr( $cls ) . '"><span aria-hidden="true">' . esc_html( $icon ) . '</span><span class="screen-reader-text">' . esc_html( $said ) . '</span></td><td><strong>' . esc_html( $item['title'] ) . '</strong>';
 			if ( $item['detail'] ) {
 				echo '<br><span class="description">' . esc_html( $item['detail'] ) . '</span>';
 			}
 			echo '</td><td style="width:110px">';
 			if ( true !== $item['ok'] && $item['fix'] ) {
-				echo '<a class="button" href="' . esc_url( $item['fix'] ) . '">' . esc_html__( 'Rezolvă', 'libertbus-bilete' ) . '</a>';
+				// Mai multe „Rezolvă” pe pagină: în lista de linkuri a cititorului de ecran fiecare spune ce rezolvă.
+				/* translators: %s: titlul verificării, ex. „Site-ul folosește HTTPS” */
+				echo '<a class="button" href="' . esc_url( $item['fix'] ) . '" aria-label="' . esc_attr( sprintf( __( 'Rezolvă: %s', 'libertbus-bilete' ), $item['title'] ) ) . '">' . esc_html__( 'Rezolvă', 'libertbus-bilete' ) . '</a>';
 			}
 			echo '</td></tr>';
 		}

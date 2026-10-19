@@ -29,6 +29,17 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (/Fatal error|Warning:|Notice:|Deprecated:|critical error/i.test(body)) fail(slug + ': eroare PHP în pagină: ' + (body.match(/(Fatal error|Warning:|Notice:|Deprecated:)[^\n]{0,160}/) || [''])[0]);
   }
 
+  // Panoul „Gata de plăți?”: starea fiecărui rând e spusă în cuvinte cititorului de ecran (nu doar ✔ ! ✘ colorate),
+  // iar fiecare „Rezolvă” spune ce rezolvă (în lista de linkuri toate s-ar numi la fel).
+  {
+    await page.goto(BASE + '/wp-admin/admin.php?page=lbb');
+    const rows = await page.$$eval('#wpbody-content table tr', trs => trs.filter(tr => tr.querySelector('td.lbb-ok, td.lbb-warn, td.lbb-bad')).map(tr => ({ said: (tr.querySelector('td .screen-reader-text') || {}).textContent || '', icon: !!tr.querySelector('td [aria-hidden="true"]'), fix: !!tr.querySelector('a.button'), title: tr.querySelector('strong').textContent })));
+    const fixes = rows.filter(r => r.fix);
+    const named = [];
+    for (const r of fixes) named.push(await page.getByRole('link', { name: 'Rezolvă: ' + r.title, exact: true }).count());
+    if (!rows.length || rows.some(r => !/^(Gata|De verificat|Lipsește)$/.test(r.said) || !r.icon) || named.some(n => n !== 1)) fail('panoul „Gata de plăți?”: stare fără cuvinte pentru cititorul de ecran sau „Rezolvă” fără ce rezolvă: ' + JSON.stringify({ rows: rows.slice(0, 3), named }));
+  }
+
   // Rezervările fără cod (coș abandonat, anulate) arată „—”, nu o căsuță de cod goală.
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&status=cancelled');
   const emptyCodes = await page.$$eval('#wpbody-content table.widefat code', cs => cs.filter(c => !c.textContent.trim()).length);
