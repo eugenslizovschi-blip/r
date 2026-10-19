@@ -843,6 +843,39 @@ foreach ( array( 15, 60 ) as $tc_n ) {
 update_option( 'lbb_settings', $tc_keep );
 lbb_t( 'Termenii: închiderea vânzării în română corectă („cu 15 minute”, „cu 60 de minute”)', false !== strpos( $tc_txt[15], 'se închide cu 15 minute înainte' ) && false !== strpos( $tc_txt[60], 'se închide cu 60 de minute înainte' ), array( preg_match( '/se închide cu [^.]*/u', $tc_txt[15], $tc_m ) ? $tc_m[0] : '' ) );
 
+// „Trimite un email de test”: reușit → mesaj verde cu adresa biroului; email care nu pleacă → mesaj de eroare.
+$tm_keep = array( $_POST, $_REQUEST, get_current_user_id() );
+$tm_go   = function ( $ok ) {
+	$_REQUEST = array( '_wpnonce' => wp_create_nonce( 'lbb_test_mail' ) );
+	$sent     = array();
+	$mail     = function ( $null, $atts ) use ( $ok, &$sent ) {
+		$sent[] = $atts;
+		return $ok;
+	};
+	$loc      = '';
+	$cb       = function ( $l ) use ( &$loc ) {
+		$loc = $l;
+		throw new Exception( 'redirect' );
+	};
+	add_filter( 'pre_wp_mail', $mail, 99, 2 ); // După filtrul care salvează emailurile în mediul de test.
+	add_filter( 'wp_redirect', $cb, 1 );
+	try {
+		LBB_Admin::test_mail();
+	} catch ( Exception $e ) {
+		unset( $e );
+	}
+	remove_filter( 'wp_redirect', $cb, 1 );
+	remove_filter( 'pre_wp_mail', $mail, 99 );
+	parse_str( (string) wp_parse_url( $loc, PHP_URL_QUERY ), $q );
+	return array( isset( $q['lbb_msg'] ) ? rawurldecode( $q['lbb_msg'] ) : '', ! empty( $q['lbb_err'] ), $sent );
+};
+wp_set_current_user( 1 );
+$tm_ok  = $tm_go( true );
+$tm_bad = $tm_go( false );
+list( $_POST, $_REQUEST ) = $tm_keep;
+wp_set_current_user( $tm_keep[2] );
+$tm_to = LBB_Settings::office_email();
+lbb_t( 'email de test din Setări: pleacă la birou, de la firmă; reușit → mesaj cu adresa, eșuat → eroare cu ce de verificat', 1 === count( $tm_ok[2] ) && $tm_to === $tm_ok[2][0]['to'] && false !== strpos( $tm_ok[2][0]['subject'], '[LibertBus] Email de test' ) && preg_grep( '/^From: /', (array) $tm_ok[2][0]['headers'] ) && false !== strpos( $tm_ok[0], 'Emailul de test a fost trimis la ' . $tm_to ) && ! $tm_ok[1] && false !== strpos( $tm_bad[0], 'nu a putut fi trimis' ) && false !== strpos( $tm_bad[0], 'SMTP' ) && $tm_bad[1], array( $tm_ok[0], $tm_ok[1], $tm_bad[0], $tm_bad[1] ) );
 // Salvarea Setărilor cu „Email pentru clienți” greșit: mesaj de avertizare, nu golire pe tăcute.
 $se_keep = array( get_option( 'lbb_settings' ), $_POST, $_REQUEST, get_current_user_id() );
 $se_go   = function ( $email, $more = array() ) {
