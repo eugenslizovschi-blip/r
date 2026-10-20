@@ -629,10 +629,22 @@ if ( is_int( $cs_r ) && function_exists( 'WC' ) ) {
 	$cs_res['timeb'] = $cs_t3 ? LBB_Bookings::get_by_token( $cs_t3[0] )['dep_time'] : null;
 	$cs_res['other'] = LBB_Frontend::book( array_merge( $cs_d, array( 'lbb_time' => '10:00', 'lbb_date' => ( new DateTimeImmutable( $tomorrow ) )->modify( '+1 day' )->format( 'Y-m-d' ) ) ) );
 	$cs_res['n']     = array( count( $cs_t1 ), count( $cs_t2 ), count( $cs_tok() ) );
+	// Checkout-ul cu blocuri ia câmpurile din regulile pe țară: cu „Plată simplificată” și doar bilete în coș, adresa
+	// e ascunsă și opțională acolo (clientul nu e obligat la stradă, oraș, cod poștal); cu coșul gol rămâne ca înainte.
+	$cs_lk = LBB_Settings::all();
+	update_option( 'lbb_settings', array_merge( $cs_lk, array( 'simple_checkout' => 1 ) ) );
+	WC()->countries->locale = null;
+	$cs_loc = WC()->countries->get_country_locale();
+	$cs_res['loc'] = array( $cs_loc['default']['address_1']['required'], ! empty( $cs_loc['default']['city']['hidden'] ), $cs_loc['RO']['postcode']['required'], ! empty( $cs_loc['MD']['address_1']['hidden'] ) );
 	// Autocar plin cu biletul din coș (5 din 5 locuri): același bilet trimis din nou nu e refuzat cu „s-au terminat”.
 	// empty_cart() nu eliberează locurile ținute: le eliberăm întâi, ca autocarul să fie gol.
 	array_map( array( 'LBB_Bookings', 'release' ), $cs_tok() );
 	WC()->cart->empty_cart();
+	WC()->countries->locale = null;
+	$cs_loc = WC()->countries->get_country_locale();
+	$cs_res['loc0'] = array( $cs_loc['default']['address_1']['required'], ! empty( $cs_loc['default']['city']['hidden'] ) );
+	WC()->countries->locale = null;
+	update_option( 'lbb_settings', $cs_lk );
 	$cs_full         = array_merge( $cs_d, array( 'lbb_time' => '10:00', 'lbb_adults' => 5, 'lbb_names' => array( 'Ion Cos', 'Ana Cos', 'Vlad Cos', 'Dan Cos', 'Eva Cos' ) ) );
 	$cs_res['full1'] = LBB_Frontend::book( $cs_full );
 	$cs_res['full2'] = LBB_Frontend::book( $cs_full );
@@ -652,6 +664,7 @@ if ( is_int( $cs_r ) && function_exists( 'WC' ) ) {
 lbb_t( 'aceeași cursă trimisă din nou cu „Achit online” înlocuiește biletul din coș (fără plată dublă), locurile vechi se eliberează, și pe autocarul plin cu propriul bilet; altă oră în aceeași zi înlocuiește și ea, iar „Rezerv” scoate din coș biletul neplătit al aceleiași curse; altă zi sau tur-retur se adaugă', true === ( $cs_res['a'] ?? null ) && true === ( $cs_res['b'] ?? null ) && true === ( $cs_res['other'] ?? null ) && array( 1, 1, 2 ) === ( $cs_res['n'] ?? null ) && 'cancelled' === $cs_res['old'] && 2 === $cs_res['new'] && true === $cs_res['time'] && isset( $cs_t3 ) && 1 === count( $cs_t3 ) && '10:00' === $cs_res['timeb'] && true === $cs_res['full1'] && true === $cs_res['full2'] && 1 === $cs_res['fulln'] && is_string( $cs_res['rsv'] ) && false !== strpos( $cs_res['rsv'], 'lbb_bilet=' ) && 0 === $cs_res['rsvn'] && 'cancelled' === $cs_res['rsvo'], array_map( function ( $v ) {
 	return is_wp_error( $v ) ? $v->get_error_message() : $v;
 }, $cs_res ) );
+lbb_t( 'checkout cu blocuri: cu „Plată simplificată” și doar bilete în coș, strada, orașul și codul poștal sunt ascunse și opționale; cu coșul gol, adresa rămâne obligatorie', isset( $cs_res['loc'], $cs_res['loc0'] ) && array( false, true, false, true ) === $cs_res['loc'] && array( true, false ) === $cs_res['loc0'], array( isset( $cs_res['loc'] ) ? $cs_res['loc'] : null, isset( $cs_res['loc0'] ) ? $cs_res['loc0'] : null ) );
 $desc = LBB_WooCommerce::describe( $rv );
 lbb_t( 'biletul rezervat arată suma la urcare', isset( $desc['De achitat la urcare'] ) && "120\u{00A0}RON" === $desc['De achitat la urcare'], $desc );
 lbb_t( 'anularea rezervării eliberează locurile', LBB_Bookings::cancel( $rv['id'] ) && 3 === LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow )[1]['free'] );

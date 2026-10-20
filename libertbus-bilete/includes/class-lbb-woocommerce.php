@@ -42,6 +42,8 @@ class LBB_WooCommerce {
 
 		add_filter( 'woocommerce_currency', array( __CLASS__, 'session_currency' ), 999 );
 		add_filter( 'woocommerce_checkout_fields', array( __CLASS__, 'checkout_fields' ), 20 );
+		add_filter( 'woocommerce_get_country_locale_default', array( __CLASS__, 'locale_default' ), 20 );
+		add_filter( 'woocommerce_get_country_locale', array( __CLASS__, 'country_locale' ), 20 );
 		add_filter( 'woocommerce_checkout_get_value', array( __CLASS__, 'prefill' ), 10, 2 );
 	}
 
@@ -402,6 +404,35 @@ class LBB_WooCommerce {
 		}
 		$fields['shipping'] = array();
 		return $fields;
+	}
+
+	/**
+	 * Checkout-ul cu blocuri nu folosește woocommerce_checkout_fields: câmpurile de adresă le ia din regulile pe țară.
+	 * Pentru un coș doar cu bilete le ascundem și acolo, altfel clientul e obligat la stradă, oraș și cod poștal.
+	 */
+	private static function hide_address() {
+		return did_action( 'wp_loaded' ) && LBB_Settings::get( 'simple_checkout' ) && ! ( function_exists( 'is_account_page' ) && is_account_page() ) && self::cart_only_tickets();
+	}
+
+	private static function address_off( array $fields ) {
+		foreach ( array( 'company', 'address_1', 'address_2', 'city', 'state', 'postcode' ) as $key ) {
+			$fields[ $key ] = array_merge( isset( $fields[ $key ] ) ? (array) $fields[ $key ] : array(), array( 'required' => false, 'hidden' => true ) );
+		}
+		return $fields;
+	}
+
+	public static function locale_default( $fields ) {
+		return is_array( $fields ) && self::hide_address() ? self::address_off( $fields ) : $fields;
+	}
+
+	public static function country_locale( $locales ) {
+		if ( ! is_array( $locales ) || ! self::hide_address() ) {
+			return $locales;
+		}
+		foreach ( $locales as $country => $fields ) {
+			$locales[ $country ] = self::address_off( (array) $fields );
+		}
+		return $locales;
 	}
 
 	/**
