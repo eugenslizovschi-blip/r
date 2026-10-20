@@ -1077,11 +1077,12 @@ class LBB_Admin {
 				$check( 'allow_pay', __( 'Plata online cu cardul', 'libertbus-bilete' ), __( 'Arată butonul „Achit online cu cardul”. Porniți-l doar după ce metoda de plată a băncii (ex. Paynet) e activă și testată.', 'libertbus-bilete' ) );
 				$check( 'allow_reserve', __( 'Rezervare fără plată', 'libertbus-bilete' ), __( 'Butonul „Rezerv, achit la urcare” lângă „Achit online cu cardul”.', 'libertbus-bilete' ) );
 				$num( 'reserve_limit', __( 'Rezervări neachitate pe un telefon', 'libertbus-bilete' ), __( 'Câte rezervări fără plată poate avea un număr de telefon în același timp (0 = fără limită). Oprește blocarea locurilor de către glumeți.', 'libertbus-bilete' ) );
-				echo '<tr><th>' . esc_html__( 'Clientul poate plăti în', 'libertbus-bilete' ) . '</th><td><input type="hidden" name="pay_currencies[]" value="">';
+				// Fieldset: cititorul de ecran spune „Clientul poate plăti în, MDL, bifat”, nu doar „MDL, bifat”.
+				echo '<tr><th>' . esc_html__( 'Clientul poate plăti în', 'libertbus-bilete' ) . '</th><td><fieldset><legend class="screen-reader-text">' . esc_html__( 'Clientul poate plăti în', 'libertbus-bilete' ) . '</legend><input type="hidden" name="pay_currencies[]" value="">';
 				foreach ( LBB_Settings::currencies() as $cur ) {
 					echo '<label style="margin-right:12px"><input type="checkbox" name="pay_currencies[]" value="' . esc_attr( $cur ) . '" ' . checked( in_array( $cur, LBB_Settings::pay_currencies(), true ), true, false ) . '> ' . esc_html( $cur ) . '</label>';
 				}
-				echo '<p class="description">' . esc_html__( 'Implicit se propune moneda rutei (MDL spre România, RON spre Moldova); clientul poate schimba. Prețul se convertește după cursurile de mai jos.', 'libertbus-bilete' ) . '</p></td></tr>';
+				echo '<p class="description">' . esc_html__( 'Implicit se propune moneda rutei (MDL spre România, RON spre Moldova); clientul poate schimba. Prețul se convertește după cursurile de mai jos.', 'libertbus-bilete' ) . '</p></fieldset></td></tr>';
 				// Excel cu setări regionale românești/moldovenești desparte coloanele cu „;”: cu „,” tot rândul ar ieși într-o coloană.
 				echo '<tr><th><label for="lbb-csv_separator">' . esc_html__( 'Separator în CSV (lista de pasageri)', 'libertbus-bilete' ) . '</label></th><td><select id="lbb-csv_separator" name="csv_separator" aria-describedby="lbb-csv_separator-desc">'
 					. '<option value=","' . selected( $s['csv_separator'], ',', false ) . '>' . esc_html__( 'virgulă (,)', 'libertbus-bilete' ) . '</option>'
