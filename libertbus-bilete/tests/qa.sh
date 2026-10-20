@@ -103,6 +103,14 @@ echo "== Plată în RON + rezervare cu plata la urcare"
 OUT_CR=$(BASE="$BASE" node "$DIR/tests/e2e-currency-reserve.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_CR" | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "$OUT_CR" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
 fresh_carts
+echo "== Checkout cu blocuri: fără adresă poștală pentru bilete"
+CHK_ID=$(cd "$WP_PATH" && $WP_CLI option get woocommerce_checkout_page_id 2>/dev/null)
+CHK_OLD=$(cd "$WP_PATH" && $WP_CLI post get "$CHK_ID" --field=post_content 2>/dev/null)
+(cd "$WP_PATH" && $WP_CLI post update "$CHK_ID" --post_content='<!-- wp:woocommerce/checkout --><div class="wp-block-woocommerce-checkout wc-block-checkout is-loading"></div><!-- /wp:woocommerce/checkout -->' >/dev/null 2>&1)
+OUT_BL=$(BASE="$BASE" node "$DIR/tests/e2e-blocks.js" 2>&1 | grep -v CERT_AUTHORITY)
+(cd "$WP_PATH" && $WP_CLI post update "$CHK_ID" --post_content="$CHK_OLD" >/dev/null 2>&1)
+echo "$OUT_BL" | grep -q 'BLOCKS: OK' && echo "  ok" || { echo "$OUT_BL" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
+fresh_carts
 echo "== Previzualizare doar pentru admin (plata online oprită pentru clienți)"
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=0; update_option("lbb_settings",$s);')
 LBB_PREVIEW_TOKEN=$(cd "$WP_PATH" && $WP_CLI eval 'echo LBB_Settings::preview_token();' 2>/dev/null) BASE="$BASE" node "$DIR/tests/e2e-preview.js" 2>&1 | grep -v CERT_AUTHORITY > "${TMPDIR:-/tmp}/lbb-preview.out"
