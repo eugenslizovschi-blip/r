@@ -5,7 +5,10 @@ set -e
 W="${1:?director de lucru}"
 PLUGIN="$(cd "$(dirname "$0")/.." && pwd)"
 mkdir -p "$W" && cd "$W"
-pgrep -x mariadbd >/dev/null || pgrep -x mysqld >/dev/null || { (mysqld_safe --user=mysql >/dev/null 2>&1 &); sleep 5; }
+pgrep -x mariadbd >/dev/null || pgrep -x mysqld >/dev/null || (mysqld_safe --user=mysql >/dev/null 2>&1 &)
+# La un container pornit la rece MariaDB are nevoie de mai mult de câteva secunde: așteptăm până răspunde (max. 60 s).
+for _ in $(seq 60); do mysqladmin ping >/dev/null 2>&1 && break; sleep 1; done
+mysqladmin ping >/dev/null 2>&1 || { echo "MariaDB nu pornește (vezi: apt-get install -y mariadb-server)" >&2; exit 1; }
 mysql -uroot -e "CREATE DATABASE IF NOT EXISTS wp; CREATE USER IF NOT EXISTS 'wp'@'localhost' IDENTIFIED BY 'wp'; GRANT ALL ON wp.* TO 'wp'@'localhost';"
 [ -f wp-cli.phar ] || curl -sSL -o wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 # Aceeași versiune ca pe libertbus.md; WP_VERSION=7.1.2 tests/setup-local.sh … testează o actualizare.
