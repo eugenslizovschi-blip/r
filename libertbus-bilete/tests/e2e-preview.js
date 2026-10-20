@@ -83,6 +83,10 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const esc = await second.evaluate(f => ({ open: !!document.querySelector('.lbb-overlay'), focus: f.contains(document.activeElement) && document.activeElement.getAttribute('data-lbb') }));
   if (esc.open || esc.focus !== 'time') fail('Escape la pasul 2: ' + JSON.stringify(esc));
   await (await second.$('[data-lbb="next"]')).click();
+  // „Continuă” duce focusul în fereastră, la numele primului pasager (cititorul de ecran și tastatura nu rămân în
+  // pagina din spate).
+  const openFocus = await admin.evaluate(() => { const a = document.activeElement; const ov = document.querySelector('.lbb-overlay'); return { inside: !!ov && ov.contains(a), name: a && a.name }; });
+  if (!openFocus.inside || openFocus.name !== 'lbb_names[]') fail('după „Continuă” focusul nu e la numele primului pasager: ' + JSON.stringify(openFocus));
   // Pasul 2 e într-o fereastră peste pagină; ambele butoane se văd pe ecran chiar cu 5 pasageri.
   if (!(await admin.$('.lbb-overlay .lbb-booking'))) fail('pasul 2 nu s-a deschis în fereastră');
   const btns = await admin.$$eval('.lbb-overlay [data-lbb-submit]', bs => bs.map(b => { const r = b.getBoundingClientRect(); return { v: b.value, ok: r.top >= 0 && r.bottom <= window.innerHeight && r.height > 30 }; }));
