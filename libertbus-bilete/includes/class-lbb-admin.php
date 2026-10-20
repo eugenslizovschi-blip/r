@@ -1057,8 +1057,9 @@ class LBB_Admin {
 			}
 			echo '</td></tr>';
 		};
+		// Fieldset cu titlul rândului: cititorul de ecran spune „Plata online cu cardul” înainte de explicația lungă.
 		$check = function ( $key, $label, $help = '' ) use ( $s ) {
-			echo '<tr><th>' . esc_html( $label ) . '</th><td><label><input name="' . esc_attr( $key ) . '" type="checkbox" value="1" ' . checked( ! empty( $s[ $key ] ), true, false ) . '> ' . esc_html( $help ) . '</label></td></tr>';
+			echo '<tr><th>' . esc_html( $label ) . '</th><td><fieldset><legend class="screen-reader-text">' . esc_html( $label ) . '</legend><label><input name="' . esc_attr( $key ) . '" type="checkbox" value="1" ' . checked( ! empty( $s[ $key ] ), true, false ) . '> ' . esc_html( $help ) . '</label></fieldset></td></tr>';
 		};
 		?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
