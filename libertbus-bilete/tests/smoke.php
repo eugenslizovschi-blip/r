@@ -476,7 +476,7 @@ lbb_t( 'text și contururi pe alb (buton secundar, „Înapoi”, câmp selectat
 // Fiecare fișier PHP al plugin-ului refuză accesul direct din browser (defined( 'ABSPATH' ) || exit;): altfel o
 // cerere la /wp-content/plugins/libertbus-bilete/includes/… poate afișa erori PHP cu căile serverului.
 $da_bad = array();
-foreach ( array_merge( array( LBB_DIR . 'libertbus-bilete.php', LBB_DIR . 'uninstall.php' ), glob( LBB_DIR . 'includes/*.php' ) ) as $da_f ) {
+foreach ( array_merge( array( LBB_DIR . 'libertbus-bilete.php', LBB_DIR . 'uninstall.php' ), glob( LBB_DIR . 'includes/class-*.php' ), glob( LBB_DIR . 'data/routes-*.php' ) ) as $da_f ) {
 	if ( ! preg_match( "/^\\s*defined\\( '(ABSPATH|WP_UNINSTALL_PLUGIN)' \\) \\|\\| exit;/m", (string) file_get_contents( $da_f ) ) ) {
 		$da_bad[] = basename( $da_f );
 	}
@@ -487,6 +487,17 @@ lbb_t( 'fișierele PHP refuză accesul direct (defined ABSPATH || exit), iar o c
 $fh_r = wp_remote_get( home_url( '/?lbb_bilet=LB-XXXXXX&k=0' ), array( 'timeout' => 20 ) );
 $fh_h = array( wp_remote_retrieve_header( $fh_r, 'x-frame-options' ), wp_remote_retrieve_header( $fh_r, 'content-security-policy' ), wp_remote_retrieve_header( $fh_r, 'x-content-type-options' ) );
 lbb_t( 'pagina biletului nu se poate încadra pe alt site (X-Frame-Options, frame-ancestors) și are nosniff', array( 'SAMEORIGIN', "frame-ancestors 'self'", 'nosniff' ) === $fh_h, $fh_h );
+// Pe un server cu listarea folderelor pornită (Apache „Options +Indexes”), /wp-content/plugins/libertbus-bilete/includes/
+// ar arăta toate fișierele: fiecare folder are un index.php gol, inclus și în arhiva de instalare.
+$ix_bad = array();
+foreach ( array( '', 'includes/', 'assets/', 'data/', 'languages/' ) as $ix_d ) {
+	$ix_body = file_exists( LBB_DIR . $ix_d . 'index.php' ) ? wp_remote_retrieve_body( wp_remote_get( plugins_url( $ix_d . 'index.php', LBB_DIR . 'libertbus-bilete.php' ), array( 'timeout' => 20 ) ) ) : 'lipsește';
+	if ( '' !== trim( $ix_body ) ) {
+		$ix_bad[] = $ix_d . 'index.php: ' . substr( $ix_body, 0, 40 );
+	}
+}
+$ix_zip = (string) file_get_contents( LBB_DIR . 'tests/build-zip.sh' );
+lbb_t( 'fiecare folder al plugin-ului are un index.php gol (fără listarea fișierelor pe server), inclus în arhivă', ! $ix_bad && false !== strpos( $ix_zip, '"$(basename "$DIR")/index.php"' ), $ix_bad );
 // Flex gap lipsește în Safari < 14.1 (iPhone-uri încă folosite): în rândurile flex spațiile sunt margini.
 $fg_bad = array();
 foreach ( array( 'assets/lbb.css', 'assets/cookies.css', 'includes/class-lbb-tickets.php' ) as $fg_f ) {
