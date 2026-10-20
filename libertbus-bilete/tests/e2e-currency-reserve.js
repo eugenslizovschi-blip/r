@@ -94,6 +94,18 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const h = tr.headers();
   // Și nu se poate încadra pe alt site (butonul de plată sub un strat invizibil).
   if (!/no-store/.test(h['cache-control'] || '') || !/noindex/.test(h['x-robots-tag'] || '') || h['referrer-policy'] !== 'no-referrer' || h['x-frame-options'] !== 'SAMEORIGIN' || !/frame-ancestors 'self'/.test(h['content-security-policy'] || '') || h['x-content-type-options'] !== 'nosniff') fail('pagina biletului: antete greșite ' + JSON.stringify({ cc: h['cache-control'], robots: h['x-robots-tag'], ref: h['referrer-policy'], xfo: h['x-frame-options'], csp: h['content-security-policy'], nosniff: h['x-content-type-options'] }));
+  // Pe telefonul cel mai îngust (320px) eticheta („De achitat la urcare”) nu ia jumătate din bilet: valorile (numele,
+  // ruta) au loc și nu se rup în mijlocul cuvântului; fără scroll orizontal.
+  {
+    const vp = guest.viewportSize();
+    await guest.setViewportSize({ width: 320, height: 640 });
+    const nw = await guest.evaluate(() => {
+      const t = document.querySelector('.lbb-ticket table'); const th = t && t.querySelector('th');
+      return { th: th ? Math.round(100 * th.getBoundingClientRect().width / t.getBoundingClientRect().width) : 100, hs: document.documentElement.scrollWidth > innerWidth + 1 };
+    });
+    if (nw.th > 45 || nw.hs) fail('biletul la 320px: coloana etichetelor ia ' + nw.th + '% din tabel' + (nw.hs ? ', scroll orizontal' : ''));
+    await guest.setViewportSize(vp);
+  }
   // „Printează” se vede (și deschide printarea) doar cu JavaScript; fără el butonul n-ar face nimic, deci lipsește.
   {
     const printBtn = await guest.evaluate(() => { const b = document.querySelector('.actions .print'); let called = 0; window.print = () => { called++; }; if (b) b.click(); return { shown: !!b && b.getClientRects().length > 0, called }; });
@@ -112,7 +124,8 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   // Un link cu cheia greșită nu arată nimic din rezervare.
   const forged = await guest.request.get(guest.url().replace(/([?&]k=)[^&]+/, '$1' + '0'.repeat(20)));
   const fbody = await forged.text();
-  if (forged.status() !== 404 || /lbb-ticket|Test Pasager/.test(fbody)) fail('un link fals arată rezervarea: ' + forged.status());
+  // Biletul afișat (elementul), nu numele clasei din stilul comun al paginii.
+  if (forged.status() !== 404 || /class="lbb-ticket[" ]|Test Pasager/.test(fbody)) fail('un link fals arată rezervarea: ' + forged.status());
   // Clientul cu un link stricat are măcar telefonul firmei.
   if (!/Biletul nu a fost găsit/.test(fbody) || !/href="tel:\+?\d{6,}"/.test(fbody)) fail('pagina „bilet negăsit” nu are telefonul firmei');
   // „Adaugă în calendar”: butonul de pe bilet și linkul din emailul primit de client descarcă un .ics al cursei.
