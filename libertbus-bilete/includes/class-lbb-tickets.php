@@ -574,6 +574,10 @@ class LBB_Tickets {
 		header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private' );
 		header( 'X-Robots-Tag: noindex, nofollow' );
 		header( 'Referrer-Policy: no-referrer' );
+		// Butonul de plată și codul QR nu se pot încadra pe alt site (clickjacking); nici fișierul .ics nu se ghicește ca HTML.
+		header( 'X-Frame-Options: SAMEORIGIN' );
+		header( "Content-Security-Policy: frame-ancestors 'self'" );
+		header( 'X-Content-Type-Options: nosniff' );
 		status_header( $booking ? 200 : 404 );
 
 		$state = $booking ? self::state( $booking ) : null;

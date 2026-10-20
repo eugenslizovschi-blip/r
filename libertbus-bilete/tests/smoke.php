@@ -484,6 +484,9 @@ foreach ( array_merge( array( LBB_DIR . 'libertbus-bilete.php', LBB_DIR . 'unins
 $da_url  = plugins_url( 'includes/class-lbb-tickets.php', LBB_DIR . 'libertbus-bilete.php' );
 $da_body = wp_remote_retrieve_body( wp_remote_get( $da_url, array( 'timeout' => 20 ) ) );
 lbb_t( 'fișierele PHP refuză accesul direct (defined ABSPATH || exit), iar o cerere directă la un fișier din includes/ nu afișează nimic', ! $da_bad && '' === trim( $da_body ), array( $da_bad, substr( $da_body, 0, 200 ) ) );
+$fh_r = wp_remote_get( home_url( '/?lbb_bilet=LB-XXXXXX&k=0' ), array( 'timeout' => 20 ) );
+$fh_h = array( wp_remote_retrieve_header( $fh_r, 'x-frame-options' ), wp_remote_retrieve_header( $fh_r, 'content-security-policy' ), wp_remote_retrieve_header( $fh_r, 'x-content-type-options' ) );
+lbb_t( 'pagina biletului nu se poate încadra pe alt site (X-Frame-Options, frame-ancestors) și are nosniff', array( 'SAMEORIGIN', "frame-ancestors 'self'", 'nosniff' ) === $fh_h, $fh_h );
 // Flex gap lipsește în Safari < 14.1 (iPhone-uri încă folosite): în rândurile flex spațiile sunt margini.
 $fg_bad = array();
 foreach ( array( 'assets/lbb.css', 'assets/cookies.css', 'includes/class-lbb-tickets.php' ) as $fg_f ) {

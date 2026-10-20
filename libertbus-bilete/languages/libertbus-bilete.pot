@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T06:58:09+00:00\n"
+"POT-Creation-Date: 2026-10-20T07:57:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: libertbus-bilete\n"
@@ -788,7 +788,7 @@ msgid "Arată"
 msgstr ""
 
 #: includes/class-lbb-admin.php:647
-#: includes/class-lbb-tickets.php:637
+#: includes/class-lbb-tickets.php:641
 msgid "Printează"
 msgstr ""
 
@@ -2170,7 +2170,7 @@ msgstr ""
 
 #: includes/class-lbb-tickets.php:146
 #: includes/class-lbb-tickets.php:385
-#: includes/class-lbb-tickets.php:638
+#: includes/class-lbb-tickets.php:642
 msgid "Adaugă în calendar"
 msgstr ""
 
@@ -2223,7 +2223,7 @@ msgid "Rezervarea %1$s pentru %2$s, %3$s a fost anulată. Locurile nu mai sunt p
 msgstr ""
 
 #: includes/class-lbb-tickets.php:268
-#: includes/class-lbb-tickets.php:641
+#: includes/class-lbb-tickets.php:645
 msgid "Rezervați din nou online"
 msgstr ""
 
@@ -2333,25 +2333,25 @@ msgstr ""
 msgid "Autocar %1$s (%2$s)"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:613
+#: includes/class-lbb-tickets.php:617
 msgid "Bilet negăsit"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:630
+#: includes/class-lbb-tickets.php:634
 msgid "Biletul nu a fost găsit. Verificați linkul din email."
 msgstr ""
 
 #. translators: %s: telefonul pentru clienți
-#: includes/class-lbb-tickets.php:632
+#: includes/class-lbb-tickets.php:636
 #, php-format
 msgid "Dacă nu găsiți emailul, sunați-ne la %s și vă ajutăm după numele sau telefonul de la rezervare."
 msgstr ""
 
-#: includes/class-lbb-tickets.php:639
+#: includes/class-lbb-tickets.php:643
 msgid "Trimite biletul"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:640
+#: includes/class-lbb-tickets.php:644
 msgid "Achită acum"
 msgstr ""
 
