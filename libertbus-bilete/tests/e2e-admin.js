@@ -70,6 +70,23 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const lost = await page.$$eval('.subsubsub a', (as, q) => as.filter(a => new URL(a.href).searchParams.get('q') !== q).map(a => a.textContent), someCode.toLowerCase());
     if (lost.length) fail('filtrele de stare pierd căutarea: ' + lost.join(', '));
   } else fail('nu am găsit un bilet pentru testul de căutare');
+  // WooCommerce → Comenzi (pagina pe care o folosește biroul, HPOS sau „posts”): căutarea după codul unui bilet plătit
+  // („LB-…” din emailul clientului) găsește comanda; o căutare fără sens nu găsește nimic.
+  {
+    await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&status=confirmed');
+    const paid = await page.$$eval('#wpbody-content table.widefat code', cs => (cs.map(c => c.textContent.trim()).find(t => /^LB-/.test(t)) || ''));
+    const ordersUrl = await page.$eval('#adminmenu a[href*="page=wc-orders"], #adminmenu a[href*="post_type=shop_order"]', a => a.href).catch(() => '');
+    if (!paid || !ordersUrl) fail('lipsește un bilet plătit sau pagina Comenzi pentru testul de căutare: ' + JSON.stringify([paid, ordersUrl]));
+    else {
+      const rows = async (q) => {
+        // search-filter=all ca formularul din pagină (fără el WooCommerce 8.7 scrie „Deprecated: urldecode()” pe HPOS).
+        await page.goto(ordersUrl + (ordersUrl.includes('?') ? '&' : '?') + 's=' + encodeURIComponent(q) + '&search-filter=all');
+        return page.$$eval('#the-list tr:not(.no-items)', trs => trs.length);
+      };
+      const hit = await rows(paid), miss = await rows('zzqq-nimic');
+      if (hit < 1 || miss !== 0) fail('WooCommerce → Comenzi: căutarea după ' + paid + ' a dat ' + hit + ' comenzi (fără sens: ' + miss + ')');
+    }
+  }
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');
   const none = await page.textContent('#wpbody-content table.widefat tbody');
   if (!/Nicio rezervare găsită/.test(none)) fail('căutarea fără rezultat nu spune nimic: ' + none.trim().slice(0, 80));
