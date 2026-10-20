@@ -77,7 +77,12 @@ async function check(browser, state, [name, dev]) {
       const ungrouped = tot ? /\d{4}/.test(tot.textContent) : false;
       // Bara cu butoane lipită jos nu ia mai mult de 30% din ecran (pe telefon orizontal, cu tastatura, ar acoperi câmpurile).
       const act = ov.querySelector('.lbb-actions'); const actH = act ? act.getBoundingClientRect().height : 0;
-      return { bs, panelW: Math.round(panel.width), hScroll: ov.scrollWidth > ov.clientWidth + 1, backOk: !back || backColor === accent, backColor, phoneLines, totalSplit, ungrouped, actPct: Math.round(100 * actH / innerHeight) };
+      // Și la pasul 2 (nume, telefon, email, moneda, „Schimbă cursa”) totul se atinge ușor cu degetul: cel puțin 40px.
+      // Fără textele din frază (display: inline), radiourile ascunse (se apasă eticheta) și câmpul-capcană anti-spam.
+      const small = [...ov.querySelectorAll('select, input:not([type=hidden]):not([type=radio]):not([type=checkbox]), button, .lbb-chip span')]
+        .filter(e => e.offsetParent && !e.closest('.lbb-hp') && getComputedStyle(e).display !== 'inline' && e.getBoundingClientRect().height < 40)
+        .map(e => (e.name || e.dataset.lbb || e.className || e.tagName) + ' ' + Math.round(e.getBoundingClientRect().height) + 'px');
+      return { small, bs, panelW: Math.round(panel.width), hScroll: ov.scrollWidth > ov.clientWidth + 1, backOk: !back || backColor === accent, backColor, phoneLines, totalSplit, ungrouped, actPct: Math.round(100 * actH / innerHeight) };
     });
     if (!m2) r.issues.push('fereastra pasului 2 nu s-a deschis');
     else {
@@ -87,6 +92,7 @@ async function check(browser, state, [name, dev]) {
       if (m2.phoneLines !== 1) r.issues.push('telefonul de la final e rupt pe ' + m2.phoneLines + ' rânduri (sau lipsește)');
       if (m2.totalSplit) r.issues.push('suma și moneda se pot despărți pe rânduri diferite');
       if (m2.ungrouped) r.issues.push('suma de peste 999 fără punct la mii (altfel decât pe bilet)');
+      if (m2.small.length) r.issues.push('pasul 2: elemente sub 40px înălțime: ' + m2.small.join(','));
       if (m2.actPct > 30) r.issues.push('butoanele de jos iau ' + m2.actPct + '% din înălțimea ecranului');
       r.step2 = 'panou ' + m2.panelW + 'px, butoane ' + m2.bs.map(b => b.w + '×' + b.h).join(' / ');
     }

@@ -136,7 +136,10 @@
 .lbb-compact .lbb-summary { margin: 4px 0 10px; padding: 10px 12px; }
 .lbb-compact .lbb-summary-total { font-size: 18px; }
 .lbb-next-wrap { margin-bottom: 4px; }
-.lbb-back { background: none !important; border: 0 !important; color: var(--lbb-accent-text) !important; padding: 4px 0 !important; margin: 0 0 8px !important; font: inherit; font-weight: 600; cursor: pointer; box-shadow: none !important; }
+/* Fără chenar, dar cu zona de atingere de un deget (44px), ca restul butoanelor. */
+.lbb-back { background: none !important; border: 0 !important; color: var(--lbb-accent-text) !important; padding: 4px 0 !important; margin: 0 0 8px !important; min-height: 44px !important; display: inline-flex !important; align-items: center; font: inherit; font-weight: 600; cursor: pointer; box-shadow: none !important; }
+/* Săgeata și textul: în flex spațiul dintre ele dispare, iar gap nu merge în Safari < 14.1. */
+.lbb-back > span[aria-hidden] { margin-right: 0.25em; }
 @media (max-width: 340px) { .lbb-compact .lbb-grid { grid-template-columns: 1fr; } }
 
 /* Pasul 2 al formularului compact: fereastră peste pagină */
