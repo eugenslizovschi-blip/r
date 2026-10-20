@@ -470,6 +470,17 @@ wp_deregister_style( 'lbb' );
 LBB_Frontend::register_assets();
 lbb_t( 'culoarea butoanelor: text alb pe verde/albastru închis, text închis pe galben sau alb; aplicat în stilul formularului', '#fff' === LBB_Settings::accent_ink( '#00875a' ) && '#fff' === LBB_Settings::accent_ink( '#1e40af' ) && '#1d2733' === LBB_Settings::accent_ink( '#ffd700' ) && '#1d2733' === LBB_Settings::accent_ink( '#fff' ) && '#fff' === LBB_Settings::accent_ink( 'nu' ) && false !== strpos( $ai_css, '--lbb-accent:#ffd700;--lbb-accent-ink:#1d2733;--lbb-accent-text:#1d2733' ), $ai_css );
 lbb_t( 'text și contururi pe alb (buton secundar, „Înapoi”, câmp selectat): culoarea aleasă dacă se citește, altfel închisă', '#00875a' === LBB_Settings::accent_text( '#00875a' ) && '#1e40af' === LBB_Settings::accent_text( '#1e40af' ) && '#1d2733' === LBB_Settings::accent_text( '#ffd700' ) && '#1d2733' === LBB_Settings::accent_text( '#f39c12' ) && '#1d2733' === LBB_Settings::accent_text( 'nu' ) && ! preg_match( '/(?<![\w-])color:\s*var\(--lbb-accent\)|outline:[^;]*var\(--lbb-accent\)/', (string) file_get_contents( LBB_DIR . 'assets/lbb.css' ) ) );
+// Fiecare fișier PHP al plugin-ului refuză accesul direct din browser (defined( 'ABSPATH' ) || exit;): altfel o
+// cerere la /wp-content/plugins/libertbus-bilete/includes/… poate afișa erori PHP cu căile serverului.
+$da_bad = array();
+foreach ( array_merge( array( LBB_DIR . 'libertbus-bilete.php', LBB_DIR . 'uninstall.php' ), glob( LBB_DIR . 'includes/*.php' ) ) as $da_f ) {
+	if ( ! preg_match( "/^\\s*defined\\( '(ABSPATH|WP_UNINSTALL_PLUGIN)' \\) \\|\\| exit;/m", (string) file_get_contents( $da_f ) ) ) {
+		$da_bad[] = basename( $da_f );
+	}
+}
+$da_url  = plugins_url( 'includes/class-lbb-tickets.php', LBB_DIR . 'libertbus-bilete.php' );
+$da_body = wp_remote_retrieve_body( wp_remote_get( $da_url, array( 'timeout' => 20 ) ) );
+lbb_t( 'fișierele PHP refuză accesul direct (defined ABSPATH || exit), iar o cerere directă la un fișier din includes/ nu afișează nimic', ! $da_bad && '' === trim( $da_body ), array( $da_bad, substr( $da_body, 0, 200 ) ) );
 // Flex gap lipsește în Safari < 14.1 (iPhone-uri încă folosite): în rândurile flex spațiile sunt margini.
 $fg_bad = array();
 foreach ( array( 'assets/lbb.css', 'assets/cookies.css', 'includes/class-lbb-tickets.php' ) as $fg_f ) {
