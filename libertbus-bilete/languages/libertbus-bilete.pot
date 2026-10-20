@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T14:59:21+00:00\n"
+"POT-Creation-Date: 2026-10-20T15:57:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: libertbus-bilete\n"
@@ -1513,8 +1513,8 @@ msgid "Rezervată, cu plata la urcare"
 msgstr ""
 
 #: includes/class-lbb-bookings.php:649
-#: includes/class-lbb-install.php:52
-#: includes/class-lbb-install.php:57
+#: includes/class-lbb-install.php:54
+#: includes/class-lbb-install.php:59
 msgid "Rezervări LibertBus"
 msgstr ""
 
@@ -1972,11 +1972,11 @@ msgstr ""
 msgid "Plată de test LibertBus (fără bani reali)."
 msgstr ""
 
-#: includes/class-lbb-install.php:156
+#: includes/class-lbb-install.php:180
 msgid "Bilet autocar"
 msgstr ""
 
-#: includes/class-lbb-install.php:165
+#: includes/class-lbb-install.php:189
 msgid "Bilet pentru transport de pasageri. Se cumpără din formularul de rezervare."
 msgstr ""
 

@@ -146,6 +146,12 @@ lbb_t( 'plata confirmă biletul și dă cod', 'confirmed' === $b['status'] && pr
 $sc_hpos = class_exists( 'Automattic\\WooCommerce\\Utilities\\OrderUtil' ) && Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 $sc_ids  = $sc_hpos ? wc_get_orders( array( 's' => $b['ticket_code'], 'return' => 'ids', 'limit' => 5 ) ) : WC_Data_Store::load( 'order' )->search_orders( $b['ticket_code'] );
 lbb_t( 'WooCommerce → Comenzi: căutarea după codul biletului găsește comanda (' . ( $sc_hpos ? 'HPOS' : 'posts' ) . ')', in_array( $order->get_id(), array_map( 'intval', (array) $sc_ids ), true ) && $b['ticket_code'] === wc_get_order( $order->get_id() )->get_meta( '_lbb_codes' ), array( $sc_ids, $order->get_id() ) );
+// Comandă plătită înainte de versiunea 5 (fără codurile pe comandă): actualizarea le pune, o singură dată.
+$order->delete_meta_data( '_lbb_codes' );
+$order->save_meta_data();
+$bf_n = LBB_Install::backfill_codes();
+$bf_c = wc_get_order( $order->get_id() )->get_meta( '_lbb_codes' );
+lbb_t( 'actualizarea pune codurile biletelor și pe comenzile plătite înainte (căutarea din WooCommerce → Comenzi), iar a doua rulare nu mai schimbă nimic', $bf_n >= 1 && $b['ticket_code'] === $bf_c && 0 === LBB_Install::backfill_codes(), array( $bf_n, $bf_c ) );
 $order->update_status( 'cancelled' );
 lbb_t( 'anularea comenzii eliberează locurile', 'cancelled' === LBB_Bookings::get_by_token( $h3['token'] )['status'] );
 

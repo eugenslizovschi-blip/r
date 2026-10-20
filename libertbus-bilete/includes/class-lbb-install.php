@@ -38,6 +38,8 @@ class LBB_Install {
 		if ( get_option( 'lbb_db_version' ) !== LBB_DB_VERSION ) {
 			self::create_tables();
 			update_option( 'lbb_db_version', LBB_DB_VERSION );
+			// Versiunea 5: codurile biletelor și pe comenzile plătite înainte (căutarea din WooCommerce → Comenzi).
+			add_action( 'init', array( __CLASS__, 'backfill_codes' ), 30 );
 		}
 		if ( get_option( 'lbb_needs_product' ) && class_exists( 'WooCommerce' ) ) {
 			add_action( 'init', array( __CLASS__, 'ensure_product' ), 20 );
@@ -57,6 +59,28 @@ class LBB_Install {
 			$erasers['libertbus-bilete'] = array( 'eraser_friendly_name' => __( 'Rezervări LibertBus', 'libertbus-bilete' ), 'callback' => array( 'LBB_Bookings', 'privacy_erase' ) );
 			return $erasers;
 		} );
+	}
+
+	/**
+	 * Codurile biletelor („LB-…”) puse pe comenzile plătite care nu le au încă (din versiunile dinainte), ca
+	 * biroul să le găsească și în căutarea din WooCommerce → Comenzi. Comenzile care le au rămân neatinse.
+	 */
+	public static function backfill_codes() {
+		global $wpdb;
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			return 0;
+		}
+		$rows = $wpdb->get_results( 'SELECT order_id, GROUP_CONCAT(ticket_code ORDER BY id SEPARATOR \' \') AS codes FROM ' . LBB_Bookings::table() . " WHERE order_id > 0 AND ticket_code <> '' GROUP BY order_id ORDER BY order_id DESC LIMIT 5000", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
+		$done = 0;
+		foreach ( (array) $rows as $row ) {
+			$order = wc_get_order( (int) $row['order_id'] );
+			if ( $order && '' === (string) $order->get_meta( '_lbb_codes' ) ) {
+				$order->update_meta_data( '_lbb_codes', (string) $row['codes'] );
+				$order->save_meta_data();
+				$done++;
+			}
+		}
+		return $done;
 	}
 
 	public static function create_tables() {
