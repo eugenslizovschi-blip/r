@@ -441,7 +441,7 @@ class LBB_WooCommerce {
 		}
 		$order = is_object( $order ) ? $order : wc_get_order( $order );
 		$codes = $order ? array_filter( explode( ' ', (string) $order->get_meta( '_lbb_codes' ) ) ) : array();
-		echo $codes ? '<code>' . implode( '</code> <code>', array_map( 'esc_html', $codes ) ) . '</code>' : '<span aria-hidden="true">—</span>';
+		echo $codes ? '<code>' . implode( '</code> <code>', array_map( 'esc_html', $codes ) ) . '</code>' : '<span aria-hidden="true">—</span><span class="screen-reader-text">' . esc_html__( 'fără bilete', 'libertbus-bilete' ) . '</span>';
 	}
 
 	public static function search_keys( $keys ) {

@@ -721,9 +721,6 @@ class LBB_Admin {
 	}
 
 	/**
-	 * Codul biletului; rezervările fără cod (coș abandonat, anulate înainte de plată) arată „—”.
-	 */
-	/**
 	 * Pentru linkurile care se deschid într-o filă nouă: cititorul de ecran o spune (WCAG G201), vizual nu apare.
 	 */
 	private static function new_tab_note() {
@@ -738,8 +735,14 @@ class LBB_Admin {
 		return (bool) preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', (string) $date, $m ) && checkdate( (int) $m[2], (int) $m[3], (int) $m[1] );
 	}
 
+	/**
+	 * Codul biletului; rezervările fără cod (coș abandonat, anulate înainte de plată) arată „—”, iar cititorul de
+	 * ecran spune „fără cod” (liniuța singură e citită „linie lungă” sau deloc).
+	 */
 	private static function ticket_code_html( $code ) {
-		return '' === (string) $code ? '—' : '<code>' . esc_html( $code ) . '</code>';
+		return '' === (string) $code
+			? '<span aria-hidden="true">—</span><span class="screen-reader-text">' . esc_html__( 'fără cod', 'libertbus-bilete' ) . '</span>'
+			: '<code>' . esc_html( $code ) . '</code>';
 	}
 
 	/**

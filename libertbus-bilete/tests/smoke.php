@@ -152,6 +152,15 @@ LBB_WooCommerce::order_column( 'lbb_tickets', $order->get_id() );
 LBB_WooCommerce::order_column( 'order_total', $order );
 $oc_html = ob_get_clean();
 lbb_t( 'WooCommerce → Comenzi: coloana „Bilete” după „Stare”, cu codul biletului (și cu comanda ca obiect, HPOS)', array( 'cb', 'order_number', 'order_date', 'order_status', 'lbb_tickets', 'order_total' ) === $oc_cols && '<code>' . $b['ticket_code'] . '</code>' === $oc_html, array( $oc_cols, $oc_html ) );
+// „—” singur e citit „linie lungă” sau deloc: cititorul de ecran aude „fără cod” / „fără bilete”.
+$em_m = new ReflectionMethod( 'LBB_Admin', 'ticket_code_html' );
+$em_m->setAccessible( true );
+$em_o = wc_create_order();
+ob_start();
+LBB_WooCommerce::order_column( 'lbb_tickets', $em_o );
+$em_col = ob_get_clean();
+$em_o->delete( true );
+lbb_t( 'codul lipsă („—”) are text pentru cititorul de ecran: „fără cod” în Rezervări, „fără bilete” în WooCommerce → Comenzi', '<span aria-hidden="true">—</span><span class="screen-reader-text">fără cod</span>' === $em_m->invoke( null, '' ) && '<code>LB-ABC234</code>' === $em_m->invoke( null, 'LB-ABC234' ) && false !== strpos( $em_col, 'aria-hidden="true">—</span><span class="screen-reader-text">fără bilete</span>' ), array( $em_m->invoke( null, '' ), $em_col ) );
 // Comandă plătită înainte de versiunea 5 (fără codurile pe comandă): actualizarea le pune, o singură dată.
 $order->delete_meta_data( '_lbb_codes' );
 $order->save_meta_data();
