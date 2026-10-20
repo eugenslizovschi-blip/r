@@ -139,7 +139,9 @@ class LBB_Frontend {
 			self::$error = new WP_Error( 'lbb_nonce', __( 'Sesiunea a expirat. Reîncărcați pagina și încercați din nou.', 'libertbus-bilete' ) );
 			return;
 		}
-		if ( ! empty( $_POST['lbb_website'] ) ) { // Câmp-capcană pentru roboți.
+		// Câmp-capcană pentru roboți: „lbb_hp”, nu „…website” (managerii de parole și extensiile completează automat
+		// câmpurile după nume, iar clientul ar fi refuzat); „lbb_website” rămâne pentru paginile vechi din cache.
+		if ( ! empty( $_POST['lbb_hp'] ) || ! empty( $_POST['lbb_website'] ) ) {
 			// Eticheta capcanei nu mai seamănă cu „Website” (completat automat de unele extensii), dar dacă un om
 			// ajunge totuși aici, are telefonul biroului (link de apel), nu un mesaj fără ieșire.
 			$phone       = LBB_Settings::phone_text();
@@ -526,7 +528,7 @@ class LBB_Frontend {
 				<input type="hidden" name="lbb_mode" value="<?php echo $can_pay ? 'pay' : 'reserve'; ?>" data-lbb="mode">
 				<input type="hidden" name="lbb_nonce" value="<?php echo esc_attr( wp_create_nonce( 'lbb_book' ) ); ?>">
 				<input type="hidden" name="lbb_form" value="<?php echo esc_attr( $form_key ); ?>">
-				<div class="lbb-hp" aria-hidden="true"><label><?php esc_html_e( 'Nu completați', 'libertbus-bilete' ); ?> <input type="text" name="lbb_website" tabindex="-1" autocomplete="off"></label></div>
+				<div class="lbb-hp" aria-hidden="true"><label><?php esc_html_e( 'Nu completați', 'libertbus-bilete' ); ?> <input type="text" name="lbb_hp" tabindex="-1" autocomplete="off"></label></div>
 
 				<div class="lbb-step1" data-lbb="step1">
 				<div class="lbb-grid">
