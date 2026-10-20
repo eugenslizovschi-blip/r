@@ -42,6 +42,9 @@ class LBB_WooCommerce {
 
 		add_filter( 'woocommerce_currency', array( __CLASS__, 'session_currency' ), 999 );
 		add_filter( 'woocommerce_checkout_fields', array( __CLASS__, 'checkout_fields' ), 20 );
+		// Căutarea din WooCommerce → Comenzi găsește și codul biletului (comenzi în tabelele HPOS și în articole).
+		add_filter( 'woocommerce_order_table_search_query_meta_keys', array( __CLASS__, 'search_keys' ) );
+		add_filter( 'woocommerce_shop_order_search_fields', array( __CLASS__, 'search_keys' ) );
 		add_filter( 'woocommerce_get_country_locale_default', array( __CLASS__, 'locale_default' ), 20 );
 		add_filter( 'woocommerce_get_country_locale', array( __CLASS__, 'country_locale' ), 20 );
 		add_filter( 'woocommerce_checkout_get_value', array( __CLASS__, 'prefill' ), 10, 2 );
@@ -302,6 +305,9 @@ class LBB_WooCommerce {
 		}
 		$over  = LBB_Bookings::confirm_order( $order->get_id() );
 		$codes = wp_list_pluck( LBB_Bookings::by_order( $order->get_id() ), 'ticket_code' );
+		// Codurile și pe comandă: biroul găsește comanda după „LB-…” și în WooCommerce → Comenzi (căutare).
+		$order->update_meta_data( '_lbb_codes', implode( ' ', array_filter( $codes ) ) );
+		$order->save_meta_data();
 		/* translators: %s: codurile biletelor, separate prin virgulă */
 		$order->add_order_note( sprintf( __( 'LibertBus: bilete emise: %s', 'libertbus-bilete' ), implode( ', ', array_filter( $codes ) ) ) );
 		if ( $over ) {
@@ -404,6 +410,12 @@ class LBB_WooCommerce {
 		}
 		$fields['shipping'] = array();
 		return $fields;
+	}
+
+	public static function search_keys( $keys ) {
+		$keys   = (array) $keys;
+		$keys[] = '_lbb_codes';
+		return $keys;
 	}
 
 	/**
