@@ -1552,6 +1552,8 @@ $zy_p = LBB_Settings::parse_dates( '25.12, 1.1, 25.12.99, 32.13' );
 lbb_t( 'zile fără curse: „25.12”, „1.1” fără an devin următoarea apariție, „25.12.99” devine 2099, „32.13” e semnalat', in_array( $zy_next( 12, 25 ), $zy_p['dates'], true ) && in_array( $zy_next( 1, 1 ), $zy_p['dates'], true ) && in_array( '2099-12-25', $zy_p['dates'], true ) && array( '32.13' ) === $zy_p['bad'], $zy_p );
 $zc_p = LBB_Settings::parse_dates( '25.12.2099, 1/1/2100 2099-12-26 32.01.2099 abc 01.01.2000 25.12.2099' );
 lbb_t( 'zile fără curse: datele se înțeleg în mai multe forme, cele greșite se semnalează, cele trecute se ignoră', array( '2099-12-25', '2099-12-26', '2100-01-01' ) === $zc_p['dates'] && array( '32.01.2099', 'abc' ) === $zc_p['bad'], $zc_p );
+$zd_p = LBB_Settings::parse_dates( '24.12.2099. 26-12-2099, 31.12.99.' );
+lbb_t( 'zile fără curse: punctul de la sfârșit („24.12.2099.”) și liniuțele („26-12-2099”) sunt înțelese, nu semnalate ca greșite', array( '2099-12-24', '2099-12-26', '2099-12-31' ) === $zd_p['dates'] && array() === $zd_p['bad'], $zd_p );
 $zc_keep = get_option( 'lbb_settings' );
 LBB_Settings::save( array_merge( LBB_Settings::all(), array( 'closed_dates' => '2099-12-26; 25.12.2099 nu' ) ) );
 $zc_saved = LBB_Settings::get( 'closed_dates' );

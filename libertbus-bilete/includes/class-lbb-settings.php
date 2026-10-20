@@ -151,7 +151,9 @@ class LBB_Settings {
 		$bad   = array();
 		$today = self::today();
 		foreach ( preg_split( '/[\s,;]+/', (string) $text, -1, PREG_SPLIT_NO_EMPTY ) as $part ) {
-			if ( preg_match( '/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4}|\d{2})$/', $part, $m ) ) {
+			// „25.12.” / „01.01.2027.”: punctul de la sfârșit se scrie des din obișnuință; „26-12-2026” ca în formular.
+			$part = rtrim( $part, '.' );
+			if ( preg_match( '/^(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4}|\d{2})$/', $part, $m ) ) {
 				// Anul și cu două cifre („25.12.26” = 2026).
 				list( $y, $mo, $d ) = array( 2 === strlen( $m[3] ) ? 2000 + (int) $m[3] : (int) $m[3], (int) $m[2], (int) $m[1] );
 			} elseif ( preg_match( '/^(\d{1,2})[.\/](\d{1,2})$/', $part, $m ) ) {
