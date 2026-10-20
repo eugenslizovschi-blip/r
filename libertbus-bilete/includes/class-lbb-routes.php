@@ -63,7 +63,8 @@ class LBB_Routes {
 	 * „08:45, 9:30 17:45” → ['08:45','09:30','17:45'], sortate și fără duplicate.
 	 */
 	public static function parse_times( $text ) {
-		preg_match_all( '/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/', (string) $text, $m, PREG_SET_ORDER );
+		// O dată scrisă din greșeală („10.11.2026”, „2026.10.11”) nu e o oră: altfel ar apărea o cursă la 10:11.
+		preg_match_all( '/\b(?<!\d\.)([01]?\d|2[0-3])[:.]([0-5]\d)\b(?!\.\d)/', (string) $text, $m, PREG_SET_ORDER );
 		$times = array();
 		foreach ( $m as $match ) {
 			$times[] = sprintf( '%02d:%02d', $match[1], $match[2] );
