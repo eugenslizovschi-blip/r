@@ -78,6 +78,10 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (admin.url() !== urlBefore || await admin.$('.lbb-alert')) fail('Enter la pasul 1 a trimis formularul');
   if (!(await admin.$('.lbb-overlay .lbb-booking'))) fail('Enter la pasul 1 nu a deschis pasul 2');
   await admin.keyboard.press('Escape');
+  // Escape închide fereastra, iar cine folosește tastatura continuă din același formular, de la „Ora” (nu de la
+  // începutul paginii).
+  const esc = await second.evaluate(f => ({ open: !!document.querySelector('.lbb-overlay'), focus: f.contains(document.activeElement) && document.activeElement.getAttribute('data-lbb') }));
+  if (esc.open || esc.focus !== 'time') fail('Escape la pasul 2: ' + JSON.stringify(esc));
   await (await second.$('[data-lbb="next"]')).click();
   // Pasul 2 e într-o fereastră peste pagină; ambele butoane se văd pe ecran chiar cu 5 pasageri.
   if (!(await admin.$('.lbb-overlay .lbb-booking'))) fail('pasul 2 nu s-a deschis în fereastră');
