@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T16:58:37+00:00\n"
+"POT-Creation-Date: 2026-10-20T01:56:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: libertbus-bilete\n"
@@ -244,7 +244,7 @@ msgid "săptămâni"
 msgstr ""
 
 #: includes/class-lbb-admin.php:185
-#: includes/class-lbb-routes.php:289
+#: includes/class-lbb-routes.php:290
 #: includes/class-lbb-woocommerce.php:108
 msgid "luni"
 msgstr ""
@@ -638,6 +638,10 @@ msgstr ""
 msgid "Separate prin virgulă, ex. 08:45, 17:45"
 msgstr ""
 
+#: includes/class-lbb-admin.php:520
+msgid "Zile de circulație"
+msgstr ""
+
 #: includes/class-lbb-admin.php:521
 msgid "Preț adult"
 msgstr ""
@@ -678,12 +682,12 @@ msgid "Se vinde online"
 msgstr ""
 
 #: includes/class-lbb-admin.php:528
-#: includes/class-lbb-routes.php:137
+#: includes/class-lbb-routes.php:138
 msgid "Pagina rutei"
 msgstr ""
 
 #: includes/class-lbb-admin.php:529
-#: includes/class-lbb-routes.php:136
+#: includes/class-lbb-routes.php:137
 msgid "Locul de urcare"
 msgstr ""
 
@@ -1676,7 +1680,7 @@ msgstr ""
 
 #. translators: %s: zilele săptămânii în care circulă ruta, ex. „luni, joi”
 #: includes/class-lbb-frontend.php:456
-#: includes/class-lbb-routes.php:306
+#: includes/class-lbb-routes.php:307
 #, php-format
 msgid "Ruta circulă doar: %s."
 msgstr ""
@@ -2039,81 +2043,81 @@ msgstr ""
 msgid "Ruta nu există."
 msgstr ""
 
-#: includes/class-lbb-routes.php:88
+#: includes/class-lbb-routes.php:89
 msgid "Completați plecarea și destinația."
 msgstr ""
 
-#: includes/class-lbb-routes.php:93
+#: includes/class-lbb-routes.php:94
 msgid "Plecarea și destinația trebuie să fie diferite."
 msgstr ""
 
-#: includes/class-lbb-routes.php:97
+#: includes/class-lbb-routes.php:98
 msgid "Introduceți cel puțin o oră de plecare (ex. 08:45)."
 msgstr ""
 
-#: includes/class-lbb-routes.php:106
+#: includes/class-lbb-routes.php:107
 msgid "Alegeți cel puțin o zi a săptămânii."
 msgstr ""
 
-#: includes/class-lbb-routes.php:112
+#: includes/class-lbb-routes.php:113
 msgid "Ruta aceasta există deja."
 msgstr ""
 
-#: includes/class-lbb-routes.php:134
+#: includes/class-lbb-routes.php:135
 msgid "Plecarea"
 msgstr ""
 
-#: includes/class-lbb-routes.php:135
+#: includes/class-lbb-routes.php:136
 msgid "Destinația"
 msgstr ""
 
-#: includes/class-lbb-routes.php:138
+#: includes/class-lbb-routes.php:139
 msgid "Orele de plecare"
 msgstr ""
 
 #. translators: 1: numele câmpului, 2: numărul maxim de caractere
-#: includes/class-lbb-routes.php:143
+#: includes/class-lbb-routes.php:144
 #, php-format
 msgid "%1$s e prea lung (cel mult %2$d de caractere)."
 msgstr ""
 
-#: includes/class-lbb-routes.php:149
-#: includes/class-lbb-routes.php:155
+#: includes/class-lbb-routes.php:150
+#: includes/class-lbb-routes.php:156
 msgid "Ruta nu a putut fi salvată. Încercați din nou."
 msgstr ""
 
 #. translators: 1: prețul pentru copii, cu moneda, 2: prețul pentru adulți, cu moneda
-#: includes/class-lbb-routes.php:282
+#: includes/class-lbb-routes.php:283
 #, php-format
 msgid "Atenție: prețul pentru copii (%1$s) e mai mare decât cel pentru adulți (%2$s). Verificați prețurile."
 msgstr ""
 
-#: includes/class-lbb-routes.php:289
+#: includes/class-lbb-routes.php:290
 #: includes/class-lbb-woocommerce.php:109
 msgid "marți"
 msgstr ""
 
-#: includes/class-lbb-routes.php:289
+#: includes/class-lbb-routes.php:290
 #: includes/class-lbb-woocommerce.php:110
 msgid "miercuri"
 msgstr ""
 
-#: includes/class-lbb-routes.php:289
+#: includes/class-lbb-routes.php:290
 #: includes/class-lbb-woocommerce.php:111
 msgid "joi"
 msgstr ""
 
-#: includes/class-lbb-routes.php:289
+#: includes/class-lbb-routes.php:290
 #: includes/class-lbb-woocommerce.php:112
 msgid "vineri"
 msgstr ""
 
-#: includes/class-lbb-routes.php:289
+#: includes/class-lbb-routes.php:290
 #: includes/class-lbb-woocommerce.php:113
 msgid "sâmbătă"
 msgstr ""
 
-#: includes/class-lbb-routes.php:289
+#: includes/class-lbb-routes.php:290
 #: includes/class-lbb-woocommerce.php:114
 msgid "duminică"
 msgstr ""
