@@ -265,7 +265,7 @@
 		// Browser fără calendar pentru dată (Safari pe Mac < 14.1, Firefox < 57): câmpul e text, iar clientul scrie
 		// „25.12.2026” sau „25/12/2026”. Îl aducem la 2026-12-25, formatul cu care lucrează restul formularului.
 		function isoDate( v ) {
-			var m = /^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4}|\d{2})\s*$/.exec( v || '' );
+			var m = /^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4}|\d{2})\.?\s*$/.exec( v || '' );
 			if ( ! m ) {
 				return v;
 			}

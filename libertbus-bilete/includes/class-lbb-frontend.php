@@ -253,7 +253,8 @@ class LBB_Frontend {
 	 */
 	public static function iso_date( $date ) {
 		// Anul și cu două cifre („25.12.26”): biletele se vând doar pentru zilele următoare, deci 20xx.
-		if ( preg_match( '/^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4}|\d{2})\s*$/', (string) $date, $m ) ) {
+		// Și cu punct la sfârșit („25.12.2026.”), scris des din obișnuință.
+		if ( preg_match( '/^\s*(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4}|\d{2})\.?\s*$/', (string) $date, $m ) ) {
 			return sprintf( '%04d-%02d-%02d', 2 === strlen( $m[3] ) ? 2000 + (int) $m[3] : $m[3], $m[2], $m[1] );
 		}
 		return trim( (string) $date );
