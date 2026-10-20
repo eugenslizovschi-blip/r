@@ -95,6 +95,19 @@ async function check(browser, state, [name, dev]) {
       if (m2.small.length) r.issues.push('pasul 2: elemente sub 40px înălțime: ' + m2.small.join(','));
       if (m2.actPct > 30) r.issues.push('butoanele de jos iau ' + m2.actPct + '% din înălțimea ecranului');
       r.step2 = 'panou ' + m2.panelW + 'px, butoane ' + m2.bs.map(b => b.w + '×' + b.h).join(' / ');
+      // Cu Tab prin fereastră (5 pasageri): câmpul cu focus nu ajunge sub bara cu butoane lipită jos (WCAG 2.4.11).
+      const under = [];
+      for (let i = 0; i < 10; i++) {
+        await p.keyboard.press('Tab');
+        const c = await p.evaluate(() => {
+          const a = document.activeElement, bar = document.querySelector('.lbb-overlay .lbb-actions');
+          if (!a || !bar || bar.contains(a) || !(bar.compareDocumentPosition(a) & 2)) return null;
+          const q = a.getBoundingClientRect(), b = bar.getBoundingClientRect();
+          return q.bottom > b.top + 1 && q.top < b.bottom ? (a.name || a.className) : null;
+        });
+        if (c) under.push(c);
+      }
+      if (under.length) r.issues.push('cu Tab, câmpuri ascunse sub butoanele de jos: ' + under.join(','));
     }
     await p.screenshot({ path: `${OUT}/${name.replace(/\W+/g, '_')}-2.png` });
   } catch (e) { r.issues.push('EROARE: ' + e.message.split('\n')[0]); }

@@ -58,6 +58,7 @@
 			}
 			overlay.appendChild( root );
 			document.body.appendChild( overlay );
+			overlay.addEventListener( 'focusin', keepFocusVisible );
 			document.documentElement.classList.add( 'lbb-lock' );
 			overlay.scrollTop = 0;
 			// Fereastra are o intrare proprie în istoric: „Înapoi” pe telefon (Android) o închide și revine la pasul 1,
@@ -69,6 +70,21 @@
 				}
 				pushedStep = true;
 			} catch ( x ) {}
+		}
+
+		// Tab de la tastatură: câmpul cu focus (ex. al treilea nume) nu rămâne ascuns sub bara cu butoane lipită jos
+		// (WCAG 2.4.11); fereastra derulează cât trebuie. Doar câmpurile de deasupra barei, cele de după ea se văd oricum.
+		function keepFocusVisible( e ) {
+			var bar = root.querySelector( '.lbb-actions' );
+			var tg = e.target;
+			if ( ! overlay || ! bar || ! tg || tg === bar || bar.contains( tg ) || ! ( bar.compareDocumentPosition( tg ) & 2 ) ) {
+				return;
+			}
+			var q = tg.getBoundingClientRect();
+			var b = bar.getBoundingClientRect();
+			if ( q.bottom > b.top && q.top < b.bottom ) {
+				overlay.scrollTop += Math.ceil( q.bottom - b.top ) + 12;
+			}
 		}
 
 		function stepInHistory() {
