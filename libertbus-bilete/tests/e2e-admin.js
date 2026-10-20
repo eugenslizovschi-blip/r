@@ -83,8 +83,12 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
         await page.goto(ordersUrl + (ordersUrl.includes('?') ? '&' : '?') + 's=' + encodeURIComponent(q) + '&search-filter=all');
         return page.$$eval('#the-list tr:not(.no-items)', trs => trs.length);
       };
-      const hit = await rows(paid), miss = await rows('zzqq-nimic');
+      const hit = await rows(paid);
+      // Coloana „Bilete” din listă arată codul, fără a deschide comanda.
+      const col = await page.$$eval('#the-list td.column-lbb_tickets', tds => tds.map(td => td.textContent.trim()).join(' '));
+      const miss = await rows('zzqq-nimic');
       if (hit < 1 || miss !== 0) fail('WooCommerce → Comenzi: căutarea după ' + paid + ' a dat ' + hit + ' comenzi (fără sens: ' + miss + ')');
+      if (!col.includes(paid)) fail('WooCommerce → Comenzi: coloana „Bilete” nu arată ' + paid + ': ' + JSON.stringify(col));
     }
   }
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-bookings&q=zzqq-nimic');

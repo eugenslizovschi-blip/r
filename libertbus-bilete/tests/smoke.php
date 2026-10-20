@@ -146,6 +146,12 @@ lbb_t( 'plata confirmă biletul și dă cod', 'confirmed' === $b['status'] && pr
 $sc_hpos = class_exists( 'Automattic\\WooCommerce\\Utilities\\OrderUtil' ) && Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 $sc_ids  = $sc_hpos ? wc_get_orders( array( 's' => $b['ticket_code'], 'search_filter' => 'all', 'return' => 'ids', 'limit' => 5 ) ) : WC_Data_Store::load( 'order' )->search_orders( $b['ticket_code'] );
 lbb_t( 'WooCommerce → Comenzi: căutarea după codul biletului găsește comanda (' . ( $sc_hpos ? 'HPOS' : 'posts' ) . ')', in_array( $order->get_id(), array_map( 'intval', (array) $sc_ids ), true ) && $b['ticket_code'] === wc_get_order( $order->get_id() )->get_meta( '_lbb_codes' ), array( $sc_ids, $order->get_id() ) );
+$oc_cols = array_keys( LBB_WooCommerce::order_columns( array( 'cb' => '', 'order_number' => '', 'order_date' => '', 'order_status' => '', 'order_total' => '' ) ) );
+ob_start();
+LBB_WooCommerce::order_column( 'lbb_tickets', $order->get_id() );
+LBB_WooCommerce::order_column( 'order_total', $order );
+$oc_html = ob_get_clean();
+lbb_t( 'WooCommerce → Comenzi: coloana „Bilete” după „Stare”, cu codul biletului (și cu comanda ca obiect, HPOS)', array( 'cb', 'order_number', 'order_date', 'order_status', 'lbb_tickets', 'order_total' ) === $oc_cols && '<code>' . $b['ticket_code'] . '</code>' === $oc_html, array( $oc_cols, $oc_html ) );
 // Comandă plătită înainte de versiunea 5 (fără codurile pe comandă): actualizarea le pune, o singură dată.
 $order->delete_meta_data( '_lbb_codes' );
 $order->save_meta_data();

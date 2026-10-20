@@ -45,6 +45,11 @@ class LBB_WooCommerce {
 		// Căutarea din WooCommerce → Comenzi găsește și codul biletului (comenzi în tabelele HPOS și în articole).
 		add_filter( 'woocommerce_order_table_search_query_meta_keys', array( __CLASS__, 'search_keys' ) );
 		add_filter( 'woocommerce_shop_order_search_fields', array( __CLASS__, 'search_keys' ) );
+		// Coloana „Bilete” în lista de comenzi (HPOS și „posts”): codurile se văd fără a deschide fiecare comandă.
+		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( __CLASS__, 'order_columns' ) );
+		add_filter( 'manage_edit-shop_order_columns', array( __CLASS__, 'order_columns' ) );
+		add_action( 'manage_woocommerce_page_wc-orders_custom_column', array( __CLASS__, 'order_column' ), 10, 2 );
+		add_action( 'manage_shop_order_posts_custom_column', array( __CLASS__, 'order_column' ), 10, 2 );
 		add_filter( 'woocommerce_get_country_locale_default', array( __CLASS__, 'locale_default' ), 20 );
 		add_filter( 'woocommerce_get_country_locale', array( __CLASS__, 'country_locale' ), 20 );
 		add_filter( 'woocommerce_checkout_get_value', array( __CLASS__, 'prefill' ), 10, 2 );
@@ -410,6 +415,33 @@ class LBB_WooCommerce {
 		}
 		$fields['shipping'] = array();
 		return $fields;
+	}
+
+	public static function order_columns( $columns ) {
+		$out = array();
+		foreach ( (array) $columns as $key => $label ) {
+			$out[ $key ] = $label;
+			if ( 'order_status' === $key ) {
+				$out['lbb_tickets'] = __( 'Bilete', 'libertbus-bilete' );
+			}
+		}
+		if ( ! isset( $out['lbb_tickets'] ) ) {
+			$out['lbb_tickets'] = __( 'Bilete', 'libertbus-bilete' );
+		}
+		return $out;
+	}
+
+	/**
+	 * @param string       $column Coloana.
+	 * @param WC_Order|int $order  Comanda (HPOS) sau ID-ul ei („posts”).
+	 */
+	public static function order_column( $column, $order ) {
+		if ( 'lbb_tickets' !== $column ) {
+			return;
+		}
+		$order = is_object( $order ) ? $order : wc_get_order( $order );
+		$codes = $order ? array_filter( explode( ' ', (string) $order->get_meta( '_lbb_codes' ) ) ) : array();
+		echo $codes ? '<code>' . implode( '</code> <code>', array_map( 'esc_html', $codes ) ) . '</code>' : '<span aria-hidden="true">—</span>';
 	}
 
 	public static function search_keys( $keys ) {
