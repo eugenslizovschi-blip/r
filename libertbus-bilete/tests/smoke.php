@@ -701,6 +701,8 @@ $ac_left = array_merge( $ac_base, array( 'travel_date' => $ac_gone->format( 'Y-m
 $ac_next = array_merge( $ac_base, array( 'travel_date' => $ac_now->modify( '+1 day' )->format( 'Y-m-d' ), 'dep_time' => '10:00' ) );
 lbb_t( '„Adaugă în calendar” lipsește după plecarea autocarului (aceeași zi) și apare pentru o cursă care urmează', false === strpos( LBB_Tickets::html( $ac_left ), 'ics=1' ) && false !== strpos( LBB_Tickets::html( $ac_next ), 'ics=1' ), array( $ac_left['travel_date'] . ' ' . $ac_left['dep_time'] ) );
 lbb_t( 'la printare biletul nu se rupe între două pagini (și în email, cu stil inline)', 1 === preg_match( '/<div class="lbb-ticket" style="[^"]*page-break-inside:avoid;break-inside:avoid;/', LBB_Tickets::html( $ac_next ) ) );
+// Și în email (fără media queries): eticheta nu e „nowrap” și ia cel mult 38%, ca pe telefon numele să aibă loc.
+lbb_t( 'biletul (și în email): eticheta ia cel mult 38% și poate trece pe două rânduri, valoarea are loc pe telefon', (bool) preg_match_all( '/<th style="[^"]*width:38%;[^"]*">/', LBB_Tickets::html( $rv ) ) && false === strpos( LBB_Tickets::html( $rv ), 'nowrap' ) );
 // Rută ștearsă din admin (rezervările rămân): fără „Adaugă în calendar”, care n-ar avea ce cursă să descrie.
 $ac_gone_r = array_merge( $ac_next, array( 'route_id' => 987654 ) );
 lbb_t( 'rută ștearsă: biletul nu mai are „Adaugă în calendar” (linkul doar reîncărca pagina)', '' === LBB_Tickets::ics( $ac_gone_r ) && false === strpos( LBB_Tickets::html( $ac_gone_r ), 'ics=1' ) && ! LBB_Tickets::can_add_to_calendar( $ac_gone_r ) );

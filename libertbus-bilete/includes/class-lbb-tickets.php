@@ -135,7 +135,8 @@ class LBB_Tickets {
 			<table style="width:100%;border-collapse:collapse;">
 				<?php foreach ( $rows as $label => $value ) : ?>
 					<tr>
-						<th style="text-align:left;padding:3px 10px 3px 0;vertical-align:top;white-space:nowrap;"><?php echo esc_html( $label ); ?></th>
+						<?php // Eticheta ia cel mult 38%: pe telefonul îngust („De achitat la urcare”) trece pe două rânduri și lasă loc valorii, și în email (fără media queries). ?>
+						<th style="text-align:left;padding:3px 10px 3px 0;vertical-align:top;width:38%;"><?php echo esc_html( $label ); ?></th>
 						<?php // Un nume lung („Popescu-Vasilescu-Andronachescu”) se rupe pe telefonul îngust, nu iese din bilet. ?>
 						<td style="text-align:left;padding:3px 0;vertical-align:top;word-break:break-word;overflow-wrap:anywhere;"><?php echo esc_html( $value ); ?></td>
 					</tr>
@@ -624,9 +625,6 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 .ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}.past{background:#eceff3;color:#3a4552}
 /* Spațiu cu margini, nu cu gap: flex gap lipsește în Safari < 14.1 (iPhone-uri încă folosite), butoanele s-ar lipi. */
 .actions{display:flex;flex-wrap:wrap;margin:4px -4px 0}.actions [hidden]{display:none}.actions button,.actions a{flex:1 1 30%;margin:4px;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px 8px;box-sizing:border-box}
-/* Telefon îngust (320–400px): eticheta („De achitat la urcare”) trece pe două rânduri și lasă loc valorii, altfel
-   numele lungi s-ar rupe în mijlocul cuvântului. Stilul din rând (și pentru email) are nevoie de !important. */
-@media (max-width:400px){.lbb-ticket th{white-space:normal!important;width:38%}}
 @media print{.actions{display:none}body{background:#fff}.state{border:2px solid currentColor}}
 </style>
 </head>
