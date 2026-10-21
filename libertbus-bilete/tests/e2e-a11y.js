@@ -82,6 +82,7 @@ async function scan(page, label, include) {
   await page.addInitScript(() => { navigator.share = () => Promise.resolve(); });
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="reserve"]')]);
   if (!/lbb_bilet=/.test(page.url())) fail('rezervarea nu a dus la pagina biletului: ' + page.url());
+  const ticketUrl = page.url();
   await page.waitForSelector('.lbb-ticket-qr img, .lbb-ticket-qr canvas', { state: 'attached' });
   // Pagina biletului e în întregime a plugin-ului: o verificăm toată (repere, titlu), nu doar biletul.
   if (!(await page.isVisible('.actions .share'))) fail('„Trimite biletul” nu apare pe biletul verificat');
@@ -138,7 +139,7 @@ async function scan(page, label, include) {
     const SPACING = '*{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}p{margin-bottom:2em!important}';
     const clipped = () => {
       const bad = [];
-      document.querySelectorAll('.lbb-booking *, #lbb-cc *').forEach(e => {
+      document.querySelectorAll('.lbb-booking *, #lbb-cc *, .lbb-ticket *, .wrap .actions *').forEach(e => {
         if (e.closest('.lbb-hp') || ['SELECT', 'INPUT', 'TEXTAREA'].includes(e.tagName) || (!e.offsetParent && getComputedStyle(e).position !== 'fixed')) return;
         const cs = getComputedStyle(e);
         if ((e.scrollWidth > e.clientWidth + 1 && /hidden|clip/.test(cs.overflowX)) || (e.scrollHeight > e.clientHeight + 1 && /hidden|clip/.test(cs.overflowY))) bad.push(e.tagName + '.' + e.className);
@@ -164,7 +165,12 @@ async function scan(page, label, include) {
     await sp.waitForSelector('.lbb-overlay .lbb-booking');
     const c2 = await sp.evaluate(clipped);
     if (c2.length) fail('spațierea textului mărită (pasul 2, 320px) taie: ' + c2.join(', '));
-    console.log('spațierea textului (320px): ' + (c1.length + c2.length ? 'probleme' : 'ok'));
+    // Și biletul (îl arată șoferului de pe telefon): tabelul cu datele și butoanele de jos.
+    await sp.goto(ticketUrl);
+    await sp.addStyleTag({ content: SPACING });
+    const c3 = await sp.evaluate(clipped);
+    if (c3.length) fail('spațierea textului mărită (pagina biletului, 320px) taie: ' + c3.join(', '));
+    console.log('spațierea textului (320px): ' + (c1.length + c2.length + c3.length ? 'probleme' : 'ok'));
     await sctx.close();
   }
 
