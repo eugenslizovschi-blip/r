@@ -678,7 +678,7 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<?php echo self::notes_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<div class="actions"><button type="button" class="print" hidden><?php esc_html_e( 'Printează', 'libertbus-bilete' ); ?></button>
 			<?php if ( self::can_add_to_calendar( $booking, $state ) ) : ?><a class="cal" href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a>
-			<button type="button" class="share" hidden data-share-title="<?php echo esc_attr( $booking['ticket_code'] ); ?>" data-share-text="<?php echo esc_attr( self::share_text( $booking ) ); ?>" data-share-url="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php esc_html_e( 'Trimite biletul', 'libertbus-bilete' ); ?></button><?php endif; ?>
+			<button type="button" class="share" hidden data-share-title="<?php echo esc_attr( self::page_title( $booking ) ); ?>" data-share-text="<?php echo esc_attr( self::share_text( $booking ) ); ?>" data-share-url="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php esc_html_e( 'Trimite biletul', 'libertbus-bilete' ); ?></button><?php endif; ?>
 			<?php if ( $pay_url ) : ?><a class="pay" href="<?php echo esc_url( $pay_url ); ?>"><?php esc_html_e( 'Achită acum', 'libertbus-bilete' ); ?></a><?php endif; ?>
 			<?php if ( $again_url ) : ?><a class="again" href="<?php echo esc_url( $again_url ); ?>"><?php esc_html_e( 'Rezervați din nou online', 'libertbus-bilete' ); ?></a><?php endif; ?></div>
 		<script src="<?php echo esc_url( LBB_URL . 'assets/qrcode.min.js?ver=' . LBB_Frontend::asset_ver( 'qrcode.min.js' ) ); ?>"></script>

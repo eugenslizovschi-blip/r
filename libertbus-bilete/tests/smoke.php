@@ -704,6 +704,9 @@ lbb_t( 'titlul paginii biletului (numele PDF-ului salvat) are codul, ruta și da
 $if_n = LBB_Tickets::ics_filename( $pt_b );
 $if_h = wp_remote_retrieve_header( wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $pt_b['ticket_code'] ) ), array( 'timeout' => 20 ) ), 'content-disposition' );
 lbb_t( 'fișierul .ics de pe bilet: „COD-ruta-data.ics”, fără diacritice, și chiar așa se descarcă', $if_n === $pt_b['ticket_code'] . '-' . sanitize_title( remove_accents( $pt_r['origin'] . ' ' . $pt_r['destination'] ) ) . '-' . $pt_b['travel_date'] . '.ics' && ! preg_match( '/[^\x20-\x7e]/', $if_n ) && false !== strpos( (string) $if_h, 'filename="' . $if_n . '"' ), array( $if_n, $if_h ) );
+// „Trimite biletul”: titlul (subiectul în aplicația de email) e cel al paginii, cu ruta și data, nu doar codul.
+preg_match( '/data-share-title="([^"]*)"/', wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $pt_b['ticket_code'] ), array( 'timeout' => 20 ) ) ), $st_m );
+lbb_t( '„Trimite biletul” are ca titlu (subiectul emailului) codul, ruta și data', isset( $st_m[1] ) && html_entity_decode( $st_m[1], ENT_QUOTES, 'UTF-8' ) === $pt_t, isset( $st_m[1] ) ? $st_m[1] : null );
 lbb_t( 'anularea rezervării eliberează locurile', LBB_Bookings::cancel( $rv['id'] ) && 3 === LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow )[1]['free'] );
 lbb_t( 'o rezervare anulată nu se mai anulează', ! LBB_Bookings::cancel( $rv['id'] ) );
 

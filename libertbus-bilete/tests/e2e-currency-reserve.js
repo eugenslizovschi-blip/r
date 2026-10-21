@@ -149,7 +149,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   else {
     await sharePage.click('.actions .share');
     const shared = await sharePage.evaluate(() => window.__shared || null);
-    if (!shared || shared.url !== guest.url() || shared.title !== code || !new RegExp('^Rezervare LibertBus ' + code + ': .+ → .+, \\d\\d\\.\\d\\d\\.\\d{4} \\(\\S+\\), \\d\\d:\\d\\d(\\. Urcare: .+)?\\. De achitat la urcare: [\\d.,]+\\s(MDL|RON)$').test(shared.text || '')) fail('„Trimite biletul” nu trimite linkul biletului: ' + JSON.stringify(shared));
+    if (!shared || shared.url !== guest.url() || !new RegExp('^' + code + ' · .+ → .+ · \\d\\d\\.\\d\\d\\.\\d{4} — ').test(shared.title || '') || !new RegExp('^Rezervare LibertBus ' + code + ': .+ → .+, \\d\\d\\.\\d\\d\\.\\d{4} \\(\\S+\\), \\d\\d:\\d\\d(\\. Urcare: .+)?\\. De achitat la urcare: [\\d.,]+\\s(MDL|RON)$').test(shared.text || '')) fail('„Trimite biletul” nu trimite linkul biletului: ' + JSON.stringify(shared));
   }
   await sharePage.close();
   // Telefon vechi, fără NodeList.forEach (Android 4.4, iOS 9): codul QR se desenează totuși, fără erori.
