@@ -700,6 +700,10 @@ $pt_r  = LBB_Routes::get( $pt_b['route_id'] );
 $pt_t  = LBB_Tickets::page_title( $pt_b );
 $pt_ok = 0 === strpos( $pt_t, $pt_b['ticket_code'] . ' · ' . $pt_r['origin'] . ' → ' . $pt_r['destination'] . ' · ' . gmdate( 'd.m.Y', strtotime( $pt_b['travel_date'] . ' 12:00' ) ) . ' — ' );
 lbb_t( 'titlul paginii biletului (numele PDF-ului salvat) are codul, ruta și data; link greșit: „Bilet negăsit”', $pt_ok && 'Bilet negăsit' === LBB_Tickets::page_title( null ), $pt_t );
+// Fișierul de calendar descărcat de pe bilet are și ruta și data în nume (ca lista de pasageri), fără diacritice.
+$if_n = LBB_Tickets::ics_filename( $pt_b );
+$if_h = wp_remote_retrieve_header( wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $pt_b['ticket_code'] ) ), array( 'timeout' => 20 ) ), 'content-disposition' );
+lbb_t( 'fișierul .ics de pe bilet: „COD-ruta-data.ics”, fără diacritice, și chiar așa se descarcă', $if_n === $pt_b['ticket_code'] . '-' . sanitize_title( remove_accents( $pt_r['origin'] . ' ' . $pt_r['destination'] ) ) . '-' . $pt_b['travel_date'] . '.ics' && ! preg_match( '/[^\x20-\x7e]/', $if_n ) && false !== strpos( (string) $if_h, 'filename="' . $if_n . '"' ), array( $if_n, $if_h ) );
 lbb_t( 'anularea rezervării eliberează locurile', LBB_Bookings::cancel( $rv['id'] ) && 3 === LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow )[1]['free'] );
 lbb_t( 'o rezervare anulată nu se mai anulează', ! LBB_Bookings::cancel( $rv['id'] ) );
 

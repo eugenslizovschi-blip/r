@@ -545,6 +545,21 @@ class LBB_Tickets {
 	}
 
 	/**
+	 * Numele fișierului de calendar, ca la lista de pasageri: „LB-ABC123-balti-iasi-2026-10-25.ics” (fără diacritice,
+	 * ca să se deschidă la fel pe orice telefon), nu doar codul.
+	 *
+	 * @param array $booking Rezervarea.
+	 */
+	public static function ics_filename( array $booking ) {
+		$name  = $booking['ticket_code'];
+		$route = LBB_Routes::get( $booking['route_id'] );
+		if ( $route ) {
+			$name .= '-' . sanitize_title( remove_accents( $route['origin'] . ' ' . $route['destination'] ) );
+		}
+		return sanitize_file_name( $name . '-' . $booking['travel_date'] . '.ics' );
+	}
+
+	/**
 	 * Titlul paginii biletului. La „Printează” → „Salvare ca PDF” e și numele propus pentru fișier, deci are ruta și data:
 	 * „LB-ABC123 · Bălți → Iași · 25.10.2026 — LibertBus”, ușor de găsit mai târziu în telefon.
 	 *
@@ -623,7 +638,7 @@ class LBB_Tickets {
 			$ics = self::ics( $booking );
 			if ( $ics ) {
 				header( 'Content-Type: text/calendar; charset=utf-8' );
-				header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $booking['ticket_code'] ) . '.ics"' );
+				header( 'Content-Disposition: attachment; filename="' . self::ics_filename( $booking ) . '"' );
 				echo $ics; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- text/calendar, nu HTML.
 				exit;
 			}
