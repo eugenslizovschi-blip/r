@@ -106,6 +106,13 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (nw.th > 45 || nw.hs) fail('biletul la 320px: coloana etichetelor ia ' + nw.th + '% din tabel' + (nw.hs ? ', scroll orizontal' : ''));
     await guest.setViewportSize(vp);
   }
+  // Contrast ridicat cu temă întunecată (Windows): codul QR rămâne pe alb, cu margine, altfel scannerul nu-l citește.
+  {
+    await guest.emulateMedia({ forcedColors: 'active', colorScheme: 'dark' });
+    const qz = await guest.$eval('.lbb-ticket-qr', e => { const r = e.getBoundingClientRect(), i = e.querySelector('img').getBoundingClientRect(); return { bg: getComputedStyle(e).backgroundColor, m: Math.min(i.left - r.left, r.right - i.right, i.top - r.top, r.bottom - i.bottom) }; });
+    await guest.emulateMedia({ forcedColors: 'none', colorScheme: 'light' });
+    if (qz.bg !== 'rgb(255, 255, 255)' || qz.m < 12) fail('contrast ridicat întunecat: codul QR fără margine albă ' + JSON.stringify(qz));
+  }
   // „Printează” se vede (și deschide printarea) doar cu JavaScript; fără el butonul n-ar face nimic, deci lipsește.
   {
     const printBtn = await guest.evaluate(() => { const b = document.querySelector('.actions .print'); let called = 0; window.print = () => { called++; }; if (b) b.click(); return { shown: !!b && b.getClientRects().length > 0, called }; });

@@ -127,6 +127,11 @@
 .lbb-ticket table { width: 100%; border-collapse: collapse; }
 .lbb-ticket th, .lbb-ticket td { text-align: left; padding: 4px 8px 4px 0; vertical-align: top; }
 .lbb-ticket-qr { float: right; margin: 0 0 8px 12px; }
+/* Scannerul șoferului are nevoie de o margine albă în jurul codului QR (aici o dă fundalul biletului). În contrast
+   ridicat cu temă întunecată fundalul devine negru și codul nu se mai citește: păstrăm alb-negru, cu margine. */
+@media (forced-colors: active) {
+	.lbb-ticket-qr { forced-color-adjust: none; background: #fff; padding: 16px; }
+}
 
 @media (max-width: 480px) {
 	.lbb-booking { padding: 14px; border-radius: 0; border-left: 0; border-right: 0; }
