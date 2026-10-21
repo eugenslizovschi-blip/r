@@ -545,6 +545,28 @@ class LBB_Tickets {
 	}
 
 	/**
+	 * Titlul paginii biletului. La „Printează” → „Salvare ca PDF” e și numele propus pentru fișier, deci are ruta și data:
+	 * „LB-ABC123 · Bălți → Iași · 25.10.2026 — LibertBus”, ușor de găsit mai târziu în telefon.
+	 *
+	 * @param array|null $booking Rezervarea sau null (link greșit).
+	 */
+	public static function page_title( $booking ) {
+		if ( ! $booking ) {
+			return __( 'Bilet negăsit', 'libertbus-bilete' );
+		}
+		$parts = array( $booking['ticket_code'] );
+		$route = LBB_Routes::get( $booking['route_id'] );
+		if ( $route ) {
+			$parts[] = $route['origin'] . ' → ' . $route['destination'];
+		}
+		$day = DateTimeImmutable::createFromFormat( '!Y-m-d', (string) $booking['travel_date'], LBB_Settings::tz() );
+		if ( $day ) {
+			$parts[] = $day->format( 'd.m.Y' );
+		}
+		return implode( ' · ', $parts ) . ' — ' . get_bloginfo( 'name' );
+	}
+
+	/**
 	 * Unde se rezervă din nou: pagina rutei sau, dacă ruta nu are una, prima pagină publicată cu formularul.
 	 *
 	 * @param array|null $route Ruta biletului.
@@ -615,7 +637,7 @@ class LBB_Tickets {
 <meta name="robots" content="noindex,nofollow">
 <?php // Biletul se arată șoferului: fără „temă întunecată automată” (Chrome pe Android, Samsung Internet), care ar recolora pagina, starea biletului și chenarul codului QR. ?>
 <meta name="color-scheme" content="only light">
-<title><?php echo esc_html( $booking ? $booking['ticket_code'] . ' — ' . get_bloginfo( 'name' ) : __( 'Bilet negăsit', 'libertbus-bilete' ) ); ?></title>
+<title><?php echo esc_html( self::page_title( $booking ) ); ?></title>
 <link rel="stylesheet" href="<?php echo esc_url( LBB_URL . 'assets/lbb.css?ver=' . LBB_Frontend::asset_ver( 'lbb.css' ) ); ?>">
 <style>
 /* La printare starea rămâne: un bilet anulat, neplătit sau expirat nu trebuie să arate pe hârtie ca unul valabil. */

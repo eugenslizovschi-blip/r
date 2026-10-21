@@ -694,6 +694,12 @@ lbb_t( 'aceeași cursă trimisă din nou cu „Achit online” înlocuiește bil
 lbb_t( 'checkout cu blocuri: cu „Plată simplificată” și doar bilete în coș, strada, orașul și codul poștal sunt ascunse și opționale, telefonul obligatoriu (WooCommerce 9+ îl face opțional); cu coșul gol, adresa rămâne obligatorie', isset( $cs_res['loc'], $cs_res['loc0'] ) && array( false, true, false, true, true ) === $cs_res['loc'] && array( true, false ) === $cs_res['loc0'], array( isset( $cs_res['loc'] ) ? $cs_res['loc'] : null, isset( $cs_res['loc0'] ) ? $cs_res['loc0'] : null ) );
 $desc = LBB_WooCommerce::describe( $rv );
 lbb_t( 'biletul rezervat arată suma la urcare', isset( $desc['De achitat la urcare'] ) && "120\u{00A0}RON" === $desc['De achitat la urcare'], $desc );
+// Titlul paginii biletului = numele propus la „Salvare ca PDF”: cu ruta și data, nu doar codul.
+$pt_b  = LBB_Bookings::get( $rv['id'] );
+$pt_r  = LBB_Routes::get( $pt_b['route_id'] );
+$pt_t  = LBB_Tickets::page_title( $pt_b );
+$pt_ok = 0 === strpos( $pt_t, $pt_b['ticket_code'] . ' · ' . $pt_r['origin'] . ' → ' . $pt_r['destination'] . ' · ' . gmdate( 'd.m.Y', strtotime( $pt_b['travel_date'] . ' 12:00' ) ) . ' — ' );
+lbb_t( 'titlul paginii biletului (numele PDF-ului salvat) are codul, ruta și data; link greșit: „Bilet negăsit”', $pt_ok && 'Bilet negăsit' === LBB_Tickets::page_title( null ), $pt_t );
 lbb_t( 'anularea rezervării eliberează locurile', LBB_Bookings::cancel( $rv['id'] ) && 3 === LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow )[1]['free'] );
 lbb_t( 'o rezervare anulată nu se mai anulează', ! LBB_Bookings::cancel( $rv['id'] ) );
 
