@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T19:57:34+00:00\n"
+"POT-Creation-Date: 2026-10-21T05:22:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: libertbus-bilete\n"
@@ -1968,11 +1968,15 @@ msgstr ""
 msgid "Plată de test (doar administratori)"
 msgstr ""
 
-#: includes/class-lbb-gateway-test.php:30
-msgid "Plata de test e permisă doar administratorilor."
+#: includes/class-lbb-gateway-test.php:20
+msgid "Comanda se marchează plătită fără bani reali. Doar pentru verificări."
 msgstr ""
 
 #: includes/class-lbb-gateway-test.php:33
+msgid "Plata de test e permisă doar administratorilor."
+msgstr ""
+
+#: includes/class-lbb-gateway-test.php:36
 msgid "Plată de test LibertBus (fără bani reali)."
 msgstr ""
 

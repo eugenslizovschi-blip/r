@@ -15,6 +15,9 @@ class LBB_Gateway_Test extends WC_Payment_Gateway {
 		$this->method_title       = __( 'LibertBus — plată de test', 'libertbus-bilete' );
 		$this->method_description = __( 'Doar pentru verificări. O văd numai administratorii logați, iar comanda se marchează plătită fără bani reali. Se pornește din LibertBus → Setări.', 'libertbus-bilete' );
 		$this->title              = __( 'Plată de test (doar administratori)', 'libertbus-bilete' );
+		// Textul de sub metodă la plată. Fără el descrierea e null, iar WooCommerce 9+ (pe PHP 8.1+) scrie
+		// „Deprecated: preg_replace(): Passing null” la fiecare afișare a paginii de plată.
+		$this->description        = __( 'Comanda se marchează plătită fără bani reali. Doar pentru verificări.', 'libertbus-bilete' );
 		$this->has_fields         = false;
 		$this->supports           = array( 'products' );
 		$this->enabled            = LBB_Settings::get( 'test_gateway' ) ? 'yes' : 'no';

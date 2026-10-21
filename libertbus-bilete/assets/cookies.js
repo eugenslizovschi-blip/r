@@ -195,9 +195,21 @@
 
 	// Tab de la tastatură prin pagină cu bannerul deschis: elementul cu focus (ex. un câmp din formular) nu rămâne
 	// ascuns sub banner (WCAG 2.4.11); pagina derulează cât trebuie. Fereastra formularului stă oricum peste banner.
+	// Doar pentru focusul de la tastatură: la o atingere (sau clic) focusul vine la apăsare, iar o derulare chiar atunci
+	// mută butonul de sub deget și clicul ajunge pe alt element (ex. „Continuă” nu mai deschide pasul 2).
+	var byPointer = false;
+	document.addEventListener( 'mousedown', function () {
+		byPointer = true;
+	}, true );
+	document.addEventListener( 'touchstart', function () {
+		byPointer = true;
+	}, true );
+	document.addEventListener( 'keydown', function () {
+		byPointer = false;
+	}, true );
 	document.addEventListener( 'focusin', function ( e ) {
 		var t = e.target;
-		if ( ! box || box.hidden || ! t || ! t.getBoundingClientRect || box.contains( t ) || document.documentElement.classList.contains( 'lbb-lock' ) ) {
+		if ( byPointer || ! box || box.hidden || ! t || ! t.getBoundingClientRect || box.contains( t ) || document.documentElement.classList.contains( 'lbb-lock' ) ) {
 			return;
 		}
 		var q = t.getBoundingClientRect();

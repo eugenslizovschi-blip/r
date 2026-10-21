@@ -67,6 +67,21 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
       if (c) hiddenFocus.push(c);
     }
     if (hiddenFocus.length) fail(vp.name + ': cu Tab, elemente ascunse sub banner: ' + hiddenFocus.join(','));
+    // Dar la clic / atingere pagina nu sare: un buton atins chiar la marginea bannerului primește clicul (derularea doar
+    // pentru Tab; o derulare la apăsare muta butonul de sub deget și „Continuă” nu mai deschidea pasul 2).
+    const tap = await page.evaluate(() => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.id = 'lbb-test-edge'; b.textContent = 'test'; b.style.cssText = 'display:block;height:52px;width:200px;margin:8px 0';
+      document.querySelector('.lbb-booking').appendChild(b);
+      window.__edgeClicks = 0; b.addEventListener('click', () => { window.__edgeClicks++; });
+      const cc = document.getElementById('lbb-cc').getBoundingClientRect();
+      window.scrollBy(0, b.getBoundingClientRect().bottom - (cc.top + 20));
+      return { y: window.scrollY };
+    });
+    await page.click('#lbb-test-edge');
+    const after = await page.evaluate(() => ({ y: window.scrollY, clicks: window.__edgeClicks }));
+    await page.evaluate(() => document.getElementById('lbb-test-edge').remove());
+    if (after.clicks !== 1 || Math.abs(after.y - tap.y) > 1) fail(vp.name + ': clic pe un buton de la marginea bannerului: pagina a sărit sau clicul s-a pierdut ' + JSON.stringify({ before: tap.y, after }));
     // De la tastatură: „Setări” mută cursorul pe prima bifă care se poate schimba (butonul „Setări” dispare).
     await page.focus('#lbb-cc [data-lbb-cc="settings"]');
     await page.keyboard.press('Enter');

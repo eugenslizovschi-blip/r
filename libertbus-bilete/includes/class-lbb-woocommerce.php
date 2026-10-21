@@ -462,6 +462,9 @@ class LBB_WooCommerce {
 		foreach ( array( 'company', 'address_1', 'address_2', 'city', 'state', 'postcode' ) as $key ) {
 			$fields[ $key ] = array_merge( isset( $fields[ $key ] ) ? (array) $fields[ $key ] : array(), array( 'required' => false, 'hidden' => true ) );
 		}
+		// Telefonul rămâne obligatoriu (biroul sună clientul). WooCommerce 9+ îl are în regulile pe țară, implicit
+		// opțional, iar scriptul din pagina de plată i-ar scoate obligativitatea pusă în woocommerce_checkout_fields.
+		$fields['phone'] = array_merge( isset( $fields['phone'] ) ? (array) $fields['phone'] : array(), array( 'required' => true, 'hidden' => false ) );
 		return $fields;
 	}
 

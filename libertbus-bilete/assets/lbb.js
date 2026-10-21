@@ -38,6 +38,16 @@
 		// Formular compact (în căsuțe mici, ex. pe homepage): pasul 1 = cursa, pasul 2 = datele și plata.
 		var overlay = null;
 		var placeholder = null;
+		var byPointer = false;
+		document.addEventListener( 'mousedown', function () {
+			byPointer = true;
+		}, true );
+		document.addEventListener( 'touchstart', function () {
+			byPointer = true;
+		}, true );
+		document.addEventListener( 'keydown', function () {
+			byPointer = false;
+		}, true );
 
 		// Pasul 2 se deschide într-o fereastră peste pagină (ecran întreg pe telefon), ca să nu depindă
 		// de căsuța temei: pe homepage căsuța are înălțime fixă și secțiunea următoare acoperea butoanele.
@@ -74,10 +84,12 @@
 
 		// Tab de la tastatură: câmpul cu focus (ex. al treilea nume) nu rămâne ascuns sub bara cu butoane lipită jos
 		// (WCAG 2.4.11); fereastra derulează cât trebuie. Doar câmpurile de deasupra barei, cele de după ea se văd oricum.
+		// Doar la focusul de la tastatură: la o atingere, o derulare chiar la apăsare mută elementul de sub deget și
+		// clicul se pierde.
 		function keepFocusVisible( e ) {
 			var bar = root.querySelector( '.lbb-actions' );
 			var tg = e.target;
-			if ( ! overlay || ! bar || ! tg || tg === bar || bar.contains( tg ) || ! ( bar.compareDocumentPosition( tg ) & 2 ) ) {
+			if ( byPointer || ! overlay || ! bar || ! tg || tg === bar || bar.contains( tg ) || ! ( bar.compareDocumentPosition( tg ) & 2 ) ) {
 				return;
 			}
 			var q = tg.getBoundingClientRect();
