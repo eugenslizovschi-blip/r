@@ -1255,6 +1255,8 @@ if ( $pv_old ) {
 $pv_exp = isset( $pv_ex['libertbus-bilete'] ) ? call_user_func( $pv_ex['libertbus-bilete']['callback'], 'gdpr@example.com', 1 ) : array( 'data' => array() );
 $pv_txt = wp_json_encode( $pv_exp['data'] );
 lbb_t( 'export date personale: ambele rezervări ale clientului, cu nume, telefon și cod', 2 === count( $pv_exp['data'] ) && false !== strpos( $pv_txt, 'Gdpr Vechi' ) && false !== strpos( $pv_txt, '+37369000093' ) && false !== strpos( $pv_txt, 'plata la urcare' ) && $pv_new && false !== strpos( $pv_txt, $pv_new['ticket_code'] ), $pv_txt );
+$pv_day = $pv_new ? LBB_WooCommerce::date_with_day( $pv_new['travel_date'] ) . ' 10:00' : '';
+lbb_t( 'export date personale: data cursei ca pe bilet (zi.lună.an, ziua săptămânii), nu în format ISO', $pv_new && preg_match( '/^\\d{2}\\.\\d{2}\\.\\d{4} \\(/', $pv_day ) && false !== strpos( $pv_txt, wp_json_encode( $pv_day ) ) && false === strpos( $pv_txt, $pv_new['travel_date'] ), $pv_txt );
 $pv_res = isset( $pv_er['libertbus-bilete'] ) ? call_user_func( $pv_er['libertbus-bilete']['callback'], 'gdpr@example.com', 1 ) : array();
 $pv_o   = $pv_old ? LBB_Bookings::get( $pv_old['id'] ) : null;
 $pv_n   = $pv_new ? LBB_Bookings::get( $pv_new['id'] ) : null;

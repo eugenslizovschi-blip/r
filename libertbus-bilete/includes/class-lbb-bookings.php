@@ -651,7 +651,8 @@ class LBB_Bookings {
 				'data'        => array(
 					array( 'name' => __( 'Cod', 'libertbus-bilete' ), 'value' => $b['ticket_code'] ),
 					array( 'name' => __( 'Ruta', 'libertbus-bilete' ), 'value' => self::route_name( $b ) ),
-					array( 'name' => __( 'Data și ora', 'libertbus-bilete' ), 'value' => $b['travel_date'] . ' ' . $b['dep_time'] ),
+					// Ca pe bilet („05.11.2026 (joi) 09:30”), nu „2026-11-05”: exportul îl citește clientul.
+					array( 'name' => __( 'Data și ora', 'libertbus-bilete' ), 'value' => LBB_WooCommerce::date_with_day( $b['travel_date'] ) . ' ' . $b['dep_time'] ),
 					array( 'name' => __( 'Pasageri', 'libertbus-bilete' ), 'value' => implode( ', ', self::passenger_labels( $b ) ) ),
 					array( 'name' => __( 'Telefon', 'libertbus-bilete' ), 'value' => $b['phone'] ),
 					array( 'name' => 'Email', 'value' => $b['email'] ),
