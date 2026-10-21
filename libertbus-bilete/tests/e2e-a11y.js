@@ -1,5 +1,5 @@
 // E2E: accesibilitate cu axe-core (etichete, contrast, roluri ARIA, text alternativ) pe telefon:
-// formularul de pe pagina rutei, bannerul de cookies cu „Setări” deschis și pagina biletului; apoi conținutul
+// formularul de pe pagina rutei, bannerul de cookies cu „Setări” deschis, pagina biletului și paginile legale (confidențialitate, cookies); apoi conținutul
 // paginilor LibertBus din admin (Panou, Rute și orar, o rută, Pasageri, Rezervări, Setări).
 // AXE_JS=/cale/axe.min.js BASE=http://127.0.0.1:8080 node tests/e2e-a11y.js
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -90,6 +90,12 @@ async function scan(page, label, include) {
   // Linkul stricat (cheie greșită): pagina „Biletul nu a fost găsit” are aceleași repere și linkul spre telefon.
   await page.goto(page.url().replace(/([?&]k=)[^&]+/, '$1' + '0'.repeat(20)));
   await scan(page, 'bilet negăsit', [['body']]);
+  // Paginile legale scrise de plugin (titluri, liste, linkul „Setări cookies”): doar conținutul, nu tema.
+  for (const slug of ['politica-de-confidentialitate', 'politica-de-cookies']) {
+    const r = await page.goto(BASE + '/' + slug + '/');
+    if (!r || r.status() !== 200) { fail(slug + ': pagina legală lipsește (' + (r && r.status()) + ')'); continue; }
+    await scan(page, slug, [['.entry-content']]);
+  }
 
   // Formularul compact (pagina de previzualizare, cu admin): fereastra pasului 2 e un dialog peste pagină.
   {
