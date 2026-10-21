@@ -53,6 +53,20 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     if ((await trackers()).length) fail(vp.name + ': cookies de statistică fără acord: ' + (await trackers()).join(','));
     if (await page.evaluate(() => typeof window.dataLayer !== 'undefined')) fail(vp.name + ': codul gtag a rulat fără acord');
     if (await page.$('noscript iframe, iframe[src*="googletagmanager"]') || /ns\.html\?id=GTM/.test(await page.content())) fail(vp.name + ': iframe-ul Google Tag Manager din <noscript> a rămas în pagină');
+    // Cu Tab prin pagină (bannerul deschis, prima vizită): nimic din pagină nu primește focus ascuns sub banner (WCAG 2.4.11).
+    await page.evaluate(() => { window.scrollTo(0, 0); if (document.activeElement) document.activeElement.blur(); });
+    const hiddenFocus = [];
+    for (let i = 0; i < 30; i++) {
+      await page.keyboard.press('Tab');
+      const c = await page.evaluate(() => {
+        const a = document.activeElement, cc = document.getElementById('lbb-cc');
+        if (!a || a === document.body || cc.contains(a)) return null;
+        const q = a.getBoundingClientRect(), r = cc.getBoundingClientRect();
+        return q.bottom > r.top + 1 && q.top < r.bottom ? (a.name || a.getAttribute('data-lbb') || a.tagName) : null;
+      });
+      if (c) hiddenFocus.push(c);
+    }
+    if (hiddenFocus.length) fail(vp.name + ': cu Tab, elemente ascunse sub banner: ' + hiddenFocus.join(','));
     // De la tastatură: „Setări” mută cursorul pe prima bifă care se poate schimba (butonul „Setări” dispare).
     await page.focus('#lbb-cc [data-lbb-cc="settings"]');
     await page.keyboard.press('Enter');

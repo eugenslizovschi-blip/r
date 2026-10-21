@@ -193,6 +193,20 @@
 		} );
 	}
 
+	// Tab de la tastatură prin pagină cu bannerul deschis: elementul cu focus (ex. un câmp din formular) nu rămâne
+	// ascuns sub banner (WCAG 2.4.11); pagina derulează cât trebuie. Fereastra formularului stă oricum peste banner.
+	document.addEventListener( 'focusin', function ( e ) {
+		var t = e.target;
+		if ( ! box || box.hidden || ! t || ! t.getBoundingClientRect || box.contains( t ) || document.documentElement.classList.contains( 'lbb-lock' ) ) {
+			return;
+		}
+		var q = t.getBoundingClientRect();
+		var r = box.getBoundingClientRect();
+		if ( q.bottom > r.top && q.top < r.bottom ) {
+			window.scrollBy( 0, Math.ceil( q.bottom - r.top ) + 12 );
+		}
+	} );
+
 	// Escape: cine a ales deja închide bannerul fără schimbări; la prima vizită doar se strâng „Setări”.
 	document.addEventListener( 'keydown', function ( e ) {
 		if ( ( e.key !== 'Escape' && e.key !== 'Esc' ) || ! box || box.hidden ) {
