@@ -111,6 +111,42 @@ async function scan(page, label, include) {
     await mctx.close();
   }
 
+  // Spațierea textului mărită (WCAG 1.4.12: rânduri 1,5, litere 0,12em, cuvinte 0,16em, paragrafe 2em), pe telefonul
+  // cel mai îngust: nimic din formular sau din banner nu se taie și pagina nu capătă scroll orizontal.
+  {
+    const SPACING = '*{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}p{margin-bottom:2em!important}';
+    const clipped = () => {
+      const bad = [];
+      document.querySelectorAll('.lbb-booking *, #lbb-cc *').forEach(e => {
+        if (e.closest('.lbb-hp') || ['SELECT', 'INPUT', 'TEXTAREA'].includes(e.tagName) || (!e.offsetParent && getComputedStyle(e).position !== 'fixed')) return;
+        const cs = getComputedStyle(e);
+        if ((e.scrollWidth > e.clientWidth + 1 && /hidden|clip/.test(cs.overflowX)) || (e.scrollHeight > e.clientHeight + 1 && /hidden|clip/.test(cs.overflowY))) bad.push(e.tagName + '.' + e.className);
+      });
+      if (document.documentElement.scrollWidth > innerWidth + 1) bad.push('scroll orizontal');
+      return bad;
+    };
+    const sctx = await browser.newContext({ viewport: { width: 320, height: 640 } });
+    await sctx.route(/googletagmanager\.com|google-analytics\.com/, r => r.fulfill({ status: 200, contentType: 'application/javascript', body: '' }));
+    const sp = await sctx.newPage();
+    await sp.goto(BASE + '/balti-iasi/');
+    await sp.waitForSelector('#lbb-cc:not([hidden])');
+    await sp.addStyleTag({ content: SPACING });
+    const c1 = await sp.evaluate(clipped);
+    if (c1.length) fail('spațierea textului mărită (formular + banner, 320px) taie: ' + c1.join(', '));
+    await login(sp, BASE);
+    await sp.goto(BASE + '/previzualizare-bilete/');
+    await sp.addStyleTag({ content: SPACING });
+    const sf = (await sp.$$('.lbb-booking'))[1];
+    await sp.waitForFunction(el => el.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0, sf);
+    await sf.$eval('[data-lbb="time"]', t => { t.value = [...t.options].find(o => o.value && !o.disabled).value; t.dispatchEvent(new Event('change')); });
+    await (await sf.$('[data-lbb="next"]')).click();
+    await sp.waitForSelector('.lbb-overlay .lbb-booking');
+    const c2 = await sp.evaluate(clipped);
+    if (c2.length) fail('spațierea textului mărită (pasul 2, 320px) taie: ' + c2.join(', '));
+    console.log('spațierea textului (320px): ' + (c1.length + c2.length ? 'probleme' : 'ok'));
+    await sctx.close();
+  }
+
   // Admin: doar conținutul nostru (.wrap), nu meniurile WordPress.
   const admin = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
   await login(admin, BASE);
