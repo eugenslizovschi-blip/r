@@ -59,6 +59,10 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const ticket = (await admin.textContent('.lbb-ticket')).replace(/\s+/g, ' ');
   if (!new RegExp('Achitat online .*' + PAY).test(ticket)) fail('biletul nu arată plata în ' + PAY + ': ' + ticket);
   console.log('bilet:', ticket);
+  // Pe telefon, „Deschide biletul” și „Adaugă în calendar” se ating ușor (zonă de cel puțin 28px) și nu se suprapun.
+  const links = await admin.$$eval('.lbb-ticket p a', as => as.map(a => { const r = a.getBoundingClientRect(); return { h: Math.round(r.height), l: r.left, r: r.right, t: r.top, b: r.bottom }; }));
+  const overlap = links.length > 1 && links[0].r > links[1].l && links[0].l < links[1].r && links[0].b > links[1].t && links[0].t < links[1].b;
+  if (links.length < 2 || links.some(x => x.h < 28) || overlap) fail('linkurile de pe bilet sunt greu de atins: ' + JSON.stringify(links));
 
   // 2) Rezervare fără plată ca vizitator.
   const guestCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });

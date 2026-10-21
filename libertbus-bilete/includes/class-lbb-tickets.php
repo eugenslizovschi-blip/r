@@ -143,8 +143,9 @@ class LBB_Tickets {
 				<?php endforeach; ?>
 			</table>
 			<?php if ( ! $with_qr ) : ?>
-				<p style="margin:10px 0 0;"><a href="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>"><?php echo self::is_reservation( $booking ) ? esc_html__( 'Deschide rezervarea cu cod QR', 'libertbus-bilete' ) : esc_html__( 'Deschide biletul cu cod QR', 'libertbus-bilete' ); ?></a>
-				<?php if ( self::can_add_to_calendar( $booking, $state ) ) : ?> · <a href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?></p>
+				<?php // Linkuri ușor de atins pe telefon (cel puțin 28px): inline-block, ca atunci când trec pe două rânduri zonele lor să nu se suprapună. ?>
+				<p style="margin:10px 0 0;"><a href="<?php echo esc_url( self::url( $booking['ticket_code'] ) ); ?>" style="display:inline-block;padding:6px 0;"><?php echo self::is_reservation( $booking ) ? esc_html__( 'Deschide rezervarea cu cod QR', 'libertbus-bilete' ) : esc_html__( 'Deschide biletul cu cod QR', 'libertbus-bilete' ); ?></a>
+				<?php if ( self::can_add_to_calendar( $booking, $state ) ) : ?> · <a href="<?php echo esc_url( add_query_arg( 'ics', 1, self::url( $booking['ticket_code'] ) ) ); ?>" style="display:inline-block;padding:6px 0;"><?php esc_html_e( 'Adaugă în calendar', 'libertbus-bilete' ); ?></a><?php endif; ?></p>
 			<?php endif; ?>
 		</div>
 		<?php
