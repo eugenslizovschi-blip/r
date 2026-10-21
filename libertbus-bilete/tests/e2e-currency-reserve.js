@@ -104,6 +104,13 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
       return { th: th ? Math.round(100 * th.getBoundingClientRect().width / t.getBoundingClientRect().width) : 100, hs: document.documentElement.scrollWidth > innerWidth + 1 };
     });
     if (nw.th > 45 || nw.hs) fail('biletul la 320px: coloana etichetelor ia ' + nw.th + '% din tabel' + (nw.hs ? ', scroll orizontal' : ''));
+    // Telefonul biroului din text se atinge ușor (zonă de cel puțin 32px) și nu acoperă butoanele de dedesubt.
+    const tap = await guest.evaluate(() => {
+      const a = document.querySelector('.wrap a.lbb-phone'); const b = document.querySelector('.actions > :not([hidden])');
+      if (!a) return null; const r = a.getBoundingClientRect();
+      return { h: Math.round(r.height), gap: b ? Math.round(b.getBoundingClientRect().top - r.bottom) : 99 };
+    });
+    if (!tap || tap.h < 32 || tap.gap < 0) fail('biletul: telefonul biroului e greu de atins sau acoperă butoanele ' + JSON.stringify(tap));
     await guest.setViewportSize(vp);
   }
   // Contrast ridicat cu temă întunecată (Windows): codul QR rămâne pe alb, cu margine, altfel scannerul nu-l citește.
