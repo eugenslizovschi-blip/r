@@ -111,6 +111,27 @@ async function scan(page, label, include) {
     await mctx.close();
   }
 
+  // Contrast ridicat (Windows, forced-colors): moneda aleasă se vede altfel decât cealaltă (fundalul colorat dispare).
+  {
+    const fctx = await browser.newContext({ viewport: { width: 390, height: 844 }, forcedColors: 'active' });
+    await fctx.addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
+    const fp = await fctx.newPage();
+    await fp.goto(BASE + '/balti-iasi/');
+    // Fundalul văzut: unul transparent arată culoarea primului părinte cu fundal (altfel „alb” și „transparent pe alb”
+    // ar părea diferite, deși pe ecran sunt la fel).
+    const chips = await fp.$$eval('.lbb-booking .lbb-chip', cs => cs.filter(c => c.offsetParent).map(c => {
+      const span = c.querySelector('span'), s = getComputedStyle(span);
+      let bg = 'rgb(255, 255, 255)';
+      for (let e = span; e; e = e.parentElement) { const b = getComputedStyle(e).backgroundColor; if (!/rgba\(.*, 0\)$|transparent/.test(b)) { bg = b; break; } }
+      return { on: c.querySelector('input').checked, look: bg + '|' + s.color + '|' + s.borderTopWidth + '|' + s.borderTopColor };
+    }));
+    const on = chips.filter(c => c.on), off = chips.filter(c => !c.on);
+    if (chips.length < 2) console.log('contrast ridicat: o singură monedă, sărit');
+    else if (on.length !== 1 || off.some(c => c.look === on[0].look)) fail('contrast ridicat: moneda aleasă arată la fel ca cealaltă ' + JSON.stringify(chips));
+    else console.log('contrast ridicat (monede): ok');
+    await fctx.close();
+  }
+
   // Spațierea textului mărită (WCAG 1.4.12: rânduri 1,5, litere 0,12em, cuvinte 0,16em, paragrafe 2em), pe telefonul
   // cel mai îngust: nimic din formular sau din banner nu se taie și pagina nu capătă scroll orizontal.
   {

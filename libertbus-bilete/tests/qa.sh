@@ -129,7 +129,11 @@ echo "== Accesibilitate (axe-core): formular, banner cookies, pagina biletului, 
 # AXE_JS = axe.min.js din pachetul axe-core (tests/setup-local.sh îl descarcă); fără el pasul se sare.
 AXE_JS="${AXE_JS:-$(dirname "$WP_PATH")/axe/package/axe.min.js}"
 if [ -f "$AXE_JS" ]; then
+  # Cu două monede de plată: butoanele MDL / RON apar în formular și sunt verificate și ele (și în contrast ridicat).
+  PAY_OLD=$(cd "$WP_PATH" && $WP_CLI eval 'echo LBB_Settings::get("pay_currencies");' 2>/dev/null)
+  (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["pay_currencies"]="MDL,RON"; update_option("lbb_settings",$s);' >/dev/null 2>&1)
   OUT_A11Y=$(AXE_JS="$AXE_JS" BASE="$BASE" node "$DIR/tests/e2e-a11y.js" 2>&1 | grep -v CERT_AUTHORITY)
+  (cd "$WP_PATH" && LBB_PAY_OLD="$PAY_OLD" $WP_CLI eval '$s=LBB_Settings::all(); $s["pay_currencies"]=getenv("LBB_PAY_OLD") ?: "MDL"; update_option("lbb_settings",$s);' >/dev/null 2>&1)
   echo "$OUT_A11Y" | grep -q "A11Y: OK" && echo "  ok" || { echo "$OUT_A11Y" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
 else
   echo "  sărit (setați AXE_JS)"

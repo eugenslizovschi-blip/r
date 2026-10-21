@@ -107,6 +107,10 @@
 .lbb-chip input:focus + span { outline: 2px solid var(--lbb-accent-text); outline-offset: 2px; }
 .lbb-chip input:focus:not(:focus-visible) + span { outline: none; }
 .lbb-chip input:focus-visible + span { outline: 2px solid var(--lbb-accent-text); outline-offset: 2px; }
+/* Contrast ridicat (Windows): fundalul și chenarul colorat dispar, iar moneda aleasă ar arăta ca cealaltă. */
+@media (forced-colors: active) {
+	.lbb-chip input:checked + span { forced-color-adjust: none; background: Highlight; color: HighlightText; border: 3px solid HighlightText; line-height: 34px; }
+}
 .lbb-submit:disabled { opacity: .45; cursor: not-allowed; }
 .lbb-submit.is-busy { opacity: .7; cursor: progress; }
 .lbb-sending { margin: 10px 0 0; font-weight: 600; text-align: center; }
