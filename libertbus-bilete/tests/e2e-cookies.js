@@ -9,8 +9,9 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const browser = await chromium.launch();
   // Testul nu depinde de internet: cererile spre Google primesc local un script gol (cererea tot se numără).
   const offline = (ctx) => ctx.route(/googletagmanager\.com|google-analytics\.com/, r => r.fulfill({ status: 200, contentType: 'application/javascript', body: '' }));
-  for (const vp of [{ width: 375, height: 667, name: 'iphone-se' }, { width: 1280, height: 800, name: 'desktop' }]) {
-    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+  // Telefonul e tactil: unele verificări (butonul de la marginea bannerului) se fac cu atingere, nu cu mouse.
+  for (const vp of [{ width: 375, height: 667, name: 'iphone-se', touch: true }, { width: 1280, height: 800, name: 'desktop' }]) {
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, hasTouch: !!vp.touch });
     await offline(ctx);
     const page = await ctx.newPage();
     page.on('pageerror', e => fail(vp.name + ' pageerror: ' + e.message));
@@ -78,7 +79,7 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
       window.scrollBy(0, b.getBoundingClientRect().bottom - (cc.top + 20));
       return { y: window.scrollY };
     });
-    await page.click('#lbb-test-edge');
+    if (vp.touch) await page.tap('#lbb-test-edge'); else await page.click('#lbb-test-edge');
     const after = await page.evaluate(() => ({ y: window.scrollY, clicks: window.__edgeClicks }));
     await page.evaluate(() => document.getElementById('lbb-test-edge').remove());
     if (after.clicks !== 1 || Math.abs(after.y - tap.y) > 1) fail(vp.name + ': clic pe un buton de la marginea bannerului: pagina a sărit sau clicul s-a pierdut ' + JSON.stringify({ before: tap.y, after }));

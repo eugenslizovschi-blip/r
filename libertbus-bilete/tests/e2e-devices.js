@@ -59,7 +59,10 @@ async function check(browser, state, [name, dev]) {
     if (m1.timeTruncated) r.issues.push('ora tăiată în listă: „' + m1.opt + '”');
     r.step1 = m1.boxW + '×' + m1.boxH;
     await f.screenshot({ path: `${OUT}/${name.replace(/\W+/g, '_')}-1.png` });
-    await (await f.$('[data-lbb="next"]')).click(); await p.waitForTimeout(700);
+    // Pe telefon / tabletă „Continuă” se atinge (ca un client), cu bannerul de cookies încă deschis jos.
+    const nextBtn = await f.$('[data-lbb="next"]');
+    if (dev.hasTouch) await nextBtn.tap(); else await nextBtn.click();
+    await p.waitForTimeout(700);
     const m2 = await p.evaluate(() => {
       const ov = document.querySelector('.lbb-overlay'); if (!ov) return null;
       const bs = [...ov.querySelectorAll('[data-lbb-submit]')].map(b => { const q = b.getBoundingClientRect(); return { t: b.textContent.trim(), on: q.top >= 0 && q.bottom <= innerHeight, w: Math.round(q.width), h: Math.round(q.height), oneLine: q.height < 70 }; });
