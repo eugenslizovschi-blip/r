@@ -54,6 +54,14 @@ async function scan(page, label, include) {
   const maxAdults = await page.$eval('[data-lbb="adults"]', s => s.options[s.options.length - 1].value);
   await page.selectOption('[data-lbb="adults"]', maxAdults);
   await page.waitForSelector('[data-lbb="groupNote"]:not([hidden])');
+  // Telefonul din notă se atinge ușor (zonă de cel puțin 28px) și zona lui nu ajunge peste alt câmp sau buton.
+  const tap = await page.evaluate(() => {
+    const a = document.querySelector('[data-lbb="groupNote"] a.lbb-phone'); if (!a) return null;
+    const r = a.getBoundingClientRect();
+    const over = [...document.querySelectorAll('.lbb-booking a, .lbb-booking button, .lbb-booking input, .lbb-booking select')].filter(e => e !== a && e.offsetParent).filter(e => { const q = e.getBoundingClientRect(); return q.left < r.right && q.right > r.left && q.top < r.bottom && q.bottom > r.top; }).map(e => e.name || e.dataset.lbb || e.tagName);
+    return { h: Math.round(r.height), over };
+  });
+  if (!tap || tap.h < 28 || tap.over.length) fail('telefonul din nota pentru grupuri e greu de atins sau acoperă alt element: ' + JSON.stringify(tap));
   await scan(page, 'formular cu nota pentru grupuri', [['.lbb-booking']]);
   await page.selectOption('[data-lbb="adults"]', '1');
   // Eroare de la server (telefon „123”): mesajul de alertă și câmpul marcat greșit, verificate și ele.
