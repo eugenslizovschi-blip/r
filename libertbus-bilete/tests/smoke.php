@@ -707,6 +707,9 @@ lbb_t( 'fișierul .ics de pe bilet: „COD-ruta-data.ics”, fără diacritice, 
 // „Trimite biletul”: titlul (subiectul în aplicația de email) e cel al paginii, cu ruta și data, nu doar codul.
 preg_match( '/data-share-title="([^"]*)"/', wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $pt_b['ticket_code'] ), array( 'timeout' => 20 ) ) ), $st_m );
 lbb_t( '„Trimite biletul” are ca titlu (subiectul emailului) codul, ruta și data', isset( $st_m[1] ) && html_entity_decode( $st_m[1], ENT_QUOTES, 'UTF-8' ) === $pt_t, isset( $st_m[1] ) ? $st_m[1] : null );
+// Cititorul de ecran (navigare după titluri) află din titlul paginii și ce bilet e, nu doar numele site-ului.
+preg_match( '/<h1[^>]*>(.*?)<\/h1>/s', wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $pt_b['ticket_code'] ), array( 'timeout' => 20 ) ) ), $h1_m );
+lbb_t( 'pagina biletului: titlul (h1) are pentru cititorul de ecran și „Rezervare / Bilet” cu codul', isset( $h1_m[1] ) && false !== strpos( $h1_m[1], '<span class="sr"> — Rezervare ' . $pt_b['ticket_code'] . '</span>' ), isset( $h1_m[1] ) ? $h1_m[1] : null );
 lbb_t( 'anularea rezervării eliberează locurile', LBB_Bookings::cancel( $rv['id'] ) && 3 === LBB_Routes::departures_on( LBB_Routes::get( $rid ), $tomorrow )[1]['free'] );
 lbb_t( 'o rezervare anulată nu se mai anulează', ! LBB_Bookings::cancel( $rv['id'] ) );
 

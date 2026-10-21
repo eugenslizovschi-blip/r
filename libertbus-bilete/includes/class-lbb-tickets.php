@@ -659,6 +659,7 @@ class LBB_Tickets {
 body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#1d2733}
 .wrap{max-width:560px;margin:0 auto}.site{font-size:1em;margin:0 0 1em}
 .state{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
+.sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .ok{background:#e7f6ec;color:#16632f}.bad{background:#fdecea;color:#8a1c13}.past{background:#eceff3;color:#3a4552}
 /* Spațiu cu margini, nu cu gap: flex gap lipsește în Safari < 14.1 (iPhone-uri încă folosite), butoanele s-ar lipi. */
 .actions{display:flex;flex-wrap:wrap;margin:4px -4px 0}.actions [hidden]{display:none}.actions button,.actions a{flex:1 1 30%;margin:4px;min-height:44px;border:1px solid #d7dbe0;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px 8px;box-sizing:border-box}
@@ -667,7 +668,8 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 </head>
 <body>
 <main class="wrap">
-	<h1 class="site"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></h1>
+	<?php // Titlul paginii pentru cititorul de ecran (navigare după titluri): și ce bilet e, nu doar numele site-ului. ?>
+	<h1 class="site"><?php echo esc_html( get_bloginfo( 'name' ) ); ?><?php if ( $booking ) : ?><span class="sr"> — <?php echo esc_html( ( self::is_reservation( $booking ) ? __( 'Rezervare', 'libertbus-bilete' ) : __( 'Bilet', 'libertbus-bilete' ) ) . ' ' . $booking['ticket_code'] ); ?></span><?php endif; ?></h1>
 	<?php if ( ! $booking ) : ?>
 		<div class="state bad"><?php esc_html_e( 'Biletul nu a fost găsit. Verificați linkul din email.', 'libertbus-bilete' ); ?></div>
 		<?php /* translators: %s: telefonul pentru clienți */ ?>
