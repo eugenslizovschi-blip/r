@@ -1263,6 +1263,18 @@ $pv_n   = $pv_new ? LBB_Bookings::get( $pv_new['id'] ) : null;
 lbb_t( 'ștergere date personale: cursa trecută anonimizată, biletul pentru cursa viitoare păstrat cu mesaj', ! empty( $pv_res['items_removed'] ) && ! empty( $pv_res['items_retained'] ) && ! empty( $pv_res['messages'] )
 	&& $pv_o && '' === $pv_o['email'] && '' === $pv_o['phone'] && ! array_filter( (array) $pv_o['passengers'] ) && $pv_n && 'gdpr@example.com' === $pv_n['email'], array( $pv_res, $pv_o, $pv_n ) );
 
+// Coșul abandonat al clientului (expirat) dispare la cererea de ștergere; coșul încă activ rămâne.
+$ph_old = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Abandonat' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
+$ph_new = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Activ' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
+if ( is_array( $ph_old ) ) {
+	$wpdb->update( LBB_Bookings::table(), array( 'expires_at' => gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ), array( 'id' => $ph_old['id'] ) );
+}
+$ph_res = isset( $pv_er['libertbus-bilete'] ) ? call_user_func( $pv_er['libertbus-bilete']['callback'], 'gdpr-hold@example.com', 1 ) : array();
+lbb_t( 'ștergere date personale: coșul abandonat (expirat) al clientului dispare imediat, coșul încă activ rămâne', is_array( $ph_old ) && is_array( $ph_new ) && ! empty( $ph_res['items_removed'] ) && ! LBB_Bookings::get( $ph_old['id'] ) && LBB_Bookings::get( $ph_new['id'] ), $ph_res );
+if ( is_array( $ph_new ) ) {
+	$wpdb->delete( LBB_Bookings::table(), array( 'id' => $ph_new['id'] ) );
+}
+
 // WooCommerce anonimizează o comandă (la cerere sau după perioada setată): dispar și numele de pe rândul comenzii și din rezervare.
 $wa_h = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Anonim Comanda' ), '+37369000094', 'wa@example.com', 'MDL' );
 $wa_o = wc_create_order();

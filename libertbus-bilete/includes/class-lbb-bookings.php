@@ -683,6 +683,11 @@ class LBB_Bookings {
 			}
 			$removed = true;
 		}
+		// Coșul abandonat (bilet pus în coș, neplătit, cu timpul expirat) nu e o rezervare și nu ține locuri: la cerere
+		// se șterge acum, nu abia la curățenia de a doua zi. Coșul încă activ rămâne (clientul poate fi la plată).
+		if ( $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::table() . " WHERE email = %s AND status = 'hold' AND order_id = 0 AND expires_at < %s", $email, self::now_utc() ) ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$removed = true;
+		}
 		return array(
 			'items_removed'  => $removed,
 			'items_retained' => $retained,
