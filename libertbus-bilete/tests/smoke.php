@@ -1263,6 +1263,10 @@ $pv_n   = $pv_new ? LBB_Bookings::get( $pv_new['id'] ) : null;
 lbb_t( 'ștergere date personale: cursa trecută anonimizată, biletul pentru cursa viitoare păstrat cu mesaj', ! empty( $pv_res['items_removed'] ) && ! empty( $pv_res['items_retained'] ) && ! empty( $pv_res['messages'] )
 	&& $pv_o && '' === $pv_o['email'] && '' === $pv_o['phone'] && ! array_filter( (array) $pv_o['passengers'] ) && $pv_n && 'gdpr@example.com' === $pv_n['email'], array( $pv_res, $pv_o, $pv_n ) );
 
+// Descrierea scurtă a produsului „Bilet autocar” nu apare clientului (coș / checkout cu blocuri), dar rămâne în admin.
+$sd_p = wc_get_product( LBB_Install::product_id() );
+lbb_t( 'produsul bilet: descrierea scurtă (notă internă) e goală pentru client și rămâne în admin', $sd_p && '' === $sd_p->get_short_description() && '' !== $sd_p->get_short_description( 'edit' ), $sd_p ? $sd_p->get_short_description( 'edit' ) : null );
+
 // Coșul abandonat al clientului (expirat) dispare la cererea de ștergere; coșul încă activ rămâne.
 $ph_old = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Abandonat' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
 $ph_new = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Activ' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );

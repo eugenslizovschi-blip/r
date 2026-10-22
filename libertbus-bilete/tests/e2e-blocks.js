@@ -1,5 +1,5 @@
 // E2E: checkout-ul cu blocul „Checkout” (nu shortcode-ul clasic), cu „Plată simplificată” și doar bilete în coș:
-// clientul vede numele, emailul și telefonul, dar nu strada, orașul, județul sau codul poștal.
+// clientul vede numele, emailul și telefonul, dar nu strada, orașul, județul sau codul poștal; rezumatul arată biletul (ora, pasagerii).
 // qa.sh pune blocul pe pagina de finalizare doar cât rulează testul.
 // BASE=http://127.0.0.1:8080 node tests/e2e-blocks.js
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -32,6 +32,10 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   // Numele și telefonul din formular sunt deja completate (clientul nu le scrie din nou).
   const pre = await page.$eval('#billing-first_name', i => i.value).catch(() => '');
   if (pre !== 'Ion') fail('checkout cu blocuri: numele din formular nu e precompletat: ' + JSON.stringify(pre));
+  // Rezumatul comenzii (pe telefon se deschide cu un clic) arată ruta, ora și pasagerii, fără nota internă a produsului.
+  await page.click('.wc-block-components-order-summary__button-text').catch(() => {});
+  const item = await page.$eval('.wc-block-components-order-summary-item', e => e.innerText.replace(/\s+/g, ' ')).catch(() => '');
+  if (!/Ora plecării/.test(item) || !/Pasageri: Ion Bloc/.test(item) || /Se cumpără din formularul/.test(item)) fail('checkout cu blocuri: rezumatul biletului e greșit: ' + JSON.stringify(item));
   console.log('câmpuri vizibile: ' + shown.join(', '));
   console.log(process.exitCode ? 'BLOCKS: PROBLEME' : 'BLOCKS: OK');
   await browser.close();

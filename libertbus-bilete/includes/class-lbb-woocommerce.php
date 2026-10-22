@@ -41,6 +41,7 @@ class LBB_WooCommerce {
 		add_filter( 'woocommerce_payment_complete_order_status', array( __CLASS__, 'autocomplete' ), 10, 3 );
 
 		add_filter( 'woocommerce_currency', array( __CLASS__, 'session_currency' ), 999 );
+		add_filter( 'woocommerce_product_get_short_description', array( __CLASS__, 'short_description' ), 10, 2 );
 		add_filter( 'woocommerce_checkout_fields', array( __CLASS__, 'checkout_fields' ), 20 );
 		// Căutarea din WooCommerce → Comenzi găsește și codul biletului (comenzi în tabelele HPOS și în articole).
 		add_filter( 'woocommerce_order_table_search_query_meta_keys', array( __CLASS__, 'search_keys' ) );
@@ -367,6 +368,15 @@ class LBB_WooCommerce {
 	 * Moneda aleasă de client în formular devine moneda coșului și a comenzii,
 	 * doar cât coșul conține numai bilete. În admin rămâne moneda magazinului.
 	 */
+	/**
+	 * Descrierea scurtă a produsului „Bilet autocar” e o notă pentru administrator: coșul și checkout-ul cu blocuri o
+	 * afișează sub bilet („Se cumpără din formularul de rezervare”), lângă ruta, data și pasagerii, unde doar încurcă.
+	 * În admin (contextul „edit”) rămâne neschimbată.
+	 */
+	public static function short_description( $description, $product ) {
+		return $product && (int) $product->get_id() === (int) get_option( LBB_Install::PRODUCT_OPTION ) ? '' : $description;
+	}
+
 	public static function session_currency( $currency ) {
 		static $busy = false;
 		if ( $busy || ( is_admin() && ! wp_doing_ajax() ) || ! function_exists( 'WC' ) || ! WC()->session ) {
