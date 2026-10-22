@@ -43,7 +43,8 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   // Coșul cu blocul „Cart”: biletul arată ruta, ora și pasagerii, fără selector de cantitate (locurile se aleg în
   // formular) și fără link spre pagina produsului.
   await page.goto(BASE + '/cart/');
-  await page.waitForSelector('.wc-block-cart-items__row').catch(() => fail('coșul cu blocuri nu s-a încărcat'));
+  // WooCommerce 11 arată întâi rândul gol (schelet) și abia apoi biletul: așteptăm conținutul, nu doar rândul.
+  await page.waitForFunction(() => { const r = document.querySelector('.wc-block-cart-items__row'); return r && /Pasageri/.test(r.innerText); }, null, { timeout: 20000 }).catch(() => fail('coșul cu blocuri nu s-a încărcat'));
   const row = await page.$eval('.wc-block-cart-items__row', r => ({ text: r.innerText.replace(/\s+/g, ' '), qty: !!r.querySelector('.wc-block-components-quantity-selector'), links: r.querySelectorAll('a[href]').length })).catch(() => null);
   if (!row || !/Ora plecării/.test(row.text) || !/Pasageri: Ion Bloc/.test(row.text) || row.qty || row.links) fail('coș cu blocuri: biletul e afișat greșit ' + JSON.stringify(row));
   // „Remove item” din coșul cu blocuri (prin Store API) eliberează locul ținut, ca în coșul clasic.
