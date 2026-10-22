@@ -154,8 +154,10 @@ echo "$OUT_DEV" | grep -E '^✗|^    -|FAIL' ; echo "$OUT_DEV" | grep -c '^✓' 
 echo "$OUT_DEV" | grep -qE '^✗|FAIL' && FAIL=1
 # Orice avertisment PHP din această rulare, și cele raportate în fișierele WordPress/WooCommerce (ex. esc_url( null )
 # apelat din plugin apare în formatting.php, fără „lbb” în cale). Excepție: un notice al WooCommerce însuși, la
-# anonimizarea clientului din Unelte → Șterge datele personale (WC_Admin Customers DataStore, nu codul nostru).
-PHP_ERR=$( [ -f "$LOG" ] && tail -n +$((LOG_START + 1)) "$LOG" | grep -E "PHP (Fatal|Warning|Notice|Deprecated)" | grep -v "wpdb::prepare was called .*Unsupported value type (object)" )
+# anonimizarea clientului din Unelte → Șterge datele personale (WC_Admin Customers DataStore, nu codul nostru), și
+# unul al WordPress 6.4: cron-ul lui de verificare HTTPS (de două ori pe zi) apelează o funcție pe care el însuși a
+# declarat-o învechită; apare doar când cron-ul nimerește în timpul testelor, deci QA ar pica la întâmplare.
+PHP_ERR=$( [ -f "$LOG" ] && tail -n +$((LOG_START + 1)) "$LOG" | grep -E "PHP (Fatal|Warning|Notice|Deprecated)" | grep -v "wpdb::prepare was called .*Unsupported value type (object)" | grep -v "Function wp_update_https_detection_errors is deprecated since version 6.4.0" )
 if [ -n "$PHP_ERR" ]; then echo "== Avertismente PHP în debug.log:"; echo "$PHP_ERR" | sed -E 's/^\[[^]]*\] //' | sort | uniq -c | head -8; FAIL=1; fi
 MAIL_FAILED=$(cd "$WP_PATH" && $WP_CLI eval '$f = get_option( "lbb_mail_failed" ); echo is_array( $f ) ? $f["message"] : "";' 2>/dev/null)
 if [ -n "$MAIL_FAILED" ]; then echo "== Emailuri: un test a încercat o trimitere reală (eșuată): $MAIL_FAILED"; FAIL=1; fi
