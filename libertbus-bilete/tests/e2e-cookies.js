@@ -49,6 +49,13 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await page.setViewportSize({ width: vp.width, height: vp.height });
     await page.waitForTimeout(300);
     if (!(await page.$('#lbb-cc a[href*="politica-de-cookies"]'))) fail(vp.name + ': bannerul nu are link spre Politica de cookies');
+    // „Detalii” se atinge ușor: cel puțin 24px, iar zona lui nu ajunge peste butoanele bannerului.
+    const det = await page.evaluate(() => {
+      const a = document.querySelector('#lbb-cc .lbb-cc-text a'); if (!a) return null; const r = a.getBoundingClientRect();
+      const over = [...document.querySelectorAll('#lbb-cc button')].filter(b => b.offsetParent).filter(b => { const q = b.getBoundingClientRect(); return q.left < r.right && q.right > r.left && q.top < r.bottom && q.bottom > r.top; }).length;
+      return { h: Math.round(r.height), over };
+    });
+    if (!det || det.h < 24 || det.over) fail(vp.name + ': „Detalii” din banner e greu de atins ' + JSON.stringify(det));
     await page.screenshot({ path: OUT + '/cookies-' + vp.name + '.png' });
     if (ga) fail(vp.name + ': Google Analytics s-a încărcat fără acord');
     if ((await trackers()).length) fail(vp.name + ': cookies de statistică fără acord: ' + (await trackers()).join(','));

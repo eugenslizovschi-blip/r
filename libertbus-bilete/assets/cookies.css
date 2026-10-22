@@ -24,7 +24,8 @@
 .lbb-cc[hidden] { display: none !important; }
 .lbb-cc *, .lbb-cc *::before, .lbb-cc *::after { box-sizing: border-box; }
 .lbb-cc .lbb-cc-text { margin: 0 0 12px !important; padding: 0 !important; color: #1d2733 !important; font-size: 15px !important; line-height: 1.45 !important; }
-.lbb-cc .lbb-cc-text a { color: #00875a !important; text-decoration: underline !important; font-weight: 600; }
+/* „Detalii”: zona de atingere crește în sus și în jos (padding pe un link din text nu mută rândurile). */
+.lbb-cc .lbb-cc-text a { padding: 6px 0; color: #00875a !important; text-decoration: underline !important; font-weight: 600; }
 .lbb-cc .lbb-cc-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-areas: "nec set acc"; gap: 8px; }
 .lbb-cc [data-lbb-cc="necessary"] { grid-area: nec; }
 .lbb-cc [data-lbb-cc="settings"] { grid-area: set; }
