@@ -16,7 +16,11 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await page.fill('[data-lbb="date"]', day);
   await page.dispatchEvent('[data-lbb="date"]', 'change');
   await page.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0);
-  await page.selectOption('[data-lbb="time"]', await page.$eval('[data-lbb="time"] option:not([disabled]):not([value=""])', o => o.value));
+  const time = await page.$eval('[data-lbb="time"] option:not([disabled]):not([value=""])', o => o.value);
+  await page.selectOption('[data-lbb="time"]', time);
+  const routeId = await page.$eval('[data-lbb="route"]', s => s.value);
+  // Locurile libere ale cursei, din același API ca formularul (biletul din coș ține un loc).
+  const free = async () => { const r = await page.request.get(BASE + '/?rest_route=/lbb/v1/departures&route_id=' + routeId + '&date=' + day); const d = (await r.json()).departures || []; const x = d.find(o => o.time === time); return x ? x.free : null; };
   await page.fill('input[name="lbb_names[]"]', 'Ion Bloc');
   await page.fill('input[name="lbb_phone"]', '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
   await page.fill('input[name="lbb_email"]', 'bloc@example.com');
@@ -42,6 +46,13 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await page.waitForSelector('.wc-block-cart-items__row').catch(() => fail('coșul cu blocuri nu s-a încărcat'));
   const row = await page.$eval('.wc-block-cart-items__row', r => ({ text: r.innerText.replace(/\s+/g, ' '), qty: !!r.querySelector('.wc-block-components-quantity-selector'), links: r.querySelectorAll('a[href]').length })).catch(() => null);
   if (!row || !/Ora plecării/.test(row.text) || !/Pasageri: Ion Bloc/.test(row.text) || row.qty || row.links) fail('coș cu blocuri: biletul e afișat greșit ' + JSON.stringify(row));
+  // „Remove item” din coșul cu blocuri (prin Store API) eliberează locul ținut, ca în coșul clasic.
+  const held = await free();
+  await page.click('.wc-block-cart-item__remove-link');
+  await page.waitForSelector('.wc-block-cart-items__row', { state: 'detached' }).catch(() => fail('coș cu blocuri: biletul nu s-a scos'));
+  await page.waitForTimeout(500);
+  const after = await free();
+  if (held === null || after !== held + 1) fail('coș cu blocuri: scoaterea biletului nu eliberează locul (' + held + ' → ' + after + ')');
   console.log('câmpuri vizibile: ' + shown.join(', '));
   console.log(process.exitCode ? 'BLOCKS: PROBLEME' : 'BLOCKS: OK');
   await browser.close();
