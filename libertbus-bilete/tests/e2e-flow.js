@@ -77,7 +77,8 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   await page.waitForLoadState('networkidle');
   if (await page.locator('#terms').count()) await page.locator('#terms').check();
   await Promise.all([page.waitForURL(/order-received/, { timeout: 30000 }), page.click('#place_order')]);
-  console.log('thank you url:', page.url());
+  const thankUrl = page.url();
+  console.log('thank you url:', thankUrl);
   const ticket = await page.textContent('.lbb-ticket');
   console.log('ticket:', ticket.replace(/\s+/g, ' '));
   await page.screenshot({ path: (process.env.OUT || '.') + '/thankyou.png', fullPage: true });
@@ -89,6 +90,14 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const qr = await page.waitForSelector('.lbb-ticket-qr img[src^="data:image/png"]', { state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
   console.log('qr rendered:', qr);
   await page.screenshot({ path: (process.env.OUT || '.') + '/ticketpage.png', fullPage: true });
+  // Contul meu → Comenzi → Vezi comanda: clientul logat își găsește biletul și mai târziu, o singură dată.
+  {
+    const orderId = (thankUrl.match(/order-received\/(\d+)/) || [])[1];
+    const code = (ticket.match(/LB-[A-Z0-9]{6}/) || [])[0];
+    await page.goto(BASE + '/my-account/view-order/' + orderId + '/');
+    const mine = await page.$$eval('.lbb-ticket', els => els.map(e => e.textContent.replace(/\s+/g, ' ')));
+    if (!orderId || !code || mine.length !== 1 || mine[0].indexOf(code) < 0) console.log('FAIL comanda din Contul meu nu arată biletul (o dată): ' + JSON.stringify({ orderId, code, mine: mine.map(t => t.slice(0, 60)) }));
+  }
   console.log('JS errors:', errors.length ? errors : 'none');
   // Ce vede clientul după plată: biletul plătit cu ambii pasageri, pagina lui „valabil”, cu cod QR, fără erori JS.
   const flat = ticket.replace(/\s+/g, ' ');
