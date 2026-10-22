@@ -13,6 +13,7 @@ class LBB_Tickets {
 		add_action( 'woocommerce_email_before_order_table', array( __CLASS__, 'email' ), 5, 4 );
 		add_filter( 'woocommerce_email_subject_customer_processing_order', array( __CLASS__, 'email_subject' ), 10, 3 );
 		add_filter( 'woocommerce_email_subject_customer_completed_order', array( __CLASS__, 'email_subject' ), 10, 3 );
+		add_filter( 'woocommerce_email_subject_new_order', array( __CLASS__, 'email_subject' ), 10, 3 );
 		add_action( 'woocommerce_thankyou', array( __CLASS__, 'thankyou' ), 5 );
 		add_action( 'woocommerce_order_details_before_order_table', array( __CLASS__, 'order_details' ), 5 );
 		add_action( 'template_redirect', array( __CLASS__, 'ticket_page' ), 5 );
@@ -380,6 +381,12 @@ class LBB_Tickets {
 			return $subject;
 		}
 		$tickets = self::confirmed( $order );
+		// Emailul către birou („Comandă nouă”): numărul comenzii și biletul, ca biroul să vadă din inbox ce s-a vândut.
+		if ( $tickets && $email instanceof WC_Email && 'new_order' === $email->id ) {
+			$what = 1 === count( $tickets ) ? self::ticket_label( $tickets[0] ) : implode( ', ', wp_list_pluck( $tickets, 'ticket_code' ) );
+			/* translators: 1: numele site-ului, 2: numărul comenzii, 3: biletul (cod · rută · dată) sau codurile biletelor */
+			return sprintf( __( '[%1$s] Comandă nouă #%2$s: %3$s', 'libertbus-bilete' ), get_bloginfo( 'name' ), $order->get_order_number(), $what );
+		}
 		if ( 1 === count( $tickets ) ) {
 			/* translators: %s: codul, ruta și data biletului, ex. LB-ABC123 · Bălți → Iași · 05.11.2026 — LibertBus */
 			return sprintf( __( 'Biletul dumneavoastră: %s', 'libertbus-bilete' ), self::page_title( $tickets[0] ) );
@@ -597,6 +604,13 @@ class LBB_Tickets {
 		if ( ! $booking ) {
 			return __( 'Bilet negăsit', 'libertbus-bilete' );
 		}
+		return self::ticket_label( $booking ) . ' — ' . get_bloginfo( 'name' );
+	}
+
+	/**
+	 * Biletul pe scurt: „LB-ABC123 · Bălți → Iași · 25.10.2026” (titlul paginii, subiectele emailurilor).
+	 */
+	public static function ticket_label( array $booking ) {
 		$parts = array( $booking['ticket_code'] );
 		$route = LBB_Routes::get( $booking['route_id'] );
 		if ( $route ) {
@@ -606,7 +620,7 @@ class LBB_Tickets {
 		if ( $day ) {
 			$parts[] = $day->format( 'd.m.Y' );
 		}
-		return implode( ' · ', $parts ) . ' — ' . get_bloginfo( 'name' );
+		return implode( ' · ', $parts );
 	}
 
 	/**

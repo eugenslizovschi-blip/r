@@ -1331,6 +1331,10 @@ $es_em->init_settings();
 $es_pe   = WC()->mailer()->emails['WC_Email_Customer_Processing_Order'];
 $es_pe->object = wc_create_order();
 $es_s3   = $es_pe->get_subject();
+$es_ne   = WC()->mailer()->emails['WC_Email_New_Order'];
+$es_ne->object = $es_o;
+$es_s4   = $es_o ? $es_ne->get_subject() : '';
+lbb_t( 'emailul „Comandă nouă” către birou are numărul comenzii și biletul (cod, rută, dată)', $es_b && $es_o && 0 === strpos( $es_s4, '[' . get_bloginfo( 'name' ) . '] Comandă nouă #' . $es_o->get_order_number() . ': ' . $es_b[0]['ticket_code'] . ' · ' ), $es_s4 );
 lbb_t( 'emailul cu biletul are în subiect codul, ruta și data; subiectul scris de administrator și comenzile fără bilete rămân', $es_b && 0 === strpos( $es_s1, 'Biletul dumneavoastră: ' . $es_b[0]['ticket_code'] . ' · ' ) && false !== strpos( $es_s1, ' → ' ) && $es_o && 'Comanda ' . $es_o->get_order_number() === $es_s2 && false === strpos( $es_s3, 'Bilet' ), array( $es_s1, $es_s2, $es_s3 ) );
 
 // Coșul abandonat al clientului (expirat) dispare la cererea de ștergere; coșul încă activ rămâne.
