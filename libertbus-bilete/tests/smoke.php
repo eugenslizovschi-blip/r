@@ -1290,6 +1290,29 @@ $sm_u = $sm_p ? wp_list_pluck( $sm_p->get_url_list( 1, 'product' ), 'loc' ) : ar
 $sm_y = apply_filters( 'wpseo_exclude_from_sitemap_by_post_ids', array() );
 lbb_t( 'sitemap: produsul „Bilet autocar” lipsește (redirecționare), și din Yoast', $sm_p && ! in_array( get_permalink( LBB_Install::product_id() ), $sm_u, true ) && in_array( LBB_Install::product_id(), $sm_y, true ), array( $sm_u, $sm_y ) );
 
+// Emailurile HTML pleacă cu varianta text alăturată (multipart): PHPMailer-ul primește AltBody, iar următorul email
+// trimis de site (alt plugin, WordPress) nu-l moștenește. PHPMailer de test: nu trimite nimic.
+require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
+require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
+global $phpmailer;
+$mh_keep   = $phpmailer;
+$phpmailer = new class( true ) extends PHPMailer\PHPMailer\PHPMailer {
+	public function send() {
+		return true;
+	}
+};
+$mh_go = function () {
+	return null; // Trece de filtrul care salvează emailurile în mediul de test: ajunge la PHPMailer.
+};
+add_filter( 'pre_wp_mail', $mh_go, 20 );
+$mh_ok   = LBB_Tickets::mail_html( 'alt@example.com', 'Test', '<p>Bilet <a href="https://example.com/b">deschide</a></p>', array( 'Content-Type: text/html; charset=UTF-8' ) );
+$mh_alt  = $phpmailer->AltBody;
+wp_mail( 'altul@example.com', 'Alt plugin', 'Text simplu' );
+$mh_next = $phpmailer->AltBody;
+remove_filter( 'pre_wp_mail', $mh_go, 20 );
+$phpmailer = $mh_keep;
+lbb_t( 'emailul HTML are și varianta text (AltBody), iar următorul email al site-ului nu o moștenește', $mh_ok && false !== strpos( $mh_alt, 'Bilet' ) && false !== strpos( $mh_alt, 'https://example.com/b' ) && false === strpos( $mh_alt, '<p>' ) && '' === $mh_next, array( $mh_alt, $mh_next ) );
+
 // Coșul abandonat al clientului (expirat) dispare la cererea de ștergere; coșul încă activ rămâne.
 $ph_old = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Abandonat' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
 $ph_new = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Activ' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
