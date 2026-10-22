@@ -937,6 +937,24 @@ foreach ( LBB_Admin::checklist() as $dbg_it ) {
 	}
 }
 lbb_t( 'panoul semnalează erorile PHP afișate vizitatorilor: WP_DEBUG cu afișare (și implicit, fără WP_DEBUG_DISPLAY) da; afișare oprită sau WP_DEBUG oprit nu', LBB_Admin::errors_shown( true, true ) && LBB_Admin::errors_shown( true, 1 ) && ! LBB_Admin::errors_shown( true, false ) && ! LBB_Admin::errors_shown( false, true ) && $dbg_row && true === $dbg_row['ok'], $dbg_row );
+// Emailul WooCommerce care duce biletul („Comandă finalizată” cu finalizarea automată) oprit: panoul îl semnalează.
+$te_key  = 'woocommerce_customer_completed_order_settings';
+$te_keep = get_option( $te_key, null );
+$te_find = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'ticket_email' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+$te_auto = LBB_Settings::get( 'autocomplete' );
+update_option( $te_key, array_merge( is_array( $te_keep ) ? $te_keep : array(), array( 'enabled' => 'no' ) ) );
+$te_off = $te_find();
+update_option( $te_key, array_merge( is_array( $te_keep ) ? $te_keep : array(), array( 'enabled' => 'yes' ) ) );
+$te_on = $te_find();
+null === $te_keep ? delete_option( $te_key ) : update_option( $te_key, $te_keep );
+lbb_t( 'panoul semnalează emailul WooCommerce cu biletul oprit („Comandă finalizată”), cu link spre setările lui', $te_auto && $te_off && false === $te_off['ok'] && false !== strpos( $te_off['fix'], 'section=wc_email_customer_completed_order' ) && $te_on && true === $te_on['ok'], array( $te_off, $te_on ) );
 // WooCommerce 9+ în modul „În curând”: panoul îl semnalează (coșul și plata ascunse); fără opțiune (WooCommerce 8) nu apare.
 $cs_keep = get_option( 'woocommerce_coming_soon', null );
 $cs_find = function () {

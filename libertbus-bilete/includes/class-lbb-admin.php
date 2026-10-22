@@ -117,6 +117,16 @@ class LBB_Admin {
 				$guest ? '' : ( $signup ? __( 'Acum clientul e obligat să-și facă un cont la plată. Bifați „Permite clienților să plaseze comenzi fără cont” în WooCommerce → Setări → Conturi și confidențialitate.', 'libertbus-bilete' ) : __( 'Clienții fără cont nu pot plăti online. Bifați „Permite clienților să plaseze comenzi fără cont” în WooCommerce → Setări → Conturi și confidențialitate.', 'libertbus-bilete' ) ),
 				admin_url( 'admin.php?page=wc-settings&tab=account' ) );
 
+			// Biletul pleacă în emailul WooCommerce al comenzii: „Comandă finalizată” (cu finalizarea automată) sau „Comandă
+			// în procesare”. Dacă acel email e oprit în WooCommerce → Setări → Emailuri, clientul rămâne fără bilet pe email.
+			$mail_key = LBB_Settings::get( 'autocomplete' ) ? 'customer_completed_order' : 'customer_processing_order';
+			$mail_opt = get_option( 'woocommerce_' . $mail_key . '_settings', array() );
+			$mail_on  = ! is_array( $mail_opt ) || ! isset( $mail_opt['enabled'] ) || 'no' !== $mail_opt['enabled'];
+			$add( 'ticket_email', $mail_on,
+				'customer_completed_order' === $mail_key ? __( 'Emailul WooCommerce „Comandă finalizată” (cu biletul) e pornit', 'libertbus-bilete' ) : __( 'Emailul WooCommerce „Comandă în procesare” (cu biletul) e pornit', 'libertbus-bilete' ),
+				$mail_on ? '' : __( 'E oprit: clienții nu primesc biletul pe email după plată. Bifați „Activează acest email” în setările lui.', 'libertbus-bilete' ),
+				admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_' . $mail_key ) );
+
 			// WooCommerce 9+: în modul „În curând” (Coming soon) vizitatorii nu ajung la coș și la plată; un magazin nou
 			// pornește chiar așa. Pe versiunile fără această opțiune verificarea nu apare.
 			$soon = get_option( 'woocommerce_coming_soon', null );
