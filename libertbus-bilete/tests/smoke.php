@@ -1348,6 +1348,29 @@ $es_pe->object = wc_get_order( $es_two->get_id() );
 $es_s5  = $es_pe->get_subject();
 lbb_t( 'comanda cu două bilete: subiectul emailului le are pe amândouă („Biletele dumneavoastră: LB-…, LB-…”)', 2 === count( $es_tc ) && 'Biletele dumneavoastră: ' . implode( ', ', $es_tc ) . ' — ' . get_bloginfo( 'name' ) === $es_s5, array( $es_s5, $es_tc ) );
 $es_two->update_status( 'cancelled' ); // Locurile se eliberează pentru testele următoare de pe aceeași cursă.
+// Rambursare completă: clientul află în subiect ce bilet s-a anulat; la rambursare parțială subiectul WooCommerce rămâne.
+$es_r  = wc_create_order();
+$es_rh = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Ramb Ursat' ), '+37369000098', 'ramburs@example.com', 'MDL' );
+$es_ri = new WC_Order_Item_Product();
+$es_ri->set_product( wc_get_product( LBB_Install::product_id() ) );
+$es_ri->add_meta_data( '_lbb_token', is_array( $es_rh ) ? $es_rh['token'] : '', true );
+$es_r->add_item( $es_ri );
+$es_r->save();
+LBB_WooCommerce::attach_order( $es_r );
+$es_r->update_status( 'processing' );
+$es_r->update_status( 'refunded' );
+$es_rc = wp_list_pluck( LBB_Bookings::by_order( $es_r->get_id() ), 'ticket_code' );
+$es_re = WC()->mailer()->emails['WC_Email_Customer_Refunded_Order'];
+$es_re->object = wc_get_order( $es_r->get_id() );
+$es_re->partial_refund = false;
+$es_re->id = 'customer_refunded_order'; // Ca WooCommerce la trimitere: id-ul se schimbă după tipul rambursării.
+$es_s9  = $es_re->get_subject();
+$es_re->partial_refund = true;
+$es_re->id = 'customer_partially_refunded_order';
+$es_s10 = $es_re->get_subject();
+$es_re->partial_refund = false;
+$es_re->id = 'customer_refunded_order';
+lbb_t( 'rambursare completă: subiectul spune biletul anulat („Bilet anulat și rambursat: LB-… · ruta · data”); la rambursare parțială rămâne cel WooCommerce', 1 === count( $es_rc ) && '' !== $es_rc[0] && 0 === strpos( $es_s9, 'Bilet anulat și rambursat: ' . $es_rc[0] . ' · ' ) && false === strpos( $es_s10, 'Bilet' ), array( $es_s9, $es_s10, $es_rc ) );
 // Un nume de site cu „&” (WordPress îl salvează „&amp;”) apare în subiect ca text, nu ca entitate HTML.
 $es_bn = get_option( 'blogname' );
 update_option( 'blogname', 'Autocare & Bilete' );

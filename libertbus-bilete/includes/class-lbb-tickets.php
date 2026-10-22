@@ -16,6 +16,7 @@ class LBB_Tickets {
 		add_filter( 'woocommerce_email_subject_new_order', array( __CLASS__, 'email_subject' ), 10, 3 );
 		add_filter( 'woocommerce_email_subject_cancelled_order', array( __CLASS__, 'email_subject' ), 10, 3 );
 		add_filter( 'woocommerce_email_subject_failed_order', array( __CLASS__, 'email_subject' ), 10, 3 );
+		add_filter( 'woocommerce_email_subject_customer_refunded_order', array( __CLASS__, 'email_subject' ), 10, 3 );
 		add_action( 'woocommerce_thankyou', array( __CLASS__, 'thankyou' ), 5 );
 		add_action( 'woocommerce_order_details_before_order_table', array( __CLASS__, 'order_details' ), 5 );
 		add_action( 'template_redirect', array( __CLASS__, 'ticket_page' ), 5 );
@@ -381,6 +382,24 @@ class LBB_Tickets {
 		$custom = is_array( $saved ) && isset( $saved['subject'] ) ? trim( (string) $saved['subject'] ) : '';
 		if ( ! $order instanceof WC_Order || ( '' !== $custom && $custom !== $email->get_default_subject() ) ) {
 			return $subject;
+		}
+		// Rambursare completă: biletul e anulat, iar clientul află care („Bilet anulat și rambursat: LB-… · ruta · data”).
+		// La o rambursare parțială biletul rămâne valabil, deci subiectul WooCommerce rămâne. Subiectul scris de
+		// administrator („subject_full”) rămâne și el.
+		// După clasă, nu după id: WooCommerce schimbă id-ul în „customer_partially_refunded_order” la rambursarea parțială.
+		if ( $email instanceof WC_Email_Customer_Refunded_Order ) {
+			$full = is_array( $saved ) && isset( $saved['subject_full'] ) ? trim( (string) $saved['subject_full'] ) : '';
+			$done = array_values( array_filter( LBB_Bookings::by_order( $order->get_id() ), function ( $b ) {
+				return '' !== (string) $b['ticket_code'];
+			} ) );
+			if ( ! empty( $email->partial_refund ) || ! $done || ( '' !== $full && $full !== $email->get_default_subject() ) ) {
+				return $subject;
+			}
+			return 1 === count( $done )
+				/* translators: %s: biletul (cod · rută · dată — site) */
+				? sprintf( __( 'Bilet anulat și rambursat: %s', 'libertbus-bilete' ), self::page_title( $done[0] ) )
+				/* translators: 1: codurile biletelor, 2: numele site-ului */
+				: sprintf( __( 'Bilete anulate și rambursate: %1$s — %2$s', 'libertbus-bilete' ), implode( ', ', wp_list_pluck( $done, 'ticket_code' ) ), self::site_name() );
 		}
 		// Comandă anulată sau plată eșuată (emailuri către birou): ce cursă era, ca biroul să poată suna clientul. La o
 		// plată eșuată biletul nu are încă cod: rămân ruta, data și ora.
