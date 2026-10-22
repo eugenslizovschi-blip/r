@@ -10,6 +10,16 @@ pgrep -x mariadbd >/dev/null || pgrep -x mysqld >/dev/null || (mysqld_safe --use
 for _ in $(seq 60); do mysqladmin ping >/dev/null 2>&1 && break; sleep 1; done
 mysqladmin ping >/dev/null 2>&1 || { echo "MariaDB nu pornește (vezi: apt-get install -y mariadb-server)" >&2; exit 1; }
 mysql -uroot -e "CREATE DATABASE IF NOT EXISTS wp; CREATE USER IF NOT EXISTS 'wp'@'localhost' IDENTIFIED BY 'wp'; GRANT ALL ON wp.* TO 'wp'@'localhost';"
+# PHP 7.4, ca pe libertbus.md: tests/qa.sh rulează cu el și testele automate, nu doar verificarea statică. Se
+# instalează din depozitul ondrej/php (Ubuntu); PHP74=0 sare peste, iar o instalare eșuată nu oprește pregătirea.
+if [ "${PHP74:-1}" != 0 ] && ! command -v php7.4 >/dev/null && command -v apt-get >/dev/null; then
+  ( . /etc/os-release
+    [ -f /usr/share/keyrings/ondrej-php.gpg ] || curl -sS "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14AA40EC0831756756D7F66C4F4EA0AAE5267A6C" | gpg --dearmor > /usr/share/keyrings/ondrej-php.gpg
+    echo "deb [signed-by=/usr/share/keyrings/ondrej-php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu $VERSION_CODENAME main" > /etc/apt/sources.list.d/ondrej-php.list
+    apt-get update -qq -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ondrej-php.list -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends php7.4-cli php7.4-mysql php7.4-mbstring php7.4-xml php7.4-curl php7.4-zip php7.4-gd php7.4-intl
+  ) >/dev/null 2>&1 || echo "PHP 7.4 nu s-a putut instala (testele cu PHP 7.4 se sar)"
+fi
 [ -f wp-cli.phar ] || curl -sSL -o wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 # Aceeași versiune ca pe libertbus.md; WP_VERSION=7.1.2 tests/setup-local.sh … testează o actualizare.
 WP_VERSION="${WP_VERSION:-6.4.3}"

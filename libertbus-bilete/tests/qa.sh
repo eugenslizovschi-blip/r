@@ -76,6 +76,16 @@ README_DEV=$(sed -n 's/.*\*\*\([0-9]*\) dispozitive\*\*.*/\1/p' "$DIR/README.md"
 if [ -z "$SMOKE_N" ] || [ "$SMOKE_N" != "$README_N" ] || [ "$DEV_N" != "$README_DEV" ]; then
   echo "  README nesincronizat: $README_N verificări în README, $SMOKE_N rulate; $README_DEV dispozitive în README, $DEV_N în tests/e2e-devices.js"; FAIL=1
 fi
+# Site-ul live rulează PHP 7.4: cu php7.4 instalat (tests/setup-local.sh îl pune), sintaxa și testele automate rulează
+# și cu el, nu doar verificarea statică de mai sus. PHP74_BIN=/cale/php7.4 alege alt binar.
+PHP74_BIN="${PHP74_BIN:-$(command -v php7.4 || true)}"
+if [ -n "$PHP74_BIN" ] && [ "${WP_CLI#php }" != "$WP_CLI" ]; then
+  echo "== Teste automate cu PHP 7.4 (ca pe site-ul live)"
+  for f in $(find "$DIR" -name '*.php'); do "$PHP74_BIN" -l "$f" >/dev/null || { echo "  eroare PHP 7.4: $f"; FAIL=1; }; done
+  OUT_74=$(cd "$WP_PATH" && "$PHP74_BIN" ${WP_CLI#php } eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
+  echo "$OUT_74" | grep -E "FAIL|eșuate|Fatal|Parse error"
+  echo "$OUT_74" | grep -q " 0 eșuate" || FAIL=1
+fi
 # Încălzire: după repornirea containerului prima comandă WooCommerce poate dura peste 30 s (cache-uri reci)
 # și testele din browser ar pica din timeout, nu din cauza codului.
 for u in / /balti-iasi/ /checkout/ /wp-login.php; do curl -s -o /dev/null -m 60 "$BASE$u" || true; done
