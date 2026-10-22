@@ -1348,6 +1348,13 @@ $es_pe->object = wc_get_order( $es_two->get_id() );
 $es_s5  = $es_pe->get_subject();
 lbb_t( 'comanda cu două bilete: subiectul emailului le are pe amândouă („Biletele dumneavoastră: LB-…, LB-…”)', 2 === count( $es_tc ) && 'Biletele dumneavoastră: ' . implode( ', ', $es_tc ) . ' — ' . get_bloginfo( 'name' ) === $es_s5, array( $es_s5, $es_tc ) );
 $es_two->update_status( 'cancelled' ); // Locurile se eliberează pentru testele următoare de pe aceeași cursă.
+// Un nume de site cu „&” (WordPress îl salvează „&amp;”) apare în subiect ca text, nu ca entitate HTML.
+$es_bn = get_option( 'blogname' );
+update_option( 'blogname', 'Autocare & Bilete' );
+$es_em->object = $es_o;
+$es_s8 = $es_o ? $es_em->get_subject() : '';
+update_option( 'blogname', $es_bn );
+lbb_t( 'numele site-ului cu „&” apare în subiectul emailului ca „&”, nu „&amp;”', false !== strpos( get_option( 'blogname' ) . get_bloginfo( 'name' ), $es_bn ) && false !== strpos( $es_s8, '— Autocare & Bilete' ) && false === strpos( $es_s8, '&amp;' ), $es_s8 );
 // Emailurile către birou pentru comandă anulată / plată eșuată spun cursa (fără cod, dacă plata n-a trecut).
 $es_ca = WC()->mailer()->emails['WC_Email_Cancelled_Order'];
 $es_ca->object = wc_get_order( $es_two->get_id() );

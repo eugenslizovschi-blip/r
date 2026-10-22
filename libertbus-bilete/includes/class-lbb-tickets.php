@@ -392,16 +392,16 @@ class LBB_Tickets {
 			$what = 1 === count( $all ) ? self::ticket_label( $all[0], true ) : LBB_Settings::ro_count( count( $all ), __( 'bilet', 'libertbus-bilete' ), __( 'bilete', 'libertbus-bilete' ) );
 			return 'cancelled_order' === $email->id
 				/* translators: 1: numele site-ului, 2: numărul comenzii, 3: cursa (cod · rută · dată, ora) sau numărul de bilete */
-				? sprintf( __( '[%1$s] Comandă anulată #%2$s: %3$s', 'libertbus-bilete' ), get_bloginfo( 'name' ), $order->get_order_number(), $what )
+				? sprintf( __( '[%1$s] Comandă anulată #%2$s: %3$s', 'libertbus-bilete' ), self::site_name(), $order->get_order_number(), $what )
 				/* translators: 1: numele site-ului, 2: numărul comenzii, 3: cursa (rută · dată, ora) sau numărul de bilete */
-				: sprintf( __( '[%1$s] Plată eșuată #%2$s: %3$s', 'libertbus-bilete' ), get_bloginfo( 'name' ), $order->get_order_number(), $what );
+				: sprintf( __( '[%1$s] Plată eșuată #%2$s: %3$s', 'libertbus-bilete' ), self::site_name(), $order->get_order_number(), $what );
 		}
 		$tickets = self::confirmed( $order );
 		// Emailul către birou („Comandă nouă”): numărul comenzii și biletul, ca biroul să vadă din inbox ce s-a vândut.
 		if ( $tickets && $email instanceof WC_Email && 'new_order' === $email->id ) {
 			$what = 1 === count( $tickets ) ? self::ticket_label( $tickets[0] ) : implode( ', ', wp_list_pluck( $tickets, 'ticket_code' ) );
 			/* translators: 1: numele site-ului, 2: numărul comenzii, 3: biletul (cod · rută · dată) sau codurile biletelor */
-			return sprintf( __( '[%1$s] Comandă nouă #%2$s: %3$s', 'libertbus-bilete' ), get_bloginfo( 'name' ), $order->get_order_number(), $what );
+			return sprintf( __( '[%1$s] Comandă nouă #%2$s: %3$s', 'libertbus-bilete' ), self::site_name(), $order->get_order_number(), $what );
 		}
 		if ( 1 === count( $tickets ) ) {
 			/* translators: %s: codul, ruta și data biletului, ex. LB-ABC123 · Bălți → Iași · 05.11.2026 — LibertBus */
@@ -409,7 +409,7 @@ class LBB_Tickets {
 		}
 		if ( $tickets ) {
 			/* translators: 1: codurile biletelor, ex. LB-ABC123, LB-DEF456, 2: numele site-ului */
-			return sprintf( __( 'Biletele dumneavoastră: %1$s — %2$s', 'libertbus-bilete' ), implode( ', ', wp_list_pluck( $tickets, 'ticket_code' ) ), get_bloginfo( 'name' ) );
+			return sprintf( __( 'Biletele dumneavoastră: %1$s — %2$s', 'libertbus-bilete' ), implode( ', ', wp_list_pluck( $tickets, 'ticket_code' ) ), self::site_name() );
 		}
 		return $subject;
 	}
@@ -620,7 +620,15 @@ class LBB_Tickets {
 		if ( ! $booking ) {
 			return __( 'Bilet negăsit', 'libertbus-bilete' );
 		}
-		return self::ticket_label( $booking ) . ' — ' . get_bloginfo( 'name' );
+		return self::ticket_label( $booking ) . ' — ' . self::site_name();
+	}
+
+	/**
+	 * Numele site-ului ca text simplu, pentru subiectele emailurilor: WordPress îl păstrează cu entități HTML
+	 * („Autocare &amp; Bilete”), care într-un subiect ar apărea așa, textual (ca WooCommerce cu {site_title}).
+	 */
+	private static function site_name() {
+		return wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
 	}
 
 	/**
