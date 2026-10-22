@@ -1267,6 +1267,12 @@ lbb_t( 'ștergere date personale: cursa trecută anonimizată, biletul pentru cu
 $sd_p = wc_get_product( LBB_Install::product_id() );
 lbb_t( 'produsul bilet: descrierea scurtă (notă internă) e goală pentru client și rămâne în admin', $sd_p && '' === $sd_p->get_short_description() && '' !== $sd_p->get_short_description( 'edit' ), $sd_p ? $sd_p->get_short_description( 'edit' ) : null );
 
+// Produsul „Bilet autocar” nu apare în sitemap (WordPress, Yoast): pagina lui trimite la formular.
+$sm_p = wp_sitemaps_get_server()->registry->get_provider( 'posts' );
+$sm_u = $sm_p ? wp_list_pluck( $sm_p->get_url_list( 1, 'product' ), 'loc' ) : array();
+$sm_y = apply_filters( 'wpseo_exclude_from_sitemap_by_post_ids', array() );
+lbb_t( 'sitemap: produsul „Bilet autocar” lipsește (redirecționare), și din Yoast', $sm_p && ! in_array( get_permalink( LBB_Install::product_id() ), $sm_u, true ) && in_array( LBB_Install::product_id(), $sm_y, true ), array( $sm_u, $sm_y ) );
+
 // Coșul abandonat al clientului (expirat) dispare la cererea de ștergere; coșul încă activ rămâne.
 $ph_old = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Abandonat' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
 $ph_new = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Activ' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );

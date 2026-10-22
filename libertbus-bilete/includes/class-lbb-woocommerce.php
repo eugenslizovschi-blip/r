@@ -23,6 +23,8 @@ class LBB_WooCommerce {
 		add_filter( 'woocommerce_is_sold_individually', array( __CLASS__, 'sold_individually' ), 10, 2 );
 		add_filter( 'woocommerce_add_to_cart_validation', array( __CLASS__, 'block_direct_add' ), 10, 2 );
 		add_action( 'template_redirect', array( __CLASS__, 'product_page_redirect' ) );
+		add_filter( 'wp_sitemaps_posts_query_args', array( __CLASS__, 'sitemap_skip_product' ), 10, 2 );
+		add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', array( __CLASS__, 'yoast_skip_product' ) );
 		add_action( 'woocommerce_remove_cart_item', array( __CLASS__, 'release_on_remove' ), 10, 2 );
 		add_filter( 'woocommerce_cart_item_permalink', array( __CLASS__, 'no_permalink' ), 10, 2 );
 		add_filter( 'woocommerce_order_item_permalink', array( __CLASS__, 'no_order_permalink' ), 10, 2 );
@@ -220,6 +222,23 @@ class LBB_WooCommerce {
 			wp_safe_redirect( $url, 302 );
 			exit;
 		}
+	}
+
+	/**
+	 * Produsul „Bilet autocar” nu apare în sitemap (al WordPress sau Yoast): pagina lui trimite la formular, iar o
+	 * adresă cu redirecționare în sitemap e raportată ca eroare în Google Search Console.
+	 */
+	public static function sitemap_skip_product( $args, $post_type ) {
+		$id = (int) get_option( LBB_Install::PRODUCT_OPTION );
+		if ( 'product' === $post_type && $id ) {
+			$args['post__not_in'] = array_merge( isset( $args['post__not_in'] ) ? (array) $args['post__not_in'] : array(), array( $id ) );
+		}
+		return $args;
+	}
+
+	public static function yoast_skip_product( $ids ) {
+		$id = (int) get_option( LBB_Install::PRODUCT_OPTION );
+		return $id ? array_merge( (array) $ids, array( $id ) ) : $ids;
 	}
 
 	public static function block_direct_add( $passed, $product_id ) {
