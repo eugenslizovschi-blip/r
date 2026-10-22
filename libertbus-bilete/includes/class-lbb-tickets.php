@@ -142,7 +142,7 @@ class LBB_Tickets {
 				<?php foreach ( $rows as $label => $value ) : ?>
 					<tr>
 						<?php // Eticheta ia cel mult 38%: pe telefonul îngust („De achitat la urcare”) trece pe două rânduri și lasă loc valorii, și în email (fără media queries). ?>
-						<th style="text-align:left;padding:3px 10px 3px 0;vertical-align:top;width:38%;"><?php echo esc_html( $label ); ?></th>
+						<th scope="row" style="text-align:left;padding:3px 10px 3px 0;vertical-align:top;width:38%;"><?php echo esc_html( $label ); ?></th>
 						<?php // Un nume lung („Popescu-Vasilescu-Andronachescu”) se rupe pe telefonul îngust, nu iese din bilet. ?>
 						<td style="text-align:left;padding:3px 0;vertical-align:top;word-break:break-word;overflow-wrap:anywhere;"><?php echo esc_html( $value ); ?></td>
 					</tr>

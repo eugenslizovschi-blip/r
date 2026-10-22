@@ -745,7 +745,7 @@ $ac_next = array_merge( $ac_base, array( 'travel_date' => $ac_now->modify( '+1 d
 lbb_t( '„Adaugă în calendar” lipsește după plecarea autocarului (aceeași zi) și apare pentru o cursă care urmează', false === strpos( LBB_Tickets::html( $ac_left ), 'ics=1' ) && false !== strpos( LBB_Tickets::html( $ac_next ), 'ics=1' ), array( $ac_left['travel_date'] . ' ' . $ac_left['dep_time'] ) );
 lbb_t( 'la printare biletul nu se rupe între două pagini (și în email, cu stil inline)', 1 === preg_match( '/<div class="lbb-ticket" style="[^"]*page-break-inside:avoid;break-inside:avoid;/', LBB_Tickets::html( $ac_next ) ) );
 // Și în email (fără media queries): eticheta nu e „nowrap” și ia cel mult 38%, ca pe telefon numele să aibă loc.
-lbb_t( 'biletul (și în email): eticheta ia cel mult 38% și poate trece pe două rânduri, valoarea are loc pe telefon', (bool) preg_match_all( '/<th style="[^"]*width:38%;[^"]*">/', LBB_Tickets::html( $rv ) ) && false === strpos( LBB_Tickets::html( $rv ), 'nowrap' ) );
+lbb_t( 'biletul (și în email): eticheta ia cel mult 38% și poate trece pe două rânduri, valoarea are loc pe telefon', (bool) preg_match_all( '/<th [^>]*style="[^"]*width:38%;[^"]*">/', LBB_Tickets::html( $rv ) ) && false === strpos( LBB_Tickets::html( $rv ), 'nowrap' ) );
 // Rută ștearsă din admin (rezervările rămân): fără „Adaugă în calendar”, care n-ar avea ce cursă să descrie.
 $ac_gone_r = array_merge( $ac_next, array( 'route_id' => 987654 ) );
 lbb_t( 'rută ștearsă: biletul nu mai are „Adaugă în calendar” (linkul doar reîncărca pagina)', '' === LBB_Tickets::ics( $ac_gone_r ) && false === strpos( LBB_Tickets::html( $ac_gone_r ), 'ics=1' ) && ! LBB_Tickets::can_add_to_calendar( $ac_gone_r ) );
@@ -1312,6 +1312,12 @@ $mh_next = $phpmailer->AltBody;
 remove_filter( 'pre_wp_mail', $mh_go, 20 );
 $phpmailer = $mh_keep;
 lbb_t( 'emailul HTML are și varianta text (AltBody), iar următorul email al site-ului nu o moștenește', $mh_ok && false !== strpos( $mh_alt, 'Bilet' ) && false !== strpos( $mh_alt, 'https://example.com/b' ) && false === strpos( $mh_alt, '<p>' ) && '' === $mh_next, array( $mh_alt, $mh_next ) );
+
+// Tabelul biletului (email, pagina de mulțumire, pagina biletului): etichetele sunt antete de rând pentru cititorul de
+// ecran (scope="row"), ca „Pasageri” să fie citit împreună cu numele de pe același rând.
+$sr_b = LBB_Bookings::get_by_code( (string) $wpdb->get_var( 'SELECT ticket_code FROM ' . LBB_Bookings::table() . " WHERE ticket_code <> '' ORDER BY id DESC LIMIT 1" ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$sr_h = $sr_b ? LBB_Tickets::html( $sr_b ) : '';
+lbb_t( 'tabelul biletului: fiecare etichetă e antet de rând (th scope="row")', $sr_h && preg_match_all( '/<th\b/', $sr_h ) >= 3 && preg_match_all( '/<th\b/', $sr_h ) === preg_match_all( '/<th scope="row"/', $sr_h ), $sr_h ? substr( $sr_h, 0, 300 ) : null );
 
 // Subiectul emailului WooCommerce cu biletul spune codul, ruta și data; un subiect scris de administrator rămâne.
 $es_id = (int) $wpdb->get_var( 'SELECT order_id FROM ' . LBB_Bookings::table() . " WHERE status = 'confirmed' AND ticket_code <> '' AND order_id > 0 GROUP BY order_id HAVING COUNT(*) = 1 ORDER BY order_id DESC LIMIT 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
