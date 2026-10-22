@@ -42,6 +42,15 @@ async function scan(page, label, include) {
   await page.click('#lbb-cc [data-lbb-cc="settings"]');
   await page.waitForSelector('[data-lbb="route"] option:checked', { state: 'attached' });
   await scan(page, 'formular + banner', [['.lbb-booking'], ['#lbb-cc']]);
+  // Nota despre date de sub formular: text de cel puțin 13px, iar linkul spre politică pe un singur rând, cu zonă de
+  // atingere de cel puțin 24px, care nu ajunge peste alt câmp sau buton.
+  const pn = await page.evaluate(() => {
+    const n = document.querySelector('.lbb-privacy-note'); const a = n && n.querySelector('a'); if (!a) return null;
+    const r = a.getBoundingClientRect();
+    const over = [...document.querySelectorAll('.lbb-booking a, .lbb-booking button, .lbb-booking input, .lbb-booking select')].filter(e => e !== a && e.offsetParent).filter(e => { const q = e.getBoundingClientRect(); return q.left < r.right && q.right > r.left && q.top < r.bottom && q.bottom > r.top; }).length;
+    return { font: parseFloat(getComputedStyle(n).fontSize), rows: a.getClientRects().length, h: Math.round(r.height), over };
+  });
+  if (!pn || pn.font < 13 || pn.rows !== 1 || pn.h < 24 || pn.over) fail('nota despre date: text mic sau linkul greu de atins ' + JSON.stringify(pn));
   await page.click('#lbb-cc [data-lbb-cc="necessary"]');
 
   // O rezervare cu plata la urcare, apoi pagina biletului (codul QR, tabelul cu datele).
