@@ -1266,6 +1266,23 @@ lbb_t( 'ștergere date personale: cursa trecută anonimizată, biletul pentru cu
 // Descrierea scurtă a produsului „Bilet autocar” nu apare clientului (coș / checkout cu blocuri), dar rămâne în admin.
 $sd_p = wc_get_product( LBB_Install::product_id() );
 lbb_t( 'produsul bilet: descrierea scurtă (notă internă) e goală pentru client și rămâne în admin', $sd_p && '' === $sd_p->get_short_description() && '' !== $sd_p->get_short_description( 'edit' ), $sd_p ? $sd_p->get_short_description( 'edit' ) : null );
+// Și la crearea produsului (instalare nouă): WooCommerce citește descrierea pentru salvare prin filtrul de mai sus.
+$sd_opt = get_option( LBB_Install::PRODUCT_OPTION );
+update_option( LBB_Install::PRODUCT_OPTION, 0 );
+LBB_Install::ensure_product();
+$sd_new = (int) get_option( LBB_Install::PRODUCT_OPTION );
+$sd_ex  = $sd_new ? (string) get_post_field( 'post_excerpt', $sd_new ) : '';
+if ( $sd_new && (int) $sd_opt !== $sd_new ) {
+	wp_delete_post( $sd_new, true );
+}
+update_option( LBB_Install::PRODUCT_OPTION, $sd_opt );
+lbb_t( 'produsul bilet creat din nou păstrează descrierea scurtă pentru admin, iar filtrul pentru client rămâne activ', '' !== $sd_ex && false !== has_filter( 'woocommerce_product_get_short_description', array( 'LBB_WooCommerce', 'short_description' ) ) && '' === wc_get_product( LBB_Install::product_id() )->get_short_description(), $sd_ex );
+
+// Antetul „WC tested up to” acoperă versiunea WooCommerce pe care rulează testele: altfel, după actualizarea
+// WooCommerce pe site, pagina de pluginuri avertizează „netestat cu versiunea dumneavoastră”.
+$wt_h  = get_file_data( LBB_FILE, array( 'wc' => 'WC tested up to' ) );
+$wt_mm = implode( '.', array_slice( explode( '.', WC()->version ), 0, 2 ) );
+lbb_t( 'antetul „WC tested up to” acoperă WooCommerce ' . $wt_mm . ' (versiunea testată aici)', '' !== $wt_h['wc'] && version_compare( $wt_h['wc'], $wt_mm, '>=' ), array( $wt_h['wc'], WC()->version ) );
 
 // Produsul „Bilet autocar” nu apare în sitemap (WordPress, Yoast): pagina lui trimite la formular.
 $sm_p = wp_sitemaps_get_server()->registry->get_provider( 'posts' );

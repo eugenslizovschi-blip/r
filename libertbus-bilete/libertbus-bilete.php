@@ -10,7 +10,7 @@
  * Text Domain:       libertbus-bilete
  * Domain Path:       /languages
  * WC requires at least: 7.0
- * WC tested up to:   8.9
+ * WC tested up to:   11.2
  *
  * @package LibertBus_Bilete
  */

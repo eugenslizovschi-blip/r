@@ -57,6 +57,9 @@ fi
 $WP plugin activate woocommerce libertbus-bilete
 $WP wc update >/dev/null 2>&1 || true
 $WP option update timezone_string Europe/Chisinau && $WP option update woocommerce_currency MDL && $WP rewrite structure '/%postname%/'
+# WooCommerce 9+ pornește un magazin nou în modul „Coming soon”: vizitatorii nelogați ar vedea „Great things are on the
+# horizon” în loc de formular și plată. Site-ul real e public, deci și cel de test.
+$WP option update woocommerce_coming_soon no >/dev/null
 if [ "$($WP post list --post_type=page --name=rezervare-bilet --format=count)" = 0 ]; then
   $WP eval 'WC_Install::create_pages();'
   $WP post update "$($WP option get woocommerce_checkout_page_id)" --post_content='[woocommerce_checkout]'

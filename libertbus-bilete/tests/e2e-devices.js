@@ -59,6 +59,10 @@ async function check(browser, state, [name, dev]) {
     if (m1.timeTruncated) r.issues.push('ora tăiată în listă: „' + m1.opt + '”');
     r.step1 = m1.boxW + '×' + m1.boxH;
     await f.screenshot({ path: `${OUT}/${name.replace(/\W+/g, '_')}-1.png` });
+    // Pe un telefon orizontal mare (ecran jos și lat) bannerul de cookies are textul lângă butoane: ia cel mult 30%
+    // din înălțime, nu aproape jumătate (altfel acoperă butonul „Continuă”).
+    const cc = await p.evaluate(() => { const b = document.getElementById('lbb-cc'); if (!b || b.hidden || innerHeight > 480 || innerWidth < 760) return null; return Math.round(100 * b.getBoundingClientRect().height / innerHeight); });
+    if (cc !== null && cc > 30) r.issues.push('bannerul de cookies ia ' + cc + '% din ecranul orizontal');
     // Pe telefon / tabletă „Continuă” se atinge (ca un client), cu bannerul de cookies încă deschis jos.
     const nextBtn = await f.$('[data-lbb="next"]');
     if (dev.hasTouch) await nextBtn.tap(); else await nextBtn.click();

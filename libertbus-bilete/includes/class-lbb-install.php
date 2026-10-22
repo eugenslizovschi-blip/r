@@ -187,7 +187,16 @@ class LBB_Install {
 			$product->set_tax_status( 'none' );
 			$product->set_reviews_allowed( false );
 			$product->set_short_description( __( 'Bilet pentru transport de pasageri. Se cumpără din formularul de rezervare.', 'libertbus-bilete' ) );
+			// La creare WooCommerce citește descrierea pentru salvare prin filtrul care o ascunde clientului: fără
+			// filtru cât timp se salvează, altfel nota pentru administrator s-ar salva goală.
+			$hide = has_filter( 'woocommerce_product_get_short_description', array( 'LBB_WooCommerce', 'short_description' ) );
+			if ( false !== $hide ) {
+				remove_filter( 'woocommerce_product_get_short_description', array( 'LBB_WooCommerce', 'short_description' ), $hide );
+			}
 			$id = $product->save();
+			if ( false !== $hide ) {
+				add_filter( 'woocommerce_product_get_short_description', array( 'LBB_WooCommerce', 'short_description' ), $hide, 2 );
+			}
 			update_option( self::PRODUCT_OPTION, $id );
 		}
 		delete_option( 'lbb_needs_product' );
