@@ -22,6 +22,7 @@ class LBB_WooCommerce {
 		add_filter( 'woocommerce_cart_item_name', array( __CLASS__, 'item_name' ), 10, 2 );
 		add_filter( 'woocommerce_is_sold_individually', array( __CLASS__, 'sold_individually' ), 10, 2 );
 		add_filter( 'woocommerce_add_to_cart_validation', array( __CLASS__, 'block_direct_add' ), 10, 2 );
+		add_action( 'template_redirect', array( __CLASS__, 'product_page_redirect' ) );
 		add_action( 'woocommerce_remove_cart_item', array( __CLASS__, 'release_on_remove' ), 10, 2 );
 		add_filter( 'woocommerce_cart_item_permalink', array( __CLASS__, 'no_permalink' ), 10, 2 );
 		add_filter( 'woocommerce_order_item_permalink', array( __CLASS__, 'no_order_permalink' ), 10, 2 );
@@ -204,6 +205,21 @@ class LBB_WooCommerce {
 
 	public static function sold_individually( $value, $product ) {
 		return self::is_ticket_product( $product->get_id() ) ? true : $value;
+	}
+
+	/**
+	 * Pagina produsului „Bilet autocar” (din linkul din coșul cu blocuri sau din căutări) nu are ce oferi: butonul
+	 * „Adaugă în coș” e oricum blocat. Vizitatorul ajunge la formularul de rezervare. Previzualizarea din admin rămâne.
+	 */
+	public static function product_page_redirect() {
+		if ( is_preview() || ! function_exists( 'is_product' ) || ! is_product() || ! self::is_ticket_product( get_queried_object_id() ) ) {
+			return;
+		}
+		$url = LBB_Tickets::booking_page_url( null );
+		if ( $url ) {
+			wp_safe_redirect( $url, 302 );
+			exit;
+		}
 	}
 
 	public static function block_direct_add( $passed, $product_id ) {

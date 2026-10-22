@@ -461,6 +461,15 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await nj.close();
   }
 
+  // Pagina produsului „Bilet autocar” (linkul din coșul cu blocuri, căutări) duce la formularul de rezervare.
+  {
+    const pp = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await pp.goto(BASE + '/?product=bilet-autocar-libertbus');
+    const at = { url: pp.url(), form: await pp.$('.lbb-booking') !== null, addToCart: await pp.$('.single_add_to_cart_button') !== null };
+    if (!at.form || at.addToCart) fail('pagina produsului „Bilet autocar” nu duce la formularul de rezervare: ' + JSON.stringify(at));
+    await pp.close();
+  }
+
   console.log(process.exitCode ? 'GUEST: PROBLEME' : 'GUEST: OK');
   await browser.close();
 })().catch(require('./crash')('guest', () => BROWSER));
