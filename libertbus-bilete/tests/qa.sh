@@ -12,6 +12,7 @@ fresh_carts() {
 # Contează doar erorile scrise în debug.log în timpul acestei rulări: una veche (ex. de la o rulare oprită la
 # jumătate) ar face QA să pice la nesfârșit.
 LOG="$WP_PATH/wp-content/debug.log"; LOG_START=$( [ -f "$LOG" ] && wc -l < "$LOG" || echo 0 )
+echo "== Serverul web: $(curl -sI "$BASE/" | tr -d '\r' | sed -n 's/^[Xx]-[Pp]owered-[Bb]y: //p' | head -1)"
 echo "== Comenzi WooCommerce în: $(cd "$WP_PATH" && $WP_CLI eval 'echo WC_Data_Store::load( "order" )->get_current_class_name();' 2>/dev/null)"
 echo "== Sintaxă PHP"
 for f in $(find "$DIR" -name '*.php'); do php -l "$f" >/dev/null || { echo "  eroare: $f"; FAIL=1; }; done

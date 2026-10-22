@@ -156,7 +156,12 @@ fi
 [ -x "$W/wpcs/vendor/bin/phpcs" ] && "$W/wpcs/vendor/bin/phpcs" --config-set installed_paths "$W/wpcs/vendor/wp-coding-standards/wpcs,$W/wpcs/vendor/phpcsstandards/phpcsutils,$W/wpcs/vendor/phpcsstandards/phpcsextra" >/dev/null 2>&1 || true
 # Serverul de test pornește mereu din nou, cu 4 procese: cu unul singur, o cerere lentă (ex. cron-ul WordPress)
 # le blochează pe celelalte și testele din browser expiră din când în când.
-pkill -f "[p]hp -S 127\.0\.0\.1:8080" 2>/dev/null || true; sleep 1
-(PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8080 -t wordpress router.php > server.log 2>&1 &)
+# Serverul rulează pe rând cu PHP 8 și cu PHP 7.4 (ca pe libertbus.md): în orele UTC 2–3, 6–7, 10–11… pe 7.4, ca
+# toate testele din browser să treacă regulat și prin el. Cu stocarea comenzilor (oră pară / impară) se acoperă cele
+# 4 combinații în 4 ore. SERVER_PHP=php sau SERVER_PHP=php7.4 o fixează.
+SERVER_PHP="${SERVER_PHP:-$( command -v php7.4 >/dev/null && [ $(( 10#$(date -u +%H) / 2 % 2 )) -eq 1 ] && echo php7.4 || echo php )}"
+pkill -f "[p]hp(7\.4)? -S 127\.0\.0\.1:8080" 2>/dev/null || true; sleep 1
+(PHP_CLI_SERVER_WORKERS=4 nohup "$SERVER_PHP" -S 127.0.0.1:8080 -t wordpress router.php > server.log 2>&1 &)
+echo "Serverul web rulează pe PHP $("$SERVER_PHP" -r 'echo PHP_VERSION;')"
 for i in 1 2 3 4 5 6 7 8 9 10; do curl -s -o /dev/null http://127.0.0.1:8080/ && break; sleep 1; done
 curl -s -o /dev/null -w "WordPress de test: %{http_code}\n" http://127.0.0.1:8080/rezervare-bilet/
