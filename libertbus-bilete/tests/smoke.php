@@ -1331,6 +1331,23 @@ $es_em->init_settings();
 $es_pe   = WC()->mailer()->emails['WC_Email_Customer_Processing_Order'];
 $es_pe->object = wc_create_order();
 $es_s3   = $es_pe->get_subject();
+// Comandă cu două bilete (ex. tur-retur): subiectul le numește pe amândouă.
+$es_two = wc_create_order();
+foreach ( array( 'Dus Doi', 'Intors Doi' ) as $es_n ) {
+	$es_h  = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( $es_n ), '+37369000096', 'doua-bilete@example.com', 'MDL' );
+	$es_it = new WC_Order_Item_Product();
+	$es_it->set_product( wc_get_product( LBB_Install::product_id() ) );
+	$es_it->add_meta_data( '_lbb_token', is_array( $es_h ) ? $es_h['token'] : '', true );
+	$es_two->add_item( $es_it );
+}
+$es_two->save();
+LBB_WooCommerce::attach_order( $es_two );
+$es_two->update_status( 'processing' );
+$es_tc  = wp_list_pluck( array_filter( LBB_Bookings::by_order( $es_two->get_id() ), function ( $b ) { return 'confirmed' === $b['status']; } ), 'ticket_code' );
+$es_pe->object = wc_get_order( $es_two->get_id() );
+$es_s5  = $es_pe->get_subject();
+lbb_t( 'comanda cu două bilete: subiectul emailului le are pe amândouă („Biletele dumneavoastră: LB-…, LB-…”)', 2 === count( $es_tc ) && 'Biletele dumneavoastră: ' . implode( ', ', $es_tc ) . ' — ' . get_bloginfo( 'name' ) === $es_s5, array( $es_s5, $es_tc ) );
+$es_two->update_status( 'cancelled' ); // Locurile se eliberează pentru testele următoare de pe aceeași cursă.
 $es_ne   = WC()->mailer()->emails['WC_Email_New_Order'];
 $es_ne->object = $es_o;
 $es_s4   = $es_o ? $es_ne->get_subject() : '';
