@@ -65,6 +65,13 @@
 	.lbb-cc { left: 8px; right: 8px; bottom: 8px; padding: 12px; }
 	.lbb-cc .lbb-cc-text { font-size: 14px !important; }
 }
+/* Orice ecran jos (telefon orizontal, inclusiv cele mici): margini, text și butoane mai strânse, ca bannerul să lase
+   loc paginii. Butoanele rămân de cel puțin 40px, ușor de atins. */
+@media (max-height: 480px) {
+	.lbb-cc { bottom: 8px; padding: 8px 12px; }
+	.lbb-cc .lbb-cc-text { margin-bottom: 8px !important; font-size: 13px !important; line-height: 1.35 !important; }
+	.lbb-cc .lbb-cc-btn { min-height: 40px !important; padding: 6px 10px !important; }
+}
 /* Telefon orizontal mare (ecran jos și lat): textul lângă butoane, nu deasupra lor. Bannerul ia cam un sfert din
    ecran, nu aproape jumătate, și nu mai acoperă butonul „Continuă” al formularului. Cu „Setări” deschis rămâne pe
    verticală. Margini, nu gap (Safari < 14.1). */
