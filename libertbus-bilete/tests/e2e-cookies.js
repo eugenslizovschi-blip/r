@@ -109,8 +109,14 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     // Subsolul are linkurile legale și „Setări cookies”, care redeschide bannerul.
     const foot = await page.evaluate(() => {
       const n = document.getElementById('lbb-legal-links');
-      return n ? { inFooter: !!n.closest('footer'), text: n.textContent.replace(/\s+/g, ' ').trim() } : null;
+      if (!n) return null;
+      // Pe telefon linkurile se ating ușor: cel puțin 28px fiecare, iar zonele lor nu se suprapun (nici pe două rânduri).
+      const rs = [...n.querySelectorAll('a')].map(a => a.getBoundingClientRect());
+      const small = rs.filter(r => r.height < 28).length;
+      const overlap = rs.some((r, i) => rs.some((q, j) => j > i && r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top));
+      return { inFooter: !!n.closest('footer'), text: n.textContent.replace(/\s+/g, ' ').trim(), small, overlap };
     });
+    if (foot && (foot.small || foot.overlap)) fail(vp.name + ': linkurile din subsol sunt greu de atins ' + JSON.stringify(foot));
     if (!foot || !foot.inFooter || !/Politica de confidențialitate/.test(foot.text) || !/Politica de cookies/.test(foot.text) || !/Setări cookies/.test(foot.text)) fail(vp.name + ': linkurile din subsol lipsesc ' + JSON.stringify(foot));
     await page.click('#lbb-legal-links a[href="#lbb-cookies"]');
     if (!(await page.isVisible('#lbb-cc'))) fail(vp.name + ': „Setări cookies” din subsol nu redeschide bannerul');
