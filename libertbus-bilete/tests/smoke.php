@@ -937,6 +937,24 @@ foreach ( LBB_Admin::checklist() as $dbg_it ) {
 	}
 }
 lbb_t( 'panoul semnalează erorile PHP afișate vizitatorilor: WP_DEBUG cu afișare (și implicit, fără WP_DEBUG_DISPLAY) da; afișare oprită sau WP_DEBUG oprit nu', LBB_Admin::errors_shown( true, true ) && LBB_Admin::errors_shown( true, 1 ) && ! LBB_Admin::errors_shown( true, false ) && ! LBB_Admin::errors_shown( false, true ) && $dbg_row && true === $dbg_row['ok'], $dbg_row );
+// WooCommerce 9+ în modul „În curând”: panoul îl semnalează (coșul și plata ascunse); fără opțiune (WooCommerce 8) nu apare.
+$cs_keep = get_option( 'woocommerce_coming_soon', null );
+$cs_find = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'coming_soon' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+update_option( 'woocommerce_coming_soon', 'yes' );
+$cs_on = $cs_find();
+update_option( 'woocommerce_coming_soon', 'no' );
+$cs_off = $cs_find();
+delete_option( 'woocommerce_coming_soon' );
+$cs_none = $cs_find();
+null === $cs_keep ? delete_option( 'woocommerce_coming_soon' ) : update_option( 'woocommerce_coming_soon', $cs_keep );
+lbb_t( 'panoul semnalează magazinul în modul „În curând” (WooCommerce 9+), cu linkul spre Vizibilitatea site-ului; fără opțiune nu apare', $cs_on && false === $cs_on['ok'] && false !== strpos( $cs_on['fix'], 'tab=site-visibility' ) && '' !== $cs_on['detail'] && $cs_off && true === $cs_off['ok'] && null === $cs_none, array( $cs_on, $cs_off, $cs_none ) );
 lbb_t( 'panoul semnalează PHP fără actualizări de securitate (7.4, 8.0); 8.1 și mai nou nu', LBB_Admin::php_outdated( '7.4.33' ) && LBB_Admin::php_outdated( '8.0.30' ) && ! LBB_Admin::php_outdated( '8.1.0' ) && ! LBB_Admin::php_outdated( '8.3.6' ) && in_array( 'php', wp_list_pluck( LBB_Admin::checklist(), 'id' ), true ) );
 // Rândul apare doar cui poate face actualizările (altora WordPress le arată 0 actualizări, deci „verde” pe nedrept).
 $upd_user = get_current_user_id();

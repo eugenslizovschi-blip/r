@@ -117,6 +117,17 @@ class LBB_Admin {
 				$guest ? '' : ( $signup ? __( 'Acum clientul e obligat să-și facă un cont la plată. Bifați „Permite clienților să plaseze comenzi fără cont” în WooCommerce → Setări → Conturi și confidențialitate.', 'libertbus-bilete' ) : __( 'Clienții fără cont nu pot plăti online. Bifați „Permite clienților să plaseze comenzi fără cont” în WooCommerce → Setări → Conturi și confidențialitate.', 'libertbus-bilete' ) ),
 				admin_url( 'admin.php?page=wc-settings&tab=account' ) );
 
+			// WooCommerce 9+: în modul „În curând” (Coming soon) vizitatorii nu ajung la coș și la plată; un magazin nou
+			// pornește chiar așa. Pe versiunile fără această opțiune verificarea nu apare.
+			$soon = get_option( 'woocommerce_coming_soon', null );
+			if ( null !== $soon ) {
+				$add( 'coming_soon', 'yes' !== $soon, __( 'Magazinul e public, nu în modul „În curând”', 'libertbus-bilete' ),
+					'yes' === $soon ? ( 'yes' === get_option( 'woocommerce_store_pages_only' )
+						? __( 'Coșul și plata sunt ascunse vizitatorilor. În WooCommerce → Setări → Vizibilitatea site-ului alegeți „Live”.', 'libertbus-bilete' )
+						: __( 'Vizitatorii văd doar pagina „În curând”, nu formularul și plata. În WooCommerce → Setări → Vizibilitatea site-ului alegeți „Live”.', 'libertbus-bilete' ) ) : '',
+					admin_url( 'admin.php?page=wc-settings&tab=site-visibility' ) );
+			}
+
 			// Produsul intern poate fi stricat dintr-o editare în WooCommerce: cu stoc gestionat și 0 bucăți biletele nu
 			// mai intră în coș, iar fără „Virtual” plata cere adresă de livrare.
 			$product  = wc_get_product( LBB_Install::product_id() );
