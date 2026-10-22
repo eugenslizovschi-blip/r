@@ -1,6 +1,6 @@
 // E2E: checkout-ul cu blocul „Checkout” (nu shortcode-ul clasic), cu „Plată simplificată” și doar bilete în coș:
 // clientul vede numele, emailul și telefonul, dar nu strada, orașul, județul sau codul poștal; rezumatul arată biletul (ora, pasagerii).
-// qa.sh pune blocul pe pagina de finalizare doar cât rulează testul.
+// qa.sh pune blocurile pe paginile de finalizare și de coș doar cât rulează testul.
 // BASE=http://127.0.0.1:8080 node tests/e2e-blocks.js
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
@@ -36,6 +36,12 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await page.click('.wc-block-components-order-summary__button-text').catch(() => {});
   const item = await page.$eval('.wc-block-components-order-summary-item', e => e.innerText.replace(/\s+/g, ' ')).catch(() => '');
   if (!/Ora plecării/.test(item) || !/Pasageri: Ion Bloc/.test(item) || /Se cumpără din formularul/.test(item)) fail('checkout cu blocuri: rezumatul biletului e greșit: ' + JSON.stringify(item));
+  // Coșul cu blocul „Cart”: biletul arată ruta, ora și pasagerii, fără selector de cantitate (locurile se aleg în
+  // formular) și fără link spre pagina produsului.
+  await page.goto(BASE + '/cart/');
+  await page.waitForSelector('.wc-block-cart-items__row').catch(() => fail('coșul cu blocuri nu s-a încărcat'));
+  const row = await page.$eval('.wc-block-cart-items__row', r => ({ text: r.innerText.replace(/\s+/g, ' '), qty: !!r.querySelector('.wc-block-components-quantity-selector'), links: r.querySelectorAll('a[href]').length })).catch(() => null);
+  if (!row || !/Ora plecării/.test(row.text) || !/Pasageri: Ion Bloc/.test(row.text) || row.qty || row.links) fail('coș cu blocuri: biletul e afișat greșit ' + JSON.stringify(row));
   console.log('câmpuri vizibile: ' + shown.join(', '));
   console.log(process.exitCode ? 'BLOCKS: PROBLEME' : 'BLOCKS: OK');
   await browser.close();
