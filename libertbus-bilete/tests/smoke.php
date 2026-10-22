@@ -1313,6 +1313,26 @@ remove_filter( 'pre_wp_mail', $mh_go, 20 );
 $phpmailer = $mh_keep;
 lbb_t( 'emailul HTML are și varianta text (AltBody), iar următorul email al site-ului nu o moștenește', $mh_ok && false !== strpos( $mh_alt, 'Bilet' ) && false !== strpos( $mh_alt, 'https://example.com/b' ) && false === strpos( $mh_alt, '<p>' ) && '' === $mh_next, array( $mh_alt, $mh_next ) );
 
+// Subiectul emailului WooCommerce cu biletul spune codul, ruta și data; un subiect scris de administrator rămâne.
+$es_id = (int) $wpdb->get_var( 'SELECT order_id FROM ' . LBB_Bookings::table() . " WHERE status = 'confirmed' AND ticket_code <> '' AND order_id > 0 GROUP BY order_id HAVING COUNT(*) = 1 ORDER BY order_id DESC LIMIT 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$es_o  = $es_id ? wc_get_order( $es_id ) : null;
+$es_b  = $es_id ? LBB_Bookings::by_order( $es_id ) : array();
+// Prin get_subject(), ca la trimiterea reală (WooCommerce scrie întâi subiectul implicit în setările emailului).
+$es_em   = WC()->mailer()->emails['WC_Email_Customer_Completed_Order'];
+$es_key  = $es_em->get_option_key();
+$es_keep = get_option( $es_key );
+$es_em->object = $es_o;
+$es_s1   = $es_o ? $es_em->get_subject() : '';
+update_option( $es_key, array_merge( is_array( $es_keep ) ? $es_keep : array(), array( 'subject' => 'Comanda {order_number}' ) ) );
+$es_em->init_settings();
+$es_s2   = $es_o ? $es_em->get_subject() : '';
+false === $es_keep ? delete_option( $es_key ) : update_option( $es_key, $es_keep );
+$es_em->init_settings();
+$es_pe   = WC()->mailer()->emails['WC_Email_Customer_Processing_Order'];
+$es_pe->object = wc_create_order();
+$es_s3   = $es_pe->get_subject();
+lbb_t( 'emailul cu biletul are în subiect codul, ruta și data; subiectul scris de administrator și comenzile fără bilete rămân', $es_b && 0 === strpos( $es_s1, 'Biletul dumneavoastră: ' . $es_b[0]['ticket_code'] . ' · ' ) && false !== strpos( $es_s1, ' → ' ) && $es_o && 'Comanda ' . $es_o->get_order_number() === $es_s2 && false === strpos( $es_s3, 'Bilet' ), array( $es_s1, $es_s2, $es_s3 ) );
+
 // Coșul abandonat al clientului (expirat) dispare la cererea de ștergere; coșul încă activ rămâne.
 $ph_old = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Abandonat' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
 $ph_new = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Activ' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );

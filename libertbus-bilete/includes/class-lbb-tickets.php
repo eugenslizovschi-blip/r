@@ -11,6 +11,8 @@ class LBB_Tickets {
 
 	public static function init() {
 		add_action( 'woocommerce_email_before_order_table', array( __CLASS__, 'email' ), 5, 4 );
+		add_filter( 'woocommerce_email_subject_customer_processing_order', array( __CLASS__, 'email_subject' ), 10, 3 );
+		add_filter( 'woocommerce_email_subject_customer_completed_order', array( __CLASS__, 'email_subject' ), 10, 3 );
 		add_action( 'woocommerce_thankyou', array( __CLASS__, 'thankyou' ), 5 );
 		add_action( 'woocommerce_order_details_before_order_table', array( __CLASS__, 'order_details' ), 5 );
 		add_action( 'template_redirect', array( __CLASS__, 'ticket_page' ), 5 );
@@ -362,6 +364,31 @@ class LBB_Tickets {
 			$html .= '<p style="color:#5f6b7a;">' . sprintf( esc_html__( 'Anulare sau schimbarea datei: %s', 'libertbus-bilete' ), LBB_Settings::phone_link() ) . '</p>';
 		}
 		return $html;
+	}
+
+	/**
+	 * Subiectul emailului cu biletul spune biletul („Biletul dumneavoastră: LB-ABC123 · Bălți → Iași · 05.11.2026”), nu
+	 * „Comanda a fost finalizată”: clientul îl găsește ușor în inbox în ziua cursei. Un subiect scris de administrator
+	 * în WooCommerce → Setări → Emailuri rămâne neschimbat.
+	 */
+	public static function email_subject( $subject, $order, $email = null ) {
+		// Subiectul salvat în setări, citit direct: get_option() al emailului ar întoarce subiectul implicit (WooCommerce îl
+		// scrie în setări chiar înainte de acest filtru) și orice email ar părea personalizat.
+		$saved  = $email instanceof WC_Email ? get_option( $email->get_option_key(), array() ) : array();
+		$custom = is_array( $saved ) && isset( $saved['subject'] ) ? trim( (string) $saved['subject'] ) : '';
+		if ( ! $order instanceof WC_Order || ( '' !== $custom && $custom !== $email->get_default_subject() ) ) {
+			return $subject;
+		}
+		$tickets = self::confirmed( $order );
+		if ( 1 === count( $tickets ) ) {
+			/* translators: %s: codul, ruta și data biletului, ex. LB-ABC123 · Bălți → Iași · 05.11.2026 — LibertBus */
+			return sprintf( __( 'Biletul dumneavoastră: %s', 'libertbus-bilete' ), self::page_title( $tickets[0] ) );
+		}
+		if ( $tickets ) {
+			/* translators: 1: codurile biletelor, ex. LB-ABC123, LB-DEF456, 2: numele site-ului */
+			return sprintf( __( 'Biletele dumneavoastră: %1$s — %2$s', 'libertbus-bilete' ), implode( ', ', wp_list_pluck( $tickets, 'ticket_code' ) ), get_bloginfo( 'name' ) );
+		}
+		return $subject;
 	}
 
 	public static function email( $order, $sent_to_admin, $plain_text, $email = null ) {
