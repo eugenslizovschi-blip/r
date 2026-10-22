@@ -14,6 +14,8 @@ class LBB_Tickets {
 		add_filter( 'woocommerce_email_subject_customer_processing_order', array( __CLASS__, 'email_subject' ), 10, 3 );
 		add_filter( 'woocommerce_email_subject_customer_completed_order', array( __CLASS__, 'email_subject' ), 10, 3 );
 		add_filter( 'woocommerce_email_subject_new_order', array( __CLASS__, 'email_subject' ), 10, 3 );
+		add_filter( 'woocommerce_email_subject_cancelled_order', array( __CLASS__, 'email_subject' ), 10, 3 );
+		add_filter( 'woocommerce_email_subject_failed_order', array( __CLASS__, 'email_subject' ), 10, 3 );
 		add_action( 'woocommerce_thankyou', array( __CLASS__, 'thankyou' ), 5 );
 		add_action( 'woocommerce_order_details_before_order_table', array( __CLASS__, 'order_details' ), 5 );
 		add_action( 'template_redirect', array( __CLASS__, 'ticket_page' ), 5 );
@@ -380,6 +382,20 @@ class LBB_Tickets {
 		if ( ! $order instanceof WC_Order || ( '' !== $custom && $custom !== $email->get_default_subject() ) ) {
 			return $subject;
 		}
+		// Comandă anulată sau plată eșuată (emailuri către birou): ce cursă era, ca biroul să poată suna clientul. La o
+		// plată eșuată biletul nu are încă cod: rămân ruta, data și ora.
+		if ( $email instanceof WC_Email && in_array( $email->id, array( 'cancelled_order', 'failed_order' ), true ) ) {
+			$all = LBB_Bookings::by_order( $order->get_id() );
+			if ( ! $all ) {
+				return $subject;
+			}
+			$what = 1 === count( $all ) ? self::ticket_label( $all[0], true ) : LBB_Settings::ro_count( count( $all ), __( 'bilet', 'libertbus-bilete' ), __( 'bilete', 'libertbus-bilete' ) );
+			return 'cancelled_order' === $email->id
+				/* translators: 1: numele site-ului, 2: numărul comenzii, 3: cursa (cod · rută · dată, ora) sau numărul de bilete */
+				? sprintf( __( '[%1$s] Comandă anulată #%2$s: %3$s', 'libertbus-bilete' ), get_bloginfo( 'name' ), $order->get_order_number(), $what )
+				/* translators: 1: numele site-ului, 2: numărul comenzii, 3: cursa (rută · dată, ora) sau numărul de bilete */
+				: sprintf( __( '[%1$s] Plată eșuată #%2$s: %3$s', 'libertbus-bilete' ), get_bloginfo( 'name' ), $order->get_order_number(), $what );
+		}
 		$tickets = self::confirmed( $order );
 		// Emailul către birou („Comandă nouă”): numărul comenzii și biletul, ca biroul să vadă din inbox ce s-a vândut.
 		if ( $tickets && $email instanceof WC_Email && 'new_order' === $email->id ) {
@@ -608,17 +624,19 @@ class LBB_Tickets {
 	}
 
 	/**
-	 * Biletul pe scurt: „LB-ABC123 · Bălți → Iași · 25.10.2026” (titlul paginii, subiectele emailurilor).
+	 * Biletul pe scurt: „LB-ABC123 · Bălți → Iași · 25.10.2026” (titlul paginii, subiectele emailurilor), cu ora la
+	 * cerere („… · 25.10.2026 08:45”).
 	 */
-	public static function ticket_label( array $booking ) {
-		$parts = array( $booking['ticket_code'] );
+	public static function ticket_label( array $booking, $with_time = false ) {
+		// Fără cod (plată neterminată): doar ruta și data.
+		$parts = '' !== (string) $booking['ticket_code'] ? array( $booking['ticket_code'] ) : array();
 		$route = LBB_Routes::get( $booking['route_id'] );
 		if ( $route ) {
 			$parts[] = $route['origin'] . ' → ' . $route['destination'];
 		}
 		$day = DateTimeImmutable::createFromFormat( '!Y-m-d', (string) $booking['travel_date'], LBB_Settings::tz() );
 		if ( $day ) {
-			$parts[] = $day->format( 'd.m.Y' );
+			$parts[] = $day->format( 'd.m.Y' ) . ( $with_time && ! empty( $booking['dep_time'] ) ? ' ' . $booking['dep_time'] : '' );
 		}
 		return implode( ' · ', $parts );
 	}

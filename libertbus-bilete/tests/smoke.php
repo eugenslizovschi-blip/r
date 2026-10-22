@@ -1348,6 +1348,25 @@ $es_pe->object = wc_get_order( $es_two->get_id() );
 $es_s5  = $es_pe->get_subject();
 lbb_t( 'comanda cu două bilete: subiectul emailului le are pe amândouă („Biletele dumneavoastră: LB-…, LB-…”)', 2 === count( $es_tc ) && 'Biletele dumneavoastră: ' . implode( ', ', $es_tc ) . ' — ' . get_bloginfo( 'name' ) === $es_s5, array( $es_s5, $es_tc ) );
 $es_two->update_status( 'cancelled' ); // Locurile se eliberează pentru testele următoare de pe aceeași cursă.
+// Emailurile către birou pentru comandă anulată / plată eșuată spun cursa (fără cod, dacă plata n-a trecut).
+$es_ca = WC()->mailer()->emails['WC_Email_Cancelled_Order'];
+$es_ca->object = wc_get_order( $es_two->get_id() );
+$es_s6 = $es_ca->get_subject();
+$es_f  = wc_create_order();
+$es_fh = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Plata Esuata' ), '+37369000097', 'esuat@example.com', 'MDL' );
+$es_fi = new WC_Order_Item_Product();
+$es_fi->set_product( wc_get_product( LBB_Install::product_id() ) );
+$es_fi->add_meta_data( '_lbb_token', is_array( $es_fh ) ? $es_fh['token'] : '', true );
+$es_f->add_item( $es_fi );
+$es_f->save();
+LBB_WooCommerce::attach_order( $es_f );
+$es_f->update_status( 'failed' );
+$es_fa = WC()->mailer()->emails['WC_Email_Failed_Order'];
+$es_fa->object = wc_get_order( $es_f->get_id() );
+$es_s7 = $es_fa->get_subject();
+$es_rt = LBB_Routes::get( $rid2 );
+lbb_t( 'emailurile către birou „comandă anulată” / „plată eșuată” spun cursa: numărul de bilete, respectiv ruta, data și ora (fără cod)', '[' . get_bloginfo( 'name' ) . '] Comandă anulată #' . $es_two->get_order_number() . ': 2 bilete' === $es_s6
+	&& '[' . get_bloginfo( 'name' ) . '] Plată eșuată #' . $es_f->get_order_number() . ': ' . $es_rt['origin'] . ' → ' . $es_rt['destination'] . ' · ' . gmdate( 'd.m.Y', strtotime( $tomorrow ) ) . ' 10:00' === $es_s7, array( $es_s6, $es_s7 ) );
 $es_ne   = WC()->mailer()->emails['WC_Email_New_Order'];
 $es_ne->object = $es_o;
 $es_s4   = $es_o ? $es_ne->get_subject() : '';
