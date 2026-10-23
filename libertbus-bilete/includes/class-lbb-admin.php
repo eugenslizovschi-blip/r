@@ -427,9 +427,35 @@ class LBB_Admin {
 		echo '</div>';
 
 		$ready = self::ready();
-		echo '<h2>' . ( $ready ? '✅ ' . esc_html__( 'Totul e pregătit pentru plăți', 'libertbus-bilete' ) : esc_html__( 'Ce mai trebuie făcut', 'libertbus-bilete' ) ) . '</h2>';
+		// Întâi ce lipsește, apoi ce e de verificat, apoi ce e gata (ordinea din listă rămâne în fiecare grup): pe telefon
+		// administratorul nu caută cele câteva roșii printre zeci de bife.
+		$items = self::checklist();
+		$rank  = function ( $ok ) {
+			return true === $ok ? 2 : ( 'warn' === $ok ? 1 : 0 );
+		};
+		$order = array_keys( $items );
+		usort( $order, function ( $a, $b ) use ( $items, $rank ) {
+			return array( $rank( $items[ $a ]['ok'] ), $a ) <=> array( $rank( $items[ $b ]['ok'] ), $b );
+		} );
+		$n_bad  = count( array_filter( $items, function ( $it ) {
+			return false === $it['ok'];
+		} ) );
+		$n_warn = count( array_filter( $items, function ( $it ) {
+			return 'warn' === $it['ok'];
+		} ) );
+		$todo   = array();
+		if ( $n_bad ) {
+			/* translators: %s: ex. „3 de rezolvat” */
+			$todo[] = sprintf( __( '%s de rezolvat', 'libertbus-bilete' ), number_format_i18n( $n_bad ) );
+		}
+		if ( $n_warn ) {
+			/* translators: %s: ex. „2 de verificat” */
+			$todo[] = sprintf( __( '%s de verificat', 'libertbus-bilete' ), number_format_i18n( $n_warn ) );
+		}
+		echo '<h2>' . ( $ready ? '✅ ' . esc_html__( 'Totul e pregătit pentru plăți', 'libertbus-bilete' ) : esc_html__( 'Ce mai trebuie făcut', 'libertbus-bilete' ) ) . ( $todo ? ' <span class="lbb-todo-count">(' . esc_html( implode( ', ', $todo ) ) . ')</span>' : '' ) . '</h2>';
 		echo '<table class="widefat striped lbb-check"><tbody>';
-		foreach ( self::checklist() as $item ) {
+		foreach ( $order as $key ) {
+			$item = $items[ $key ];
 			$cls  = true === $item['ok'] ? 'lbb-ok' : ( 'warn' === $item['ok'] ? 'lbb-warn' : 'lbb-bad' );
 			$icon = true === $item['ok'] ? '✔' : ( 'warn' === $item['ok'] ? '!' : '✘' );
 			// Simbolul e doar pentru ochi; cititorul de ecran spune starea în cuvinte („bifă grea” nu spune nimic).

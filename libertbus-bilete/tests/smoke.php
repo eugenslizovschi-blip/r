@@ -955,6 +955,27 @@ update_option( $te_key, array_merge( is_array( $te_keep ) ? $te_keep : array(), 
 $te_on = $te_find();
 null === $te_keep ? delete_option( $te_key ) : update_option( $te_key, $te_keep );
 lbb_t( 'panoul semnalează emailul WooCommerce cu biletul oprit („Comandă finalizată”), cu link spre setările lui', $te_auto && $te_off && false === $te_off['ok'] && false !== strpos( $te_off['fix'], 'section=wc_email_customer_completed_order' ) && $te_on && true === $te_on['ok'], array( $te_off, $te_on ) );
+// Panoul: întâi ce lipsește (✘), apoi ce e de verificat (!), apoi ce e gata (✔), cu numărul lor în titlu.
+$pd_keep = get_option( 'woocommerce_email_from_address', null );
+update_option( 'woocommerce_email_from_address', 'birou@gmail.com' ); // Cel puțin un „de verificat”.
+ob_start();
+LBB_Admin::page_dashboard();
+$pd_html = ob_get_clean();
+null === $pd_keep ? delete_option( 'woocommerce_email_from_address' ) : update_option( 'woocommerce_email_from_address', $pd_keep );
+$pd_cls  = array();
+if ( preg_match_all( '/<td style="width:24px" class="(lbb-(?:ok|warn|bad))"/', $pd_html, $pd_m ) ) {
+	$pd_cls = $pd_m[1];
+}
+$pd_rank = array_map( function ( $c ) {
+	return array( 'lbb-bad' => 0, 'lbb-warn' => 1, 'lbb-ok' => 2 )[ $c ];
+}, $pd_cls );
+$pd_sorted = $pd_rank;
+sort( $pd_sorted );
+$pd_nb = count( array_keys( $pd_cls, 'lbb-bad', true ) );
+$pd_nw = count( array_keys( $pd_cls, 'lbb-warn', true ) );
+lbb_t( 'panoul „Gata de plăți?”: problemele sunt primele (lipsă, apoi de verificat, apoi gata), cu numărul lor în titlu', count( $pd_cls ) === count( LBB_Admin::checklist() ) && $pd_rank === $pd_sorted && $pd_nw >= 1
+	&& false !== strpos( $pd_html, $pd_nw . ' de verificat' ) && ( 0 === $pd_nb || false !== strpos( $pd_html, $pd_nb . ' de rezolvat' ) ), array( $pd_cls, $pd_nb, $pd_nw ) );
+
 // Expeditorul emailurilor WooCommerce pe Gmail (DMARC): panoul avertizează; cu o adresă a site-ului nu.
 $mf_keep = get_option( 'woocommerce_email_from_address', null );
 $mf_find = function () {
