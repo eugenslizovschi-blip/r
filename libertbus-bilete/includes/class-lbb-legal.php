@@ -94,7 +94,18 @@ class LBB_Legal {
 			'email'   => 'company_email',
 			'phone'   => 'support_phone',
 		);
-		$key   = isset( $map[ $atts['camp'] ] ) ? $map[ $atts['camp'] ] : 'company_name';
+		// Biroul poate scrie câmpul și în română sau cu majuscule: camp="Telefon" e tot telefonul, nu numele firmei.
+		$alias = array(
+			'nume'    => 'name',
+			'firma'   => 'name',
+			'adresa'  => 'address',
+			'adresă'  => 'address',
+			'telefon' => 'phone',
+			'e-mail'  => 'email',
+		);
+		$camp  = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( (string) $atts['camp'] ), 'UTF-8' ) : strtolower( trim( (string) $atts['camp'] ) );
+		$camp  = isset( $alias[ $camp ] ) ? $alias[ $camp ] : $camp;
+		$key   = isset( $map[ $camp ] ) ? $map[ $camp ] : 'company_name';
 		$value = (string) LBB_Settings::get( $key );
 		if ( 'company_email' === $key && ! $value ) {
 			$value = get_option( 'admin_email' );

@@ -3043,6 +3043,20 @@ lbb_t( 'shortcode: mode="Pay " lasă doar „Achit online”', false !== strpos(
 lbb_t( 'shortcode: mode="RESERVE" lasă doar „Rezerv”', false !== strpos( $sa_res, 'value="reserve" class="lbb-submit' ) && false === strpos( $sa_res, 'value="pay" class="lbb-submit"' ) );
 lbb_t( 'shortcode: compact="false" / "nu" nu face formularul compact', false === strpos( $sa_off, 'lbb-compact' ) && false !== strpos( $sa_on, 'lbb-compact' ) );
 
+// [lbb_firma] scris de mână cu majuscule sau în română arată câmpul cerut, nu numele firmei.
+$fc_keep = get_option( 'lbb_settings' );
+update_option( 'lbb_settings', array_merge( $fc_keep, array( 'company_name' => 'Firma Test SRL', 'company_idno' => '1001600000000', 'company_address' => 'str. Testului 1', 'company_email' => 'birou@example.com', 'support_phone' => '+373 69 000 111' ) ) );
+$fc_got = array(
+	do_shortcode( '[lbb_firma camp="Phone"]' ),
+	do_shortcode( '[lbb_firma camp=" telefon "]' ),
+	do_shortcode( '[lbb_firma camp="Adresă"]' ),
+	do_shortcode( '[lbb_firma camp="E-mail"]' ),
+	do_shortcode( '[lbb_firma camp="IDNO"]' ),
+	do_shortcode( '[lbb_firma camp="nume"]' ),
+);
+update_option( 'lbb_settings', $fc_keep );
+lbb_t( 'shortcode [lbb_firma]: camp cu majuscule sau în română arată câmpul cerut', array( '+373 69 000 111', '+373 69 000 111', 'str. Testului 1', 'birou@example.com', '1001600000000', 'Firma Test SRL' ) === $fc_got, $fc_got );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
