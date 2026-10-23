@@ -312,7 +312,10 @@ class LBB_Bookings {
 		if ( $children <= 0 || count( $names ) !== (int) $booking['seats'] ) {
 			return $names;
 		}
-		for ( $i = count( $names ) - $children; $i < count( $names ); $i++ ) {
+		// Mai mulți copii decât locuri (date stricate) nu pornesc de la un indice negativ: fiecare nume nou adăugat
+		// ar crește count() odată cu $i, iar bucla n-ar mai ieși (pagina biletului și lista ar cădea).
+		$total = count( $names );
+		for ( $i = max( 0, $total - $children ); $i < $total; $i++ ) {
 			/* translators: %s: numele copilului */
 			$names[ $i ] = sprintf( __( '%s (copil)', 'libertbus-bilete' ), $names[ $i ] );
 		}

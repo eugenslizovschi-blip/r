@@ -2999,6 +2999,7 @@ update_option( 'lbb_settings', $cl_keep );
 $kids = array( 'passengers' => array( 'Ion Popescu', 'Maria Popescu', 'Ana Popescu' ), 'children' => 1, 'seats' => 3 );
 lbb_t( 'pasageri: copilul e marcat „(copil)”', array( 'Ion Popescu', 'Maria Popescu', 'Ana Popescu (copil)' ) === LBB_Bookings::passenger_labels( $kids ), LBB_Bookings::passenger_labels( $kids ) );
 lbb_t( 'pasageri: fără copii numele rămân la fel', array( 'Ion Popescu' ) === LBB_Bookings::passenger_labels( array( 'passengers' => array( 'Ion Popescu' ), 'children' => 0, 'seats' => 1 ) ) );
+lbb_t( 'pasageri: mai mulți copii decât locuri (date stricate) nu blochează pagina, toți sunt „(copil)”', array( 'Ion Pop (copil)', 'Ana Pop (copil)' ) === LBB_Bookings::passenger_labels( array( 'passengers' => array( 'Ion Pop', 'Ana Pop' ), 'children' => 3, 'seats' => 2 ) ) );
 lbb_t( 'pasageri: fără nume pentru toate locurile nu ghicim cine e copil', array( 'Ion Popescu' ) === LBB_Bookings::passenger_labels( array( 'passengers' => array( 'Ion Popescu' ), 'children' => 1, 'seats' => 2 ) ) );
 $kid_desc = LBB_WooCommerce::describe( array_merge( $rv, $kids, array( 'status' => 'confirmed' ) ) );
 lbb_t( 'biletul arată care pasager e copil', false !== strpos( $kid_desc['Pasageri'], 'Ana Popescu (copil)' ), $kid_desc );
