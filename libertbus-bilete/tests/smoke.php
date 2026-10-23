@@ -1425,6 +1425,10 @@ $sr_b = LBB_Bookings::get_by_code( (string) $wpdb->get_var( 'SELECT ticket_code 
 $sr_h = $sr_b ? LBB_Tickets::html( $sr_b ) : '';
 lbb_t( 'tabelul biletului: fiecare etichetă e antet de rând (th scope="row")', $sr_h && preg_match_all( '/<th\b/', $sr_h ) >= 3 && preg_match_all( '/<th\b/', $sr_h ) === preg_match_all( '/<th scope="row"/', $sr_h ), $sr_h ? substr( $sr_h, 0, 300 ) : null );
 
+// Telefonul biroului din notele biletului (și în email, fără CSS-ul site-ului) are zona de atingere scrisă pe link.
+$nt_h = LBB_Tickets::notes_html();
+lbb_t( 'notele biletului: telefonul biroului are padding direct pe link (zonă de atingere și în email)', '' === trim( (string) LBB_Settings::get( 'support_phone' ) ) || (bool) preg_match( '/<a class="lbb-phone" style="padding:10px 0;" href="tel:/', $nt_h ), $nt_h );
+
 // Subiectul emailului WooCommerce cu biletul spune codul, ruta și data; un subiect scris de administrator rămâne.
 $es_id = (int) $wpdb->get_var( 'SELECT order_id FROM ' . LBB_Bookings::table() . " WHERE status = 'confirmed' AND ticket_code <> '' AND order_id > 0 GROUP BY order_id HAVING COUNT(*) = 1 ORDER BY order_id DESC LIMIT 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 $es_o  = $es_id ? wc_get_order( $es_id ) : null;

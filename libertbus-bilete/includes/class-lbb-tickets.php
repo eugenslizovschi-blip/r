@@ -364,8 +364,10 @@ class LBB_Tickets {
 		$notes = trim( (string) LBB_Settings::get( 'ticket_notes' ) );
 		$html  = $notes ? '<p style="color:#5f6b7a;">' . nl2br( esc_html( $notes ) ) . '</p>' : '';
 		if ( trim( (string) LBB_Settings::get( 'support_phone' ) ) ) {
+			// În email nu ajunge CSS-ul site-ului: zona de atingere a telefonului (ca pe pagina biletului) e scrisă direct pe link.
+			$tel   = str_replace( '<a class="lbb-phone" ', '<a class="lbb-phone" style="padding:10px 0;" ', LBB_Settings::phone_link() );
 			/* translators: %s: telefon */
-			$html .= '<p style="color:#5f6b7a;">' . sprintf( esc_html__( 'Anulare sau schimbarea datei: %s', 'libertbus-bilete' ), LBB_Settings::phone_link() ) . '</p>';
+			$html .= '<p style="color:#5f6b7a;">' . sprintf( esc_html__( 'Anulare sau schimbarea datei: %s', 'libertbus-bilete' ), $tel ) . '</p>';
 		}
 		return $html;
 	}

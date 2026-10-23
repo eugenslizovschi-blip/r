@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T04:56:41+00:00\n"
+"POT-Creation-Date: 2026-10-23T06:00:09+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: libertbus-bilete\n"
@@ -857,7 +857,7 @@ msgid "Arată"
 msgstr ""
 
 #: includes/class-lbb-admin.php:727
-#: includes/class-lbb-tickets.php:770
+#: includes/class-lbb-tickets.php:772
 msgid "Printează"
 msgstr ""
 
@@ -931,7 +931,7 @@ msgstr ""
 #: includes/class-lbb-admin.php:784
 #: includes/class-lbb-admin.php:1074
 #: includes/class-lbb-admin.php:1075
-#: includes/class-lbb-tickets.php:761
+#: includes/class-lbb-tickets.php:763
 msgid "Bilet"
 msgstr ""
 
@@ -2247,8 +2247,8 @@ msgid "Deschide biletul cu cod QR"
 msgstr ""
 
 #: includes/class-lbb-tickets.php:154
-#: includes/class-lbb-tickets.php:456
-#: includes/class-lbb-tickets.php:771
+#: includes/class-lbb-tickets.php:458
+#: includes/class-lbb-tickets.php:773
 msgid "Adaugă în calendar"
 msgstr ""
 
@@ -2301,7 +2301,7 @@ msgid "Rezervarea %1$s pentru %2$s, %3$s a fost anulată. Locurile nu mai sunt p
 msgstr ""
 
 #: includes/class-lbb-tickets.php:276
-#: includes/class-lbb-tickets.php:774
+#: includes/class-lbb-tickets.php:776
 msgid "Rezervați din nou online"
 msgstr ""
 
@@ -2318,172 +2318,172 @@ msgid "Rezervare anulată %1$s — %2$s, %3$s"
 msgstr ""
 
 #. translators: %s: telefon
-#: includes/class-lbb-tickets.php:368
+#: includes/class-lbb-tickets.php:370
 #, php-format
 msgid "Anulare sau schimbarea datei: %s"
 msgstr ""
 
 #. translators: %s: biletul (cod · rută · dată — site)
-#: includes/class-lbb-tickets.php:400
+#: includes/class-lbb-tickets.php:402
 #, php-format
 msgid "Bilet anulat și rambursat: %s"
 msgstr ""
 
 #. translators: 1: codurile biletelor, 2: numele site-ului
-#: includes/class-lbb-tickets.php:402
+#: includes/class-lbb-tickets.php:404
 #, php-format
 msgid "Bilete anulate și rambursate: %1$s — %2$s"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:411
+#: includes/class-lbb-tickets.php:413
 msgid "bilet"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:411
+#: includes/class-lbb-tickets.php:413
 msgid "bilete"
 msgstr ""
 
 #. translators: 1: numele site-ului, 2: numărul comenzii, 3: cursa (cod · rută · dată, ora) sau numărul de bilete
-#: includes/class-lbb-tickets.php:414
+#: includes/class-lbb-tickets.php:416
 #, php-format
 msgid "[%1$s] Comandă anulată #%2$s: %3$s"
 msgstr ""
 
 #. translators: 1: numele site-ului, 2: numărul comenzii, 3: cursa (rută · dată, ora) sau numărul de bilete
-#: includes/class-lbb-tickets.php:416
+#: includes/class-lbb-tickets.php:418
 #, php-format
 msgid "[%1$s] Plată eșuată #%2$s: %3$s"
 msgstr ""
 
 #. translators: 1: numele site-ului, 2: numărul comenzii, 3: biletul (cod · rută · dată) sau codurile biletelor
-#: includes/class-lbb-tickets.php:423
+#: includes/class-lbb-tickets.php:425
 #, php-format
 msgid "[%1$s] Comandă nouă #%2$s: %3$s"
 msgstr ""
 
 #. translators: %s: codul, ruta și data biletului, ex. LB-ABC123 · Bălți → Iași · 05.11.2026 — LibertBus
-#: includes/class-lbb-tickets.php:427
+#: includes/class-lbb-tickets.php:429
 #, php-format
 msgid "Biletul dumneavoastră: %s"
 msgstr ""
 
 #. translators: 1: codurile biletelor, ex. LB-ABC123, LB-DEF456, 2: numele site-ului
-#: includes/class-lbb-tickets.php:431
+#: includes/class-lbb-tickets.php:433
 #, php-format
 msgid "Biletele dumneavoastră: %1$s — %2$s"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:447
-#: includes/class-lbb-tickets.php:464
-#: includes/class-lbb-tickets.php:501
+#: includes/class-lbb-tickets.php:449
+#: includes/class-lbb-tickets.php:466
+#: includes/class-lbb-tickets.php:503
 msgid "Biletul dumneavoastră"
 msgid_plural "Biletele dumneavoastră"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-lbb-tickets.php:488
+#: includes/class-lbb-tickets.php:490
 msgid "Pagina se actualizează singură."
 msgstr ""
 
 #. translators: %s: telefonul biroului (link de apel)
-#: includes/class-lbb-tickets.php:490
+#: includes/class-lbb-tickets.php:492
 #, php-format
 msgid "Dacă biletul nu apare în câteva minute, sunați la %s."
 msgstr ""
 
-#: includes/class-lbb-tickets.php:492
+#: includes/class-lbb-tickets.php:494
 msgid "Biletele se emit imediat după confirmarea plății și vă vin pe email. De obicei durează câteva secunde."
 msgstr ""
 
-#: includes/class-lbb-tickets.php:494
+#: includes/class-lbb-tickets.php:496
 msgid "Verifică din nou"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:502
+#: includes/class-lbb-tickets.php:504
 msgid "L-am trimis și pe email. Arătați codul șoferului la urcare."
 msgid_plural "Le-am trimis și pe email. Arătați codul șoferului la urcare."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-lbb-tickets.php:528
+#: includes/class-lbb-tickets.php:530
 msgid "Plata nu e finalizată — biletul nu e încă valabil"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:531
+#: includes/class-lbb-tickets.php:533
 msgid "Rezervare anulată"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:531
+#: includes/class-lbb-tickets.php:533
 msgid "Bilet anulat"
 msgstr ""
 
 #. translators: %s: data cursei, ex. 05.10.2026
-#: includes/class-lbb-tickets.php:536
+#: includes/class-lbb-tickets.php:538
 #, php-format
 msgid "Cursa a avut loc pe %s"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:539
+#: includes/class-lbb-tickets.php:541
 msgid "Rezervare confirmată — achitați la urcare"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:541
+#: includes/class-lbb-tickets.php:543
 msgid "Bilet valabil — achitat"
 msgstr ""
 
 #. translators: 1: codul biletului, 2: numărul de locuri, 3: linkul biletului
-#: includes/class-lbb-tickets.php:561
+#: includes/class-lbb-tickets.php:563
 #, php-format
 msgid "Bilet %1$s, locuri: %2$d. Biletul cu cod QR: %3$s"
 msgstr ""
 
 #. translators: 1: codul rezervării, 2: numărul de locuri, 3: linkul rezervării
-#: includes/class-lbb-tickets.php:566
+#: includes/class-lbb-tickets.php:568
 #, php-format
 msgid "Rezervare %1$s, locuri: %2$d. Rezervarea cu cod QR: %3$s"
 msgstr ""
 
 #. translators: %s: suma, ex. 240 MDL
-#: includes/class-lbb-tickets.php:569
+#: includes/class-lbb-tickets.php:571
 #, php-format
 msgid "De achitat la urcare: %s."
 msgstr ""
 
 #. translators: %s: telefonul biroului, ex. +37369184111
-#: includes/class-lbb-tickets.php:575
+#: includes/class-lbb-tickets.php:577
 #, php-format
 msgid "Telefon: %s"
 msgstr ""
 
 #. translators: 1: ruta, ex. Bălți → Iași, 2: codul biletului
-#: includes/class-lbb-tickets.php:589
+#: includes/class-lbb-tickets.php:591
 #, php-format
 msgid "Autocar %1$s (%2$s)"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:640
+#: includes/class-lbb-tickets.php:642
 msgid "Bilet negăsit"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:761
+#: includes/class-lbb-tickets.php:763
 msgid "Rezervare"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:763
+#: includes/class-lbb-tickets.php:765
 msgid "Biletul nu a fost găsit. Verificați linkul din email."
 msgstr ""
 
 #. translators: %s: telefonul pentru clienți
-#: includes/class-lbb-tickets.php:765
+#: includes/class-lbb-tickets.php:767
 #, php-format
 msgid "Dacă nu găsiți emailul, sunați-ne la %s și vă ajutăm după numele sau telefonul de la rezervare."
 msgstr ""
 
-#: includes/class-lbb-tickets.php:772
+#: includes/class-lbb-tickets.php:774
 msgid "Trimite biletul"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:773
+#: includes/class-lbb-tickets.php:775
 msgid "Achită acum"
 msgstr ""
 
