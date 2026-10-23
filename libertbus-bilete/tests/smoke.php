@@ -2384,6 +2384,16 @@ lbb_t( 'API: cheia formularului, ziua de azi și prețul rutei vin proaspete (pa
 lbb_t( 'API: data în alt format e refuzată (400)', 400 === $api( array( 'route_id' => $rid2, 'date' => '07.10.2026' ) )->get_status() );
 lbb_t( 'API: fără rută e refuzat (400)', 400 === $api( array( 'date' => $tomorrow ) )->get_status() );
 lbb_t( 'API: ruta inexistentă dă 404', 404 === $api( array( 'route_id' => 999999, 'date' => $tomorrow ) )->get_status() );
+// Date care trec de format, dar nu se pot rezerva: zi imposibilă, zi trecută, prea departe în viitor.
+$api_odd = array();
+foreach ( array( '2026-02-31', '2026-13-01', '2020-01-01', '2099-01-01' ) as $api_d ) {
+	$api_r = $api( array( 'route_id' => $rid2, 'date' => $api_d ) );
+	$api_b = array_filter( (array) ( $api_r->get_data()['departures'] ?? array() ), function ( $dep ) {
+		return ! empty( $dep['bookable'] );
+	} );
+	$api_odd[ $api_d ] = array( $api_r->get_status(), count( $api_b ) );
+}
+lbb_t( 'API: zi imposibilă (31 februarie), trecută sau peste ani: răspuns normal, nicio oră de rezervat', array( '2026-02-31' => array( 200, 0 ), '2026-13-01' => array( 200, 0 ), '2020-01-01' => array( 200, 0 ), '2099-01-01' => array( 200, 0 ) ) === $api_odd, $api_odd );
 // Erorile trec prin același filtru ca la o cerere HTTP adevărată: și ele sunt fără cache (un 404 păstrat într-un cache de pagini ar ascunde ruta pornită din nou).
 $api_nc = function ( $params ) use ( $api ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
