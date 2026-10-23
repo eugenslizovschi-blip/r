@@ -125,6 +125,14 @@
   - **Accesibilitate:** butoanele formularului au contur vizibil la navigarea cu tastatura, și pe teme care îl ascund; linkurile din admin care se deschid într-o filă nouă o spun cititorului de ecran; cititorul de ecran anunță „Biletele se emit…” pe pagina de mulțumire și nota pentru grupuri de la listele de pasageri.
   - **Telefoane vechi** (iPhone cu iOS sub 11.3, Android 4.4): după 8 secunde fără răspuns apare „Încearcă din nou” (nu „Se verifică locurile…” la nesfârșit); tasta Tab în fereastra pasului 2 nu mai dă eroare.
   - **Română corectă** la numere: „cel mult 20 de locuri”, „mai mult de 20 de persoane”, „ultimele 200 de rezervări”; data din politici după ora Chișinăului și cu fusul „UTC+2” fix.
+  - **Date neobișnuite sau stricate:** pagina nu mai cade și nu mai arată „Array”:
+    - o rezervare cu mai mulți copii decât locuri (modificată manual în baza de date) bloca pagina biletului, lista pentru șofer și CSV-ul până la limita serverului; acum se afișează normal;
+    - fișierul „Adaugă în calendar” cu un text stricat (ex. dintr-o traducere coruptă) nu mai intră într-o buclă fără sfârșit;
+    - o listă de pasageri stricată în baza de date nu mai apare pe bilet ca „Array”;
+    - formularele din admin (rute, setări) cu date măsluite (o listă în loc de text) nu mai dau eroare fatală;
+    - o rută cu „Notițe interne” goale în forma NULL (import, phpMyAdmin) se editează fără avertismente pe PHP 8.1+.
+  - **Shortcode-uri scrise de mână:** `mode="Pay "` / `mode="RESERVE"` (majuscule, spații) lasă doar butonul cerut, iar `compact="false"` / `"nu"` nu mai face formularul compact; `[lbb_firma camp="Telefon"]`, `"Adresă"`, `"E-mail"`, `"IDNO"` arată câmpul cerut (înainte arătau numele firmei).
+  - **Link de bilet greșit sau tăiat:** pagina „Biletul nu a fost găsit” are butonul „Rezervați online” (sau spre prima pagină a site-ului), iar titlul ei din fila browserului are și numele site-ului.
   - **Altele:**
     - arhiva de instalare se face cu `tests/build-zip.sh` (~120 KB, doar ce rulează pe site; fără teste și capturi de ecran);
     - dezinstalarea cu setarea „Șterge datele” bifată șterge și linkul secret de previzualizare (rămânea în baza de date);
