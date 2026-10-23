@@ -42,6 +42,8 @@ class LBB_Routes {
 		$row['times']       = self::parse_times( $row['departures'] );
 		$row['days']        = array_map( 'intval', array_filter( explode( ',', $row['weekdays'] ) ) );
 		$row['boarding']    = isset( $row['boarding'] ) ? (string) $row['boarding'] : '';
+		// Coloana „notes” acceptă NULL (rută adăugată direct în baza de date): text gol, nu null în esc_textarea() (PHP 8.1+).
+		$row['notes']       = isset( $row['notes'] ) ? (string) $row['notes'] : '';
 		return $row;
 	}
 
