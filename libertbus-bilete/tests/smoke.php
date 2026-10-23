@@ -955,6 +955,22 @@ update_option( $te_key, array_merge( is_array( $te_keep ) ? $te_keep : array(), 
 $te_on = $te_find();
 null === $te_keep ? delete_option( $te_key ) : update_option( $te_key, $te_keep );
 lbb_t( 'panoul semnalează emailul WooCommerce cu biletul oprit („Comandă finalizată”), cu link spre setările lui', $te_auto && $te_off && false === $te_off['ok'] && false !== strpos( $te_off['fix'], 'section=wc_email_customer_completed_order' ) && $te_on && true === $te_on['ok'], array( $te_off, $te_on ) );
+// Expeditorul emailurilor WooCommerce pe Gmail (DMARC): panoul avertizează; cu o adresă a site-ului nu.
+$mf_keep = get_option( 'woocommerce_email_from_address', null );
+$mf_find = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'mail_from' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+update_option( 'woocommerce_email_from_address', 'birou.libertbus@Gmail.com' );
+$mf_gm = $mf_find();
+update_option( 'woocommerce_email_from_address', 'bilete@libertbus.md' );
+$mf_ok = $mf_find();
+null === $mf_keep ? delete_option( 'woocommerce_email_from_address' ) : update_option( 'woocommerce_email_from_address', $mf_keep );
+lbb_t( 'panoul avertizează când emailurile cu biletul pleacă „de la” Gmail (respinse des, DMARC); cu o adresă a site-ului e în regulă', $mf_gm && 'warn' === $mf_gm['ok'] && false !== strpos( $mf_gm['detail'], 'gmail.com' ) && $mf_ok && true === $mf_ok['ok'], array( $mf_gm, $mf_ok ) );
 // WooCommerce 9+ în modul „În curând”: panoul îl semnalează (coșul și plata ascunse); fără opțiune (WooCommerce 8) nu apare.
 $cs_keep = get_option( 'woocommerce_coming_soon', null );
 $cs_find = function () {

@@ -127,6 +127,17 @@ class LBB_Admin {
 				$mail_on ? '' : __( 'E oprit: clienții nu primesc biletul pe email după plată. Bifați „Activează acest email” în setările lui.', 'libertbus-bilete' ),
 				admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_' . $mail_key ) );
 
+			// Expeditorul emailurilor WooCommerce (cu biletul) pe Gmail, Yahoo, mail.ru…: trimise prin serverul site-ului, aceste
+			// servicii resping des emailurile care pretind că vin de la ele (DMARC), iar clientul nu primește biletul.
+			$m_from = (string) get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) );
+			$m_dom  = strtolower( (string) substr( (string) strrchr( $m_from, '@' ), 1 ) );
+			$m_free = in_array( $m_dom, array( 'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.ro', 'ymail.com', 'mail.ru', 'bk.ru', 'list.ru', 'inbox.ru', 'yandex.ru', 'yandex.com', 'rambler.ru', 'outlook.com', 'hotmail.com', 'live.com', 'icloud.com', 'aol.com', 'proton.me', 'protonmail.com', 'mail.md' ), true );
+			$m_host = preg_replace( '/^www\./', '', (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+			$add( 'mail_from', $m_free ? 'warn' : true, __( 'Emailurile cu biletul pleacă de la o adresă a site-ului', 'libertbus-bilete' ),
+				/* translators: 1: adresa expeditorului, ex. birou@gmail.com, 2: domeniul ei, ex. gmail.com, 3: domeniul site-ului, ex. libertbus.md */
+				$m_free ? sprintf( __( 'Expeditorul e %1$s. Trimise prin serverul site-ului, emailurile „de la” %2$s sunt des respinse sau puse la spam (Gmail, Yahoo), iar clientul nu primește biletul. Folosiți o adresă @%3$s sau un plugin SMTP conectat la acest cont.', 'libertbus-bilete' ), $m_from, $m_dom, $m_host ) : '',
+				admin_url( 'admin.php?page=wc-settings&tab=email' ) );
+
 			// WooCommerce 9+: în modul „În curând” (Coming soon) vizitatorii nu ajung la coș și la plată; un magazin nou
 			// pornește chiar așa. Pe versiunile fără această opțiune verificarea nu apare.
 			$soon = get_option( 'woocommerce_coming_soon', null );
