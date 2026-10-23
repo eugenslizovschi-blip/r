@@ -39,6 +39,8 @@ class LBB_Install {
 			self::create_tables();
 			update_option( 'lbb_db_version', LBB_DB_VERSION );
 			// Versiunea 5: codurile biletelor și pe comenzile plătite înainte (căutarea din WooCommerce → Comenzi).
+			// Versiunea 6: indexuri pe dată și telefon (lista de pasageri a zilei, reamintirile și curățenia orare, limita de
+			// rezervări pe telefon): datele se păstrează 3 ani, iar fără ele fiecare căutare citește tot tabelul.
 			add_action( 'init', array( __CLASS__, 'backfill_codes' ), 30 );
 		}
 		if ( get_option( 'lbb_needs_product' ) && class_exists( 'WooCommerce' ) ) {
@@ -135,7 +137,9 @@ class LBB_Install {
 			UNIQUE KEY token (token),
 			KEY departure (route_id,travel_date,dep_time,status),
 			KEY order_id (order_id),
-			KEY ticket_code (ticket_code)
+			KEY ticket_code (ticket_code),
+			KEY travel_date (travel_date,status),
+			KEY phone (phone)
 		) $charset;" );
 	}
 

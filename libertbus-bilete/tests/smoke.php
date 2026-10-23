@@ -1461,6 +1461,17 @@ $es_s4   = $es_o ? $es_ne->get_subject() : '';
 lbb_t( 'emailul „Comandă nouă” către birou are numărul comenzii și biletul (cod, rută, dată)', $es_b && $es_o && 0 === strpos( $es_s4, '[' . get_bloginfo( 'name' ) . '] Comandă nouă #' . $es_o->get_order_number() . ': ' . $es_b[0]['ticket_code'] . ' · ' ), $es_s4 );
 lbb_t( 'emailul cu biletul are în subiect codul, ruta și data; subiectul scris de administrator și comenzile fără bilete rămân', $es_b && 0 === strpos( $es_s1, 'Biletul dumneavoastră: ' . $es_b[0]['ticket_code'] . ' · ' ) && false !== strpos( $es_s1, ' → ' ) && $es_o && 'Comanda ' . $es_o->get_order_number() === $es_s2 && false === strpos( $es_s3, 'Bilet' ), array( $es_s1, $es_s2, $es_s3 ) );
 
+// Indexuri pe dată și telefon (tabelul păstrează 3 ani de rezervări); o instalare veche (versiunea 5) le primește la actualizare.
+$ix_names = function () use ( $wpdb ) {
+	return array_unique( wp_list_pluck( $wpdb->get_results( 'SHOW INDEX FROM ' . LBB_Bookings::table() ), 'Key_name' ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+};
+$ix_new = $ix_names();
+$wpdb->query( 'ALTER TABLE ' . LBB_Bookings::table() . ' DROP INDEX travel_date, DROP INDEX phone' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+update_option( 'lbb_db_version', '5' );
+LBB_Install::maybe_upgrade();
+$ix_up = $ix_names();
+lbb_t( 'tabelul rezervărilor are indexuri pe dată și telefon, și după actualizarea de la versiunea 5', in_array( 'travel_date', $ix_new, true ) && in_array( 'phone', $ix_new, true ) && in_array( 'travel_date', $ix_up, true ) && in_array( 'phone', $ix_up, true ) && LBB_DB_VERSION === get_option( 'lbb_db_version' ), array( $ix_new, $ix_up ) );
+
 // Coșul abandonat al clientului (expirat) dispare la cererea de ștergere; coșul încă activ rămâne.
 $ph_old = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Abandonat' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
 $ph_new = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Activ' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
