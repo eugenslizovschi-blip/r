@@ -605,7 +605,9 @@ class LBB_Tickets {
 		foreach ( $lines as $line ) {
 			while ( strlen( $line ) > 75 ) {
 				$cut = 75;
-				while ( $cut > 0 && ( ord( $line[ $cut ] ) & 0xC0 ) === 0x80 ) {
+				// O literă UTF-8 are cel mult 3 octeți de continuare; un text stricat (octeți invalizi scriși direct în
+				// baza de date) se taie oricum la 75, altfel tăietura ar ajunge la 0 și rândul ar crește la nesfârșit.
+				while ( $cut > 72 && ( ord( $line[ $cut ] ) & 0xC0 ) === 0x80 ) {
 					$cut--;
 				}
 				$out .= substr( $line, 0, $cut ) . "\r\n";

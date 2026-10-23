@@ -2316,6 +2316,17 @@ $dst_ics = function ( $date ) use ( $dst_r ) {
 };
 $dst_got = $dst_r ? array( $dst_ics( '2026-10-24' ), $dst_ics( '2026-10-26' ), $dst_ics( '2027-01-15' ), $dst_ics( '2027-07-15' ) ) : array();
 lbb_t( 'calendar: ora plecării în UTC respectă ora de vară și de iarnă (Europe/Chisinau)', array( '20261024T054500Z', '20261026T064500Z', '20270115T064500Z', '20270715T054500Z' ) === $dst_got, $dst_got );
+// Un text stricat (octeți UTF-8 invalizi, aici dintr-o traducere) nu blochează .ics: tăietura rândului nu ajunge la 0.
+$bad_tr = function ( $tr, $text ) {
+	return 0 === strpos( $text, 'Bilet %1$s' ) ? str_repeat( "\x80", 200 ) : $tr;
+};
+add_filter( 'gettext', $bad_tr, 10, 2 );
+$bad_ics = $dst_r ? LBB_Tickets::ics( array( 'route_id' => $dst_r['id'], 'travel_date' => '2027-01-15', 'dep_time' => '08:45', 'ticket_code' => 'LB-BADTXT', 'seats' => 1 ) ) : '';
+remove_filter( 'gettext', $bad_tr, 10 );
+$bad_long = array_filter( explode( "\r\n", $bad_ics ), function ( $l ) {
+	return strlen( $l ) > 75;
+} );
+lbb_t( 'calendar: text cu octeți invalizi se împarte în rânduri ≤75 octeți, fără buclă infinită', '' !== $bad_ics && false !== strpos( $bad_ics, 'END:VCALENDAR' ) && ! $bad_long, strlen( $bad_ics ) );
 
 // Lista Rezervări are o limită: când e atinsă, sub tabel scrie că se văd doar ultimele și cum le găsiți pe celelalte.
 $bl_page = function ( $limit ) {
