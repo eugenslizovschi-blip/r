@@ -3031,6 +3031,18 @@ restore_error_handler();
 update_option( 'lbb_settings', $fz_keep );
 lbb_t( 'admin: rute și setări cu date măsluite fără avertismente sau eroare fatală', ! $fz_w, array_slice( array_unique( $fz_w ), 0, 5 ) );
 
+// Atributele scrise de mână în shortcode: majuscule/spații la mode și compact="false" sunt înțelese ca atare.
+$sa_keep = get_option( 'lbb_settings' );
+update_option( 'lbb_settings', array_merge( $sa_keep, array( 'allow_pay' => 1, 'allow_reserve' => 1 ) ) );
+$sa_pay  = do_shortcode( '[libertbus_rezervare mode="Pay "]' );
+$sa_res  = do_shortcode( '[libertbus_rezervare mode="RESERVE"]' );
+$sa_off  = do_shortcode( '[libertbus_rezervare compact="false"]' ) . do_shortcode( '[libertbus_rezervare compact="nu"]' );
+$sa_on   = do_shortcode( '[libertbus_rezervare compact="da"]' );
+update_option( 'lbb_settings', $sa_keep );
+lbb_t( 'shortcode: mode="Pay " lasă doar „Achit online”', false !== strpos( $sa_pay, 'value="pay" class="lbb-submit"' ) && false === strpos( $sa_pay, 'value="reserve" class="lbb-submit' ) );
+lbb_t( 'shortcode: mode="RESERVE" lasă doar „Rezerv”', false !== strpos( $sa_res, 'value="reserve" class="lbb-submit' ) && false === strpos( $sa_res, 'value="pay" class="lbb-submit"' ) );
+lbb_t( 'shortcode: compact="false" / "nu" nu face formularul compact', false === strpos( $sa_off, 'lbb-compact' ) && false !== strpos( $sa_on, 'lbb-compact' ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );

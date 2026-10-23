@@ -406,6 +406,9 @@ class LBB_Frontend {
 
 	public static function shortcode( $atts ) {
 		$atts = shortcode_atts( array( 'from' => '', 'to' => '', 'title' => '', 'mode' => 'both', 'compact' => '' ), $atts, 'libertbus_rezervare' );
+		// Atributele scrise de mână în editor: mode="Pay " e tot „pay”, iar compact="false"/"no"/"nu" înseamnă oprit.
+		$atts['mode']    = strtolower( trim( (string) $atts['mode'] ) );
+		$atts['compact'] = in_array( strtolower( trim( (string) $atts['compact'] ) ), array( '', '0', 'false', 'no', 'nu', 'off' ), true ) ? '' : '1';
 		$map  = LBB_Routes::public_map();
 		if ( ! $map ) {
 			return '<p class="lbb-empty">' . esc_html__( 'Momentan nu sunt curse disponibile pentru rezervare online.', 'libertbus-bilete' ) . '</p>';
@@ -508,7 +511,7 @@ class LBB_Frontend {
 
 		ob_start();
 		?>
-		<?php $compact = '' !== $atts['compact'] && '0' !== $atts['compact']; ?>
+		<?php $compact = '' !== $atts['compact']; ?>
 		<div class="lbb-booking<?php echo $compact ? ' lbb-compact' : ''; ?>" lang="<?php echo esc_attr( LBB_Settings::text_lang() ); ?>" data-step="<?php echo $error ? '2' : '1'; ?>" id="<?php echo esc_attr( $uid ); ?>" data-lbb-config="<?php echo esc_attr( base64_encode( wp_json_encode( $config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ); ?>">
 			<?php if ( $atts['title'] ) : ?>
 				<h3 class="lbb-title"><?php echo esc_html( $atts['title'] ); ?></h3>
