@@ -3057,6 +3057,68 @@ $fc_got = array(
 update_option( 'lbb_settings', $fc_keep );
 lbb_t( 'shortcode [lbb_firma]: camp cu majuscule sau în română arată câmpul cerut', array( '+373 69 000 111', '+373 69 000 111', 'str. Testului 1', 'birou@example.com', '1001600000000', 'Firma Test SRL' ) === $fc_got, $fc_got );
 
+// Fiecare acțiune din admin (admin_post_lbb_*) refuză o cerere fără nonce (link măsluit trimis adminului) și un
+// abonat chiar cu nonce valid: nu redirecționează, nu șterge ruta, nu schimbă setările.
+global $wp_filter;
+$ap_user  = get_current_user_id();
+$ap_keep  = array( $_GET, $_POST, $_REQUEST );
+$ap_set   = get_option( 'lbb_settings' );
+$ap_rid   = LBB_Routes::save( array( 'origin' => 'NonceA', 'destination' => 'NonceB', 'price' => '10', 'departures' => '09:00', 'active' => 0 ) );
+$ap_sub   = wp_insert_user( array( 'user_login' => 'lbb_ap_' . wp_generate_password( 6, false ), 'user_pass' => wp_generate_password(), 'role' => 'subscriber' ) );
+$ap_hooks = array();
+foreach ( array_keys( $wp_filter ) as $ap_h ) {
+	if ( 0 === strpos( $ap_h, 'admin_post_lbb_' ) ) {
+		$ap_hooks[] = $ap_h;
+	}
+}
+$ap_die   = function () {
+	return function () {
+		throw new Exception( 'die' );
+	};
+};
+$ap_redir = function () {
+	throw new Exception( 'redirect' );
+};
+add_filter( 'wp_die_handler', $ap_die );
+add_filter( 'wp_redirect', $ap_redir, 1 );
+$ap_bad = array();
+foreach ( $ap_hooks as $ap_h ) {
+	$ap_action = substr( $ap_h, strlen( 'admin_post_' ) );
+	$ap_nonce  = 'lbb_cancel_booking' === $ap_action ? 'lbb_cancel_booking_999999' : $ap_action;
+	foreach ( array( 'admin fără nonce' => array( 1, false ), 'abonat cu nonce' => array( is_int( $ap_sub ) ? $ap_sub : 0, true ) ) as $ap_who => $ap_case ) {
+		wp_set_current_user( $ap_case[0] );
+		$_POST    = array_merge( LBB_Settings::all(), array( 'action' => $ap_action, 'id' => 'lbb_cancel_booking' === $ap_action ? 999999 : $ap_rid, 'company_name' => 'Măsluit SRL' ) );
+		$_GET     = array( 'action' => $ap_action, 'date' => LBB_Settings::today() );
+		$_REQUEST = $_POST + ( $ap_case[1] ? array( '_wpnonce' => wp_create_nonce( $ap_nonce ) ) : array() );
+		ob_start();
+		$ap_end = 'nimic';
+		try {
+			do_action( $ap_h );
+		} catch ( Exception $e ) {
+			$ap_end = $e->getMessage();
+		}
+		ob_end_clean();
+		if ( 'die' !== $ap_end ) {
+			$ap_bad[] = $ap_action . ' / ' . $ap_who . ': ' . $ap_end;
+		}
+	}
+}
+remove_filter( 'wp_die_handler', $ap_die );
+remove_filter( 'wp_redirect', $ap_redir, 1 );
+$ap_route_left = is_int( $ap_rid ) && LBB_Routes::get( $ap_rid );
+$ap_set_same   = get_option( 'lbb_settings' ) === $ap_set;
+list( $_GET, $_POST, $_REQUEST ) = $ap_keep;
+update_option( 'lbb_settings', $ap_set );
+if ( is_int( $ap_rid ) ) {
+	$wpdb->delete( LBB_Routes::table(), array( 'id' => $ap_rid ) );
+}
+if ( is_int( $ap_sub ) ) {
+	require_once ABSPATH . 'wp-admin/includes/user.php';
+	wp_delete_user( $ap_sub );
+}
+wp_set_current_user( $ap_user );
+lbb_t( 'admin: toate cele ' . count( $ap_hooks ) . ' acțiuni lbb_* refuză cererea fără nonce și abonatul; ruta și setările rămân', count( $ap_hooks ) >= 7 && ! $ap_bad && $ap_route_left && $ap_set_same, array( $ap_hooks, $ap_bad, $ap_route_left, $ap_set_same ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
