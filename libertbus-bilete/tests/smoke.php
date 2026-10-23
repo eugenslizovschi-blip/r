@@ -976,6 +976,27 @@ $pd_nw = count( array_keys( $pd_cls, 'lbb-warn', true ) );
 lbb_t( 'panoul „Gata de plăți?”: problemele sunt primele (lipsă, apoi de verificat, apoi gata), cu numărul lor în titlu', count( $pd_cls ) === count( LBB_Admin::checklist() ) && $pd_rank === $pd_sorted && $pd_nw >= 1
 	&& false !== strpos( $pd_html, $pd_nw . ' de verificat' ) && ( 0 === $pd_nb || false !== strpos( $pd_html, $pd_nb . ' de rezolvat' ) ), array( $pd_cls, $pd_nb, $pd_nw ) );
 
+// Emailul „Comandă nouă” trebuie să ajungă la biroul din Setări: altfel (sau oprit) panoul avertizează.
+$on_key  = 'woocommerce_new_order_settings';
+$on_keep = get_option( $on_key, null );
+$on_find = function () {
+	foreach ( LBB_Admin::checklist() as $it ) {
+		if ( 'office_new_order' === $it['id'] ) {
+			return $it;
+		}
+	}
+	return null;
+};
+$on_off_mail = LBB_Settings::office_email();
+update_option( $on_key, array( 'enabled' => 'yes', 'recipient' => 'altcineva@example.com' ) );
+$on_other = $on_find();
+update_option( $on_key, array( 'enabled' => 'yes', 'recipient' => 'altcineva@example.com, ' . strtoupper( $on_off_mail ) ) );
+$on_both = $on_find();
+update_option( $on_key, array( 'enabled' => 'no', 'recipient' => $on_off_mail ) );
+$on_disabled = $on_find();
+null === $on_keep ? delete_option( $on_key ) : update_option( $on_key, $on_keep );
+lbb_t( 'panoul avertizează când emailul „Comandă nouă” nu ajunge la biroul din Setări sau e oprit', $on_other && 'warn' === $on_other['ok'] && false !== strpos( $on_other['detail'], $on_off_mail ) && $on_both && true === $on_both['ok'] && $on_disabled && 'warn' === $on_disabled['ok'], array( $on_other, $on_both, $on_disabled ) );
+
 // Expeditorul emailurilor WooCommerce pe Gmail (DMARC): panoul avertizează; cu o adresă a site-ului nu.
 $mf_keep = get_option( 'woocommerce_email_from_address', null );
 $mf_find = function () {

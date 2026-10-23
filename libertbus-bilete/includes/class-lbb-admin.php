@@ -127,6 +127,19 @@ class LBB_Admin {
 				$mail_on ? '' : __( 'E oprit: clienții nu primesc biletul pe email după plată. Bifați „Activează acest email” în setările lui.', 'libertbus-bilete' ),
 				admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_' . $mail_key ) );
 
+			// Biroul află de vânzările online din emailul WooCommerce „Comandă nouă”, care are destinatarul lui (implicit
+			// administratorul WordPress), nu adresa biroului din Setări LibertBus.
+			$no_opt  = get_option( 'woocommerce_new_order_settings', array() );
+			$no_on   = ! is_array( $no_opt ) || ! isset( $no_opt['enabled'] ) || 'no' !== $no_opt['enabled'];
+			$no_to   = is_array( $no_opt ) && ! empty( $no_opt['recipient'] ) ? (string) $no_opt['recipient'] : (string) get_option( 'admin_email' );
+			$no_off  = LBB_Settings::office_email();
+			$no_has  = in_array( strtolower( $no_off ), array_map( 'strtolower', array_map( 'trim', explode( ',', $no_to ) ) ), true );
+			$add( 'office_new_order', $no_on && $no_has ? true : 'warn', __( 'Biroul primește emailul „Comandă nouă” la fiecare bilet plătit', 'libertbus-bilete' ),
+				! $no_on ? __( 'Emailul e oprit: biroul află de vânzările online doar din panou și din lista de pasageri.', 'libertbus-bilete' )
+					/* translators: 1: destinatarii actuali, 2: adresa biroului din Setări */
+					: ( $no_has ? '' : sprintf( __( 'Merge la %1$s, nu la adresa biroului din Setări (%2$s). Adăugați-o la „Destinatar(i)”, separată prin virgulă.', 'libertbus-bilete' ), $no_to, $no_off ) ),
+				admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_new_order' ) );
+
 			// Expeditorul emailurilor WooCommerce (cu biletul) pe Gmail, Yahoo, mail.ru…: trimise prin serverul site-ului, aceste
 			// servicii resping des emailurile care pretind că vin de la ele (DMARC), iar clientul nu primește biletul.
 			$m_from = (string) get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) );
