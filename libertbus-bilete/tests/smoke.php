@@ -3164,6 +3164,26 @@ $nf_pages = LBB_Admin::pages_with_form();
 $nf_want  = $nf_pages ? get_permalink( $nf_pages[0]->ID ) : home_url( '/' );
 lbb_t( 'bilet negăsit: link spre formularul de rezervare (sau site), ca buton', false !== strpos( $nf_page, 'Biletul nu a fost găsit' ) && false !== strpos( $nf_page, '<div class="actions"><a class="again" href="' . esc_url( $nf_want ) . '">' ), substr( wp_strip_all_tags( $nf_page ), -300 ) );
 
+// Lista de pasageri stricată în baza de date (liste, obiecte, null în loc de nume): pe bilet și în comandă rămân doar
+// numele, fără „Array” și fără avertismente PHP.
+$hy_w  = array();
+$hy_id = (int) $wpdb->get_var( 'SELECT id FROM ' . LBB_Bookings::table() . " WHERE ticket_code <> '' ORDER BY id DESC LIMIT 1" );
+$hy_k  = $wpdb->get_var( $wpdb->prepare( 'SELECT passengers FROM ' . LBB_Bookings::table() . ' WHERE id = %d', $hy_id ) );
+$wpdb->update( LBB_Bookings::table(), array( 'passengers' => '[["Ion"],{"a":1},null,"Ana Pop"]' ), array( 'id' => $hy_id ) );
+set_error_handler(
+	function ( $no, $msg, $file, $line ) use ( &$hy_w ) {
+		if ( false !== strpos( $file, 'libertbus-bilete' ) ) {
+			$hy_w[] = $msg . ' @' . basename( $file ) . ':' . $line;
+		}
+		return false;
+	}
+);
+$hy_b    = LBB_Bookings::get( $hy_id );
+$hy_html = $hy_b ? LBB_Tickets::html( $hy_b, true ) . implode( ' ', LBB_WooCommerce::describe( $hy_b ) ) . implode( ' ', LBB_Bookings::passenger_labels( $hy_b ) ) : '';
+restore_error_handler();
+$wpdb->update( LBB_Bookings::table(), array( 'passengers' => $hy_k ), array( 'id' => $hy_id ) );
+lbb_t( 'pasageri stricați în baza de date: pe bilet doar numele, fără „Array” și fără avertismente', $hy_b && array( 'Ana Pop' ) === $hy_b['passengers'] && false !== strpos( $hy_html, 'Ana Pop' ) && false === strpos( $hy_html, 'Array' ) && ! $hy_w, array( $hy_b ? $hy_b['passengers'] : null, array_unique( $hy_w ) ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );

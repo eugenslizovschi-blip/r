@@ -379,7 +379,10 @@ class LBB_Bookings {
 		}
 		$row['amount']     = (float) $row['amount'];
 		$names             = json_decode( (string) $row['passengers'], true );
-		$row['passengers'] = is_array( $names ) ? $names : array();
+		// Doar nume (text): o valoare stricată în baza de date (listă, obiect, null) nu ajunge pe bilet ca „Array”.
+		$row['passengers'] = is_array( $names ) ? array_values( array_map( 'strval', array_filter( $names, function ( $name ) {
+			return is_string( $name ) || is_int( $name ) || is_float( $name );
+		} ) ) ) : array();
 		return $row;
 	}
 
