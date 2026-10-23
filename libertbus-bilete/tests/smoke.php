@@ -3119,6 +3119,25 @@ if ( is_int( $ap_sub ) ) {
 wp_set_current_user( $ap_user );
 lbb_t( 'admin: toate cele ' . count( $ap_hooks ) . ' acțiuni lbb_* refuză cererea fără nonce și abonatul; ruta și setările rămân', count( $ap_hooks ) >= 7 && ! $ap_bad && $ap_route_left && $ap_set_same, array( $ap_hooks, $ap_bad, $ap_route_left, $ap_set_same ) );
 
+// lbb/v1/status (versiunea, lista „Gata de plăți?”, statisticile vânzărilor) e doar pentru birou: vizitatorul și
+// abonatul primesc refuz, administratorul primește datele.
+$st_user = get_current_user_id();
+$st_sub  = wp_insert_user( array( 'user_login' => 'lbb_st_' . wp_generate_password( 6, false ), 'user_pass' => wp_generate_password(), 'role' => 'subscriber' ) );
+$st_get  = function ( $uid ) {
+	wp_set_current_user( $uid );
+	$res = rest_do_request( new WP_REST_Request( 'GET', '/lbb/v1/status' ) );
+	return array( $res->get_status(), $res->get_data() );
+};
+$st_guest = $st_get( 0 );
+$st_subr  = $st_get( is_int( $st_sub ) ? $st_sub : 0 );
+$st_admin = $st_get( 1 );
+if ( is_int( $st_sub ) ) {
+	require_once ABSPATH . 'wp-admin/includes/user.php';
+	wp_delete_user( $st_sub );
+}
+wp_set_current_user( $st_user );
+lbb_t( 'REST lbb/v1/status: refuzat pentru vizitator și abonat, fără statistici; administratorul primește versiunea', 401 === $st_guest[0] && 403 === $st_subr[0] && ! isset( $st_guest[1]['stats'] ) && ! isset( $st_subr[1]['stats'] ) && 200 === $st_admin[0] && LBB_VERSION === $st_admin[1]['version'] && isset( $st_admin[1]['stats'] ), array( $st_guest[0], $st_subr[0], $st_admin[0] ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
