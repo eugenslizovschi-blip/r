@@ -176,7 +176,8 @@ class LBB_Frontend {
 	}
 
 	public static function normalize_phone( $raw ) {
-		$phone = preg_replace( '/[^\d+]/', '', (string) $raw );
+		// O listă în loc de text (lbb_phone[]=…, trimisă de roboți) e un telefon gol, nu un avertisment PHP.
+		$phone = preg_replace( '/[^\d+]/', '', is_scalar( $raw ) ? (string) $raw : '' );
 		$phone = '+' === substr( $phone, 0, 1 ) ? '+' . str_replace( '+', '', $phone ) : str_replace( '+', '', $phone );
 		if ( 0 === strpos( $phone, '00' ) ) {
 			$phone = '+' . substr( $phone, 2 );

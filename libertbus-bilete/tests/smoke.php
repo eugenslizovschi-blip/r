@@ -1530,6 +1530,33 @@ LBB_Install::maybe_upgrade();
 $ix_up = $ix_names();
 lbb_t( 'tabelul rezervărilor are indexuri pe dată și telefon, și după actualizarea de la versiunea 5', in_array( 'travel_date', $ix_new, true ) && in_array( 'phone', $ix_new, true ) && in_array( 'travel_date', $ix_up, true ) && in_array( 'phone', $ix_up, true ) && LBB_DB_VERSION === get_option( 'lbb_db_version' ), array( $ix_new, $ix_up ) );
 
+// Date stricate trimise formularului (liste în loc de text, numere negative, date imposibile, caractere invalide), ca
+// de la un robot: rezervarea e refuzată cu un mesaj, fără avertismente PHP (care în debug.log ar ascunde erorile reale).
+$fz_warn = array();
+set_error_handler( function ( $no, $msg, $file, $line ) use ( &$fz_warn ) {
+	if ( false !== strpos( $file, 'libertbus-bilete' ) ) {
+		$fz_warn[] = $msg . ' @' . basename( $file ) . ':' . $line;
+	}
+	return false;
+} );
+$fz_rid  = (int) $rid2;
+$fz_res  = array();
+foreach ( array(
+	array( 'lbb_route' => array( $fz_rid ), 'lbb_names' => 'Ion', 'lbb_adults' => array( 1 ), 'lbb_date' => array( 'x' ), 'lbb_time' => array( 'y' ), 'lbb_phone' => array( '1' ), 'lbb_email' => array( 'a' ), 'lbb_currency' => array( 'MDL' ), 'lbb_mode' => array( 'pay' ) ),
+	array( 'lbb_route' => $fz_rid, 'lbb_names' => array( array( 'x' => 'Ion' ) ), 'lbb_adults' => '-5', 'lbb_children' => '999999999999', 'lbb_date' => '31.02.2026', 'lbb_time' => '25:99', 'lbb_phone' => "\0", 'lbb_email' => "\xC3\x28", 'lbb_currency' => 'XXX', 'lbb_mode' => 'reserve' ),
+	array( 'lbb_route' => 'abc', 'lbb_names' => array( '' ), 'lbb_adults' => 'abc' ),
+	array( 'lbb_route' => 999999, 'lbb_names' => array( 'A B' ), 'lbb_adults' => 1, 'lbb_date' => $tomorrow, 'lbb_time' => '10:00', 'lbb_phone' => '+37369000099', 'lbb_email' => 'a@b.md', 'lbb_mode' => 'reserve' ),
+) as $fz_data ) {
+	$fz_res[] = LBB_Frontend::book( $fz_data );
+}
+// Câte un singur câmp stricat, restul valid (altfel rezervarea s-ar opri înainte să ajungă la câmpul stricat).
+$fz_ok = array( 'lbb_route' => $fz_rid, 'lbb_names' => array( 'Fuzz Test' ), 'lbb_adults' => 1, 'lbb_date' => $tomorrow, 'lbb_time' => '10:00', 'lbb_phone' => '+37369000099', 'lbb_email' => 'fuzz@example.com', 'lbb_mode' => 'reserve' );
+foreach ( array( 'lbb_names' => array( array( 'x' => 'Ion Pop' ) ), 'lbb_phone' => array( '+37369000099' ), 'lbb_email' => array( 'fuzz@example.com' ), 'lbb_date' => array( $tomorrow ), 'lbb_time' => array( '10:00' ) ) as $fz_k => $fz_v ) {
+	$fz_res[] = LBB_Frontend::book( array_merge( $fz_ok, array( $fz_k => $fz_v ) ) );
+}
+restore_error_handler();
+lbb_t( 'date stricate în formular (liste, negative, date imposibile): refuzate cu mesaj, fără avertismente PHP', ! $fz_warn && 9 === count( array_filter( $fz_res, 'is_wp_error' ) ), array( $fz_warn, array_map( function ( $r ) { return is_wp_error( $r ) ? $r->get_error_code() : $r; }, $fz_res ) ) );
+
 // Coșul abandonat al clientului (expirat) dispare la cererea de ștergere; coșul încă activ rămâne.
 $ph_old = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Abandonat' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
 $ph_new = LBB_Bookings::create_hold( LBB_Routes::get( $rid2 ), $tomorrow, '10:00', 1, 0, array( 'Cos Activ' ), '+37369000095', 'gdpr-hold@example.com', 'MDL' );
