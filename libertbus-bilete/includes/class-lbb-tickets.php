@@ -638,8 +638,9 @@ class LBB_Tickets {
 	 * @param array|null $booking Rezervarea sau null (link greșit).
 	 */
 	public static function page_title( $booking ) {
+		// Ca la biletul găsit: în fila browserului și în istoric se vede și al cui e site-ul.
 		if ( ! $booking ) {
-			return __( 'Bilet negăsit', 'libertbus-bilete' );
+			return __( 'Bilet negăsit', 'libertbus-bilete' ) . ' — ' . self::site_name();
 		}
 		return self::ticket_label( $booking ) . ' — ' . self::site_name();
 	}

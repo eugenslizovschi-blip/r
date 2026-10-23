@@ -699,7 +699,7 @@ $pt_b  = LBB_Bookings::get( $rv['id'] );
 $pt_r  = LBB_Routes::get( $pt_b['route_id'] );
 $pt_t  = LBB_Tickets::page_title( $pt_b );
 $pt_ok = 0 === strpos( $pt_t, $pt_b['ticket_code'] . ' · ' . $pt_r['origin'] . ' → ' . $pt_r['destination'] . ' · ' . gmdate( 'd.m.Y', strtotime( $pt_b['travel_date'] . ' 12:00' ) ) . ' — ' );
-lbb_t( 'titlul paginii biletului (numele PDF-ului salvat) are codul, ruta și data; link greșit: „Bilet negăsit”', $pt_ok && 'Bilet negăsit' === LBB_Tickets::page_title( null ), $pt_t );
+lbb_t( 'titlul paginii biletului (numele PDF-ului salvat) are codul, ruta și data; link greșit: „Bilet negăsit — site”', $pt_ok && 'Bilet negăsit — ' . wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) === LBB_Tickets::page_title( null ), array( $pt_t, LBB_Tickets::page_title( null ) ) );
 // Fișierul de calendar descărcat de pe bilet are și ruta și data în nume (ca lista de pasageri), fără diacritice.
 $if_n = LBB_Tickets::ics_filename( $pt_b );
 $if_h = wp_remote_retrieve_header( wp_remote_get( add_query_arg( 'ics', 1, LBB_Tickets::url( $pt_b['ticket_code'] ) ), array( 'timeout' => 20 ) ), 'content-disposition' );
