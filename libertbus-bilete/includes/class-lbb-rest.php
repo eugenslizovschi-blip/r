@@ -46,7 +46,8 @@ class LBB_Rest {
 		$response = rest_ensure_response( array(
 			'route_id'   => $route['id'],
 			'date'       => $request['date'],
-			'departures' => LBB_Routes::departures_on( $route, $request['date'] ),
+			// O zi trecută nu se mai rezervă: fără ore, ca ocuparea curselor din trecut să nu fie citită zi cu zi de oricine.
+			'departures' => $request['date'] < LBB_Settings::today() ? array() : LBB_Routes::departures_on( $route, $request['date'] ),
 			// Zi fără curse din Setări: formularul spune „zi liberă”, nu „ruta circulă doar: …”.
 			'closed'     => in_array( $request['date'], LBB_Settings::closed_dates(), true ),
 			// Pagina cu formularul poate veni dintr-un cache de pagini mai vechi de 12–24 de ore, cu o cheie expirată

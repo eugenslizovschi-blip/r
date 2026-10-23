@@ -2393,6 +2393,8 @@ foreach ( array( '2026-02-31', '2026-13-01', '2020-01-01', '2099-01-01' ) as $ap
 	} );
 	$api_odd[ $api_d ] = array( $api_r->get_status(), count( $api_b ) );
 }
+$api_past = $api( array( 'route_id' => $rid2, 'date' => gmdate( 'Y-m-d', strtotime( LBB_Settings::today() . ' -1 day' ) ) ) )->get_data();
+lbb_t( 'API: o zi trecută nu arată orele și locurile ocupate atunci (ocuparea din trecut nu e publică)', array() === ( $api_past['departures'] ?? null ), $api_past['departures'] ?? null );
 lbb_t( 'API: zi imposibilă (31 februarie), trecută sau peste ani: răspuns normal, nicio oră de rezervat', array( '2026-02-31' => array( 200, 0 ), '2026-13-01' => array( 200, 0 ), '2020-01-01' => array( 200, 0 ), '2099-01-01' => array( 200, 0 ) ) === $api_odd, $api_odd );
 // Erorile trec prin același filtru ca la o cerere HTTP adevărată: și ele sunt fără cache (un 404 păstrat într-un cache de pagini ar ascunde ruta pornită din nou).
 $api_nc = function ( $params ) use ( $api ) {
