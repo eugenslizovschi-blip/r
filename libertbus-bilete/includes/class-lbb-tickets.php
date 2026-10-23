@@ -766,6 +766,9 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		<div class="state bad"><?php esc_html_e( 'Biletul nu a fost găsit. Verificați linkul din email.', 'libertbus-bilete' ); ?></div>
 		<?php /* translators: %s: telefonul pentru clienți */ ?>
 		<p><?php echo sprintf( esc_html__( 'Dacă nu găsiți emailul, sunați-ne la %s și vă ajutăm după numele sau telefonul de la rezervare.', 'libertbus-bilete' ), LBB_Settings::phone_link() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
+		<?php // Nu o pagină fără ieșire: spre formularul de rezervare sau, dacă nu e pus pe nicio pagină, spre site. ?>
+		<?php $lost_url = self::booking_page_url( null ); ?>
+		<div class="actions"><a class="again" href="<?php echo esc_url( $lost_url ? $lost_url : home_url( '/' ) ); ?>"><?php echo $lost_url ? esc_html__( 'Rezervați online', 'libertbus-bilete' ) : esc_html__( 'Pagina principală a site-ului', 'libertbus-bilete' ); ?></a></div>
 	<?php else : ?>
 		<div class="state <?php echo esc_attr( $state['class'] ); ?>"><?php echo esc_html( $state['text'] ); ?></div>
 		<?php echo self::html( $booking, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?>

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T06:00:09+00:00\n"
+"POT-Creation-Date: 2026-10-23T13:56:35+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: libertbus-bilete\n"
@@ -53,7 +53,7 @@ msgstr ""
 #: includes/class-lbb-admin.php:784
 #: includes/class-lbb-bookings.php:587
 #: includes/class-lbb-bookings.php:656
-#: includes/class-lbb-frontend.php:577
+#: includes/class-lbb-frontend.php:581
 #: includes/class-lbb-woocommerce.php:151
 msgid "Pasageri"
 msgstr ""
@@ -292,7 +292,7 @@ msgid "săptămâni"
 msgstr ""
 
 #: includes/class-lbb-admin.php:230
-#: includes/class-lbb-routes.php:290
+#: includes/class-lbb-routes.php:299
 #: includes/class-lbb-woocommerce.php:122
 msgid "luni"
 msgstr ""
@@ -751,12 +751,12 @@ msgid "Se vinde online"
 msgstr ""
 
 #: includes/class-lbb-admin.php:608
-#: includes/class-lbb-routes.php:138
+#: includes/class-lbb-routes.php:147
 msgid "Pagina rutei"
 msgstr ""
 
 #: includes/class-lbb-admin.php:609
-#: includes/class-lbb-routes.php:137
+#: includes/class-lbb-routes.php:146
 msgid "Locul de urcare"
 msgstr ""
 
@@ -857,7 +857,7 @@ msgid "Arată"
 msgstr ""
 
 #: includes/class-lbb-admin.php:727
-#: includes/class-lbb-tickets.php:772
+#: includes/class-lbb-tickets.php:776
 msgid "Printează"
 msgstr ""
 
@@ -870,7 +870,7 @@ msgid "Ziua precedentă"
 msgstr ""
 
 #: includes/class-lbb-admin.php:736
-#: includes/class-lbb-frontend.php:482
+#: includes/class-lbb-frontend.php:486
 msgid "Ziua următoare"
 msgstr ""
 
@@ -889,7 +889,7 @@ msgid "Următoarea zi cu pasageri: %s"
 msgstr ""
 
 #: includes/class-lbb-admin.php:754
-#: includes/class-lbb-frontend.php:460
+#: includes/class-lbb-frontend.php:464
 #: includes/class-lbb-woocommerce.php:142
 msgid "Loc de urcare"
 msgstr ""
@@ -931,7 +931,7 @@ msgstr ""
 #: includes/class-lbb-admin.php:784
 #: includes/class-lbb-admin.php:1074
 #: includes/class-lbb-admin.php:1075
-#: includes/class-lbb-tickets.php:763
+#: includes/class-lbb-tickets.php:764
 msgid "Bilet"
 msgstr ""
 
@@ -946,7 +946,7 @@ msgstr ""
 #: includes/class-lbb-admin.php:783
 #: includes/class-lbb-admin.php:784
 #: includes/class-lbb-bookings.php:657
-#: includes/class-lbb-legal.php:121
+#: includes/class-lbb-legal.php:132
 #: includes/class-lbb-tickets.php:181
 msgid "Telefon"
 msgstr ""
@@ -1542,12 +1542,12 @@ msgid "Locurile la această plecare tocmai s-au terminat. Alegeți altă oră sa
 msgstr ""
 
 #: includes/class-lbb-bookings.php:115
-#: includes/class-lbb-frontend.php:472
+#: includes/class-lbb-frontend.php:476
 msgid "loc liber"
 msgstr ""
 
 #: includes/class-lbb-bookings.php:115
-#: includes/class-lbb-frontend.php:471
+#: includes/class-lbb-frontend.php:475
 msgid "locuri libere"
 msgstr ""
 
@@ -1564,7 +1564,7 @@ msgid "Au mai rămas %s la această plecare."
 msgstr ""
 
 #: includes/class-lbb-bookings.php:142
-#: includes/class-lbb-frontend.php:380
+#: includes/class-lbb-frontend.php:381
 msgid "Rezervarea nu a putut fi salvată. Încercați din nou."
 msgstr ""
 
@@ -1674,354 +1674,354 @@ msgstr ""
 msgid "Cererea nu a putut fi procesată."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:276
+#: includes/class-lbb-frontend.php:277
 msgid "Alegeți ruta."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:280
+#: includes/class-lbb-frontend.php:281
 msgid "Alegeți data călătoriei."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:284
+#: includes/class-lbb-frontend.php:285
 msgid "Alegeți ora de plecare."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:299
+#: includes/class-lbb-frontend.php:300
 msgid "Scrieți numele și prenumele fiecărui pasager (ca în pașaport)."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:307
+#: includes/class-lbb-frontend.php:308
 msgid "Introduceți un număr de telefon valid, cu prefixul țării (+373 sau +40)."
 msgstr ""
 
 #. translators: %s: adresa corectată, ex. ion@gmail.com
-#: includes/class-lbb-frontend.php:314
+#: includes/class-lbb-frontend.php:315
 #, php-format
 msgid "Verificați adresa de email: ați vrut să scrieți %s? Acolo primiți biletul."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:319
+#: includes/class-lbb-frontend.php:320
 msgid "Introduceți o adresă de email validă. Acolo primiți biletul."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:328
+#: includes/class-lbb-frontend.php:329
 msgid "Plata online nu este încă disponibilă. Folosiți „Rezerv, achit la urcare”."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:332
+#: includes/class-lbb-frontend.php:333
 msgid "Rezervarea fără plată nu este disponibilă. Achitați online."
 msgstr ""
 
 #. translators: %s: telefon suport
-#: includes/class-lbb-frontend.php:351
+#: includes/class-lbb-frontend.php:352
 #, php-format
 msgid "Aveți deja rezervări neachitate pe acest număr. Achitați online sau sunați la %s."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:391
+#: includes/class-lbb-frontend.php:392
 msgid "Biletul nu a putut fi adăugat în coș. Încercați din nou."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:410
+#: includes/class-lbb-frontend.php:414
 msgid "Momentan nu sunt curse disponibile pentru rezervare online."
 msgstr ""
 
 #. translators: %s: telefon
-#: includes/class-lbb-frontend.php:418
+#: includes/class-lbb-frontend.php:422
 #, php-format
 msgid "Rezervarea online nu este disponibilă momentan. Sunați la %s."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:453
+#: includes/class-lbb-frontend.php:457
 msgid "Alegeți orașul de plecare"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:454
+#: includes/class-lbb-frontend.php:458
 msgid "Alegeți destinația"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:455
+#: includes/class-lbb-frontend.php:459
 msgid "Alegeți ora"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:456
+#: includes/class-lbb-frontend.php:460
 msgid "Se verifică locurile…"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:457
+#: includes/class-lbb-frontend.php:461
 msgid "În ziua aleasă nu sunt plecări pe această rută. Alegeți altă dată."
 msgstr ""
 
 #. translators: %s: zilele săptămânii în care circulă ruta, ex. „luni, joi”
-#: includes/class-lbb-frontend.php:459
-#: includes/class-lbb-routes.php:307
+#: includes/class-lbb-frontend.php:463
+#: includes/class-lbb-routes.php:316
 #, php-format
 msgid "Ruta circulă doar: %s."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:461
+#: includes/class-lbb-frontend.php:465
 msgid "În ziua aleasă nu sunt curse (zi liberă). Alegeți altă dată."
 msgstr ""
 
 #. translators: %s: telefon
-#: includes/class-lbb-frontend.php:463
+#: includes/class-lbb-frontend.php:467
 #, php-format
 msgid "Această rută nu se mai rezervă online. Reîncărcați pagina sau sunați la %s."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "ianuarie"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "februarie"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "martie"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "aprilie"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "mai"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "iunie"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "iulie"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "august"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "septembrie"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "octombrie"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "noiembrie"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:466
+#: includes/class-lbb-frontend.php:470
 msgid "decembrie"
 msgstr ""
 
 #. translators: %s: ultima dată la care se poate rezerva online.
-#: includes/class-lbb-frontend.php:468
+#: includes/class-lbb-frontend.php:472
 #, php-format
 msgid "Online se poate rezerva de azi până pe %s. Alegeți o dată din acest interval."
 msgstr ""
 
 #. translators: %s: telefonul de suport
-#: includes/class-lbb-frontend.php:470
+#: includes/class-lbb-frontend.php:474
 #, php-format
 msgid "Pentru ziua aleasă nu mai sunt locuri online. Alegeți altă dată sau sunați la %s."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:473
+#: includes/class-lbb-frontend.php:477
 msgid "complet"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:474
+#: includes/class-lbb-frontend.php:478
 msgid "vânzare închisă"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:475
+#: includes/class-lbb-frontend.php:479
 msgid "Pasager"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:476
+#: includes/class-lbb-frontend.php:480
 msgid "copil"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:477
+#: includes/class-lbb-frontend.php:481
 msgid "adult"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:478
+#: includes/class-lbb-frontend.php:482
 msgid "Scrieți numele și prenumele ca în pașaport (cel puțin două litere)."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:479
+#: includes/class-lbb-frontend.php:483
 msgid "Nume și prenume"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:480
+#: includes/class-lbb-frontend.php:484
 msgid "Nu am putut verifica locurile."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:481
+#: includes/class-lbb-frontend.php:485
 msgid "Încearcă din nou"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:483
+#: includes/class-lbb-frontend.php:487
 msgid "Sau sunați la"
 msgstr ""
 
 #. translators: 1: numărul maxim de pasageri, ex. 8 persoane / 20 de persoane, 2: telefon
-#: includes/class-lbb-frontend.php:488
+#: includes/class-lbb-frontend.php:492
 #, php-format
 msgid "Sunteți mai mult de %1$s? Pentru grupuri sunați la %2$s."
 msgstr ""
 
 #. translators: 1: numărul maxim de pasageri, ex. 8 persoane / 20 de persoane, 2: telefon
-#: includes/class-lbb-frontend.php:488
+#: includes/class-lbb-frontend.php:492
 msgid "persoană"
 msgstr ""
 
 #. translators: 1: numărul maxim de pasageri, ex. 8 persoane / 20 de persoane, 2: telefon
-#: includes/class-lbb-frontend.php:488
+#: includes/class-lbb-frontend.php:492
 msgid "persoane"
 msgstr ""
 
 #. translators: {seats} rămâne așa (devine ex. „2 locuri libere”); %s: telefon
-#: includes/class-lbb-frontend.php:490
+#: includes/class-lbb-frontend.php:494
 #, php-format
 msgid "La ora aleasă mai sunt doar {seats} online. Pentru mai mulți pasageri alegeți altă oră sau sunați la %s."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:491
+#: includes/class-lbb-frontend.php:495
 msgid "Total de plată"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:492
+#: includes/class-lbb-frontend.php:496
 msgid "echivalent orientativ, plata se face în moneda afișată"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:493
+#: includes/class-lbb-frontend.php:497
 msgid "Se achită la urcare"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:494
+#: includes/class-lbb-frontend.php:498
 msgid "Datele pasagerilor și plata"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:495
+#: includes/class-lbb-frontend.php:499
 msgid "Vă ducem la plată… Nu închideți pagina."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:496
+#: includes/class-lbb-frontend.php:500
 msgid "Se trimite rezervarea… Nu închideți pagina."
 msgstr ""
 
 #. translators: %s: telefonul pentru clienți
-#: includes/class-lbb-frontend.php:519
+#: includes/class-lbb-frontend.php:523
 #, php-format
 msgid "Pentru rezervare online activați JavaScript sau sunați la %s."
 msgstr ""
 
 #. translators: %s: telefonul pentru clienți
-#: includes/class-lbb-frontend.php:521
+#: includes/class-lbb-frontend.php:525
 #, php-format
 msgid "Formularul nu merge în acest browser (prea vechi). Actualizați browserul sau sunați la %s."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:526
+#: includes/class-lbb-frontend.php:530
 msgid "Previzualizare: formularul nou și butonul de plată online se văd doar cu acest link. Ceilalți vizitatori văd site-ul ca până acum."
 msgstr ""
 
-#: includes/class-lbb-frontend.php:531
+#: includes/class-lbb-frontend.php:535
 msgid "Nu completați"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:535
+#: includes/class-lbb-frontend.php:539
 msgid "De unde plecați"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:538
+#: includes/class-lbb-frontend.php:542
 msgid "Unde mergeți"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:541
+#: includes/class-lbb-frontend.php:545
 msgid "Data plecării"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:545
+#: includes/class-lbb-frontend.php:549
 #: includes/class-lbb-woocommerce.php:138
 msgid "Ora plecării"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:552
+#: includes/class-lbb-frontend.php:556
 msgid "Adulți"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:556
+#: includes/class-lbb-frontend.php:560
 msgid "Copii"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:568
+#: includes/class-lbb-frontend.php:572
 msgid "Continuă"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:574
+#: includes/class-lbb-frontend.php:578
 msgid "Schimbă cursa"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:577
+#: includes/class-lbb-frontend.php:581
 msgid "(numele ca în pașaport)"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:581
+#: includes/class-lbb-frontend.php:585
 msgid "Telefon (cu +373 sau +40)"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:584
+#: includes/class-lbb-frontend.php:588
 msgid "Email (aici primiți biletul)"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:591
+#: includes/class-lbb-frontend.php:595
 msgid "Plătesc în"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:599
+#: includes/class-lbb-frontend.php:603
 msgid "Achit online cu cardul"
 msgstr ""
 
-#: includes/class-lbb-frontend.php:602
+#: includes/class-lbb-frontend.php:606
 msgid "Rezerv, achit la urcare"
 msgstr ""
 
 #. translators: 1: durata, ex. 15 minute / 30 de minute, 2: telefon
-#: includes/class-lbb-frontend.php:611
+#: includes/class-lbb-frontend.php:615
 #, php-format
 msgid "La plata online locurile se păstrează %1$s cât finalizați plata. Întrebări: %2$s"
 msgstr ""
 
 #. translators: 1: durata, ex. 15 minute / 30 de minute, 2: telefon
-#: includes/class-lbb-frontend.php:611
+#: includes/class-lbb-frontend.php:615
 msgid "minut"
 msgstr ""
 
 #. translators: 1: durata, ex. 15 minute / 30 de minute, 2: telefon
-#: includes/class-lbb-frontend.php:611
+#: includes/class-lbb-frontend.php:615
 msgid "minute"
 msgstr ""
 
 #. translators: %s: telefon
-#: includes/class-lbb-frontend.php:614
+#: includes/class-lbb-frontend.php:618
 #, php-format
 msgid "Plata se face la urcare. Primiți confirmarea pe email. Întrebări: %s"
 msgstr ""
 
 #. translators: %s: link spre Politica de confidențialitate
-#: includes/class-lbb-frontend.php:625
+#: includes/class-lbb-frontend.php:629
 #, php-format
 msgid "Datele se folosesc doar pentru rezervare și călătorie. Detalii: %s."
 msgstr ""
 
 #. translators: %s: link spre Politica de confidențialitate
-#: includes/class-lbb-frontend.php:625
+#: includes/class-lbb-frontend.php:629
 #: includes/class-lbb-legal.php:49
 msgid "Politica de confidențialitate"
 msgstr ""
@@ -2091,28 +2091,28 @@ msgstr ""
 msgid "Politica de cookies"
 msgstr ""
 
-#: includes/class-lbb-legal.php:102
+#: includes/class-lbb-legal.php:113
 msgid "completați în LibertBus → Setări"
 msgstr ""
 
-#: includes/class-lbb-legal.php:127
+#: includes/class-lbb-legal.php:138
 msgid "Pagini legale (cerute de bancă)"
 msgstr ""
 
-#: includes/class-lbb-legal.php:128
+#: includes/class-lbb-legal.php:139
 msgid "Butonul creează paginile care lipsesc, cu texte-model. Politica de confidențialitate și cea de cookies se publică imediat (bannerul de cookies trimite la ele); termenii, anularea și plata online rămân ciorne: completați întâi datele firmei mai sus, citiți textele, ajustați-le cu juristul și publicați-le. Le legați apoi în meniul de jos al site-ului."
 msgstr ""
 
-#: includes/class-lbb-legal.php:146
+#: includes/class-lbb-legal.php:157
 msgid "nu există"
 msgstr ""
 
-#: includes/class-lbb-legal.php:154
+#: includes/class-lbb-legal.php:165
 msgid "Creează paginile care lipsesc"
 msgstr ""
 
 #. translators: %d: numărul de pagini create
-#: includes/class-lbb-legal.php:168
+#: includes/class-lbb-legal.php:179
 #, php-format
 msgid "Pagini create: %d (confidențialitate și cookies publicate, celelalte ciorne)."
 msgstr ""
@@ -2121,81 +2121,81 @@ msgstr ""
 msgid "Ruta nu există."
 msgstr ""
 
-#: includes/class-lbb-routes.php:89
+#: includes/class-lbb-routes.php:98
 msgid "Completați plecarea și destinația."
 msgstr ""
 
-#: includes/class-lbb-routes.php:94
+#: includes/class-lbb-routes.php:103
 msgid "Plecarea și destinația trebuie să fie diferite."
 msgstr ""
 
-#: includes/class-lbb-routes.php:98
+#: includes/class-lbb-routes.php:107
 msgid "Introduceți cel puțin o oră de plecare (ex. 08:45)."
 msgstr ""
 
-#: includes/class-lbb-routes.php:107
+#: includes/class-lbb-routes.php:116
 msgid "Alegeți cel puțin o zi a săptămânii."
 msgstr ""
 
-#: includes/class-lbb-routes.php:113
+#: includes/class-lbb-routes.php:122
 msgid "Ruta aceasta există deja."
 msgstr ""
 
-#: includes/class-lbb-routes.php:135
+#: includes/class-lbb-routes.php:144
 msgid "Plecarea"
 msgstr ""
 
-#: includes/class-lbb-routes.php:136
+#: includes/class-lbb-routes.php:145
 msgid "Destinația"
 msgstr ""
 
-#: includes/class-lbb-routes.php:139
+#: includes/class-lbb-routes.php:148
 msgid "Orele de plecare"
 msgstr ""
 
 #. translators: 1: numele câmpului, 2: numărul maxim de caractere
-#: includes/class-lbb-routes.php:144
+#: includes/class-lbb-routes.php:153
 #, php-format
 msgid "%1$s e prea lung (cel mult %2$d de caractere)."
 msgstr ""
 
-#: includes/class-lbb-routes.php:150
-#: includes/class-lbb-routes.php:156
+#: includes/class-lbb-routes.php:159
+#: includes/class-lbb-routes.php:165
 msgid "Ruta nu a putut fi salvată. Încercați din nou."
 msgstr ""
 
 #. translators: 1: prețul pentru copii, cu moneda, 2: prețul pentru adulți, cu moneda
-#: includes/class-lbb-routes.php:283
+#: includes/class-lbb-routes.php:292
 #, php-format
 msgid "Atenție: prețul pentru copii (%1$s) e mai mare decât cel pentru adulți (%2$s). Verificați prețurile."
 msgstr ""
 
-#: includes/class-lbb-routes.php:290
+#: includes/class-lbb-routes.php:299
 #: includes/class-lbb-woocommerce.php:123
 msgid "marți"
 msgstr ""
 
-#: includes/class-lbb-routes.php:290
+#: includes/class-lbb-routes.php:299
 #: includes/class-lbb-woocommerce.php:124
 msgid "miercuri"
 msgstr ""
 
-#: includes/class-lbb-routes.php:290
+#: includes/class-lbb-routes.php:299
 #: includes/class-lbb-woocommerce.php:125
 msgid "joi"
 msgstr ""
 
-#: includes/class-lbb-routes.php:290
+#: includes/class-lbb-routes.php:299
 #: includes/class-lbb-woocommerce.php:126
 msgid "vineri"
 msgstr ""
 
-#: includes/class-lbb-routes.php:290
+#: includes/class-lbb-routes.php:299
 #: includes/class-lbb-woocommerce.php:127
 msgid "sâmbătă"
 msgstr ""
 
-#: includes/class-lbb-routes.php:290
+#: includes/class-lbb-routes.php:299
 #: includes/class-lbb-woocommerce.php:128
 msgid "duminică"
 msgstr ""
@@ -2248,7 +2248,7 @@ msgstr ""
 
 #: includes/class-lbb-tickets.php:154
 #: includes/class-lbb-tickets.php:458
-#: includes/class-lbb-tickets.php:773
+#: includes/class-lbb-tickets.php:777
 msgid "Adaugă în calendar"
 msgstr ""
 
@@ -2301,7 +2301,7 @@ msgid "Rezervarea %1$s pentru %2$s, %3$s a fost anulată. Locurile nu mai sunt p
 msgstr ""
 
 #: includes/class-lbb-tickets.php:276
-#: includes/class-lbb-tickets.php:776
+#: includes/class-lbb-tickets.php:780
 msgid "Rezervați din nou online"
 msgstr ""
 
@@ -2461,29 +2461,37 @@ msgstr ""
 msgid "Autocar %1$s (%2$s)"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:642
+#: includes/class-lbb-tickets.php:643
 msgid "Bilet negăsit"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:763
+#: includes/class-lbb-tickets.php:764
 msgid "Rezervare"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:765
+#: includes/class-lbb-tickets.php:766
 msgid "Biletul nu a fost găsit. Verificați linkul din email."
 msgstr ""
 
 #. translators: %s: telefonul pentru clienți
-#: includes/class-lbb-tickets.php:767
+#: includes/class-lbb-tickets.php:768
 #, php-format
 msgid "Dacă nu găsiți emailul, sunați-ne la %s și vă ajutăm după numele sau telefonul de la rezervare."
 msgstr ""
 
-#: includes/class-lbb-tickets.php:774
+#: includes/class-lbb-tickets.php:771
+msgid "Rezervați online"
+msgstr ""
+
+#: includes/class-lbb-tickets.php:771
+msgid "Pagina principală a site-ului"
+msgstr ""
+
+#: includes/class-lbb-tickets.php:778
 msgid "Trimite biletul"
 msgstr ""
 
-#: includes/class-lbb-tickets.php:775
+#: includes/class-lbb-tickets.php:779
 msgid "Achită acum"
 msgstr ""
 

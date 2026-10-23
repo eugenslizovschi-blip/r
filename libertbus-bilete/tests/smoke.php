@@ -3138,6 +3138,12 @@ if ( is_int( $st_sub ) ) {
 wp_set_current_user( $st_user );
 lbb_t( 'REST lbb/v1/status: refuzat pentru vizitator și abonat, fără statistici; administratorul primește versiunea', 401 === $st_guest[0] && 403 === $st_subr[0] && ! isset( $st_guest[1]['stats'] ) && ! isset( $st_subr[1]['stats'] ) && 200 === $st_admin[0] && LBB_VERSION === $st_admin[1]['version'] && isset( $st_admin[1]['stats'] ), array( $st_guest[0], $st_subr[0], $st_admin[0] ) );
 
+// Pagina „Biletul nu a fost găsit” (link greșit sau tăiat) nu e un drum închis: are link spre formularul de rezervare.
+$nf_page  = wp_remote_retrieve_body( wp_remote_get( add_query_arg( array( 'lbb_bilet' => 'LB-ZZZZZZ', 'k' => 'gresit' ), home_url( '/' ) ), array( 'timeout' => 20 ) ) );
+$nf_pages = LBB_Admin::pages_with_form();
+$nf_want  = $nf_pages ? get_permalink( $nf_pages[0]->ID ) : home_url( '/' );
+lbb_t( 'bilet negăsit: link spre formularul de rezervare (sau site), ca buton', false !== strpos( $nf_page, 'Biletul nu a fost găsit' ) && false !== strpos( $nf_page, '<div class="actions"><a class="again" href="' . esc_url( $nf_want ) . '">' ), substr( wp_strip_all_tags( $nf_page ), -300 ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
