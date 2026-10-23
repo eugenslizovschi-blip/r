@@ -479,9 +479,18 @@ class LBB_Admin {
 			}
 			echo '</td><td style="width:110px">';
 			if ( true !== $item['ok'] && $item['fix'] ) {
-				// Mai multe „Rezolvă” pe pagină: în lista de linkuri a cititorului de ecran fiecare spune ce rezolvă.
-				/* translators: %s: titlul verificării, ex. „Site-ul folosește HTTPS” */
-				echo '<a class="button" href="' . esc_url( $item['fix'] ) . '" aria-label="' . esc_attr( sprintf( __( 'Rezolvă: %s', 'libertbus-bilete' ), $item['title'] ) ) . '">' . esc_html__( 'Rezolvă', 'libertbus-bilete' ) . '</a>';
+				// Mai multe „Rezolvă” pe pagină: în lista de linkuri a cititorului de ecran fiecare spune ce rezolvă. Un avertisment
+				// („de verificat”) nu e neapărat o problemă: butonul lui spune „Verifică”, nu „Rezolvă”.
+				if ( 'warn' === $item['ok'] ) {
+					/* translators: %s: titlul verificării, ex. „Emailurile cu biletul pleacă de la o adresă a site-ului” */
+					$btn_label = sprintf( __( 'Verifică: %s', 'libertbus-bilete' ), $item['title'] );
+					$btn_text  = __( 'Verifică', 'libertbus-bilete' );
+				} else {
+					/* translators: %s: titlul verificării, ex. „Site-ul folosește HTTPS” */
+					$btn_label = sprintf( __( 'Rezolvă: %s', 'libertbus-bilete' ), $item['title'] );
+					$btn_text  = __( 'Rezolvă', 'libertbus-bilete' );
+				}
+				echo '<a class="button" href="' . esc_url( $item['fix'] ) . '" aria-label="' . esc_attr( $btn_label ) . '">' . esc_html( $btn_text ) . '</a>';
 			}
 			echo '</td></tr>';
 		}

@@ -34,13 +34,14 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   }
 
   // Panoul „Gata de plăți?”: starea fiecărui rând e spusă în cuvinte cititorului de ecran (nu doar ✔ ! ✘ colorate),
-  // iar fiecare „Rezolvă” spune ce rezolvă (în lista de linkuri toate s-ar numi la fel).
+  // iar fiecare „Rezolvă” / „Verifică” spune ce rezolvă (în lista de linkuri toate s-ar numi la fel).
   {
     await page.goto(BASE + '/wp-admin/admin.php?page=lbb');
     const rows = await page.$$eval('#wpbody-content table tr', trs => trs.filter(tr => tr.querySelector('td.lbb-ok, td.lbb-warn, td.lbb-bad')).map(tr => ({ said: (tr.querySelector('td .screen-reader-text') || {}).textContent || '', icon: !!tr.querySelector('td [aria-hidden="true"]'), fix: !!tr.querySelector('a.button'), title: tr.querySelector('strong').textContent })));
     const fixes = rows.filter(r => r.fix);
     const named = [];
-    for (const r of fixes) named.push(await page.getByRole('link', { name: 'Rezolvă: ' + r.title, exact: true }).count());
+    // „Verifică: …” la avertismente (de verificat), „Rezolvă: …” la ce lipsește.
+    for (const r of fixes) named.push(await page.getByRole('link', { name: (r.said === 'De verificat' ? 'Verifică: ' : 'Rezolvă: ') + r.title, exact: true }).count());
     if (!rows.length || rows.some(r => !/^(Gata|De verificat|Lipsește)$/.test(r.said) || !r.icon) || named.some(n => n !== 1)) fail('panoul „Gata de plăți?”: stare fără cuvinte pentru cititorul de ecran sau „Rezolvă” fără ce rezolvă: ' + JSON.stringify({ rows: rows.slice(0, 3), named }));
   }
 
