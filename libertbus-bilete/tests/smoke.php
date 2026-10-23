@@ -3222,6 +3222,18 @@ wp_set_current_user( $nn_u );
 $wpdb->update( LBB_Routes::table(), array( 'notes' => (string) $nn_k ), array( 'id' => $nn_id ) );
 lbb_t( 'rută cu notițele NULL în baza de date: notițe goale, pagina de editare fără avertismente', '' === $nn_note && false !== strpos( $nn_html, 'id="lbb-notes"' ) && ! $nn_w, array( $nn_note, array_unique( $nn_w ) ) );
 
+// Două formulare pe aceeași pagină (ex. în antetul Elementor și în pagină) și setările de cookies: id-uri unice, iar
+// fiecare for= / aria-describedby / aria-labelledby / aria-controls arată spre un element care există.
+$du_html = do_shortcode( '[libertbus_rezervare]' ) . do_shortcode( '[libertbus_rezervare compact="1"]' ) . do_shortcode( '[lbb_cookie_settings]' );
+preg_match_all( '/\sid="([^"]+)"/', $du_html, $du_ids );
+preg_match_all( '/\s(?:for|aria-describedby|aria-labelledby|aria-controls)="([^"]+)"/', $du_html, $du_refs );
+$du_dupes   = array_keys( array_filter( array_count_values( $du_ids[1] ), function ( $n ) {
+	return $n > 1;
+} ) );
+$du_targets = preg_split( '/\s+/', implode( ' ', $du_refs[1] ), -1, PREG_SPLIT_NO_EMPTY );
+$du_missing = array_values( array_diff( $du_targets, $du_ids[1] ) );
+lbb_t( 'două formulare pe o pagină: id-uri unice, etichetele și descrierile arată spre elemente existente', $du_ids[1] && ! $du_dupes && ! $du_missing, array( $du_dupes, $du_missing ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
