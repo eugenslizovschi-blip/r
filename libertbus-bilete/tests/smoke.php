@@ -47,6 +47,14 @@ wp_cache_delete( 'cron', 'options' );
 $cr_back = wp_next_scheduled( 'lbb_cleanup' );
 LBB_Install::ensure_cron();
 lbb_t( 'curățarea orară pierdută se programează din nou la următoarea cerere către site', false === $cr_gone && $cr_back > time() && 'hourly' === wp_get_schedule( 'lbb_cleanup' ), array( $cr_gone, $cr_back ) );
+// Dezactivarea plugin-ului (cârligul WordPress, nu doar funcția) oprește curățarea orară: altfel WP-Cron ar rula
+// la fiecare oră un eveniment fără plugin. Reactivarea o pornește din nou.
+do_action( 'deactivate_' . plugin_basename( LBB_FILE ) );
+$cr_off = wp_next_scheduled( 'lbb_cleanup' );
+do_action( 'activate_' . plugin_basename( LBB_FILE ) );
+$cr_on = wp_next_scheduled( 'lbb_cleanup' );
+LBB_Install::ensure_cron();
+lbb_t( 'dezactivarea plugin-ului oprește curățarea orară, reactivarea o repornește', false === $cr_off && $cr_on > time(), array( $cr_off, $cr_on ) );
 
 // Rută de test cu 3 locuri, preț în RON.
 $rid = LBB_Routes::save( array( 'origin' => 'TestA', 'destination' => 'TestB', 'departures' => '10:00, 7:5, 23:59, 10:00', 'price' => 60, 'currency' => 'RON', 'capacity' => 3, 'active' => 1 ) );
