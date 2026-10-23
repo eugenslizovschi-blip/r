@@ -2996,6 +2996,41 @@ $kid_desc = LBB_WooCommerce::describe( array_merge( $rv, $kids, array( 'status' 
 lbb_t( 'biletul arată care pasager e copil', false !== strpos( $kid_desc['Pasageri'], 'Ana Popescu (copil)' ), $kid_desc );
 lbb_t( 'biletul scrie „1 copil”, nu „1 copii”', '3 (din care 1 copil)' === $kid_desc['Locuri'], $kid_desc['Locuri'] );
 
+// Formularele din admin primesc date măsluite (camp[]=…, liste în liste, octet nul): fără avertismente sau eroare fatală.
+$fz_w    = array();
+$fz_keep = get_option( 'lbb_settings' );
+set_error_handler(
+	function ( $no, $msg, $file, $line ) use ( &$fz_w ) {
+		if ( false !== strpos( $file, 'libertbus-bilete' ) ) {
+			$fz_w[] = $msg . ' @' . basename( $file ) . ':' . $line;
+		}
+		return false;
+	}
+);
+$fz_base = array( 'origin' => 'FuzzA', 'destination' => 'FuzzB', 'price' => '100', 'currency' => 'MDL', 'departures' => '08:00', 'days' => array( 1, 2 ), 'active' => 1 );
+$fz_vals = array( array( 'x' ), array( array( 'y' ) ), "\0", '-1' );
+try {
+	foreach ( array( 'origin', 'destination', 'price', 'child_price', 'currency', 'departures', 'days', 'capacity', 'page_url', 'boarding', 'notes', 'active' ) as $fz_k ) {
+		foreach ( $fz_vals as $fz_v ) {
+			$fz_res = LBB_Routes::save( array_merge( $fz_base, array( $fz_k => $fz_v ) ) );
+			if ( is_int( $fz_res ) && $fz_res ) {
+				$wpdb->delete( LBB_Routes::table(), array( 'id' => $fz_res ) );
+			}
+		}
+	}
+	foreach ( array_keys( LBB_Settings::all() ) as $fz_k ) {
+		foreach ( $fz_vals as $fz_v ) {
+			LBB_Settings::save( array_merge( LBB_Settings::all(), array( $fz_k => $fz_v ) ) );
+			update_option( 'lbb_settings', $fz_keep );
+		}
+	}
+} catch ( Throwable $e ) {
+	$fz_w[] = get_class( $e ) . ': ' . $e->getMessage() . ' @' . basename( $e->getFile() ) . ':' . $e->getLine();
+}
+restore_error_handler();
+update_option( 'lbb_settings', $fz_keep );
+lbb_t( 'admin: rute și setări cu date măsluite fără avertismente sau eroare fatală', ! $fz_w, array_slice( array_unique( $fz_w ), 0, 5 ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );

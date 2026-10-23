@@ -83,6 +83,15 @@ class LBB_Routes {
 	 */
 	public static function save( array $data, $id = 0 ) {
 		global $wpdb;
+		// O listă unde se așteaptă text (cerere măsluită: currency[]=…) devine gol, nu „Array” sau o eroare fatală;
+		// doar zilele de circulație sunt o listă, și ea doar cu valori simple.
+		foreach ( $data as $key => $value ) {
+			if ( 'days' === $key ) {
+				$data[ $key ] = array_filter( (array) $value, 'is_scalar' );
+			} elseif ( ! is_scalar( $value ) && null !== $value ) {
+				$data[ $key ] = '';
+			}
+		}
 		$origin      = sanitize_text_field( isset( $data['origin'] ) ? $data['origin'] : '' );
 		$destination = sanitize_text_field( isset( $data['destination'] ) ? $data['destination'] : '' );
 		if ( '' === $origin || '' === $destination ) {

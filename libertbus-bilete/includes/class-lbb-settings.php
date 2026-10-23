@@ -87,10 +87,14 @@ class LBB_Settings {
 				continue;
 			}
 			$value = $values[ $key ];
+			// O listă unde se așteaptă text (cerere măsluită: camp[]=…) devine gol, nu „Array” sau o eroare fatală.
+			if ( is_array( $value ) && 'pay_currencies' !== $key ) {
+				$value = '';
+			}
 			if ( 'csv_separator' === $key ) {
 				$value = ';' === $value ? ';' : ',';
 			} elseif ( 'pay_currencies' === $key ) {
-				$list  = is_array( $value ) ? $value : explode( ',', (string) $value );
+				$list  = is_array( $value ) ? array_filter( $value, 'is_scalar' ) : explode( ',', (string) $value );
 				$list  = array_values( array_intersect( self::currencies(), array_map( 'strtoupper', array_map( 'trim', $list ) ) ) );
 				$value = implode( ',', $list ? $list : array( 'MDL' ) );
 			} elseif ( 'accent_color' === $key ) {
