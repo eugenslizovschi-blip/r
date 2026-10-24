@@ -132,9 +132,10 @@
     - formularele din admin (rute, setări) cu date măsluite (o listă în loc de text) nu mai dau eroare fatală;
     - o rută cu „Notițe interne” goale în forma NULL (import, phpMyAdmin) se editează fără avertismente pe PHP 8.1+.
   - **Shortcode-uri scrise de mână:** `mode="Pay "` / `mode="RESERVE"` (majuscule, spații) lasă doar butonul cerut, iar `compact="false"` / `"nu"` nu mai face formularul compact; `[lbb_firma camp="Telefon"]`, `"Adresă"`, `"E-mail"`, `"IDNO"` arată câmpul cerut (înainte arătau numele firmei).
+  - **WooCommerce oprit** (ex. temporar, la o depanare; pe WordPress 6.4, ca pe site, plugin-ul rămâne activ): paginile rutelor arată „Rezervarea online nu este disponibilă momentan. Sunați la …”, nu textul brut „[libertbus_rezervare …]”, iar biletele deja vândute se deschid în continuare din linkul din email, cu codul QR și „Adaugă în calendar”.
   - **Link de bilet greșit sau tăiat:** pagina „Biletul nu a fost găsit” are butonul „Rezervați online” (sau spre prima pagină a site-ului), iar titlul ei din fila browserului are și numele site-ului.
   - **Altele:**
-    - arhiva de instalare se face cu `tests/build-zip.sh` (~120 KB, doar ce rulează pe site; fără teste și capturi de ecran);
+    - arhiva de instalare se face cu `tests/build-zip.sh` (~150 KB, doar ce rulează pe site; fără teste și capturi de ecran);
     - dezinstalarea cu setarea „Șterge datele” bifată șterge și linkul secret de previzualizare (rămânea în baza de date);
     - ziua de azi după ora Chișinăului;
     - expeditorul corect în emailurile de rezervare;
