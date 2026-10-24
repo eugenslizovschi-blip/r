@@ -133,6 +133,9 @@
     - o rută cu „Notițe interne” goale în forma NULL (import, phpMyAdmin) se editează fără avertismente pe PHP 8.1+.
   - **Shortcode-uri scrise de mână:** `mode="Pay "` / `mode="RESERVE"` (majuscule, spații) lasă doar butonul cerut, iar `compact="false"` / `"nu"` nu mai face formularul compact; `[lbb_firma camp="Telefon"]`, `"Adresă"`, `"E-mail"`, `"IDNO"` arată câmpul cerut (înainte arătau numele firmei).
   - **WooCommerce oprit** (ex. temporar, la o depanare; pe WordPress 6.4, ca pe site, plugin-ul rămâne activ): paginile rutelor arată „Rezervarea online nu este disponibilă momentan. Sunați la …”, nu textul brut „[libertbus_rezervare …]”, iar biletele deja vândute se deschid în continuare din linkul din email, cu codul QR și „Adaugă în calendar”.
+  - **Cookie-uri blocate în browser:** „Achit online” nu mai trimite clientul la o plată cu coșul gol (coșul WooCommerce se ține într-un cookie), ci îi spune că plata online are nevoie de cookie-uri, cu telefonul biroului.
+  - **Produsul intern „Bilet autocar”:** mutat la Gunoi din greșeală, revine singur (același produs, aceeași adresă); șters definitiv, se face altul. Pus pe ciornă sau privat, panoul „Gata de plăți?” spune că nu e publicat și ce de apăsat (înainte scria „Se recreează automat”).
+  - **Codul QR pentru cititorul de ecran:** „Cod QR al biletului …” se anunță doar după ce codul e desenat; fără JavaScript nu se mai anunță un cod care nu există.
   - **Link de bilet greșit sau tăiat:** pagina „Biletul nu a fost găsit” are butonul „Rezervați online” (sau spre prima pagină a site-ului), iar titlul ei din fila browserului are și numele site-ului.
   - **Altele:**
     - arhiva de instalare se face cu `tests/build-zip.sh` (~150 KB, doar ce rulează pe site; fără teste și capturi de ecran);
