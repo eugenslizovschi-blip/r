@@ -3234,6 +3234,17 @@ $du_targets = preg_split( '/\s+/', implode( ' ', $du_refs[1] ), -1, PREG_SPLIT_N
 $du_missing = array_values( array_diff( $du_targets, $du_ids[1] ) );
 lbb_t( 'două formulare pe o pagină: id-uri unice, etichetele și descrierile arată spre elemente existente', $du_ids[1] && ! $du_dupes && ! $du_missing, array( $du_dupes, $du_missing ) );
 
+// WooCommerce oprit (WordPress 6.4 nu oprește plugin-ul singur): pagina rutei arată telefonul, nu „[libertbus_rezervare …]”.
+$nw_keep  = get_option( 'active_plugins' );
+$nw_page  = LBB_Admin::pages_with_form();
+$nw_url   = $nw_page ? get_permalink( $nw_page[0]->ID ) : '';
+update_option( 'active_plugins', array_values( array_filter( $nw_keep, function ( $p ) {
+	return 'woocommerce/woocommerce.php' !== $p;
+} ) ) );
+$nw_html = $nw_url ? wp_remote_retrieve_body( wp_remote_get( $nw_url, array( 'timeout' => 20 ) ) ) : '';
+update_option( 'active_plugins', $nw_keep );
+lbb_t( 'WooCommerce oprit: pagina cu formularul arată „Rezervarea online nu este disponibilă” cu telefonul, nu shortcode-ul brut', '' !== $nw_html && false !== strpos( $nw_html, 'Rezervarea online nu este disponibilă momentan' ) && false !== strpos( $nw_html, 'href="tel:' ) && ! preg_match( '/\[(libertbus_rezervare|lbb_booking)/', $nw_html ), $nw_url );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );

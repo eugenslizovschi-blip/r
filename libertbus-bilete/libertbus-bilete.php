@@ -59,6 +59,14 @@ function lbb_boot() {
 	LBB_Cookies::init();
 
 	if ( ! class_exists( 'WooCommerce' ) ) {
+		// WooCommerce oprit (ex. temporar, la o depanare): pe paginile rutelor vizitatorul vede telefonul, nu textul
+		// brut „[libertbus_rezervare …]”. WordPress < 6.5 (ca pe libertbus.md) nu oprește plugin-ul singur.
+		$unavailable = function () {
+			/* translators: %s: telefon */
+			return '<p class="lbb-empty">' . sprintf( esc_html__( 'Rezervarea online nu este disponibilă momentan. Sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_link() ) . '</p>';
+		};
+		add_shortcode( 'libertbus_rezervare', $unavailable );
+		add_shortcode( 'lbb_booking', $unavailable );
 		add_action( 'admin_notices', function () {
 			echo '<div class="notice notice-error"><p><strong>LibertBus Bilete</strong>: ' . esc_html__( 'are nevoie de WooCommerce activ pentru a încasa plăți.', 'libertbus-bilete' ) . '</p></div>';
 		} );
