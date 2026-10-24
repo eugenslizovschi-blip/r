@@ -1039,6 +1039,12 @@
 				}
 			}, 0 );
 		} );
+		// După mesajul „fără internet”: când revine semnalul, clientul află că poate apăsa din nou.
+		window.addEventListener( 'online', function () {
+			if ( el.sending && el.sending.textContent === t.offline ) {
+				el.sending.textContent = t.backOnline;
+			}
+		} );
 		// „Înapoi” din browser: din memorie (bfcache) pagina revine cu butoanele blocate de trimiterea de mai sus;
 		// la o reîncărcare browserul pune la loc data aleasă de client după ce s-au cerut orele pentru azi.
 		var triedKeep = ''; // Ora ținută minte deja încercată (dacă s-a umplut, nu o mai cerem iar).

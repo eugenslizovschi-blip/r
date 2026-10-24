@@ -499,6 +499,7 @@ class LBB_Frontend {
 				'sendingPay'  => __( 'Vă ducem la plată… Nu închideți pagina.', 'libertbus-bilete' ),
 				'sendingRes'  => __( 'Se trimite rezervarea… Nu închideți pagina.', 'libertbus-bilete' ),
 				'offline'     => __( 'Nu aveți conexiune la internet. Datele completate rămân aici: apăsați din nou când revine semnalul.', 'libertbus-bilete' ),
+				'backOnline'  => __( 'Conexiunea a revenit. Apăsați din nou butonul.', 'libertbus-bilete' ),
 				/* translators: %s: telefonul de suport */
 				'noCookies'   => sprintf( __( 'Plata online are nevoie de cookie-uri, iar browserul le blochează. Permiteți cookie-urile pentru acest site și încercați din nou sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
 			),
