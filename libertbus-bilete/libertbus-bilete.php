@@ -74,7 +74,7 @@ function lbb_boot() {
 			return $vars;
 		} );
 		add_action( 'admin_notices', function () {
-			echo '<div class="notice notice-error"><p><strong>LibertBus Bilete</strong>: ' . esc_html__( 'are nevoie de WooCommerce activ pentru a încasa plăți.', 'libertbus-bilete' ) . '</p></div>';
+			echo '<div class="notice notice-error"><p><strong>LibertBus Bilete</strong>: ' . esc_html__( 'are nevoie de WooCommerce activ pentru a încasa plăți.', 'libertbus-bilete' ) . ' ' . esc_html__( 'Până îl activați, vânzarea online e oprită: pe paginile rutelor apare telefonul pentru rezervări, iar biletele deja vândute se deschid în continuare din email.', 'libertbus-bilete' ) . '</p></div>';
 		} );
 		return;
 	}

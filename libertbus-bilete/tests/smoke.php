@@ -3249,7 +3249,18 @@ $nw_h    = $nw_r ? LBB_Bookings::create_hold( $nw_r, $tomorrow, $nw_r['times'][0
 $nw_b    = is_array( $nw_h ) ? LBB_Bookings::reserve( $nw_h['token'] ) : null;
 $nw_code = $nw_b ? $nw_b['ticket_code'] : '';
 $nw_tick = $nw_code ? wp_remote_get( LBB_Tickets::url( $nw_code ), array( 'timeout' => 20 ) ) : null;
+// Avizul din admin spune și ce văd clienții între timp (cerere ca administrator, cu cookie-ul de autentificare).
+// Pagina plugin-ului, nu Panoul WordPress: acolo widgetul „Activitate” listează comenzile vechi, al căror tip
+// (shop_order) nu mai există fără WooCommerce, cu notificări WordPress care nu țin de plugin.
+$nw_adm  = wp_remote_retrieve_body( wp_remote_get( admin_url( 'admin.php?page=lbb-settings' ), array(
+	'timeout' => 20,
+	'cookies' => array(
+		new WP_Http_Cookie( array( 'name' => AUTH_COOKIE, 'value' => wp_generate_auth_cookie( 1, time() + 600, 'auth' ) ) ),
+		new WP_Http_Cookie( array( 'name' => LOGGED_IN_COOKIE, 'value' => wp_generate_auth_cookie( 1, time() + 600, 'logged_in' ) ) ),
+	),
+) ) );
 update_option( 'active_plugins', $nw_keep );
+lbb_t( 'WooCommerce oprit: avizul din admin spune că vânzarea e oprită și biletele vândute rămân valabile', false !== strpos( $nw_adm, 'are nevoie de WooCommerce activ' ) && false !== strpos( $nw_adm, 'biletele deja vândute se deschid în continuare' ), substr( wp_strip_all_tags( $nw_adm ), 0, 200 ) );
 if ( $nw_b ) {
 	LBB_Bookings::cancel( $nw_b['id'] );
 }
