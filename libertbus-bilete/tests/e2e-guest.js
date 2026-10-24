@@ -374,6 +374,14 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (!(await page.$eval('input[name="lbb_names[]"]', i => i.checkValidity()))) fail('numele scurt în chirilică e respins în browser');
   await page.fill('input[name="lbb_names[]"]', 'Vasile Guest');
   await page.waitForFunction(() => !document.querySelector('[data-lbb-submit]').disabled);
+  // Fără internet: formularul nu pleacă spre pagina de eroare a browserului; datele rămân, cu un mesaj.
+  await page.context().setOffline(true);
+  await page.evaluate(() => { window.__lbbNoReload = 1; });
+  await page.click('[data-lbb-submit][value="pay"]');
+  await page.waitForTimeout(500);
+  const off = await page.evaluate(() => ({ stayed: window.__lbbNoReload === 1, msg: document.querySelector('[data-lbb="sending"]').textContent, name: document.querySelector('input[name="lbb_names[]"]').value, enabled: !document.querySelector('[data-lbb-submit][value="pay"]').disabled }));
+  await page.context().setOffline(false);
+  if (!off.stayed || !/conexiune la internet/.test(off.msg) || off.name !== 'Vasile Guest' || !off.enabled) fail('fără internet formularul nu rămâne pe loc cu mesaj: ' + JSON.stringify(off));
   // Browser cu cookie-urile blocate: „Achit online” nu duce la un coș gol, ci spune de ce și ce de făcut.
   await page.evaluate(() => { window.__lbbNoReload = 1; Object.defineProperty(navigator, 'cookieEnabled', { get: () => false, configurable: true }); });
   await page.click('[data-lbb-submit][value="pay"]');

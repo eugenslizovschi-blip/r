@@ -1008,6 +1008,15 @@
 					return;
 				}
 			}
+			// Fără semnal (ex. în autogară): browserul ar arăta pagina lui „Fără internet”, iar la „Înapoi” clientul poate
+			// găsi formularul gol. Rămânem pe pagină, cu datele completate, și spunem ce s-a întâmplat.
+			if ( false === navigator.onLine ) {
+				e.preventDefault();
+				if ( el.sending ) {
+					el.sending.textContent = t.offline;
+				}
+				return;
+			}
 			// Coșul WooCommerce se ține într-un cookie: cu cookie-urile blocate clientul ar ajunge la plată cu coșul gol,
 			// iar locurile ar rămâne ținute degeaba. Spunem de ce, în loc să-l trimitem acolo.
 			if ( 'pay' === btn.value && false === navigator.cookieEnabled ) {
