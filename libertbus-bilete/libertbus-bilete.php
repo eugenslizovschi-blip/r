@@ -67,6 +67,12 @@ function lbb_boot() {
 		};
 		add_shortcode( 'libertbus_rezervare', $unavailable );
 		add_shortcode( 'lbb_booking', $unavailable );
+		// Biletele deja vândute rămân deschise din linkul din email (codul QR se arată șoferului).
+		add_action( 'template_redirect', array( 'LBB_Tickets', 'ticket_page' ), 5 );
+		add_filter( 'query_vars', function ( $vars ) {
+			$vars[] = 'lbb_bilet';
+			return $vars;
+		} );
 		add_action( 'admin_notices', function () {
 			echo '<div class="notice notice-error"><p><strong>LibertBus Bilete</strong>: ' . esc_html__( 'are nevoie de WooCommerce activ pentru a încasa plăți.', 'libertbus-bilete' ) . '</p></div>';
 		} );

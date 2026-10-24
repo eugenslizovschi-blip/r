@@ -3242,7 +3242,11 @@ update_option( 'active_plugins', array_values( array_filter( $nw_keep, function 
 	return 'woocommerce/woocommerce.php' !== $p;
 } ) ) );
 $nw_html = $nw_url ? wp_remote_retrieve_body( wp_remote_get( $nw_url, array( 'timeout' => 20 ) ) ) : '';
+// Biletele deja vândute se deschid în continuare din linkul din email, cu codul QR.
+$nw_code = $wpdb->get_var( 'SELECT ticket_code FROM ' . LBB_Bookings::table() . " WHERE status IN ('confirmed','reserved') AND ticket_code <> '' AND travel_date >= '" . esc_sql( LBB_Settings::today() ) . "' ORDER BY id DESC LIMIT 1" );
+$nw_tick = $nw_code ? wp_remote_get( LBB_Tickets::url( $nw_code ), array( 'timeout' => 20 ) ) : null;
 update_option( 'active_plugins', $nw_keep );
+lbb_t( 'WooCommerce oprit: biletul vândut se deschide din linkul din email, cu codul QR', $nw_tick && 200 === wp_remote_retrieve_response_code( $nw_tick ) && false !== strpos( wp_remote_retrieve_body( $nw_tick ), 'lbb-ticket-qr' ) && false !== strpos( wp_remote_retrieve_body( $nw_tick ), (string) $nw_code ), $nw_code );
 lbb_t( 'WooCommerce oprit: pagina cu formularul arată „Rezervarea online nu este disponibilă” cu telefonul, nu shortcode-ul brut', '' !== $nw_html && false !== strpos( $nw_html, 'Rezervarea online nu este disponibilă momentan' ) && false !== strpos( $nw_html, 'href="tel:' ) && ! preg_match( '/\[(libertbus_rezervare|lbb_booking)/', $nw_html ), $nw_url );
 
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
