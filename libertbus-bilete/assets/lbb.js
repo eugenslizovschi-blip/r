@@ -1044,6 +1044,10 @@
 			if ( el.sending && el.sending.textContent === t.offline ) {
 				el.sending.textContent = t.backOnline;
 			}
+			// Orele nu s-au putut încărca (butonul „Reîncercați” e afișat): le cerem singuri, fără atingerea clientului.
+			if ( el.status.querySelector( '.lbb-retry' ) ) {
+				loadDepartures();
+			}
 		} );
 		// „Înapoi” din browser: din memorie (bfcache) pagina revine cu butoanele blocate de trimiterea de mai sus;
 		// la o reîncărcare browserul pune la loc data aleasă de client după ce s-au cerut orele pentru azi.

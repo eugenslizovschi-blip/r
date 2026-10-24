@@ -480,6 +480,22 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await nj.close();
   }
 
+  // Orele nu se încarcă fără semnal („Reîncercați”); când semnalul revine se încarcă singure.
+  {
+    const on = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    on.on('pageerror', e => fail('pageerror: ' + e.message));
+    await on.goto(BASE + '/balti-iasi/');
+    await on.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled])').length > 1, null, { timeout: 15000 });
+    await on.context().setOffline(true);
+    await on.fill('[data-lbb="date"]', new Date(Date.now() + 86400000 * 6).toISOString().slice(0, 10));
+    await on.dispatchEvent('[data-lbb="date"]', 'change');
+    const shown = await on.waitForSelector('.lbb-retry', { timeout: 20000 }).then(() => true).catch(() => false);
+    await on.context().setOffline(false);
+    const back = shown && await on.waitForFunction(() => !document.querySelector('.lbb-retry') && document.querySelectorAll('[data-lbb="time"] option:not([disabled])').length > 1, null, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (!shown || !back) fail('orele nu se reîncarcă singure când revine semnalul: ' + JSON.stringify({ shown, back }));
+    await on.close();
+  }
+
   // Pagina produsului „Bilet autocar” (linkul din coșul cu blocuri, căutări) duce la formularul de rezervare.
   {
     const pp = await browser.newPage({ viewport: { width: 390, height: 844 } });
