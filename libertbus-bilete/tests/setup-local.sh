@@ -107,6 +107,10 @@ $WP eval 'global $wpdb; $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_
 # automate să le acopere pe amândouă (libertbus.md, actualizat de-a lungul anilor, folosește probabil „posts”).
 # LBB_ORDER_STORAGE=hpos|posts o fixează. Comenzile de test se șterg întâi: WooCommerce nu schimbă stocarea
 # cât timp există comenzi nesincronizate.
+# La o instalare nouă, WooCommerce încearcă la prima pagină de admin să pornească singur HPOS; cu comenzile create
+# între timp de teste, schimbarea pică („orders out of sync”) cu eroare 500 pe fiecare pagină de admin. Stocarea o
+# alegem noi, mai jos, deci pasul „instalare nouă” se marchează ca făcut (ca pe un site existent, ex. libertbus.md).
+$WP option update woocommerce_newly_installed no >/dev/null
 STORAGE="${LBB_ORDER_STORAGE:-$( [ $(( 10#$(date -u +%H) % 2 )) -eq 0 ] && echo hpos || echo posts )}"
 $WP eval 'foreach ( wc_get_orders( array( "limit" => -1, "return" => "ids", "status" => "any" ) ) as $id ) { $o = wc_get_order( $id ); if ( $o ) { $o->delete( true ); } }' >/dev/null 2>&1 || true
 $WP option update woocommerce_custom_orders_table_enabled "$( [ "$STORAGE" = hpos ] && echo yes || echo no )" >/dev/null
