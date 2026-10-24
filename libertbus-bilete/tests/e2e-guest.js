@@ -374,6 +374,13 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (!(await page.$eval('input[name="lbb_names[]"]', i => i.checkValidity()))) fail('numele scurt în chirilică e respins în browser');
   await page.fill('input[name="lbb_names[]"]', 'Vasile Guest');
   await page.waitForFunction(() => !document.querySelector('[data-lbb-submit]').disabled);
+  // Browser cu cookie-urile blocate: „Achit online” nu duce la un coș gol, ci spune de ce și ce de făcut.
+  await page.evaluate(() => { window.__lbbNoReload = 1; Object.defineProperty(navigator, 'cookieEnabled', { get: () => false, configurable: true }); });
+  await page.click('[data-lbb-submit][value="pay"]');
+  await page.waitForTimeout(800);
+  const nc = await page.evaluate(() => ({ stayed: window.__lbbNoReload === 1, msg: document.querySelector('[data-lbb="sending"]').textContent, enabled: !document.querySelector('[data-lbb-submit][value="pay"]').disabled }));
+  if (!nc.stayed || !/cookie-uri/.test(nc.msg) || !/\+373/.test(nc.msg) || !nc.enabled) fail('cu cookie-urile blocate „Achit online” nu explică problema: ' + JSON.stringify(nc));
+  await page.evaluate(() => { delete navigator.cookieEnabled; document.querySelector('[data-lbb="sending"]').textContent = ''; });
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
   if (!/checkout/.test(page.url())) fail('nu s-a ajuns la plată: ' + page.url());
   await page.waitForSelector('#payment');

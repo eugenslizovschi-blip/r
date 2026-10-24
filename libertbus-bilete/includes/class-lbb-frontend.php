@@ -498,6 +498,8 @@ class LBB_Frontend {
 				'dialogLabel' => __( 'Datele pasagerilor și plata', 'libertbus-bilete' ),
 				'sendingPay'  => __( 'Vă ducem la plată… Nu închideți pagina.', 'libertbus-bilete' ),
 				'sendingRes'  => __( 'Se trimite rezervarea… Nu închideți pagina.', 'libertbus-bilete' ),
+				/* translators: %s: telefonul de suport */
+				'noCookies'   => sprintf( __( 'Plata online are nevoie de cookie-uri, iar browserul le blochează. Permiteți cookie-urile pentru acest site și încercați din nou sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
 			),
 		);
 

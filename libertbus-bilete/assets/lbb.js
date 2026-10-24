@@ -1008,6 +1008,15 @@
 					return;
 				}
 			}
+			// Coșul WooCommerce se ține într-un cookie: cu cookie-urile blocate clientul ar ajunge la plată cu coșul gol,
+			// iar locurile ar rămâne ținute degeaba. Spunem de ce, în loc să-l trimitem acolo.
+			if ( 'pay' === btn.value && false === navigator.cookieEnabled ) {
+				e.preventDefault();
+				if ( el.sending ) {
+					el.sending.textContent = t.noCookies;
+				}
+				return;
+			}
 			el.mode.value = btn.value;
 			// Dezactivăm după ce browserul a citit datele, ca să nu se trimită de două ori.
 			setTimeout( function () {
