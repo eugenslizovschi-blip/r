@@ -179,6 +179,13 @@ class LBB_Install {
 	public static function ensure_product() {
 		$id      = (int) get_option( self::PRODUCT_OPTION );
 		$product = $id ? wc_get_product( $id ) : null;
+		// Mutat la Gunoi din greșeală: îl scoatem de acolo (același produs, aceeași adresă), nu facem unul nou; altfel,
+		// restaurat apoi de birou, ar rămâne un al doilea „Bilet autocar” fără protecțiile plugin-ului.
+		if ( $product && 'trash' === $product->get_status() ) {
+			wp_untrash_post( $id );
+			wp_update_post( array( 'ID' => $id, 'post_status' => 'publish' ) );
+			$product = wc_get_product( $id );
+		}
 		if ( ! $product || 'trash' === $product->get_status() ) {
 			$product = new WC_Product_Simple();
 			$product->set_name( __( 'Bilet autocar', 'libertbus-bilete' ) );
@@ -208,7 +215,10 @@ class LBB_Install {
 
 	public static function product_id() {
 		$id = (int) get_option( self::PRODUCT_OPTION );
-		if ( ! $id && class_exists( 'WooCommerce' ) ) {
+		// Produsul mutat la Gunoi sau șters din WooCommerce → Produse se recreează (cum spune panoul), altfel biletele
+		// n-ar mai intra în coș și plata online s-ar opri până îl restaurează cineva.
+		$status = $id ? get_post_status( $id ) : false;
+		if ( ( ! $status || 'trash' === $status ) && class_exists( 'WooCommerce' ) ) {
 			self::ensure_product();
 			$id = (int) get_option( self::PRODUCT_OPTION );
 		}

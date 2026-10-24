@@ -3268,6 +3268,14 @@ lbb_t( 'WooCommerce oprit: biletul vândut se deschide din linkul din email, cu 
 lbb_t( 'WooCommerce oprit: bannerul de cookies apare, iar Google Analytics rămâne blocat până la acord (Legea 195/2024)', false !== strpos( $nw_html, 'id="lbb-cc"' ) && false !== strpos( $nw_html, 'data-lbb-consent="statistics"' ) && ! preg_match( '#<script(?![^>]*type="text/plain")[^>]*src="https://www\.googletagmanager\.com#', $nw_html ), $nw_url );
 lbb_t( 'WooCommerce oprit: pagina cu formularul arată „Rezervarea online nu este disponibilă” cu telefonul, nu shortcode-ul brut', '' !== $nw_html && false !== strpos( $nw_html, 'Rezervarea online nu este disponibilă momentan' ) && false !== strpos( $nw_html, 'href="tel:' ) && ! preg_match( '/\[(libertbus_rezervare|lbb_booking)/', $nw_html ), $nw_url );
 
+// Produsul intern „Bilet autocar” mutat la Gunoi din greșeală revine singur (același produs, aceeași adresă, nu un
+// al doilea), iar șters definitiv se recreează; în ambele cazuri biletul se poate cumpăra.
+$tp_old  = LBB_Install::product_id();
+wp_trash_post( $tp_old );
+$tp_back = LBB_Install::product_id();
+$tp_ok   = $tp_back === $tp_old && 'publish' === get_post_status( $tp_old ) && 'bilet-autocar-libertbus' === get_post_field( 'post_name', $tp_old ) && wc_get_product( $tp_old )->is_purchasable();
+lbb_t( 'produsul „Bilet autocar” mutat la Gunoi revine singur, același produs și aceeași adresă', $tp_ok, array( $tp_old, $tp_back, get_post_status( $tp_old ), get_post_field( 'post_name', $tp_old ) ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
