@@ -169,7 +169,7 @@ Vezi `README.md`. Pe scurt:
 ### Recomandat separat (securitate)
 - Actualizare PHP 7.4 → 8.2 sau mai nou, din panoul de hosting (după instalarea versiunii 1.5.0, panoul „Gata de plăți?” o semnalează cu galben până atunci).
 - Actualizarea WordPress, WooCommerce, Elementor și Slider Revolution. Versiunea 6.3.3 de Slider Revolution are breșe cunoscute. După instalarea versiunii 1.5.0, panoul „Gata de plăți?” arată câte actualizări sunt în așteptare.
-  - Plugin-ul 1.5.0 e verificat (QA complet, 21.10.2026, refăcut pe 22.10.2026 de la o instalare nouă) și pe WordPress 7.1.2 cu WooCommerce 11.2.1, nu doar pe 6.4.3 / 8.7 ca acum pe site.
+  - Plugin-ul 1.5.0 e verificat (QA complet, 21.10.2026, refăcut pe 22.10.2026 de la o instalare nouă și pe 24.10.2026, cu toate îmbunătățirile din 23.10) și pe WordPress 7.1.2 cu WooCommerce 11.2.1, nu doar pe 6.4.3 / 8.7 ca acum pe site.
   - Și pe PHP 7.4 (ca pe site acum), 22.10.2026: testele automate la fiecare rulare QA, iar o dată tot QA-ul din browser cu serverul pe PHP 7.4 — fără erori de la plugin.
   - WordPress și WooCommerce se actualizează împreună: WooCommerce 8.7 pe WordPress 7 scrie sute de avertismente (traduceri încărcate prea devreme) la fiecare pagină.
 - Schimbarea parolei de administrator.
