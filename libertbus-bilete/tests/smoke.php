@@ -3329,6 +3329,16 @@ $qa_b    = LBB_Bookings::get_by_code( (string) $wpdb->get_var( 'SELECT ticket_co
 $qa_html = $qa_b ? LBB_Tickets::html( $qa_b, true ) : '';
 lbb_t( 'cod QR: fără role="img" până îl desenează scriptul; eticheta în data-qr-label', (bool) preg_match( '/<div class="lbb-ticket-qr" data-qr-label="Cod QR al biletului LB-[^"]+" data-qr="/', $qa_html ) && false === strpos( $qa_html, 'role="img"' ), substr( $qa_html, 0, 300 ) );
 
+// Stilul formularului se pune în <head> pe paginile cu formular (și în Elementor), nu abia în subsol pe temele clasice.
+$na_pages = LBB_Admin::pages_with_form();
+$na_plain = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Fara formular', 'post_content' => 'Text simplu.' ) );
+$na_elem  = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Elementor', 'post_content' => '' ) );
+update_post_meta( $na_elem, '_elementor_data', wp_slash( '[{"elType":"widget","settings":{"shortcode":"[libertbus_rezervare from=\\"Balti\\"]"}}]' ) );
+$na_got = array( $na_pages && LBB_Frontend::needs_assets( $na_pages[0]->ID ), LBB_Frontend::needs_assets( $na_plain ), LBB_Frontend::needs_assets( $na_elem ) );
+wp_delete_post( $na_plain, true );
+wp_delete_post( $na_elem, true );
+lbb_t( 'stilul formularului: pus din <head> pe paginile cu formular, inclusiv în Elementor; nu pe celelalte', array( true, false, true ) === $na_got, $na_got );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );

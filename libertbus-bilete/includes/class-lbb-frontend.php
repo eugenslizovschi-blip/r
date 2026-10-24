@@ -126,6 +126,25 @@ class LBB_Frontend {
 			wp_add_inline_style( 'lbb', '.lbb-booking{--lbb-accent:' . $accent . ';--lbb-accent-ink:' . LBB_Settings::accent_ink( $accent ) . ';--lbb-accent-text:' . LBB_Settings::accent_text( $accent ) . '}' );
 		}
 		wp_register_script( 'lbb', LBB_URL . 'assets/lbb.js', array(), self::asset_ver( 'lbb.js' ), true );
+		// Pe temele clasice (ex. Betheme cu Elementor, ca pe site) conținutul se construiește după <head>: stilul pus în
+		// coadă abia de shortcode ar ajunge în subsol, iar pe internet lent formularul ar apărea o clipă fără stil.
+		if ( is_singular() && self::needs_assets( get_queried_object_id() ) ) {
+			wp_enqueue_style( 'lbb' );
+		}
+	}
+
+	/**
+	 * Pagina are formularul de rezervare: shortcode în conținut sau în datele Elementor, ori un formular Contact Form 7
+	 * pe care plugin-ul îl înlocuiește.
+	 *
+	 * @param int $post_id Pagina.
+	 */
+	public static function needs_assets( $post_id ) {
+		$text = (string) get_post_field( 'post_content', $post_id ) . (string) get_post_meta( $post_id, '_elementor_data', true );
+		if ( false !== stripos( $text, '[libertbus_rezervare' ) || false !== stripos( $text, '[lbb_booking' ) ) {
+			return true;
+		}
+		return '' !== (string) LBB_Settings::get( 'replace_cf7' ) && false !== stripos( $text, 'contact-form-7' );
 	}
 
 	/**
