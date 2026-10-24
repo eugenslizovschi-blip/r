@@ -134,7 +134,8 @@ class LBB_Tickets {
 		?>
 		<div class="lbb-ticket" style="border:2px dashed #c9ced6;border-radius:12px;padding:16px;margin:0 0 16px;background:#fff;color:#1d2733;page-break-inside:avoid;break-inside:avoid;">
 			<?php if ( $with_qr ) : ?>
-				<div class="lbb-ticket-qr" role="img" aria-label="<?php /* translators: %s: codul biletului */ echo esc_attr( sprintf( __( 'Cod QR al biletului %s', 'libertbus-bilete' ), $booking['ticket_code'] ) ); ?>" data-qr="<?php echo esc_attr( self::url( $booking['ticket_code'] ) ); ?>"></div>
+				<?php // Rolul „imagine” și textul le pune scriptul după ce desenează codul: fără JavaScript locul e gol, iar cititorul de ecran nu anunță un cod care nu există. ?>
+				<div class="lbb-ticket-qr" data-qr-label="<?php /* translators: %s: codul biletului */ echo esc_attr( sprintf( __( 'Cod QR al biletului %s', 'libertbus-bilete' ), $booking['ticket_code'] ) ); ?>" data-qr="<?php echo esc_attr( self::url( $booking['ticket_code'] ) ); ?>"></div>
 			<?php endif; ?>
 			<div style="font-size:13px;color:#5f6b7a;"><?php echo self::is_reservation( $booking ) ? esc_html__( 'Rezervare LibertBus', 'libertbus-bilete' ) : esc_html__( 'Bilet LibertBus', 'libertbus-bilete' ); ?></div>
 			<div class="lbb-ticket-code" style="font-family:Menlo,Consolas,monospace;font-size:22px;font-weight:700;letter-spacing:1px;margin:2px 0 10px;"><?php echo esc_html( $booking['ticket_code'] ); ?></div>
@@ -800,7 +801,10 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 		// codul QR, cel pe care îl scanează șoferul, nu s-ar mai desena.
 		var each = function(list, fn){ Array.prototype.forEach.call(list, fn); };
 		each(document.querySelectorAll('[data-qr]'), function(el){
-			if (window.QRCode) { new QRCode(el, {text: el.getAttribute('data-qr'), width: 132, height: 132, correctLevel: QRCode.CorrectLevel.M}); }
+			if (!window.QRCode) { return; }
+			new QRCode(el, {text: el.getAttribute('data-qr'), width: 132, height: 132, correctLevel: QRCode.CorrectLevel.M});
+			el.setAttribute('role', 'img');
+			el.setAttribute('aria-label', el.getAttribute('data-qr-label'));
 			// Textul e pe container (role="img"); imaginea și canvasul generate nu se mai citesc o dată.
 			each(el.querySelectorAll('img'), function(i){ i.setAttribute('alt', ''); });
 			each(el.querySelectorAll('canvas'), function(c){ c.setAttribute('aria-hidden', 'true'); });

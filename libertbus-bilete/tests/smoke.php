@@ -3323,6 +3323,12 @@ if ( is_array( $vc_h ) ) {
 WC()->session = $vc_sess;
 lbb_t( 'coș: biletul cu locurile ținute rămâne, cel cu rezervarea dispărută iese cu mesaj, alte produse rămân', array( 'ok', 'other' ) === array_keys( $vc_cart->cart_contents ) && 1 === count( $vc_notes ) && false !== strpos( $vc_notes[0]['notice'], 'Timpul de rezervare a expirat' ), array( array_keys( $vc_cart->cart_contents ), $vc_notes ) );
 
+// Codul QR îl desenează scriptul: în HTML-ul de la server locul nu se anunță încă drept „imagine” (fără JavaScript ar fi
+// un „Cod QR” gol pentru cititorul de ecran); textul așteaptă în data-qr-label.
+$qa_b    = LBB_Bookings::get_by_code( (string) $wpdb->get_var( 'SELECT ticket_code FROM ' . LBB_Bookings::table() . " WHERE ticket_code LIKE 'LB-%' ORDER BY id DESC LIMIT 1" ) );
+$qa_html = $qa_b ? LBB_Tickets::html( $qa_b, true ) : '';
+lbb_t( 'cod QR: fără role="img" până îl desenează scriptul; eticheta în data-qr-label', (bool) preg_match( '/<div class="lbb-ticket-qr" data-qr-label="Cod QR al biletului LB-[^"]+" data-qr="/', $qa_html ) && false === strpos( $qa_html, 'role="img"' ), substr( $qa_html, 0, 300 ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
