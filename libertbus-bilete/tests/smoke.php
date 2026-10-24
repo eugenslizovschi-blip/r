@@ -3293,6 +3293,36 @@ foreach ( LBB_Admin::checklist() as $pd_it ) {
 wp_update_post( array( 'ID' => $pd_id, 'post_status' => 'publish' ) );
 lbb_t( 'panou: produsul „Bilet autocar” pus pe ciornă e roșu și spune „nu e publicat … Publică”', $pd_row && false === $pd_row['ok'] && false !== strpos( $pd_row['detail'], 'nu e publicat' ) && false === strpos( $pd_row['detail'], 'Se recreează' ) && 'publish' === get_post_status( $pd_id ), $pd_row );
 
+// La încărcarea coșului: biletul cu locurile încă ținute rămâne, cel a cărui rezervare nu mai există iese (cu mesaj),
+// iar alte produse nu sunt atinse.
+$vc_sess = WC()->session;
+if ( ! WC()->session ) {
+	WC()->session = new WC_Session_Handler();
+	WC()->session->init();
+}
+$vc_r    = LBB_Routes::find( 'Bălți', 'Iași' );
+$vc_h    = $vc_r ? LBB_Bookings::create_hold( $vc_r, $tomorrow, $vc_r['times'][0], 1, 0, array( 'Cos Test' ), '+37369000086', 'cos@example.com', 'MDL' ) : null;
+$vc_cart = new class() {
+	public $cart_contents = array();
+	public function get_cart() {
+		return $this->cart_contents;
+	}
+};
+$vc_cart->cart_contents = array(
+	'ok'    => array( 'product_id' => LBB_Install::product_id(), 'lbb' => array( 'token' => is_array( $vc_h ) ? $vc_h['token'] : '' ) ),
+	'gone'  => array( 'product_id' => LBB_Install::product_id(), 'lbb' => array( 'token' => 'nu-exista' ) ),
+	'other' => array( 'product_id' => 999999 ),
+);
+wc_clear_notices();
+LBB_WooCommerce::validate_cart( $vc_cart );
+$vc_notes = wc_get_notices( 'notice' );
+wc_clear_notices();
+if ( is_array( $vc_h ) ) {
+	LBB_Bookings::release( $vc_h['token'] );
+}
+WC()->session = $vc_sess;
+lbb_t( 'coș: biletul cu locurile ținute rămâne, cel cu rezervarea dispărută iese cu mesaj, alte produse rămân', array( 'ok', 'other' ) === array_keys( $vc_cart->cart_contents ) && 1 === count( $vc_notes ) && false !== strpos( $vc_notes[0]['notice'], 'Timpul de rezervare a expirat' ), array( array_keys( $vc_cart->cart_contents ), $vc_notes ) );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
