@@ -3275,6 +3275,11 @@ wp_trash_post( $tp_old );
 $tp_back = LBB_Install::product_id();
 $tp_ok   = $tp_back === $tp_old && 'publish' === get_post_status( $tp_old ) && 'bilet-autocar-libertbus' === get_post_field( 'post_name', $tp_old ) && wc_get_product( $tp_old )->is_purchasable();
 lbb_t( 'produsul „Bilet autocar” mutat la Gunoi revine singur, același produs și aceeași adresă', $tp_ok, array( $tp_old, $tp_back, get_post_status( $tp_old ), get_post_field( 'post_name', $tp_old ) ) );
+// Șters definitiv: se face altul, publicat, cu aceeași adresă (pagina lui trimite tot la formular).
+wp_delete_post( $tp_old, true );
+$tp_new = LBB_Install::product_id();
+$tp_np  = $tp_new ? wc_get_product( $tp_new ) : null;
+lbb_t( 'produsul „Bilet autocar” șters definitiv se recreează: publicat, virtual, ascuns din catalog, aceeași adresă', $tp_new && $tp_new !== $tp_old && $tp_np && 'publish' === $tp_np->get_status() && $tp_np->is_virtual() && 'hidden' === $tp_np->get_catalog_visibility() && 'bilet-autocar-libertbus' === $tp_np->get_slug() && $tp_np->is_purchasable(), array( $tp_old, $tp_new, $tp_np ? $tp_np->get_slug() : null ) );
 
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
