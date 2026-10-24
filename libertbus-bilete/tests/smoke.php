@@ -3338,6 +3338,23 @@ $na_got = array( $na_pages && LBB_Frontend::needs_assets( $na_pages[0]->ID ), LB
 wp_delete_post( $na_plain, true );
 wp_delete_post( $na_elem, true );
 lbb_t( 'stilul formularului: pus din <head> pe paginile cu formular, inclusiv în Elementor; nu pe celelalte', array( true, false, true ) === $na_got, $na_got );
+// Și pe o pagină reală cu temă clasică (ca Betheme pe site, unde conținutul se face după <head>): lbb.css e în <head>.
+$tc_dir  = get_theme_root() . '/lbb-clasic-test';
+$tc_keep = array( get_option( 'template' ), get_option( 'stylesheet' ) );
+wp_mkdir_p( $tc_dir );
+file_put_contents( $tc_dir . '/style.css', "/*\nTheme Name: LBB clasic test\n*/\n" );
+file_put_contents( $tc_dir . '/index.php', "<!doctype html><html><head><?php wp_head(); ?></head><body>\n<!--LBB-CONTINUT-->\n<?php while ( have_posts() ) { the_post(); the_content(); } ?>\n<?php wp_footer(); ?></body></html>\n" );
+update_option( 'template', 'lbb-clasic-test' );
+update_option( 'stylesheet', 'lbb-clasic-test' );
+$tc_html = $na_pages ? wp_remote_retrieve_body( wp_remote_get( get_permalink( $na_pages[0]->ID ), array( 'timeout' => 20 ) ) ) : '';
+update_option( 'template', $tc_keep[0] );
+update_option( 'stylesheet', $tc_keep[1] );
+@unlink( $tc_dir . '/index.php' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+@unlink( $tc_dir . '/style.css' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+@rmdir( $tc_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+$tc_css  = strpos( $tc_html, "id='lbb-css'" );
+$tc_cont = strpos( $tc_html, '<!--LBB-CONTINUT-->' );
+lbb_t( 'temă clasică: lbb.css e în <head>, înaintea formularului, nu în subsol', false !== $tc_css && false !== $tc_cont && $tc_css < $tc_cont && false !== strpos( $tc_html, 'class="lbb-booking' ) && get_option( 'stylesheet' ) === $tc_keep[1], array( $tc_css, $tc_cont, get_option( 'stylesheet' ) ) );
 
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
