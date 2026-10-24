@@ -166,7 +166,10 @@ class LBB_Admin {
 			// mai intră în coș, iar fără „Virtual” plata cere adresă de livrare.
 			$product  = wc_get_product( LBB_Install::product_id() );
 			$p_issues = array();
-			if ( $product && 'publish' === $product->get_status() ) {
+			if ( $product && 'publish' !== $product->get_status() ) {
+				// Ciornă, privat sau „în așteptare”: nu e la Gunoi, deci nu revine singur; biletele nu intră în coș.
+				$p_issues[] = __( 'nu e publicat (e ciornă, privat sau în așteptare): biletele nu intră în coș; apăsați „Publică” sau „Actualizează” cu vizibilitatea „Public”', 'libertbus-bilete' );
+			} elseif ( $product ) {
 				if ( ! $product->is_in_stock() ) {
 					$p_issues[] = __( 'apare „stoc epuizat”: opriți „Gestionează stocul” sau puneți-l „În stoc”', 'libertbus-bilete' );
 				}

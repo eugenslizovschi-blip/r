@@ -3281,6 +3281,18 @@ $tp_new = LBB_Install::product_id();
 $tp_np  = $tp_new ? wc_get_product( $tp_new ) : null;
 lbb_t( 'produsul „Bilet autocar” șters definitiv se recreează: publicat, virtual, ascuns din catalog, aceeași adresă', $tp_new && $tp_new !== $tp_old && $tp_np && 'publish' === $tp_np->get_status() && $tp_np->is_virtual() && 'hidden' === $tp_np->get_catalog_visibility() && 'bilet-autocar-libertbus' === $tp_np->get_slug() && $tp_np->is_purchasable(), array( $tp_old, $tp_new, $tp_np ? $tp_np->get_slug() : null ) );
 
+// Produsul intern trecut pe ciornă (nu e la Gunoi, deci nu revine singur): panoul spune ce s-a întâmplat și ce de făcut.
+$pd_id = LBB_Install::product_id();
+wp_update_post( array( 'ID' => $pd_id, 'post_status' => 'draft' ) );
+$pd_row = null;
+foreach ( LBB_Admin::checklist() as $pd_it ) {
+	if ( 'product' === $pd_it['id'] ) {
+		$pd_row = $pd_it;
+	}
+}
+wp_update_post( array( 'ID' => $pd_id, 'post_status' => 'publish' ) );
+lbb_t( 'panou: produsul „Bilet autocar” pus pe ciornă e roșu și spune „nu e publicat … Publică”', $pd_row && false === $pd_row['ok'] && false !== strpos( $pd_row['detail'], 'nu e publicat' ) && false === strpos( $pd_row['detail'], 'Se recreează' ) && 'publish' === get_post_status( $pd_id ), $pd_row );
+
 // Versiunea din antetul plugin-ului (cea din lista de pluginuri) e aceeași cu LBB_VERSION.
 $lbb_header = get_file_data( LBB_DIR . 'libertbus-bilete.php', array( 'v' => 'Version' ) );
 lbb_t( 'versiunea din antet e aceeași cu LBB_VERSION', LBB_VERSION === $lbb_header['v'], array( LBB_VERSION, $lbb_header['v'] ) );
