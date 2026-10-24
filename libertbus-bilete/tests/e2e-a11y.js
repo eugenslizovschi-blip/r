@@ -207,6 +207,14 @@ async function scan(page, label, include) {
     await scan(admin, 'admin ' + u.replace(/^.*page=/, ''), [['#wpbody-content .wrap']]);
   }
 
+  // Pe telefon (390px) listele Pasageri, Rezervări și Rute devin carduri: le verificăm și în forma asta.
+  const madmin = await (await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })).newPage();
+  await login(madmin, BASE);
+  for (const u of ['lbb-routes', 'lbb-manifest&date=' + day, 'lbb-bookings']) {
+    await madmin.goto(BASE + '/wp-admin/admin.php?page=' + u);
+    await scan(madmin, 'admin pe telefon ' + u, [['#wpbody-content .wrap']]);
+  }
+
   console.log(process.exitCode ? 'A11Y: PROBLEME' : 'A11Y: OK');
   await browser.close();
 })().catch(e => { console.error('FAIL', e); process.exit(1); });
