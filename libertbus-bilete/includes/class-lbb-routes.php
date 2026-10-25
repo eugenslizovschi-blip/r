@@ -54,7 +54,8 @@ class LBB_Routes {
 	public static function unrecognized_times( $text ) {
 		$bad = array();
 		foreach ( preg_split( '/[\s,;]+/', (string) $text, -1, PREG_SPLIT_NO_EMPTY ) as $part ) {
-			if ( ! self::parse_times( $part ) ) {
+			// „19:00 - 21:00”, „07:00 și 15:30”: cuvintele și semnele fără cifre doar leagă orele, nu sunt ore greșite.
+			if ( preg_match( '/\d/', $part ) && ! self::parse_times( $part ) ) {
 				$bad[] = $part;
 			}
 		}

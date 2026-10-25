@@ -1697,7 +1697,7 @@ lbb_t( 'plată refuzată: pe pagina comenzii nu apare „biletele vin imediat”
 $ty_o->delete( true );
 
 // Ore de plecare scrise greșit la o rută: le numim, ca biroul să afle că acea cursă n-a fost salvată.
-lbb_t( 'orele neînțelese la o rută sunt semnalate (25:00, 8-45), cele bune nu', array( '25:00', '8-45' ) === LBB_Routes::unrecognized_times( "08:45, 25:00\n13.30; 8-45 17:05" ) && array() === LBB_Routes::unrecognized_times( '06:00, 7.15' ), LBB_Routes::unrecognized_times( "08:45, 25:00\n13.30; 8-45 17:05" ) );
+lbb_t( 'orele neînțelese la o rută sunt semnalate (25:00, 8-45, 1530), cele bune și legăturile („-”, „și”, „/”) nu', array( '25:00', '8-45' ) === LBB_Routes::unrecognized_times( "08:45, 25:00\n13.30; 8-45 17:05" ) && array() === LBB_Routes::unrecognized_times( '06:00, 7.15' ) && array() === LBB_Routes::unrecognized_times( '19:00 - 21:00 și 22:15 / 23:00' ) && array( '1530' ) === LBB_Routes::unrecognized_times( '07:00 și 1530' ), LBB_Routes::unrecognized_times( "08:45, 25:00\n13.30; 8-45 17:05" ) );
 $pt_in = '08:45, 10.11.2026, 2026.10.11, 17.30.';
 lbb_t( 'o dată scrisă la orele de plecare („10.11.2026”) nu devine o cursă la 10:11, ci e semnalată', array( '08:45', '17:30' ) === LBB_Routes::parse_times( $pt_in ) && array( '10.11.2026', '2026.10.11' ) === LBB_Routes::unrecognized_times( $pt_in ), array( LBB_Routes::parse_times( $pt_in ), LBB_Routes::unrecognized_times( $pt_in ) ) );
 
