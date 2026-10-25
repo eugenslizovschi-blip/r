@@ -86,6 +86,9 @@ if [ -n "$PHP74_BIN" ] && [ "${WP_CLI#php }" != "$WP_CLI" ]; then
   OUT_74=$(cd "$WP_PATH" && "$PHP74_BIN" ${WP_CLI#php } eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
   echo "$OUT_74" | grep -E "FAIL|eșuate|Fatal|Parse error"
   echo "$OUT_74" | grep -q " 0 eșuate" || FAIL=1
+  # Același număr de verificări ca pe PHP 8: un test sărit doar pe o versiune (ex. o condiție de oră/fus) se vede aici.
+  C74=$(echo "$OUT_74" | sed -n 's/^\([0-9]*\) ok, \([0-9]*\) eșuate.*/\1 \2/p' | awk '{print $1+$2}')
+  [ "$C74" = "$SMOKE_N" ] || { echo "  pe PHP 7.4 au rulat $C74 verificări, pe PHP 8 $SMOKE_N"; FAIL=1; }
 fi
 # PHP 8.4 (spre care se poate actualiza serverul): testele automate trec și plugin-ul nu produce nicio depreciere sau
 # avertisment. WordPress 6.4 / WooCommerce 8.7 (ca pe site) au ele deprecări pe PHP 8.4: după verificare le scoatem din
@@ -98,6 +101,8 @@ if [ -n "$PHP84_BIN" ] && [ "${WP_CLI#php }" != "$WP_CLI" ]; then
   OUT_84=$(cd "$WP_PATH" && "$PHP84_BIN" -d error_reporting=E_ALL ${WP_CLI#php } eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
   echo "$OUT_84" | grep -E "FAIL|eșuate|Fatal|Parse error"
   echo "$OUT_84" | grep -q " 0 eșuate" || FAIL=1
+  C84=$(echo "$OUT_84" | sed -n 's/^\([0-9]*\) ok, \([0-9]*\) eșuate.*/\1 \2/p' | awk '{print $1+$2}')
+  [ "$C84" = "$SMOKE_N" ] || { echo "  pe PHP 8.4 au rulat $C84 verificări, pe PHP 8.3 $SMOKE_N"; FAIL=1; }
   PLUG84=$( { tail -n +$((N84 + 1)) "$LOG84" 2>/dev/null; echo "$OUT_84"; } | grep -E "(Deprecated|Warning|Notice):" | grep "libertbus-bilete/" | sort -u)
   if [ -n "$PLUG84" ]; then echo "$PLUG84" | head -10; FAIL=1; else echo "  fără deprecări din plugin"; fi
   [ -f "$LOG84" ] && head -n "$N84" "$LOG84" > "$LOG84.tmp" && cat "$LOG84.tmp" > "$LOG84" && rm -f "$LOG84.tmp"
