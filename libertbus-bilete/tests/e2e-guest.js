@@ -330,6 +330,24 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
       const s3 = await step();
       await p2.unroute(depUrl, holiday);
       if (!s3 || s3.date !== plus(6)) fail('„Ziua următoare” nu sare peste ziua fără curse din Setări: ' + JSON.stringify({ s3, want: plus(6) }));
+      // Toate zilele de după marți, până la capătul intervalului, sunt fără curse: butonul nu mai apare (ar duce la o zi goală).
+      const maxDate = await p2.getAttribute('[data-lbb="date"]', 'max');
+      const allClosed = [];
+      for (let d = plus(1); d <= maxDate; d = new Date(Date.parse(d + 'T12:00:00Z') + 86400000).toISOString().slice(0, 10)) allClosed.push(d);
+      const noMore = async r => {
+        const res = await r.fetch();
+        const body = await res.json();
+        body.closedDates = allClosed;
+        await r.fulfill({ response: res, json: body });
+      };
+      await p2.route(depUrl, noMore);
+      await p2.fill('[data-lbb="date"]', plus(0));
+      await p2.dispatchEvent('[data-lbb="date"]', 'change');
+      await p2.waitForFunction(() => /nu sunt plecări/.test(document.querySelector('[data-lbb="status"]').textContent), null, { timeout: 15000 }).catch(() => {});
+      await p2.waitForTimeout(300);
+      const lastBtn = !!(await p2.$('[data-lbb="status"] button.lbb-next-day'));
+      await p2.unroute(depUrl, noMore);
+      if (!maxDate || allClosed.length < 30 || lastBtn) fail('„Ziua următoare” apare deși până la capătul intervalului nu mai e nicio zi cu curse: ' + JSON.stringify({ maxDate, n: allClosed.length, lastBtn }));
     }
     await p2.close();
   }
