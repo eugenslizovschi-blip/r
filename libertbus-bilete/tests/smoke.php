@@ -3477,6 +3477,14 @@ if ( is_int( $co_r ) && function_exists( 'WC' ) ) {
 }
 lbb_t( 'la bilete nu se poate alege transfer bancar, cec sau plata la livrare (biletul s-ar emite „achitat” fără bani), nici la „Plătește”; fără bilete rămân toate', array( 'bacs', 'cheque', 'cod', 'lbb_test', 'paynet' ) === ( $co_res['gol'] ?? null ) && array( 'lbb_test', 'paynet' ) === ( $co_res['bilet'] ?? null ) && array( 'lbb_test', 'paynet' ) === ( $co_res['plata'] ?? null ) && array( 'bacs', 'cheque', 'cod', 'lbb_test', 'paynet' ) === ( $co_res['altă'] ?? null ), $co_res );
 
+// Dezinstalarea cu „Șterge datele” bifat: fiecare opțiune lbb_… pe care plugin-ul a scris-o (după toate testele de mai
+// sus) e în lista din uninstall.php; o opțiune nouă uitată acolo ar rămâne în baza de date după ștergere.
+$un_src  = (string) file_get_contents( LBB_DIR . 'uninstall.php' );
+preg_match_all( "/'(lbb_[a-z0-9_]+)'/", $un_src, $un_m );
+$un_db   = $wpdb->get_col( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'lbb\\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+$un_miss = array_values( array_diff( $un_db, $un_m[1] ) );
+lbb_t( 'dezinstalarea șterge toate opțiunile lbb_… scrise de plugin (nicio opțiune uitată în uninstall.php)', count( $un_db ) >= 5 && array() === $un_miss, array( 'lipsesc' => $un_miss, 'în baza de date' => $un_db ) );
+
 echo "\n" . $GLOBALS['lbb_ok'] . ' ok, ' . $GLOBALS['lbb_fail'] . " eșuate\n";
 if ( $GLOBALS['lbb_fail'] ) {
 	exit( 1 );
