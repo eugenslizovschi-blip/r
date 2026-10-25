@@ -3389,6 +3389,32 @@ if ( $qr_b ) {
 }
 lbb_t( 'versiunea qrcode.min.js pe pagina biletului conține data fișierului', false !== strpos( $qr_page, 'qrcode.min.js?ver=' . LBB_VERSION . '.' . filemtime( LBB_DIR . 'assets/qrcode.min.js' ) ), $qr_b ? '' : 'fără rezervare' );
 
+// Orașe din shortcode fără rută activă (redenumită, oprită, scrisă greșit): administratorul vede o notă, vizitatorul nu.
+$um_user = get_current_user_id();
+$um_map  = LBB_Routes::public_map();
+$um_to   = '';
+foreach ( $um_map as $um_from => $um_list ) {
+	foreach ( $um_list as $um_e ) {
+		if ( ! in_array( $um_e['to'], wp_list_pluck( isset( $um_map['Bălți'] ) ? $um_map['Bălți'] : array(), 'to' ), true ) ) {
+			$um_to = $um_e['to']; // O destinație care există, dar nu din Bălți.
+		}
+	}
+}
+wp_set_current_user( 1 );
+$um_html = array(
+	'oras'     => do_shortcode( '[libertbus_rezervare from="Nicaieri" to="Iasi"]' ),
+	'pereche'  => do_shortcode( '[libertbus_rezervare from="Balti" to="' . $um_to . '"]' ),
+	'bun'      => do_shortcode( '[libertbus_rezervare from="Balti" to="Iasi"]' ),
+	'fara'     => do_shortcode( '[libertbus_rezervare]' ),
+);
+wp_set_current_user( 0 );
+$um_guest = do_shortcode( '[libertbus_rezervare from="Nicaieri" to="Iasi"]' );
+wp_set_current_user( $um_user );
+$um_has = array_map( function ( $h ) {
+	return false !== strpos( $h, 'lbb-unmatched' );
+}, $um_html );
+lbb_t( 'shortcode cu orașe fără rută activă: notă doar pentru administrator („Nicaieri → Iasi”, o pereche fără rută), nu la orașe bune sau pentru vizitatori', array( 'oras' => true, 'pereche' => true, 'bun' => false, 'fara' => false ) === $um_has && '' !== $um_to && false !== strpos( $um_html['oras'], '„Nicaieri → Iasi”' ) && false === strpos( $um_guest, 'lbb-unmatched' ), array( $um_has, $um_to ) );
+
 echo "\n" . $GLOBALS['lbb_ok'] . ' ok, ' . $GLOBALS['lbb_fail'] . " eșuate\n";
 if ( $GLOBALS['lbb_fail'] ) {
 	exit( 1 );

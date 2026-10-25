@@ -461,6 +461,16 @@ class LBB_Frontend {
 			'currency' => isset( $posted['lbb_currency'] ) ? sanitize_text_field( $posted['lbb_currency'] ) : '',
 			'names'    => isset( $posted['lbb_names'] ) ? array_map( 'sanitize_text_field', (array) $posted['lbb_names'] ) : array(),
 		);
+		// Doar pentru cine administrează biletele: orașele din shortcode nu se potrivesc cu nicio rută activă (redenumită,
+		// oprită, scrisă greșit), deci formularul nu are ruta aleasă. Vizitatorii văd, ca până acum, toate rutele.
+		$unmatched = '';
+		if ( ! $posted && ( current_user_can( LBB_Admin::CAP ) || current_user_can( 'manage_options' ) ) ) {
+			$from_bad = '' !== trim( (string) $atts['from'] ) && '' === $preset['from'];
+			$to_bad   = '' !== trim( (string) $atts['to'] ) && ( '' === $preset['to'] || ( $preset['from'] && ! in_array( $preset['to'], wp_list_pluck( $map[ $preset['from'] ], 'to' ), true ) ) );
+			if ( $from_bad || $to_bad ) {
+				$unmatched = trim( trim( (string) $atts['from'] ) . ' → ' . trim( (string) $atts['to'] ), ' →' );
+			}
+		}
 		$config = array(
 			'map'           => $map,
 			'preset'        => $preset,
@@ -558,6 +568,10 @@ class LBB_Frontend {
 				<?php if ( $preview ) : ?>
 					<input type="hidden" name="lbb_preview" value="1">
 					<p class="lbb-preview-note"><?php esc_html_e( 'Previzualizare: formularul nou și butonul de plată online se văd doar cu acest link. Ceilalți vizitatori văd site-ul ca până acum.', 'libertbus-bilete' ); ?></p>
+				<?php endif; ?>
+				<?php if ( $unmatched ) : ?>
+					<?php /* translators: %s: orașele din shortcode, ex. „Balti → Iasi” */ ?>
+					<p class="lbb-preview-note lbb-unmatched"><?php echo esc_html( sprintf( __( 'Văzut doar de administratori: „%s” din shortcode nu se potrivește cu nicio rută activă, așa că formularul nu are ruta aleasă. Verificați orașele din shortcode și din LibertBus → Rute.', 'libertbus-bilete' ), $unmatched ) ); ?></p>
 				<?php endif; ?>
 				<input type="hidden" name="lbb_mode" value="<?php echo $can_pay ? 'pay' : 'reserve'; ?>" data-lbb="mode">
 				<input type="hidden" name="lbb_nonce" value="<?php echo esc_attr( wp_create_nonce( 'lbb_book' ) ); ?>">
