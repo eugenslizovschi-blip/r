@@ -3485,6 +3485,17 @@ $un_db   = $wpdb->get_col( "SELECT option_name FROM {$wpdb->options} WHERE optio
 $un_miss = array_values( array_diff( $un_db, $un_m[1] ) );
 lbb_t( 'dezinstalarea șterge toate opțiunile lbb_… scrise de plugin (nicio opțiune uitată în uninstall.php)', count( $un_db ) >= 5 && array() === $un_miss, array( 'lipsesc' => $un_miss, 'în baza de date' => $un_db ) );
 
+// Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
+$dc_orph = array();
+foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {
+	if ( preg_match_all( '#\*/\n\t/\*\*#', (string) file_get_contents( $dc_f ), $dc_m, PREG_OFFSET_CAPTURE ) ) {
+		foreach ( $dc_m[0] as $dc_x ) {
+			$dc_orph[] = basename( $dc_f ) . ':' . ( substr_count( substr( (string) file_get_contents( $dc_f ), 0, $dc_x[1] ), "\n" ) + 1 );
+		}
+	}
+}
+lbb_t( 'cod: niciun comentariu de funcție orfan (docblock urmat direct de altul)', array() === $dc_orph, $dc_orph );
+
 echo "\n" . $GLOBALS['lbb_ok'] . ' ok, ' . $GLOBALS['lbb_fail'] . " eșuate\n";
 if ( $GLOBALS['lbb_fail'] ) {
 	exit( 1 );

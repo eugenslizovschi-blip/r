@@ -363,9 +363,6 @@ class LBB_Routes {
 	}
 
 	/**
-	 * Lista pentru formular: plecare → destinații, cu prețuri în moneda magazinului.
-	 */
-	/**
 	 * Ce vede formularul despre o rută: prețuri în fiecare monedă de plată, ore, zile, loc de urcare.
 	 *
 	 * @param array $route Ruta.
@@ -392,6 +389,9 @@ class LBB_Routes {
 		);
 	}
 
+	/**
+	 * Lista pentru formular: plecare → destinații, cu prețuri în moneda magazinului.
+	 */
 	public static function public_map() {
 		$map = array();
 		foreach ( self::all( true ) as $route ) {

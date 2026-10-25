@@ -106,9 +106,6 @@ class LBB_Tickets {
 	}
 
 	/**
-	 * Un bilet ca tabel HTML simplu, cu stiluri inline ca să arate bine și în email.
-	 */
-	/**
 	 * Rezervare cu plata la urcare (activă sau anulată de birou): fără comandă WooCommerce. Biletele plătite au
 	 * mereu o comandă, așa că o rezervare anulată rămâne „rezervare”, nu devine „bilet anulat”.
 	 */
@@ -126,6 +123,9 @@ class LBB_Tickets {
 		return 'ok' === $state['class'] && ! LBB_Bookings::departed( $booking ) && null !== LBB_Routes::get( $booking['route_id'] );
 	}
 
+	/**
+	 * Un bilet ca tabel HTML simplu, cu stiluri inline ca să arate bine și în email.
+	 */
 	public static function html( array $booking, $with_qr = false ) {
 		$rows  = LBB_WooCommerce::describe( $booking );
 		$state = self::state( $booking );
@@ -183,7 +183,6 @@ class LBB_Tickets {
 			. ( is_email( $booking['email'] ) ? '<br>' . esc_html__( 'Email', 'libertbus-bilete' ) . ': <a href="mailto:' . esc_attr( $booking['email'] ) . '">' . esc_html( $booking['email'] ) . '</a>' : '' ) . '</p>'
 			// Linkul deschide direct rezervarea aceasta (căutare după cod), nu lista cu ultimele 200.
 			. '<p><a href="' . esc_url( add_query_arg( array( 'page' => 'lbb-bookings', 'q' => rawurlencode( $booking['ticket_code'] ) ), admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Deschide rezervarea în admin', 'libertbus-bilete' ) . '</a></p>';
-		/* translators: 1: cod, 2: ruta, 3: data și ora */
 		// Biroul răspunde direct clientului. Auto-Submitted (RFC 3834): răspunsul automat de concediu al biroului nu
 		// pleacă la client (Reply-To e adresa clientului).
 		$office_headers = array( 'Content-Type: text/html; charset=UTF-8', 'From: ' . self::from_header(), 'Auto-Submitted: auto-generated' );

@@ -109,9 +109,6 @@ class LBB_WooCommerce {
 	}
 
 	/**
-	 * Descrierea biletului: ruta, data, ora, pasagerii.
-	 */
-	/**
 	 * „06.10.2026 (marți)”. Ziua e în română fix, nu după limba curentă: când biroul confirmă comanda din
 	 * admin cu profilul în engleză, biletul clientului nu trebuie să apară cu „(Tuesday)”.
 	 */
@@ -132,6 +129,9 @@ class LBB_WooCommerce {
 		return $d->format( 'd.m.Y' ) . ' (' . $days[ (int) $d->format( 'N' ) ] . ')';
 	}
 
+	/**
+	 * Descrierea biletului: ruta, data, ora, pasagerii.
+	 */
 	public static function describe( array $booking ) {
 		$route = LBB_Routes::get( $booking['route_id'] );
 		$lines = array(
@@ -429,10 +429,6 @@ class LBB_WooCommerce {
 	}
 
 	/**
-	 * Moneda aleasă de client în formular devine moneda coșului și a comenzii,
-	 * doar cât coșul conține numai bilete. În admin rămâne moneda magazinului.
-	 */
-	/**
 	 * Descrierea scurtă a produsului „Bilet autocar” e o notă pentru administrator: coșul și checkout-ul cu blocuri o
 	 * afișează sub bilet („Se cumpără din formularul de rezervare”), lângă ruta, data și pasagerii, unde doar încurcă.
 	 * În admin (contextul „edit”) rămâne neschimbată.
@@ -441,6 +437,10 @@ class LBB_WooCommerce {
 		return $product && (int) $product->get_id() === (int) get_option( LBB_Install::PRODUCT_OPTION ) ? '' : $description;
 	}
 
+	/**
+	 * Moneda aleasă de client în formular devine moneda coșului și a comenzii,
+	 * doar cât coșul conține numai bilete. În admin rămâne moneda magazinului.
+	 */
 	public static function session_currency( $currency ) {
 		static $busy = false;
 		if ( $busy || ( is_admin() && ! wp_doing_ajax() ) || ! function_exists( 'WC' ) || ! WC()->session ) {

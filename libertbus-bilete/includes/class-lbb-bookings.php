@@ -439,9 +439,6 @@ class LBB_Bookings {
 	}
 
 	/**
-	 * Lista de pasageri pentru o zi (și opțional o rută).
-	 */
-	/**
 	 * Prima zi după $date cu pasageri (bilete plătite sau rezervări la urcare), pe toate rutele sau pe una.
 	 *
 	 * @return string Data (Y-m-d) sau '' dacă nu mai urmează nicio cursă cu pasageri.
@@ -455,6 +452,9 @@ class LBB_Bookings {
 		return (string) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
+	/**
+	 * Lista de pasageri pentru o zi (și opțional o rută).
+	 */
 	public static function manifest( $date, $route_id = 0, $statuses = array( 'confirmed', 'reserved' ) ) {
 		global $wpdb;
 		$in   = implode( ',', array_map( function ( $s ) use ( $wpdb ) {
@@ -610,9 +610,6 @@ class LBB_Bookings {
 	}
 
 	/**
-	 * WooCommerce a anonimizat o comandă (la cererea clientului sau după perioada setată): la fel și rezervările ei.
-	 */
-	/**
 	 * Câți ani se păstrează datele pasagerilor după cursă (3, sau altă valoare prin filtrul lbb_retention_years).
 	 * Același număr apare în politica de confidențialitate și în panou, ca textul să spună ce face codul.
 	 */
@@ -620,6 +617,9 @@ class LBB_Bookings {
 		return max( 1, (int) apply_filters( 'lbb_retention_years', 3 ) );
 	}
 
+	/**
+	 * WooCommerce a anonimizat o comandă (la cererea clientului sau după perioada setată): la fel și rezervările ei.
+	 */
 	public static function on_order_anonymized( $order ) {
 		global $wpdb;
 		if ( ! $order instanceof WC_Order ) {

@@ -182,10 +182,6 @@ class LBB_Frontend {
 	}
 
 	/**
-	 * Aduce telefonul la forma internațională, ca același număr scris local
-	 * (069…, 07…, 00373…) să conteze o singură dată la limita de rezervări.
-	 */
-	/**
 	 * Mesajul de eroare din formular, escapat, cu telefonul de suport ca link de apel („… sunați la +373 …”).
 	 */
 	public static function alert_html( $message ) {
@@ -194,6 +190,10 @@ class LBB_Frontend {
 		return '' !== $phone ? str_replace( $phone, LBB_Settings::phone_link(), $html ) : $html;
 	}
 
+	/**
+	 * Aduce telefonul la forma internațională, ca același număr scris local
+	 * (069…, 07…, 00373…) să conteze o singură dată la limita de rezervări.
+	 */
 	public static function normalize_phone( $raw ) {
 		// O listă în loc de text (lbb_phone[]=…, trimisă de roboți) e un telefon gol, nu un avertisment PHP.
 		$phone = preg_replace( '/[^\d+]/', '', is_scalar( $raw ) ? (string) $raw : '' );
@@ -685,9 +685,6 @@ class LBB_Frontend {
 	}
 
 	/**
-	 * Potrivește „Balti” cu „Bălți”: ignoră diacriticele și majusculele.
-	 */
-	/**
 	 * Orașele din shortcode care nu se potrivesc cu nicio rută activă (redenumită, oprită, scrisă greșit), ori o
 	 * pereche fără rută: „Balti → Suceava”. Gol dacă totul se potrivește (sau shortcode-ul n-are orașe).
 	 *
@@ -704,6 +701,9 @@ class LBB_Frontend {
 		return $bad ? trim( $from . ' → ' . $to, ' →' ) : '';
 	}
 
+	/**
+	 * Potrivește „Balti” cu „Bălți”: ignoră diacriticele și majusculele.
+	 */
 	public static function match_city( $needle, array $cities ) {
 		$needle = self::fold( $needle );
 		if ( '' === $needle ) {
