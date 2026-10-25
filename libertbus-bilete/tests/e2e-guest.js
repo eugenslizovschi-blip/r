@@ -351,6 +351,41 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     }
     await p2.close();
   }
+  // Ora aleasă rămâne aleasă când clientul schimbă data (dacă și în ziua nouă are locuri); altfel trebuie aleasă din nou.
+  {
+    const p6 = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    p6.on('pageerror', e => fail('pageerror: ' + e.message));
+    const d0 = new Date(Date.now() + 86400000 * 9).toISOString().slice(0, 10);
+    const d1 = new Date(Date.now() + 86400000 * 10).toISOString().slice(0, 10);
+    const d2 = new Date(Date.now() + 86400000 * 11).toISOString().slice(0, 10);
+    // În ziua d2 cursa de 15:30 e plină.
+    await p6.route(u => /departures/.test(u.href), async r => {
+      const res = await r.fetch();
+      const body = await res.json();
+      if (body.date === d2) body.departures = body.departures.map(d => d.time === '15:30' ? Object.assign({}, d, { bookable: false, free: 0, reason: 'full' }) : d);
+      await r.fulfill({ response: res, json: body });
+    });
+    await p6.goto(BASE + '/balti-iasi/');
+    await p6.selectOption('[data-lbb="from"]', 'Chișinău');
+    const iasiId = await p6.$$eval('[data-lbb="route"] option', os => { const o = os.find(x => x.textContent.trim() === 'Iași'); return o ? o.value : ''; });
+    const setDate = async d => {
+      await p6.fill('[data-lbb="date"]', d);
+      await p6.dispatchEvent('[data-lbb="date"]', 'change');
+      await p6.waitForFunction(v => !/Se verifică/.test(document.querySelector('[data-lbb="status"]').textContent) && document.querySelectorAll('[data-lbb="time"] option:not([value=""])').length > 1, null, { timeout: 15000 }).catch(() => {});
+      return p6.inputValue('[data-lbb="time"]');
+    };
+    if (!iasiId) fail('ruta de test Chișinău → Iași lipsește din formular');
+    else {
+      await p6.selectOption('[data-lbb="route"]', iasiId);
+      await setDate(d0);
+      await p6.selectOption('[data-lbb="time"]', '15:30');
+      const kept = await setDate(d1);
+      const full = await setDate(d2);
+      const back = await setDate(d0);
+      if (kept !== '15:30' || full === '15:30' || back !== '15:30') fail('ora aleasă nu se păstrează la schimbarea datei: ' + JSON.stringify({ kept, full, back }));
+    }
+    await p6.close();
+  }
   // Seara, după ultima cursă de azi: data trece singură pe mâine, iar mesajul (citit și de cititorul de ecran) spune de ce.
   {
     const p5 = await browser.newPage({ viewport: { width: 390, height: 844 } });

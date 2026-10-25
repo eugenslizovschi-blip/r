@@ -204,6 +204,8 @@
 		var skipFrom = ''; // Data de la care a început trecerea automată la ziua cu locuri.
 		var closedDates = [];
 		var shownDate = ''; // Data pentru care s-au cerut orele afișate.
+		// Ora aleasă de client pe ruta lui: la schimbarea datei rămâne aleasă dacă și în ziua nouă are locuri.
+		var chosen = { route: '', time: '' };
 		var memoKey = 'lbbTime' + ( index || 0 );
 		var namesKey = 'lbbNames' + ( index || 0 );
 		var paxKey = 'lbbPax' + ( index || 0 );
@@ -880,6 +882,10 @@
 						return d.time === preset.time;
 					} ) ) {
 						el.time.value = preset.time;
+					} else if ( chosen.time && chosen.route === String( route.id ) && firstOpen.some( function ( d ) {
+						return d.time === chosen.time;
+					} ) ) {
+						el.time.value = chosen.time;
 					} else if ( firstOpen.length === 1 ) {
 						el.time.value = firstOpen[ 0 ].time;
 					}
@@ -983,6 +989,7 @@
 			loadDepartures();
 		} );
 		el.time.addEventListener( 'change', function () {
+			chosen = { route: el.route.value, time: el.time.value };
 			rememberTime();
 			fillCounts();
 		} );
