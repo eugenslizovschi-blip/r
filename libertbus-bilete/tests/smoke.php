@@ -3512,6 +3512,48 @@ if ( is_int( $dp_r ) && function_exists( 'wc_create_order' ) ) {
 }
 lbb_t( 'după plecarea autocarului biletul neplătit nu se mai poate plăti (locul nu se mai ține, fără „Achită acum”); pentru mâine da', array( 'ieri' => array( 'hold' => false, 'pay' => false ), 'maine' => array( 'hold' => true, 'pay' => true ) ) === $dp_res, $dp_res );
 
+// Plata confirmată de bancă după plecarea autocarului: biletul se emite, dar biroul primește o avertizare (rambursare
+// sau altă cursă), cu cursa în text, iar comanda are nota.
+$pp_r   = LBB_Routes::save( array( 'origin' => 'TarziuA', 'destination' => 'TarziuB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$pp_res = array();
+if ( is_int( $pp_r ) ) {
+	$pp_h = LBB_Bookings::create_hold( LBB_Routes::get( $pp_r ), $tomorrow, '10:00', 1, 0, array( 'Ion Tarziu' ), '+37369000062', 'tarziu@example.com', 'MDL' );
+	$pp_o = wc_create_order();
+	$pp_i = new WC_Order_Item_Product();
+	$pp_i->set_product( wc_get_product( LBB_Install::product_id() ) );
+	$pp_i->add_meta_data( '_lbb_token', $pp_h['token'], true );
+	$pp_o->add_item( $pp_i );
+	$pp_o->set_billing_phone( '+37369000062' );
+	$pp_o->save();
+	LBB_WooCommerce::attach_order( $pp_o );
+	$pp_y = ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '-1 day' )->format( 'Y-m-d' );
+	$wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $pp_y ), array( 'id' => $pp_h['id'] ) );
+	$pp_mails = array();
+	$pp_catch = function ( $null, $atts ) use ( &$pp_mails ) {
+		$pp_mails[] = $atts;
+		return true;
+	};
+	add_filter( 'pre_wp_mail', $pp_catch, 1, 2 );
+	$pp_o->payment_complete( 'TEST' );
+	remove_filter( 'pre_wp_mail', $pp_catch, 1 );
+	$pp_alert = array_values( array_filter( $pp_mails, function ( $m ) {
+		return false !== strpos( (string) $m['subject'], 'Plată după plecare' );
+	} ) );
+	$pp_notes = implode( ' | ', wp_list_pluck( wc_get_order_notes( array( 'order_id' => $pp_o->get_id() ) ), 'content' ) );
+	$pp_res   = array(
+		'mail'   => count( $pp_alert ),
+		'to'     => $pp_alert ? $pp_alert[0]['to'] : '',
+		'cursa'  => $pp_alert && false !== strpos( $pp_alert[0]['message'], 'TarziuA → TarziuB, ' . LBB_WooCommerce::date_with_day( $pp_y ) . ' 10:00' ),
+		'tel'    => $pp_alert && false !== strpos( $pp_alert[0]['message'], 'href="tel:+37369000062"' ),
+		'nota'   => false !== strpos( $pp_notes, 'după plecarea autocarului' ),
+		'bilet'  => LBB_Bookings::get( $pp_h['id'] )['status'],
+	);
+	$pp_o->delete( true );
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $pp_r ) );
+	LBB_Routes::delete( $pp_r );
+}
+lbb_t( 'plata sosită după plecarea autocarului: biletul se emite, biroul primește „Plată după plecare” cu cursa și telefonul clientului, comanda are nota', array( 'mail' => 1, 'to' => LBB_Settings::office_email(), 'cursa' => true, 'tel' => true, 'nota' => true, 'bilet' => 'confirmed' ) === $pp_res, $pp_res );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {

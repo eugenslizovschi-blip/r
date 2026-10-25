@@ -373,6 +373,9 @@ class LBB_WooCommerce {
 		if ( ! $fresh ) {
 			return;
 		}
+		// Plata confirmată de bancă abia după plecarea autocarului (ex. notificare întârziată): biletul se emite (banii au
+		// intrat), dar biroul trebuie să afle, ca să-l ramburseze sau să-l mute pe altă cursă.
+		$gone  = array_filter( $fresh, array( 'LBB_Bookings', 'departed' ) );
 		$over  = LBB_Bookings::confirm_order( $order->get_id() );
 		$codes = wp_list_pluck( LBB_Bookings::by_order( $order->get_id() ), 'ticket_code' );
 		// Codurile și pe comandă: biroul găsește comanda după „LB-…” și în WooCommerce → Comenzi (căutare).
@@ -380,14 +383,28 @@ class LBB_WooCommerce {
 		$order->save_meta_data();
 		/* translators: %s: codurile biletelor, separate prin virgulă */
 		$order->add_order_note( sprintf( __( 'LibertBus: bilete emise: %s', 'libertbus-bilete' ), implode( ', ', array_filter( $codes ) ) ) );
+		$alerts = array();
+		if ( $gone ) {
+			$trips = array();
+			foreach ( $gone as $b ) {
+				$route   = LBB_Routes::get( $b['route_id'] );
+				$trips[] = ( $route ? LBB_Bookings::route_name( $route ) . ', ' : '' ) . LBB_WooCommerce::date_with_day( $b['travel_date'] ) . ' ' . $b['dep_time'];
+			}
+			/* translators: %s: cursele plecate, ex. „Bălți → Iași, 25.10.2026 (duminică) 08:45” */
+			$alerts[] = sprintf( __( 'ATENȚIE: plata a sosit după plecarea autocarului (%s). Biletul a fost emis, dar cursa a plecat: contactați clientul pentru rambursare sau altă cursă.', 'libertbus-bilete' ), implode( '; ', $trips ) );
+		}
 		if ( $over ) {
-			$msg = __( 'ATENȚIE: plata a sosit după expirarea rezervării și cursa a depășit numărul de locuri. Verificați lista de pasageri și contactați clientul.', 'libertbus-bilete' );
-			$order->add_order_note( 'LibertBus: ' . $msg );
+			$alerts[] = __( 'ATENȚIE: plata a sosit după expirarea rezervării și cursa a depășit numărul de locuri. Verificați lista de pasageri și contactați clientul.', 'libertbus-bilete' );
+		}
+		if ( $alerts ) {
+			foreach ( $alerts as $alert ) {
+				$order->add_order_note( 'LibertBus: ' . $alert );
+			}
 			// La birou (ca emailul „rezervare nouă”), nu doar la administratorul WordPress: trebuie sunat clientul,
 			// deci emailul are telefonul (link de apel) și răspunsul ajunge direct la client.
 			$phone   = (string) $order->get_billing_phone();
 			$email   = (string) $order->get_billing_email();
-			$html    = '<p>' . esc_html( $msg ) . '</p><p><a href="' . esc_url( $order->get_edit_order_url() ) . '">'
+			$html    = '<p>' . implode( '</p><p>', array_map( 'esc_html', $alerts ) ) . '</p><p><a href="' . esc_url( $order->get_edit_order_url() ) . '">'
 				/* translators: %s: numărul comenzii */
 				. esc_html( sprintf( __( 'Deschide comanda #%s', 'libertbus-bilete' ), $order->get_order_number() ) ) . '</a></p>'
 				. ( '' !== $phone || is_email( $email ) ? '<p>' . esc_html__( 'Client', 'libertbus-bilete' ) . ': '
@@ -399,8 +416,12 @@ class LBB_WooCommerce {
 			if ( is_email( $email ) ) {
 				$headers[] = 'Reply-To: ' . $email;
 			}
-			/* translators: %s: numărul comenzii */
-			LBB_Tickets::mail_html( LBB_Settings::office_email(), sprintf( __( '[LibertBus] Locuri depășite — comanda #%s', 'libertbus-bilete' ), $order->get_order_number() ), $html, $headers );
+			$subject = $gone
+				/* translators: %s: numărul comenzii */
+				? __( '[LibertBus] Plată după plecare — comanda #%s', 'libertbus-bilete' )
+				/* translators: %s: numărul comenzii */
+				: __( '[LibertBus] Locuri depășite — comanda #%s', 'libertbus-bilete' );
+			LBB_Tickets::mail_html( LBB_Settings::office_email(), sprintf( $subject, $order->get_order_number() ), $html, $headers );
 		}
 	}
 
