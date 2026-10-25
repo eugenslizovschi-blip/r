@@ -3415,6 +3415,24 @@ $um_has = array_map( function ( $h ) {
 }, $um_html );
 lbb_t( 'shortcode cu orașe fără rută activă: notă doar pentru administrator („Nicaieri → Iasi”, o pereche fără rută), nu la orașe bune sau pentru vizitatori', array( 'oras' => true, 'pereche' => true, 'bun' => false, 'fara' => false ) === $um_has && '' !== $um_to && false !== strpos( $um_html['oras'], '„Nicaieri → Iasi”' ) && false === strpos( $um_guest, 'lbb-unmatched' ), array( $um_has, $um_to ) );
 
+// Același lucru în panoul „Gata de plăți?”: paginile publicate (și cele din Elementor) cu orașe fără rută activă.
+$um_form = function () {
+	foreach ( LBB_Admin::checklist() as $um_i ) {
+		if ( 'form' === $um_i['id'] ) {
+			return $um_i;
+		}
+	}
+	return null;
+};
+$um_p1 = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Pagina Veche Test', 'post_content' => '[libertbus_rezervare from="Nicaieri" to="Iasi"]' ) );
+$um_p2 = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Elementor Pereche Test', 'post_content' => '' ) );
+update_post_meta( $um_p2, '_elementor_data', wp_slash( wp_json_encode( array( array( 'elType' => 'widget', 'settings' => array( 'shortcode' => '[libertbus_rezervare from="Balti" to="' . $um_to . '"]' ) ) ) ) ) );
+$um_bad = $um_form();
+wp_delete_post( $um_p1, true );
+wp_delete_post( $um_p2, true );
+$um_good = $um_form();
+lbb_t( 'panoul „Gata de plăți?”: pagina cu orașe fără rută activă (și în Elementor) e semnalată cu galben, cu numele paginii', $um_bad && 'warn' === $um_bad['ok'] && false !== strpos( $um_bad['detail'], '„Pagina Veche Test”: Nicaieri → Iasi' ) && false !== strpos( $um_bad['detail'], '„Elementor Pereche Test”: Balti → ' . $um_to ) && $um_good && true === $um_good['ok'] && false === strpos( $um_good['detail'], 'fără rută activă' ), array( $um_bad, $um_good ) );
+
 echo "\n" . $GLOBALS['lbb_ok'] . ' ok, ' . $GLOBALS['lbb_fail'] . " eșuate\n";
 if ( $GLOBALS['lbb_fail'] ) {
 	exit( 1 );

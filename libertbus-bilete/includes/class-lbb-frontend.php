@@ -463,14 +463,7 @@ class LBB_Frontend {
 		);
 		// Doar pentru cine administrează biletele: orașele din shortcode nu se potrivesc cu nicio rută activă (redenumită,
 		// oprită, scrisă greșit), deci formularul nu are ruta aleasă. Vizitatorii văd, ca până acum, toate rutele.
-		$unmatched = '';
-		if ( ! $posted && ( current_user_can( LBB_Admin::CAP ) || current_user_can( 'manage_options' ) ) ) {
-			$from_bad = '' !== trim( (string) $atts['from'] ) && '' === $preset['from'];
-			$to_bad   = '' !== trim( (string) $atts['to'] ) && ( '' === $preset['to'] || ( $preset['from'] && ! in_array( $preset['to'], wp_list_pluck( $map[ $preset['from'] ], 'to' ), true ) ) );
-			if ( $from_bad || $to_bad ) {
-				$unmatched = trim( trim( (string) $atts['from'] ) . ' → ' . trim( (string) $atts['to'] ), ' →' );
-			}
-		}
+		$unmatched = ! $posted && ( current_user_can( LBB_Admin::CAP ) || current_user_can( 'manage_options' ) ) ? self::unmatched_cities( $atts['from'], $atts['to'], $map ) : '';
 		$config = array(
 			'map'           => $map,
 			'preset'        => $preset,
@@ -694,6 +687,23 @@ class LBB_Frontend {
 	/**
 	 * Potrivește „Balti” cu „Bălți”: ignoră diacriticele și majusculele.
 	 */
+	/**
+	 * Orașele din shortcode care nu se potrivesc cu nicio rută activă (redenumită, oprită, scrisă greșit), ori o
+	 * pereche fără rută: „Balti → Suceava”. Gol dacă totul se potrivește (sau shortcode-ul n-are orașe).
+	 *
+	 * @param string $from Atributul „from”.
+	 * @param string $to   Atributul „to”.
+	 * @param array  $map  LBB_Routes::public_map().
+	 */
+	public static function unmatched_cities( $from, $to, array $map ) {
+		$from  = trim( (string) $from );
+		$to    = trim( (string) $to );
+		$city  = self::match_city( $from, array_keys( $map ) );
+		$dest  = self::match_city( $to, self::all_destinations( $map ) );
+		$bad   = ( '' !== $from && '' === $city ) || ( '' !== $to && ( '' === $dest || ( $city && ! in_array( $dest, wp_list_pluck( $map[ $city ], 'to' ), true ) ) ) );
+		return $bad ? trim( $from . ' → ' . $to, ' →' ) : '';
+	}
+
 	public static function match_city( $needle, array $cities ) {
 		$needle = self::fold( $needle );
 		if ( '' === $needle ) {

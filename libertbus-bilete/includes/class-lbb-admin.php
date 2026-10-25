@@ -249,8 +249,28 @@ class LBB_Admin {
 		$add( 'routes', count( $routes ) > 0, __( 'Există rute active cu preț', 'libertbus-bilete' ), LBB_Settings::ro_count( count( $routes ), __( 'rută activă', 'libertbus-bilete' ), __( 'rute active', 'libertbus-bilete' ) ), admin_url( 'admin.php?page=lbb-routes' ) );
 
 		$form_pages = self::pages_with_form();
-		$add( 'form', $form_pages ? true : false, __( 'Formularul de rezervare e pus pe o pagină publicată', 'libertbus-bilete' ),
-			$form_pages ? implode( ', ', wp_list_pluck( $form_pages, 'post_title' ) ) : __( 'Adăugați [libertbus_rezervare] pe o pagină (sau [libertbus_rezervare from="Bălți" to="Iași"] pe paginile de rută).', 'libertbus-bilete' ),
+		// O pagină de rută cu orașe care nu mai corespund unei rute active arată formularul fără ruta aleasă.
+		$unmatched = array();
+		$map       = LBB_Routes::public_map();
+		foreach ( $form_pages as $page ) {
+			// În Elementor shortcode-ul stă într-un text JSON, cu ghilimelele scrise \".
+			$text = get_post_field( 'post_content', $page->ID ) . ' ' . str_replace( '\\"', '"', (string) get_post_meta( $page->ID, '_elementor_data', true ) );
+			preg_match_all( '/\[(?:libertbus_rezervare|lbb_booking)(\s[^\]]*)?\]/', $text, $found );
+			foreach ( $found[1] as $raw ) {
+				$atts = shortcode_parse_atts( (string) $raw );
+				$bad  = is_array( $atts ) && $map ? LBB_Frontend::unmatched_cities( isset( $atts['from'] ) ? $atts['from'] : '', isset( $atts['to'] ) ? $atts['to'] : '', $map ) : '';
+				if ( '' !== $bad ) {
+					$unmatched[] = '„' . $page->post_title . '”: ' . $bad;
+				}
+			}
+		}
+		$add( 'form', $form_pages ? ( $unmatched ? 'warn' : true ) : false, __( 'Formularul de rezervare e pus pe o pagină publicată', 'libertbus-bilete' ),
+			$form_pages
+				? implode( ', ', wp_list_pluck( $form_pages, 'post_title' ) ) . ( $unmatched
+					/* translators: %s: pagini și orașele din shortcode, ex. „Bălți - Iași”: Balti → Iasi */
+					? ' — ' . sprintf( __( 'orașe din shortcode fără rută activă (formularul apare fără ruta aleasă): %s. Verificați orașele din shortcode și din LibertBus → Rute.', 'libertbus-bilete' ), implode( '; ', array_unique( $unmatched ) ) )
+					: '' )
+				: __( 'Adăugați [libertbus_rezervare] pe o pagină (sau [libertbus_rezervare from="Bălți" to="Iași"] pe paginile de rută).', 'libertbus-bilete' ),
 			admin_url( 'edit.php?post_type=page' ) );
 
 		$failed = get_option( 'lbb_mail_failed' );
