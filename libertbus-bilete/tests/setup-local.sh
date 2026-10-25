@@ -20,6 +20,12 @@ if [ "${PHP74:-1}" != 0 ] && ! command -v php7.4 >/dev/null && command -v apt-ge
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends php7.4-cli php7.4-mysql php7.4-mbstring php7.4-xml php7.4-curl php7.4-zip php7.4-gd php7.4-intl
   ) >/dev/null 2>&1 || echo "PHP 7.4 nu s-a putut instala (testele cu PHP 7.4 se sar)"
 fi
+# PHP 8.4 (versiunea spre care se poate actualiza serverul): tests/qa.sh rulează cu el testele automate și caută
+# deprecări din plugin (ex. parametri impliciți null fără „?”). Tot din ondrej/php; PHP84=0 sare peste.
+if [ "${PHP84:-1}" != 0 ] && ! command -v php8.4 >/dev/null && [ -f /etc/apt/sources.list.d/ondrej-php.list ]; then
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends php8.4-cli php8.4-mysql php8.4-mbstring php8.4-xml php8.4-curl php8.4-zip php8.4-gd php8.4-intl >/dev/null 2>&1 \
+    || echo "PHP 8.4 nu s-a putut instala (testele cu PHP 8.4 se sar)"
+fi
 [ -f wp-cli.phar ] || curl -sSL -o wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 # Aceeași versiune ca pe libertbus.md; WP_VERSION=7.1.2 tests/setup-local.sh … testează o actualizare.
 WP_VERSION="${WP_VERSION:-6.4.3}"

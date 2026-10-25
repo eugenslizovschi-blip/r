@@ -747,6 +747,11 @@ lbb_t( 'un bilet anulat dintr-o zi trecută rămâne „anulat”', 'Bilet anula
 // „Adaugă în calendar” doar până la plecare: deschis după ce autocarul a plecat (aceeași zi), linkul nu mai apare.
 $ac_now  = new DateTimeImmutable( 'now', LBB_Settings::tz() );
 $ac_gone = $ac_now->modify( '-1 minute' );
+// În ora care se repetă la trecerea la ora de iarnă (03:00–04:00) aceeași oră scrisă înseamnă două momente: luăm o oră
+// care nu se repetă, tot din ziua de azi, ca testul să nu depindă de momentul rulării.
+if ( DateTimeImmutable::createFromFormat( '!Y-m-d H:i', $ac_gone->format( 'Y-m-d H:i' ), LBB_Settings::tz() ) > $ac_now && $ac_now->modify( '-61 minutes' )->format( 'Y-m-d' ) === $ac_now->format( 'Y-m-d' ) ) {
+	$ac_gone = $ac_now->modify( '-61 minutes' );
+}
 $ac_base = array( 'status' => 'confirmed', 'order_id' => 77, 'ticket_code' => 'LB-TESTCA', 'route_id' => $rid, 'seats' => 1, 'children' => 0, 'passengers' => array(), 'currency' => 'MDL', 'pay_currency' => 'MDL', 'amount' => 100 );
 $ac_left = array_merge( $ac_base, array( 'travel_date' => $ac_gone->format( 'Y-m-d' ), 'dep_time' => $ac_gone->format( 'H:i' ) ) );
 $ac_next = array_merge( $ac_base, array( 'travel_date' => $ac_now->modify( '+1 day' )->format( 'Y-m-d' ), 'dep_time' => '10:00' ) );
@@ -3275,6 +3280,11 @@ wp_trash_post( $tp_old );
 $tp_back = LBB_Install::product_id();
 $tp_ok   = $tp_back === $tp_old && 'publish' === get_post_status( $tp_old ) && 'bilet-autocar-libertbus' === get_post_field( 'post_name', $tp_old ) && wc_get_product( $tp_old )->is_purchasable();
 lbb_t( 'produsul „Bilet autocar” mutat la Gunoi revine singur, același produs și aceeași adresă', $tp_ok, array( $tp_old, $tp_back, get_post_status( $tp_old ), get_post_field( 'post_name', $tp_old ) ) );
+// Ajuns „programat” (data de publicare în viitor), produsul se publică singur din nou: altfel biletele n-ar intra în coș.
+$wpdb->update( $wpdb->posts, array( 'post_status' => 'future', 'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) ), array( 'ID' => $tp_old ) );
+clean_post_cache( $tp_old );
+$tp_fut = LBB_Install::product_id();
+lbb_t( 'produsul „Bilet autocar” ajuns „programat” se publică singur din nou', $tp_fut === $tp_old && 'publish' === get_post_status( $tp_old ) && wc_get_product( $tp_old )->is_purchasable(), array( $tp_fut, get_post_status( $tp_old ) ) );
 // Șters definitiv: se face altul, publicat, cu aceeași adresă (pagina lui trimite tot la formular).
 wp_delete_post( $tp_old, true );
 $tp_new = LBB_Install::product_id();

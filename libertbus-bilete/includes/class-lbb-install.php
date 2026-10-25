@@ -209,8 +209,28 @@ class LBB_Install {
 				add_filter( 'woocommerce_product_get_short_description', array( 'LBB_WooCommerce', 'short_description' ), $hide, 2 );
 			}
 			update_option( self::PRODUCT_OPTION, $id );
+			self::publish_if_scheduled( $id );
 		}
 		delete_option( 'lbb_needs_product' );
+	}
+
+	/**
+	 * „Programat” (future) nu e niciodată voit pentru produsul intern, iar biletele n-ar intra în coș până la acea oră.
+	 * Se întâmplă pe PHP 7.4 (ca pe site), la crearea produsului în ora care se repetă la trecerea la ora de iarnă
+	 * (03:00–04:00 la Chișinău): data de publicare iese cu o oră în viitor. Îl publicăm cu data de acum, dată în UTC.
+	 *
+	 * @param int $id Produsul.
+	 */
+	private static function publish_if_scheduled( $id ) {
+		if ( $id && 'future' === get_post_status( $id ) ) {
+			wp_update_post( array(
+				'ID'            => $id,
+				'post_status'   => 'publish',
+				'post_date'     => current_time( 'mysql' ),
+				'post_date_gmt' => current_time( 'mysql', true ),
+				'edit_date'     => true,
+			) );
+		}
 	}
 
 	public static function product_id() {
@@ -218,6 +238,7 @@ class LBB_Install {
 		// Produsul mutat la Gunoi sau șters din WooCommerce → Produse se recreează (cum spune panoul), altfel biletele
 		// n-ar mai intra în coș și plata online s-ar opri până îl restaurează cineva.
 		$status = $id ? get_post_status( $id ) : false;
+		self::publish_if_scheduled( $id );
 		if ( ( ! $status || 'trash' === $status ) && class_exists( 'WooCommerce' ) ) {
 			self::ensure_product();
 			$id = (int) get_option( self::PRODUCT_OPTION );
