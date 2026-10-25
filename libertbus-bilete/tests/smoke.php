@@ -2702,14 +2702,13 @@ lbb_t( 'fus orar: „UTC+2” fix devine Europe/Chisinau', 'Europe/Chisinau' ===
 $tz_y = array( ( new DateTimeImmutable( '2027-07-15 10:00', LBB_Settings::tz() ) )->format( 'P' ), ( new DateTimeImmutable( '2027-01-15 10:00', LBB_Settings::tz() ) )->format( 'P' ) );
 lbb_t( 'fus orar: cu „UTC+2” fix, iulie e +03:00 (ora de vară) și ianuarie +02:00', array( '+03:00', '+02:00' ) === $tz_y, $tz_y );
 $chis = new DateTimeImmutable( 'now', new DateTimeZone( 'Europe/Chisinau' ) );
-if ( '+03:00' === $chis->format( 'P' ) ) {
-	// Vara: plecare peste 30 de minute (ora Chișinăului) = vânzare închisă (limita e 60 de minute).
-	$soon = $chis->modify( '+30 minutes' );
-	$tzr  = LBB_Routes::save( array( 'origin' => 'TzA', 'destination' => 'TzB', 'departures' => $soon->format( 'H:i' ), 'price' => 10, 'currency' => 'MDL', 'capacity' => 5, 'active' => 1 ) );
-	$deps = LBB_Routes::departures_on( LBB_Routes::get( $tzr ), $soon->format( 'Y-m-d' ) );
-	lbb_t( 'fus orar: vara, plecarea de peste 30 de minute e închisă', isset( $deps[0] ) && ! $deps[0]['bookable'], $deps );
-	LBB_Routes::delete( $tzr );
-}
+// Plecare peste 30 de minute (ora Chișinăului) = vânzare închisă (limita e 60 de minute). Rulează tot anul (numărul de
+// verificări nu depinde de anotimp); vara verifică în plus că „UTC+2” fix nu pierde ora de vară.
+$soon = $chis->modify( '+30 minutes' );
+$tzr  = LBB_Routes::save( array( 'origin' => 'TzA', 'destination' => 'TzB', 'departures' => $soon->format( 'H:i' ), 'price' => 10, 'currency' => 'MDL', 'capacity' => 5, 'active' => 1 ) );
+$deps = LBB_Routes::departures_on( LBB_Routes::get( $tzr ), $soon->format( 'Y-m-d' ) );
+lbb_t( 'fus orar: plecarea de peste 30 de minute (ora Chișinăului, și vara) e închisă', isset( $deps[0] ) && ! $deps[0]['bookable'], $deps );
+LBB_Routes::delete( $tzr );
 update_option( 'timezone_string', 'Europe/Bucharest' );
 lbb_t( 'fus orar: un oraș ales în WordPress are întâietate', 'Europe/Bucharest' === LBB_Settings::tz()->getName() );
 update_option( 'timezone_string', '' );
