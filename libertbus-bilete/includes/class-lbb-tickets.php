@@ -554,8 +554,10 @@ class LBB_Tickets {
 		if ( ! $route || ! $start ) {
 			return '';
 		}
+		// Un „\r” rămas în text (rând nou Windows, dintr-un import sau din phpMyAdmin) ar strica fișierul: unele
+		// calendare (iPhone) îl refuză. Devine rând nou, ca „\n”.
 		$esc   = function ( $text ) {
-			return str_replace( array( '\\', ';', ',', "\n" ), array( '\\\\', '\\;', '\\,', '\\n' ), $text );
+			return str_replace( array( '\\', ';', ',', "\r\n", "\r", "\n" ), array( '\\\\', '\\;', '\\,', '\\n', '\\n', '\\n' ), $text );
 		};
 		$utc   = new DateTimeZone( 'UTC' );
 		$name  = $route['origin'] . ' → ' . $route['destination'];

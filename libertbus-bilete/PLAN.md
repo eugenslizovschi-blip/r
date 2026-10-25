@@ -130,7 +130,7 @@
   - **Română corectă** la numere: „cel mult 20 de locuri”, „mai mult de 20 de persoane”, „ultimele 200 de rezervări”; data din politici după ora Chișinăului și cu fusul „UTC+2” fix.
   - **Date neobișnuite sau stricate:** pagina nu mai cade și nu mai arată „Array”:
     - o rezervare cu mai mulți copii decât locuri (modificată manual în baza de date) bloca pagina biletului, lista pentru șofer și CSV-ul până la limita serverului; acum se afișează normal;
-    - fișierul „Adaugă în calendar” cu un text stricat (ex. dintr-o traducere coruptă) nu mai intră într-o buclă fără sfârșit;
+    - fișierul „Adaugă în calendar” cu un text stricat (ex. dintr-o traducere coruptă) nu mai intră într-o buclă fără sfârșit, iar un loc de urcare cu rând nou Windows (import, phpMyAdmin) nu-l mai face invalid pentru calendarul de pe iPhone;
     - o listă de pasageri stricată în baza de date nu mai apare pe bilet ca „Array”;
     - formularele din admin (rute, setări) cu date măsluite (o listă în loc de text) nu mai dau eroare fatală;
     - o rută cu „Notițe interne” goale în forma NULL (import, phpMyAdmin) se editează fără avertismente pe PHP 8.1+.

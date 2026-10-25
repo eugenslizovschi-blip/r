@@ -2049,12 +2049,18 @@ ob_start();
 LBB_Admin::page_routes();
 $bd_list = ob_get_clean();
 $_GET = array();
+// Locul de urcare scris direct în baza de date cu rând nou Windows („\r\n”): calendarul rămâne valid (fără „\r” singur).
+if ( is_int( $bd_r ) ) {
+	$wpdb->update( LBB_Routes::table(), array( 'boarding' => "Autogara Nord\r\nperon 3\rintrarea B" ), array( 'id' => $bd_r ) );
+}
+$bd_cr = is_int( $bd_r ) ? LBB_Tickets::ics( $bd_b ) : '';
 $bd_e = is_int( $bd_r ) ? LBB_Routes::save( array_merge( LBB_Routes::get( $bd_r ), array( 'departures' => '10:00', 'boarding' => '' ) ), $bd_r ) : null;
 $bd_n = is_int( $bd_r ) ? LBB_WooCommerce::describe( $bd_b ) : array();
 $bd_i2 = is_int( $bd_r ) ? LBB_Tickets::ics( $bd_b ) : '';
 if ( is_int( $bd_r ) ) {
 	LBB_Routes::delete( $bd_r );
 }
+lbb_t( 'calendar: un rând nou Windows în locul de urcare (din baza de date) nu strică fișierul .ics', '' !== $bd_cr && ! preg_match( "/\r(?!\n)|(?<!\r)\n/", $bd_cr ) && false !== strpos( str_replace( "\r\n ", '', $bd_cr ), 'LOCATION:Autogara Nord\\nperon 3\\nintrarea B' . "\r\n" ), $bd_cr );
 lbb_t( 'lista de rute arată locul de urcare sub rută și câte rute active nu-l au', false !== strpos( $bd_list, '<span class="description lbb-boarding">Urcare: Autogara Nord, peronul 3</span>' ) && (bool) preg_match( '#lbb-no-boarding">\\d+ (de )?rut#u', $bd_list ), substr( wp_strip_all_tags( $bd_list ), 0, 300 ) );
 lbb_t( 'lista de rute arată prețul ca în formular și pe bilet („50 MDL”), nu „50.00 MDL”', false !== strpos( $bd_list, '<td>' . esc_html( LBB_WooCommerce::money( 50, 'MDL' ) ) ) && false === strpos( $bd_list, '50.00 MDL' ), substr( wp_strip_all_tags( $bd_list ), 0, 300 ) );
 $bd_rs = LBB_Tickets::share_text( array_merge( $bd_b, array( 'status' => 'reserved' ) ) );
