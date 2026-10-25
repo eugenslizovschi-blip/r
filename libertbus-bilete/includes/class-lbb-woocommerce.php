@@ -22,6 +22,7 @@ class LBB_WooCommerce {
 		add_filter( 'woocommerce_cart_item_name', array( __CLASS__, 'item_name' ), 10, 2 );
 		add_filter( 'woocommerce_is_sold_individually', array( __CLASS__, 'sold_individually' ), 10, 2 );
 		add_filter( 'woocommerce_add_to_cart_validation', array( __CLASS__, 'block_direct_add' ), 10, 2 );
+		add_action( 'woocommerce_order_details_after_order_table', array( __CLASS__, 'no_order_again' ), 5 );
 		add_action( 'template_redirect', array( __CLASS__, 'product_page_redirect' ) );
 		add_filter( 'wp_sitemaps_posts_query_args', array( __CLASS__, 'sitemap_skip_product' ), 10, 2 );
 		add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', array( __CLASS__, 'yoast_skip_product' ) );
@@ -247,6 +248,17 @@ class LBB_WooCommerce {
 			return false;
 		}
 		return $passed;
+	}
+
+	/**
+	 * „Comandă din nou” (Contul meu, comandă finalizată) nu merge la bilete: cursa, data și pasagerii nu se pot
+	 * repeta, iar clientul ajungea la un coș gol cu „Biletele se cumpără din formularul de rezervare”. La o comandă
+	 * cu bilete butonul nu apare; biletul are oricum linkul lui, iar o cursă nouă se rezervă din formular.
+	 */
+	public static function no_order_again( $order ) {
+		if ( $order instanceof WC_Order && self::has_tickets( $order ) ) {
+			remove_action( 'woocommerce_order_details_after_order_table', 'woocommerce_order_again_button' );
+		}
 	}
 
 	public static function release_on_remove( $key, $cart ) {

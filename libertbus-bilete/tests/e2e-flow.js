@@ -97,6 +97,10 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await page.goto(BASE + '/my-account/view-order/' + orderId + '/');
     const mine = await page.$$eval('.lbb-ticket', els => els.map(e => e.textContent.replace(/\s+/g, ' ')));
     if (!orderId || !code || mine.length !== 1 || mine[0].indexOf(code) < 0) console.log('FAIL comanda din Contul meu nu arată biletul (o dată): ' + JSON.stringify({ orderId, code, mine: mine.map(t => t.slice(0, 60)) }));
+    // „Comandă din nou” ar duce la un coș gol („Biletele se cumpără din formularul de rezervare”): nu apare la bilete.
+    const status = await page.textContent('.woocommerce-MyAccount-content mark.order-status').catch(() => '');
+    if (await page.$('.order-again')) console.log('FAIL comanda cu bilet din Contul meu are „Comandă din nou” (duce la un coș gol); starea: ' + status);
+    else console.log('fără „Comandă din nou” la comanda cu bilet; starea: ' + status);
   }
   console.log('JS errors:', errors.length ? errors : 'none');
   // Ce vede clientul după plată: biletul plătit cu ambii pasageri, pagina lui „valabil”, cu cod QR, fără erori JS.
