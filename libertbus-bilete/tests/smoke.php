@@ -1958,7 +1958,8 @@ $zc_rt = is_int( $zc_r ) ? LBB_Routes::get( $zc_r ) : null;
 $zc_open = $zc_rt ? count( LBB_Routes::departures_on( $zc_rt, $tomorrow ) ) : 0;
 $zc_b  = $zc_rt ? LBB_Bookings::create_hold( $zc_rt, $tomorrow, '10:00', 1, 0, array( 'Inchis Unu' ), '+37369000095', 'zc@example.com', 'MDL' ) : null;
 $zc_b  = is_array( $zc_b ) ? LBB_Bookings::reserve( $zc_b['token'] ) : $zc_b;
-update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'closed_dates' => gmdate( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) ) ) ) );
+// Plus o zi trecută și una dincolo de intervalul de rezervare: în „closedDates” din REST intră doar ziua de mâine.
+update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'closed_dates' => gmdate( 'd.m.Y', strtotime( LBB_Settings::today() . ' 12:00 -1 day' ) ) . ', ' . gmdate( 'd.m.Y', strtotime( $tomorrow . ' 12:00' ) ) . ', 25.12.2099' ) ) );
 $zc_closed = $zc_rt ? LBB_Routes::departures_on( $zc_rt, $tomorrow ) : null;
 $zc_hold   = $zc_rt ? LBB_Bookings::create_hold( $zc_rt, $tomorrow, '10:00', 1, 0, array( 'Inchis Doi' ), '+37369000096', 'zc@example.com', 'MDL' ) : null;
 $zc_req    = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
@@ -1981,7 +1982,7 @@ if ( is_int( $zc_r ) ) {
 	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $zc_r ) );
 	LBB_Routes::delete( $zc_r );
 }
-lbb_t( 'zi fără curse: REST spune „closed” (formularul arată „zi liberă”), o zi obișnuită nu', true === ( $zc_rest['closed'] ?? null ) && false === ( $zc_rest2['closed'] ?? null ) && 1 === count( $zc_rest2['departures'] ?? array() ) && false !== strpos( (string) file_get_contents( LBB_DIR . 'assets/lbb.js' ), 'data.closed ? t.closedDay' ), array( $zc_rest, $zc_rest2 ) );
+lbb_t( 'zi fără curse: REST spune „closed” (formularul arată „zi liberă”), o zi obișnuită nu; „closedDates” are doar zilele din intervalul de rezervare (pentru „Ziua următoare →”)', true === ( $zc_rest['closed'] ?? null ) && false === ( $zc_rest2['closed'] ?? null ) && 1 === count( $zc_rest2['departures'] ?? array() ) && array( $tomorrow ) === ( $zc_rest['closedDates'] ?? null ) && array( $tomorrow ) === ( $zc_rest2['closedDates'] ?? null ) && false !== strpos( (string) file_get_contents( LBB_DIR . 'assets/lbb.js' ), 'data.closed ? t.closedDay' ), array( $zc_rest, $zc_rest2 ) );
 lbb_t( 'lista pentru șofer într-o zi fără curse care are totuși bilete: avertizează biroul să anunțe pasagerii', false !== strpos( $zc_man, 'lbb-closed-day' ) && false !== strpos( $zc_man, 'Inchis Unu' ) && false === strpos( $zc_man2, 'lbb-closed-day' ), substr( wp_strip_all_tags( $zc_man ), 0, 300 ) );
 lbb_t( 'zile fără curse: se salvează ca 26.12.2099, 25.12.2099 → sortate, în formatul de pe ecran', '25.12.2099, 26.12.2099' === $zc_saved, $zc_saved );
 lbb_t( 'într-o zi fără curse nu se arată plecări și nu se poate rezerva; rezervarea făcută înainte se vede la avertizare', 1 === $zc_open && array() === $zc_closed && is_wp_error( $zc_hold ) && array() === ( $zc_rest['departures'] ?? null ) && ( $zc_sold[ $tomorrow ] ?? 0 ) >= 1 && array( $tomorrow ) === array_keys( $zc_sold ), array( $zc_open, $zc_closed, $zc_hold, $zc_rest, $zc_sold ) );

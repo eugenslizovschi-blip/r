@@ -315,6 +315,21 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
       await p2.waitForFunction(() => document.querySelector('[data-lbb="status"] button.lbb-next-day'), null, { timeout: 15000 }).catch(() => {});
       const s2 = await step();
       if (!s2 || s2.date !== plus(6)) fail('„Ziua următoare” din vineri nu duce luni: ' + JSON.stringify({ s2, want: plus(6) }));
+      // Joi e zi fără curse în Setări (sărbătoare, „closedDates” din răspuns): din marți, butonul duce direct luni.
+      const holiday = async r => {
+        const res = await r.fetch();
+        const body = await res.json();
+        body.closedDates = [plus(2)];
+        await r.fulfill({ response: res, json: body });
+      };
+      const depUrl = u => /departures/.test(u.href);
+      await p2.route(depUrl, holiday);
+      await p2.fill('[data-lbb="date"]', plus(0));
+      await p2.dispatchEvent('[data-lbb="date"]', 'change');
+      await p2.waitForFunction(() => document.querySelector('[data-lbb="status"] button.lbb-next-day'), null, { timeout: 15000 }).catch(() => {});
+      const s3 = await step();
+      await p2.unroute(depUrl, holiday);
+      if (!s3 || s3.date !== plus(6)) fail('„Ziua următoare” nu sare peste ziua fără curse din Setări: ' + JSON.stringify({ s3, want: plus(6) }));
     }
     await p2.close();
   }

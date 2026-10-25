@@ -43,6 +43,8 @@ class LBB_Rest {
 		if ( ! $route || ! $route['active'] || $route['price'] <= 0 ) {
 			return new WP_Error( 'lbb_not_found', __( 'Ruta nu există.', 'libertbus-bilete' ), array( 'status' => 404 ) );
 		}
+		$today    = LBB_Settings::today();
+		$max_date = ( new DateTimeImmutable( $today, LBB_Settings::tz() ) )->modify( '+' . (int) LBB_Settings::get( 'max_days_ahead' ) . ' days' )->format( 'Y-m-d' );
 		$response = rest_ensure_response( array(
 			'route_id'   => $route['id'],
 			'date'       => $request['date'],
@@ -57,8 +59,12 @@ class LBB_Rest {
 			// Tot pentru pagina din cache: „azi” scris în ea poate fi ieri; formularul ia ziua de azi de aici.
 			// Și prețul: o pagină din cache ar arăta în rezumat prețul vechi, iar la plată s-ar cere cel nou.
 			'route'      => LBB_Routes::public_entry( $route ),
-			'today'      => LBB_Settings::today(),
-			'maxDate'    => ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '+' . (int) LBB_Settings::get( 'max_days_ahead' ) . ' days' )->format( 'Y-m-d' ),
+			'today'      => $today,
+			'maxDate'    => $max_date,
+			// Zilele fără curse de aici încolo: „Ziua următoare →” sare peste ele (ex. de pe 24.12 direct pe 26.12).
+			'closedDates' => array_values( array_filter( LBB_Settings::closed_dates(), function ( $d ) use ( $today, $max_date ) {
+				return $d >= $today && $d <= $max_date;
+			} ) ),
 		) );
 		$response->header( 'Cache-Control', 'no-store' );
 		return $response;

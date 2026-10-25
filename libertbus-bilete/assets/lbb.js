@@ -201,6 +201,7 @@
 		var preset = cfg.preset || {};
 		var dateTouched = !! preset.date;
 		var skipped = 0;
+		var closedDates = [];
 		var shownDate = ''; // Data pentru care s-au cerut orele afișate.
 		var memoKey = 'lbbTime' + ( index || 0 );
 		var namesKey = 'lbbNames' + ( index || 0 );
@@ -747,11 +748,14 @@
 			return d.toISOString().slice( 0, 10 );
 		}
 
-		// Următoarea zi în care ruta circulă (ruta „luni, joi”: din luni direct joi, nu marți și miercuri goale).
+		// Următoarea zi în care ruta circulă (ruta „luni, joi”: din luni direct joi, nu marți și miercuri goale),
+		// peste zilele fără curse din Setări (sărbători).
 		function nextRunDay( ymd, route ) {
 			var days = route && route.days && route.days.length < 7 ? route.days.map( Number ) : [];
+			var closed = closedDates;
 			var next = nextDay( ymd );
-			for ( var i = 0; days.length && i < 6 && days.indexOf( new Date( next + 'T12:00:00Z' ).getUTCDay() || 7 ) < 0; i++ ) {
+			// Dacă nu mai e nicio zi cu curse până la capătul intervalului, data trece de el și butonul nu apare.
+			for ( var i = 0; i < 400 && next <= cfg.maxDate && ( closed.indexOf( next ) > -1 || ( days.length && days.indexOf( new Date( next + 'T12:00:00Z' ).getUTCDay() || 7 ) < 0 ) ); i++ ) {
 				next = nextDay( next );
 			}
 			return next;
@@ -805,6 +809,9 @@
 						if ( data.route.days ) {
 							route.days = data.route.days;
 						}
+					}
+					if ( data.closedDates ) {
+						closedDates = data.closedDates;
 					}
 					// Pagina din cache de ieri: intervalul de date se mută pe ziua de azi a serverului, iar o dată rămasă
 					// în urmă (nealeasă de client) trece pe azi și orele se cer din nou.
