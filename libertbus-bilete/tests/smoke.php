@@ -3439,6 +3439,44 @@ wp_delete_post( $um_p2, true );
 $um_good = $um_form();
 lbb_t( 'panoul „Gata de plăți?”: pagina cu orașe fără rută activă (și în Elementor) e semnalată cu galben, cu numele paginii', $um_bad && 'warn' === $um_bad['ok'] && false !== strpos( $um_bad['detail'], '„Pagina Veche Test”: Nicaieri → Iasi' ) && false !== strpos( $um_bad['detail'], '„Elementor Pereche Test”: Balti → ' . $um_to ) && $um_good && true === $um_good['ok'] && false === strpos( $um_good['detail'], 'fără rută activă' ), array( $um_bad, $um_good ) );
 
+// Transfer bancar / cec / plata la livrare ar emite biletul „achitat” fără bani: la bilete rămân doar plățile cu cardul.
+$co_all  = array( 'bacs' => 1, 'cheque' => 1, 'cod' => 1, 'lbb_test' => 1, 'paynet' => 1 );
+$co_res  = array();
+$co_r    = LBB_Routes::save( array( 'origin' => 'CardA', 'destination' => 'CardB', 'departures' => '23:58', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$co_keep = get_option( 'lbb_settings', array() );
+if ( is_int( $co_r ) && function_exists( 'WC' ) ) {
+	update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_pay' => 1 ) ) );
+	if ( ! WC()->cart ) {
+		wc_load_cart();
+	}
+	WC()->cart->empty_cart();
+	$co_res['gol'] = array_keys( apply_filters( 'woocommerce_available_payment_gateways', $co_all ) );
+	LBB_Frontend::book( array( 'lbb_route' => $co_r, 'lbb_date' => $tomorrow, 'lbb_time' => '23:58', 'lbb_adults' => 1, 'lbb_names' => array( 'Ion Card' ), 'lbb_phone' => '+37369000071', 'lbb_email' => 'card@example.com', 'lbb_mode' => 'pay' ) );
+	$co_res['bilet'] = array_keys( apply_filters( 'woocommerce_available_payment_gateways', $co_all ) );
+	foreach ( WC()->cart->get_cart() as $co_i ) {
+		if ( ! empty( $co_i['lbb']['token'] ) ) {
+			LBB_Bookings::release( $co_i['lbb']['token'] );
+		}
+	}
+	WC()->cart->empty_cart();
+	// „Plătește” pentru o comandă cu bilete (coșul e gol pe acea pagină) și pentru o comandă fără bilete.
+	$co_o1 = wc_create_order();
+	$co_o1->update_meta_data( '_lbb_tickets', 'yes' );
+	$co_o1->save();
+	$co_o2 = wc_create_order();
+	set_query_var( 'order-pay', $co_o1->get_id() );
+	$co_res['plata'] = array_keys( apply_filters( 'woocommerce_available_payment_gateways', $co_all ) );
+	set_query_var( 'order-pay', $co_o2->get_id() );
+	$co_res['altă'] = array_keys( apply_filters( 'woocommerce_available_payment_gateways', $co_all ) );
+	set_query_var( 'order-pay', '' );
+	$co_o1->delete( true );
+	$co_o2->delete( true );
+	update_option( 'lbb_settings', $co_keep );
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $co_r ) );
+	LBB_Routes::delete( $co_r );
+}
+lbb_t( 'la bilete nu se poate alege transfer bancar, cec sau plata la livrare (biletul s-ar emite „achitat” fără bani), nici la „Plătește”; fără bilete rămân toate', array( 'bacs', 'cheque', 'cod', 'lbb_test', 'paynet' ) === ( $co_res['gol'] ?? null ) && array( 'lbb_test', 'paynet' ) === ( $co_res['bilet'] ?? null ) && array( 'lbb_test', 'paynet' ) === ( $co_res['plata'] ?? null ) && array( 'bacs', 'cheque', 'cod', 'lbb_test', 'paynet' ) === ( $co_res['altă'] ?? null ), $co_res );
+
 echo "\n" . $GLOBALS['lbb_ok'] . ' ok, ' . $GLOBALS['lbb_fail'] . " eșuate\n";
 if ( $GLOBALS['lbb_fail'] ) {
 	exit( 1 );

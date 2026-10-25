@@ -23,6 +23,7 @@ class LBB_WooCommerce {
 		add_filter( 'woocommerce_is_sold_individually', array( __CLASS__, 'sold_individually' ), 10, 2 );
 		add_filter( 'woocommerce_add_to_cart_validation', array( __CLASS__, 'block_direct_add' ), 10, 2 );
 		add_action( 'woocommerce_order_details_after_order_table', array( __CLASS__, 'no_order_again' ), 5 );
+		add_filter( 'woocommerce_available_payment_gateways', array( __CLASS__, 'card_only' ), 20 );
 		add_action( 'template_redirect', array( __CLASS__, 'product_page_redirect' ) );
 		add_filter( 'wp_sitemaps_posts_query_args', array( __CLASS__, 'sitemap_skip_product' ), 10, 2 );
 		add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', array( __CLASS__, 'yoast_skip_product' ) );
@@ -248,6 +249,22 @@ class LBB_WooCommerce {
 			return false;
 		}
 		return $passed;
+	}
+
+	/**
+	 * Transfer bancar, cec, plata la livrare: comanda trece „în așteptare” / „în procesare” fără bani, iar biletul
+	 * s-ar emite ca achitat. La un coș doar cu bilete (și la „Plătește” pentru o comandă cu bilete) rămân doar
+	 * plățile cu cardul; plata la șofer e „Rezerv, achit la urcare”, din formular.
+	 */
+	public static function card_only( $gateways ) {
+		if ( ! is_array( $gateways ) || ( is_admin() && ! wp_doing_ajax() ) ) {
+			return $gateways;
+		}
+		$pay_id = absint( get_query_var( 'order-pay' ) );
+		if ( $pay_id ? ! self::has_tickets( wc_get_order( $pay_id ) ) : ! self::cart_only_tickets() ) {
+			return $gateways;
+		}
+		return array_diff_key( $gateways, array_flip( array( 'bacs', 'cheque', 'cod' ) ) );
 	}
 
 	/**
