@@ -747,6 +747,16 @@
 			return d.toISOString().slice( 0, 10 );
 		}
 
+		// Următoarea zi în care ruta circulă (ruta „luni, joi”: din luni direct joi, nu marți și miercuri goale).
+		function nextRunDay( ymd, route ) {
+			var days = route && route.days && route.days.length < 7 ? route.days.map( Number ) : [];
+			var next = nextDay( ymd );
+			for ( var i = 0; days.length && i < 6 && days.indexOf( new Date( next + 'T12:00:00Z' ).getUTCDay() || 7 ) < 0; i++ ) {
+				next = nextDay( next );
+			}
+			return next;
+		}
+
 		function loadDepartures() {
 			var route = currentRoute();
 			dateHint();
@@ -792,6 +802,9 @@
 						route.orig_price = data.route.orig_price;
 						route.orig_cur = data.route.orig_cur;
 						route.boarding = data.route.boarding;
+						if ( data.route.days ) {
+							route.days = data.route.days;
+						}
 					}
 					// Pagina din cache de ieri: intervalul de date se mută pe ziua de azi a serverului, iar o dată rămasă
 					// în urmă (nealeasă de client) trece pe azi și orele se cer din nou.
@@ -813,15 +826,16 @@
 						return d.bookable;
 					} );
 					// Data aleasă automat nu are plecări deschise (ex. seara): trecem la următoarea zi cu locuri.
-					if ( ! open.length && ! dateTouched && skipped < 14 && el.date.value < cfg.maxDate ) {
+					var after = nextRunDay( el.date.value, route );
+					if ( ! open.length && ! dateTouched && skipped < 14 && after <= cfg.maxDate ) {
 						skipped++;
-						el.date.value = nextDay( el.date.value );
+						el.date.value = after;
 						loadDepartures();
 						return;
 					}
 					setStatus( departures.length ? ( open.length ? '' : t.noneOpen ) : ( data.closed ? t.closedDay : t.noDeparture + runsOn( route ) ) );
 					// Fără locuri în ziua aleasă: pe telefon calendarul se redeschide greu, „Ziua următoare” e la o atingere.
-					if ( ! open.length && t.nextDay && el.date.value < cfg.maxDate ) {
+					if ( ! open.length && t.nextDay && after <= cfg.maxDate ) {
 						el.status.appendChild( document.createTextNode( ' ' ) );
 						var dayBtn = document.createElement( 'button' );
 						dayBtn.type = 'button';
@@ -834,7 +848,7 @@
 						dayBtn.appendChild( arrow );
 						dayBtn.addEventListener( 'click', function () {
 							dateTouched = true;
-							el.date.value = nextDay( el.date.value );
+							el.date.value = after;
 							el.date.focus();
 							loadDepartures();
 						} );

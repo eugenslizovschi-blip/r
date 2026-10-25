@@ -40,7 +40,7 @@
     - după apăsarea butonului, sub el scrie „Vă ducem la plată…” / „Se trimite rezervarea…” (pe internet lent clientul nu mai apasă de două ori și nu închide pagina);
     - la numele pasagerilor, telefonul pune majusculă la fiecare cuvânt și nu mai „corectează” numele de familie (ex. „Rusu” → „Rush” pe iPhone);
     - pentru o rută care nu circulă zilnic, într-o zi fără curse mesajul spune și zilele de circulație („Ruta circulă doar: luni, joi.”), inclusiv în eroarea de la server (telefoane vechi, fără JavaScript).
-    - când în ziua aleasă nu sunt curse sau locuri, butonul „Ziua următoare →” de lângă mesaj trece la ziua de după, fără a redeschide calendarul pe telefon;
+    - când în ziua aleasă nu sunt curse sau locuri, butonul „Ziua următoare →” de lângă mesaj trece la următoarea zi în care circulă ruta (ruta „luni, joi”: din marți direct joi, din vineri direct luni), fără a redeschide calendarul pe telefon;
     - la o oră cu puține locuri (ex. 2), lista de pasageri se oprește la 2, iar sub ea scrie „La ora aleasă mai sunt doar 2 locuri libere online…”, cu telefonul (înainte lista se oprea fără explicație);
     - cititorul de ecran nu mai spune „săgeată” sau „ghilimea unghiulară” la butoanele „← Schimbă cursa”, „Ziua următoare →” și „‹ Ziua precedentă” (săgețile sunt doar decor);
     - o rută oprită și apoi pornită din nou apare imediat în formular: nici răspunsurile de eroare ale serverului („ruta nu există”) nu mai rămân în cache-ul site-ului;
