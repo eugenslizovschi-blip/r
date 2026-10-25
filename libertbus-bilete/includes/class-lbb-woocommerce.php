@@ -84,13 +84,19 @@ class LBB_WooCommerce {
 			if ( ! self::is_ticket_product( $item['product_id'] ) ) {
 				continue;
 			}
-			$token = isset( $item['lbb']['token'] ) ? $item['lbb']['token'] : '';
-			$ok    = $token && LBB_Bookings::refresh_hold( $token );
+			$token   = isset( $item['lbb']['token'] ) ? $item['lbb']['token'] : '';
+			$ok      = $token && LBB_Bookings::refresh_hold( $token );
+			$booking = $ok || ! $token ? null : LBB_Bookings::get_by_token( $token );
 			self::forget( $token );
 			if ( ! $ok ) {
 				unset( $cart->cart_contents[ $key ] );
 				if ( function_exists( 'wc_add_notice' ) && ! wp_doing_cron() ) {
-					wc_add_notice( __( 'Timpul de rezervare a expirat și locurile nu mai sunt disponibile. Alegeți din nou cursa.', 'libertbus-bilete' ), 'notice' );
+					// Coșul uitat până după plecare: „alegeți din nou cursa” l-ar trimite după același autocar.
+					$route = $booking && LBB_Bookings::departed( $booking ) ? LBB_Routes::get( $booking['route_id'] ) : null;
+					wc_add_notice( $route
+						/* translators: 1: ruta, 2: data și ora plecării */
+						? sprintf( __( 'Autocarul %1$s din %2$s a plecat deja, așa că biletul a fost scos din coș. Alegeți altă cursă.', 'libertbus-bilete' ), LBB_Bookings::route_name( $route ), self::date_with_day( $booking['travel_date'] ) . ' ' . $booking['dep_time'] )
+						: __( 'Timpul de rezervare a expirat și locurile nu mai sunt disponibile. Alegeți din nou cursa.', 'libertbus-bilete' ), 'notice' );
 				}
 			}
 		}

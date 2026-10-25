@@ -3321,6 +3321,12 @@ if ( ! WC()->session ) {
 }
 $vc_r    = LBB_Routes::find( 'Bălți', 'Iași' );
 $vc_h    = $vc_r ? LBB_Bookings::create_hold( $vc_r, $tomorrow, $vc_r['times'][0], 1, 0, array( 'Cos Test' ), '+37369000086', 'cos@example.com', 'MDL' ) : null;
+// Și un bilet uitat în coș până după plecarea autocarului: mesajul spune că a plecat, nu „alegeți din nou cursa”.
+$vc_p    = $vc_r ? LBB_Bookings::create_hold( $vc_r, $tomorrow, $vc_r['times'][0], 1, 0, array( 'Cos Plecat' ), '+37369000087', 'cos@example.com', 'MDL' ) : null;
+$vc_y    = ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '-1 day' )->format( 'Y-m-d' );
+if ( is_array( $vc_p ) ) {
+	$wpdb->update( LBB_Bookings::table(), array( 'travel_date' => $vc_y ), array( 'id' => $vc_p['id'] ) );
+}
 $vc_cart = new class() {
 	public $cart_contents = array();
 	public function get_cart() {
@@ -3330,6 +3336,7 @@ $vc_cart = new class() {
 $vc_cart->cart_contents = array(
 	'ok'    => array( 'product_id' => LBB_Install::product_id(), 'lbb' => array( 'token' => is_array( $vc_h ) ? $vc_h['token'] : '' ) ),
 	'gone'  => array( 'product_id' => LBB_Install::product_id(), 'lbb' => array( 'token' => 'nu-exista' ) ),
+	'plecat' => array( 'product_id' => LBB_Install::product_id(), 'lbb' => array( 'token' => is_array( $vc_p ) ? $vc_p['token'] : '' ) ),
 	'other' => array( 'product_id' => 999999 ),
 );
 wc_clear_notices();
@@ -3339,8 +3346,11 @@ wc_clear_notices();
 if ( is_array( $vc_h ) ) {
 	LBB_Bookings::release( $vc_h['token'] );
 }
+if ( is_array( $vc_p ) ) {
+	$wpdb->delete( LBB_Bookings::table(), array( 'id' => $vc_p['id'] ) );
+}
 WC()->session = $vc_sess;
-lbb_t( 'coș: biletul cu locurile ținute rămâne, cel cu rezervarea dispărută iese cu mesaj, alte produse rămân', array( 'ok', 'other' ) === array_keys( $vc_cart->cart_contents ) && 1 === count( $vc_notes ) && false !== strpos( $vc_notes[0]['notice'], 'Timpul de rezervare a expirat' ), array( array_keys( $vc_cart->cart_contents ), $vc_notes ) );
+lbb_t( 'coș: biletul cu locurile ținute rămâne, cel cu rezervarea dispărută iese cu mesaj, cel al unui autocar plecat iese cu „a plecat deja”, alte produse rămân', array( 'ok', 'other' ) === array_keys( $vc_cart->cart_contents ) && 2 === count( $vc_notes ) && false !== strpos( $vc_notes[0]['notice'], 'Timpul de rezervare a expirat' ) && $vc_r && false !== strpos( $vc_notes[1]['notice'], 'Autocarul ' . LBB_Bookings::route_name( $vc_r ) . ' din ' . LBB_WooCommerce::date_with_day( $vc_y ) . ' ' . $vc_r['times'][0] . ' a plecat deja' ), array( array_keys( $vc_cart->cart_contents ), $vc_notes ) );
 
 // Codul QR îl desenează scriptul: în HTML-ul de la server locul nu se anunță încă drept „imagine” (fără JavaScript ar fi
 // un „Cod QR” gol pentru cititorul de ecran); textul așteaptă în data-qr-label.
