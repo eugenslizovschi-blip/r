@@ -332,6 +332,17 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
       const s2 = await step();
       if (!s2 || s2.name.indexOf('Următoarea zi cu curse: ' + words(6)) !== 0) fail('din vineri butonul nu spune „Următoarea zi cu curse: luni, …”: ' + JSON.stringify(s2 && s2.name));
       if (!s2 || s2.date !== plus(6)) fail('„Ziua următoare” din vineri nu duce luni: ' + JSON.stringify({ s2, want: plus(6) }));
+      // La 320px, pe o temă care pune „white-space: nowrap” pe butoane, textul lung se rupe pe rânduri, nu iese din ecran.
+      {
+        await p2.setViewportSize({ width: 320, height: 640 });
+        await p2.addStyleTag({ content: 'button { white-space: nowrap; }' });
+        await p2.fill('[data-lbb="date"]', plus(0));
+        await p2.dispatchEvent('[data-lbb="date"]', 'change');
+        await p2.waitForFunction(() => /Următoarea zi cu curse/.test((document.querySelector('[data-lbb="status"] button.lbb-next-day') || {}).textContent || ''), null, { timeout: 15000 }).catch(() => {});
+        const fit = await p2.evaluate(() => { const bt = document.querySelector('[data-lbb="status"] button.lbb-next-day'); return bt ? { right: Math.round(bt.getBoundingClientRect().right), sw: document.documentElement.scrollWidth, vw: innerWidth } : null; });
+        if (!fit || fit.right > fit.vw || fit.sw > fit.vw) fail('la 320px, „Următoarea zi cu curse: …” iese din ecran: ' + JSON.stringify(fit));
+        await p2.setViewportSize({ width: 390, height: 844 });
+      }
       // Miercuri → joi e chiar ziua următoare: butonul rămâne „Ziua următoare”.
       await p2.fill('[data-lbb="date"]', plus(1));
       await p2.dispatchEvent('[data-lbb="date"]', 'change');
