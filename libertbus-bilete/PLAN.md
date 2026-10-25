@@ -43,6 +43,7 @@
     - când în ziua aleasă nu sunt curse sau locuri, butonul „Ziua următoare →” de lângă mesaj trece la următoarea zi în care circulă ruta (ruta „luni, joi”: din marți direct joi, din vineri direct luni) și sare peste zilele fără curse din Setări (sărbători), fără a redeschide calendarul pe telefon;
     - seara, după ultima cursă de azi, formularul trece singur pe prima zi cu locuri și spune de ce („Azi nu mai sunt plecări cu locuri online …”), iar cititorul de ecran anunță schimbarea;
     - ora aleasă (ex. 15:30) rămâne aleasă când clientul schimbă data, dacă și în ziua nouă cursa are locuri (înainte trebuia aleasă din nou);
+    - sub câmpul de dată, azi și mâine se spun pe nume: „mâine, luni, 26 octombrie” (seara formularul trece singur pe mâine);
     - la o oră cu puține locuri (ex. 2), lista de pasageri se oprește la 2, iar sub ea scrie „La ora aleasă mai sunt doar 2 locuri libere online…”, cu telefonul (înainte lista se oprea fără explicație);
     - cititorul de ecran nu mai spune „săgeată” sau „ghilimea unghiulară” la butoanele „← Schimbă cursa”, „Ziua următoare →” și „‹ Ziua precedentă” (săgețile sunt doar decor);
     - o rută oprită și apoi pornită din nou apare imediat în formular: nici răspunsurile de eroare ale serverului („ruta nu există”) nu mai rămân în cache-ul site-ului;

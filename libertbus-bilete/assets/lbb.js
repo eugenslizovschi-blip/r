@@ -742,7 +742,8 @@
 				return;
 			}
 			var d = new Date( v + 'T12:00:00Z' );
-			el.dateHint.textContent = t.dayNames[ d.getUTCDay() || 7 ] + ', ' + d.getUTCDate() + ' ' + t.monthNames[ d.getUTCMonth() ];
+			var near = v === cfg.today ? t.isToday : ( v === nextDay( cfg.today ) ? t.isTomorrow : '' );
+			el.dateHint.textContent = ( near ? near + ', ' : '' ) + t.dayNames[ d.getUTCDay() || 7 ] + ', ' + d.getUTCDate() + ' ' + t.monthNames[ d.getUTCMonth() ];
 		}
 
 		function nextDay( ymd ) {
@@ -820,6 +821,7 @@
 					// în urmă (nealeasă de client) trece pe azi și orele se cer din nou.
 					if ( data.today && data.today > cfg.today ) {
 						cfg.today = data.today;
+						dateHint(); // „azi” / „mâine” după ziua serverului, nu după pagina din cache.
 						el.date.min = data.today;
 						if ( data.maxDate ) {
 							cfg.maxDate = data.maxDate;

@@ -487,6 +487,9 @@ class LBB_Frontend {
 				/* translators: %s: telefon */
 				'routeGone'   => sprintf( __( 'Această rută nu se mai rezervă online. Reîncărcați pagina sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
 				'dayNames'    => array_merge( array( '' ), array_values( LBB_Routes::day_names() ) ),
+				// „mâine, luni, 26 octombrie” sub câmpul de dată: seara, clientul vede că formularul a trecut pe mâine.
+				'isToday'     => __( 'azi', 'libertbus-bilete' ),
+				'isTomorrow'  => __( 'mâine', 'libertbus-bilete' ),
 				// „luni, 12 octombrie” sub câmpul de dată: pe telefoanele în engleză data apare 10/12/2026 (lună/zi).
 				'monthNames'  => array( __( 'ianuarie', 'libertbus-bilete' ), __( 'februarie', 'libertbus-bilete' ), __( 'martie', 'libertbus-bilete' ), __( 'aprilie', 'libertbus-bilete' ), __( 'mai', 'libertbus-bilete' ), __( 'iunie', 'libertbus-bilete' ), __( 'iulie', 'libertbus-bilete' ), __( 'august', 'libertbus-bilete' ), __( 'septembrie', 'libertbus-bilete' ), __( 'octombrie', 'libertbus-bilete' ), __( 'noiembrie', 'libertbus-bilete' ), __( 'decembrie', 'libertbus-bilete' ) ),
 				/* translators: %s: ultima dată la care se poate rezerva online. */

@@ -103,7 +103,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   }
   // Sub dată, ziua în cuvinte: pe telefoanele în engleză câmpul arată 03/01/2027 (lună/zi), ușor de citit greșit.
   const hint0 = await page.textContent('[data-lbb="dateHint"]');
-  if (!/^(luni|marți|miercuri|joi|vineri|sâmbătă|duminică), \d{1,2} (ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)$/.test(hint0)) fail('data în cuvinte lipsește sub câmpul de dată: „' + hint0 + '”');
+  if (!/^((azi|mâine), )?(luni|marți|miercuri|joi|vineri|sâmbătă|duminică), \d{1,2} (ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)$/.test(hint0)) fail('data în cuvinte lipsește sub câmpul de dată: „' + hint0 + '”');
+  // Azi și mâine se spun pe nume (seara formularul trece singur pe mâine).
+  {
+    const min = await page.getAttribute('[data-lbb="date"]', 'min');
+    const tmr = new Date(Date.parse(min + 'T12:00:00Z') + 86400000).toISOString().slice(0, 10);
+    const near = [];
+    for (const d of [min, tmr]) {
+      await page.fill('[data-lbb="date"]', d);
+      await page.dispatchEvent('[data-lbb="date"]', 'change');
+      near.push(await page.textContent('[data-lbb="dateHint"]'));
+    }
+    if (!/^azi, \S+, \d/.test(near[0]) || !/^mâine, \S+, \d/.test(near[1])) fail('„azi” / „mâine” lipsesc din data în cuvinte: ' + JSON.stringify(near));
+  }
   await page.fill('[data-lbb="date"]', '2027-03-01');
   await page.dispatchEvent('[data-lbb="date"]', 'change');
   const hint1 = await page.textContent('[data-lbb="dateHint"]');
