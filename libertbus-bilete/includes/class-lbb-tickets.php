@@ -717,7 +717,7 @@ class LBB_Tickets {
 		// niciodată și mai are ceva de plată. O comandă plătită (sau rambursată) și trecută apoi înapoi în
 		// „așteaptă plata” nu primește buton: ar cere a doua plată sau ar arăta o plată de 0.
 		$pay_url = '';
-		if ( $booking && in_array( $booking['status'], array( 'hold', 'pending' ), true ) && $booking['order_id'] && function_exists( 'wc_get_order' ) ) {
+		if ( $booking && in_array( $booking['status'], array( 'hold', 'pending' ), true ) && $booking['order_id'] && ! LBB_Bookings::departed( $booking ) && function_exists( 'wc_get_order' ) ) {
 			$order   = wc_get_order( $booking['order_id'] );
 			$unpaid  = $order && $order->needs_payment() && ! $order->get_date_paid() && (float) $order->get_total() - (float) $order->get_total_refunded() > 0;
 			$pay_url = $unpaid ? $order->get_checkout_payment_url() : '';

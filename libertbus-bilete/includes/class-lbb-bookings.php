@@ -159,6 +159,11 @@ class LBB_Bookings {
 		if ( in_array( $booking['status'], array( 'confirmed', 'reserved' ), true ) ) {
 			return false;
 		}
+		// Autocarul a plecat: locul nu se mai ține, chiar dacă timpul de plată n-a expirat (ex. „Achită acum” de pe
+		// bilet, deschis după plecare); altfel plata ar trece și biletul s-ar emite pentru o cursă plecată.
+		if ( self::departed( $booking ) ) {
+			return false;
+		}
 		if ( 'cancelled' !== $booking['status'] && strtotime( $booking['expires_at'] . ' UTC' ) > time() + 120 ) {
 			return true;
 		}

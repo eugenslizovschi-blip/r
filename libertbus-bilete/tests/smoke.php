@@ -3485,6 +3485,33 @@ $un_db   = $wpdb->get_col( "SELECT option_name FROM {$wpdb->options} WHERE optio
 $un_miss = array_values( array_diff( $un_db, $un_m[1] ) );
 lbb_t( 'dezinstalarea șterge toate opțiunile lbb_… scrise de plugin (nicio opțiune uitată în uninstall.php)', count( $un_db ) >= 5 && array() === $un_miss, array( 'lipsesc' => $un_miss, 'în baza de date' => $un_db ) );
 
+// Plata unui bilet după plecarea autocarului: locul nu se mai ține (nici dacă timpul de plată n-a expirat), iar pagina
+// biletului nu mai arată „Achită acum”; aceeași rezervare pentru mâine se poate plăti.
+$dp_r   = LBB_Routes::save( array( 'origin' => 'PlecatA', 'destination' => 'PlecatB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$dp_res = array();
+if ( is_int( $dp_r ) && function_exists( 'wc_create_order' ) ) {
+	$dp_rt = LBB_Routes::get( $dp_r );
+	foreach ( array( 'ieri' => '-1 day', 'maine' => '+1 day' ) as $dp_k => $dp_mod ) {
+		$dp_day = ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( $dp_mod )->format( 'Y-m-d' );
+		$dp_h   = LBB_Bookings::create_hold( $dp_rt, ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '+1 day' )->format( 'Y-m-d' ), '10:00', 1, 0, array( 'Ion Plecat' ), '+37369000061', 'plecat@example.com', 'MDL' );
+		$dp_o   = wc_create_order();
+		$dp_o->set_total( 50 );
+		$dp_o->update_meta_data( '_lbb_tickets', 'yes' );
+		$dp_o->save();
+		$dp_b   = is_array( $dp_h ) ? LBB_Bookings::get_by_token( $dp_h['token'] ) : null;
+		if ( $dp_b ) {
+			$wpdb->update( LBB_Bookings::table(), array( 'status' => 'pending', 'travel_date' => $dp_day, 'order_id' => $dp_o->get_id(), 'ticket_code' => 'LB-PL' . strtoupper( substr( $dp_k, 0, 1 ) ) . 'X' . wp_rand( 10, 99 ), 'expires_at' => gmdate( 'Y-m-d H:i:s', time() + 3600 ) ), array( 'id' => $dp_b['id'] ) );
+			$dp_b = LBB_Bookings::get_by_token( $dp_h['token'] );
+			$dp_page = wp_remote_retrieve_body( wp_remote_get( LBB_Tickets::url( $dp_b['ticket_code'] ), array( 'timeout' => 20 ) ) );
+			$dp_res[ $dp_k ] = array( 'hold' => LBB_Bookings::refresh_hold( $dp_h['token'] ), 'pay' => false !== strpos( $dp_page, 'class="pay"' ) );
+			$wpdb->delete( LBB_Bookings::table(), array( 'id' => $dp_b['id'] ) );
+		}
+		$dp_o->delete( true );
+	}
+	LBB_Routes::delete( $dp_r );
+}
+lbb_t( 'după plecarea autocarului biletul neplătit nu se mai poate plăti (locul nu se mai ține, fără „Achită acum”); pentru mâine da', array( 'ieri' => array( 'hold' => false, 'pay' => false ), 'maine' => array( 'hold' => true, 'pay' => true ) ) === $dp_res, $dp_res );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {
