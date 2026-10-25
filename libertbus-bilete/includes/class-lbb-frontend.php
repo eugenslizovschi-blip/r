@@ -508,6 +508,8 @@ class LBB_Frontend {
 				'error'       => __( 'Nu am putut verifica locurile.', 'libertbus-bilete' ),
 				'retry'       => __( 'Încearcă din nou', 'libertbus-bilete' ),
 				'nextDay'     => __( 'Ziua următoare', 'libertbus-bilete' ),
+				/* translators: %s: ziua la care duce butonul, ex. „joi, 5 noiembrie” */
+				'nextRunDay'  => __( 'Următoarea zi cu curse: %s', 'libertbus-bilete' ),
 				'errorCall'   => __( 'Sau sunați la', 'libertbus-bilete' ),
 				'phone'       => LBB_Settings::phone_text(),
 				'phoneHref'   => LBB_Settings::phone_href(),

@@ -741,9 +741,14 @@
 				el.dateHint.textContent = '';
 				return;
 			}
-			var d = new Date( v + 'T12:00:00Z' );
 			var near = v === cfg.today ? t.isToday : ( v === nextDay( cfg.today ) ? t.isTomorrow : '' );
-			el.dateHint.textContent = ( near ? near + ', ' : '' ) + t.dayNames[ d.getUTCDay() || 7 ] + ', ' + d.getUTCDate() + ' ' + t.monthNames[ d.getUTCMonth() ];
+			el.dateHint.textContent = ( near ? near + ', ' : '' ) + dayWords( v );
+		}
+
+		// „joi, 5 noiembrie”
+		function dayWords( v ) {
+			var d = new Date( v + 'T12:00:00Z' );
+			return t.dayNames[ d.getUTCDay() || 7 ] + ', ' + d.getUTCDate() + ' ' + t.monthNames[ d.getUTCMonth() ];
 		}
 
 		function nextDay( ymd ) {
@@ -856,7 +861,8 @@
 						var dayBtn = document.createElement( 'button' );
 						dayBtn.type = 'button';
 						dayBtn.className = 'lbb-next-day';
-						dayBtn.textContent = t.nextDay + ' ';
+						// Peste zile fără curse („luni, joi”: din marți direct joi) butonul spune unde duce.
+						dayBtn.textContent = ( after !== nextDay( el.date.value ) && t.nextRunDay && t.monthNames ? t.nextRunDay.replace( '%s', dayWords( after ) ) : t.nextDay ) + ' ';
 						// Săgeata e decor: cititorul de ecran spune doar „Ziua următoare”, nu și „săgeată dreapta”.
 						var arrow = document.createElement( 'span' );
 						arrow.setAttribute( 'aria-hidden', 'true' );

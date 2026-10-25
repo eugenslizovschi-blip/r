@@ -311,22 +311,33 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
         if (!b) return null;
         const h = (await b.boundingBox()).height;
         // Săgeata e decor: cititorul de ecran spune „Ziua următoare”, fără „săgeată dreapta”.
-        if (await p2.getByRole('button', { name: 'Ziua următoare', exact: true }).count() !== 1) fail('butonul „Ziua următoare →” are săgeata în numele citit de cititorul de ecran');
+        const name = (await b.textContent()).replace('→', '').trim();
+        if (await p2.getByRole('button', { name, exact: true }).count() !== 1) fail('butonul „' + name + ' →” are săgeata în numele citit de cititorul de ecran');
         const before = await p2.inputValue('[data-lbb="date"]');
         await b.click();
         await p2.waitForFunction(v => document.querySelector('[data-lbb="date"]').value !== v && !/Se verifică/.test(document.querySelector('[data-lbb="status"]').textContent), before, { timeout: 15000 }).catch(() => {});
         await p2.waitForTimeout(300);
-        return { h, date: await p2.inputValue('[data-lbb="date"]'), focus: await p2.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-lbb')) };
+        return { h, name, date: await p2.inputValue('[data-lbb="date"]'), focus: await p2.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-lbb')) };
       };
       const s1 = await step();
       const thu = { opts: await p2.$$eval('[data-lbb="time"] option:not([disabled]):not([value=""])', o => o.length), btn: !!(await p2.$('[data-lbb="status"] button.lbb-next-day')) };
+      // Peste zile fără curse, butonul spune unde duce: „Următoarea zi cu curse: joi, 5 noiembrie”.
+      const words = n => { const d = new Date(Date.parse(plus(n) + 'T12:00:00Z')); return ['duminică', 'luni', 'marți', 'miercuri', 'joi', 'vineri', 'sâmbătă'][d.getUTCDay()] + ', ' + d.getUTCDate() + ' '; };
+      if (!s1 || s1.name.indexOf('Următoarea zi cu curse: ' + words(2)) !== 0) fail('butonul care sare peste zile fără curse nu spune unde duce: ' + JSON.stringify(s1 && s1.name));
       if (!s1 || s1.date !== plus(2) || s1.h < 40 || s1.focus !== 'date' || !thu.opts || thu.btn) fail('„Ziua următoare” nu sare la următoarea zi în care circulă ruta: ' + JSON.stringify({ s1, thu, want: plus(2) }));
       // Vineri → luni, peste weekend (și peste schimbarea de lună/oră, după caz).
       await p2.fill('[data-lbb="date"]', plus(3));
       await p2.dispatchEvent('[data-lbb="date"]', 'change');
       await p2.waitForFunction(() => document.querySelector('[data-lbb="status"] button.lbb-next-day'), null, { timeout: 15000 }).catch(() => {});
       const s2 = await step();
+      if (!s2 || s2.name.indexOf('Următoarea zi cu curse: ' + words(6)) !== 0) fail('din vineri butonul nu spune „Următoarea zi cu curse: luni, …”: ' + JSON.stringify(s2 && s2.name));
       if (!s2 || s2.date !== plus(6)) fail('„Ziua următoare” din vineri nu duce luni: ' + JSON.stringify({ s2, want: plus(6) }));
+      // Miercuri → joi e chiar ziua următoare: butonul rămâne „Ziua următoare”.
+      await p2.fill('[data-lbb="date"]', plus(1));
+      await p2.dispatchEvent('[data-lbb="date"]', 'change');
+      await p2.waitForFunction(() => document.querySelector('[data-lbb="status"] button.lbb-next-day'), null, { timeout: 15000 }).catch(() => {});
+      const s4 = await step();
+      if (!s4 || s4.name !== 'Ziua următoare' || s4.date !== plus(2)) fail('„Ziua următoare” spre ziua de imediat după: ' + JSON.stringify(s4));
       // Joi e zi fără curse în Setări (sărbătoare, „closedDates” din răspuns): din marți, butonul duce direct luni.
       const holiday = async r => {
         const res = await r.fetch();
