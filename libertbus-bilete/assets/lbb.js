@@ -201,6 +201,7 @@
 		var preset = cfg.preset || {};
 		var dateTouched = !! preset.date;
 		var skipped = 0;
+		var skipFrom = ''; // Data de la care a început trecerea automată la ziua cu locuri.
 		var closedDates = [];
 		var shownDate = ''; // Data pentru care s-au cerut orele afișate.
 		var memoKey = 'lbbTime' + ( index || 0 );
@@ -835,12 +836,16 @@
 					// Data aleasă automat nu are plecări deschise (ex. seara): trecem la următoarea zi cu locuri.
 					var after = nextRunDay( el.date.value, route );
 					if ( ! open.length && ! dateTouched && skipped < 14 && after <= cfg.maxDate ) {
+						if ( ! skipped ) {
+							skipFrom = el.date.value;
+						}
 						skipped++;
 						el.date.value = after;
 						loadDepartures();
 						return;
 					}
-					setStatus( departures.length ? ( open.length ? '' : t.noneOpen ) : ( data.closed ? t.closedDay : t.noDeparture + runsOn( route ) ) );
+					var moved = skipped && ! dateTouched && skipFrom === cfg.today && el.date.value !== cfg.today && t.movedDate;
+					setStatus( departures.length ? ( open.length ? ( moved ? t.movedDate : '' ) : t.noneOpen ) : ( data.closed ? t.closedDay : t.noDeparture + runsOn( route ) ) );
 					// Fără locuri în ziua aleasă: pe telefon calendarul se redeschide greu, „Ziua următoare” e la o atingere.
 					if ( ! open.length && t.nextDay && after <= cfg.maxDate ) {
 						el.status.appendChild( document.createTextNode( ' ' ) );

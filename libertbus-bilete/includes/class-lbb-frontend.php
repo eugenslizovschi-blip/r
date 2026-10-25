@@ -482,6 +482,8 @@ class LBB_Frontend {
 				'runsOn'      => __( 'Ruta circulă doar: %s.', 'libertbus-bilete' ),
 				'boarding'    => __( 'Loc de urcare', 'libertbus-bilete' ),
 				'closedDay'   => __( 'În ziua aleasă nu sunt curse (zi liberă). Alegeți altă dată.', 'libertbus-bilete' ),
+				// Seara, după ultima cursă, formularul trece singur pe prima zi cu locuri: clientul (și cititorul de ecran) află de ce.
+				'movedDate'   => __( 'Azi nu mai sunt plecări cu locuri online, așa că am ales prima zi cu locuri. Puteți alege altă dată.', 'libertbus-bilete' ),
 				/* translators: %s: telefon */
 				'routeGone'   => sprintf( __( 'Această rută nu se mai rezervă online. Reîncărcați pagina sau sunați la %s.', 'libertbus-bilete' ), LBB_Settings::phone_text() ),
 				'dayNames'    => array_merge( array( '' ), array_values( LBB_Routes::day_names() ) ),

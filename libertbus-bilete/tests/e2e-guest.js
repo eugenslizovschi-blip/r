@@ -333,6 +333,31 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     }
     await p2.close();
   }
+  // Seara, după ultima cursă de azi: data trece singură pe mâine, iar mesajul (citit și de cititorul de ecran) spune de ce.
+  {
+    const p5 = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    p5.on('pageerror', e => fail('pageerror: ' + e.message));
+    let today = '';
+    await p5.route(u => /departures/.test(u.href), async r => {
+      const res = await r.fetch();
+      const body = await res.json();
+      today = body.today;
+      if (body.date === body.today) body.departures = body.departures.map(d => Object.assign({}, d, { bookable: false, reason: 'closed' }));
+      await r.fulfill({ response: res, json: body });
+    });
+    await p5.goto(BASE + '/balti-iasi/');
+    await p5.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0, null, { timeout: 15000 }).catch(() => {});
+    const moved = { date: await p5.inputValue('[data-lbb="date"]'), st: await p5.textContent('[data-lbb="status"]'), live: await p5.getAttribute('[data-lbb="status"]', 'aria-live') };
+    if (!today || moved.date <= today || !/^Azi nu mai sunt plecări cu locuri online/.test(moved.st) || moved.live !== 'polite') fail('trecerea automată pe ziua cu locuri nu e explicată: ' + JSON.stringify({ today, moved }));
+    // Data aleasă de client: fără mesaj.
+    const pick = new Date(Date.parse(moved.date + 'T12:00:00Z') + 86400000 * 2).toISOString().slice(0, 10);
+    await p5.fill('[data-lbb="date"]', pick);
+    await p5.dispatchEvent('[data-lbb="date"]', 'change');
+    await p5.waitForFunction(() => !/Se verifică/.test(document.querySelector('[data-lbb="status"]').textContent) && document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0, null, { timeout: 15000 }).catch(() => {});
+    const after = await p5.textContent('[data-lbb="status"]');
+    if (/Azi nu mai sunt/.test(after)) fail('mesajul „Azi nu mai sunt plecări” rămâne după ce clientul alege data: „' + after + '”');
+    await p5.close();
+  }
   const day = new Date(Date.now() + 86400000 * (21 + Math.floor(Math.random() * 20))).toISOString().slice(0, 10);
   await page.fill('[data-lbb="date"]', day);
   await page.dispatchEvent('[data-lbb="date"]', 'change');
