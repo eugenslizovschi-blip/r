@@ -2698,6 +2698,9 @@ $tz_keep  = array( get_option( 'timezone_string' ), get_option( 'gmt_offset' ) )
 update_option( 'timezone_string', '' );
 update_option( 'gmt_offset', 2 );
 lbb_t( 'fus orar: „UTC+2” fix devine Europe/Chisinau', 'Europe/Chisinau' === LBB_Settings::tz()->getName(), LBB_Settings::tz()->getName() );
+// Tot anul, nu doar când testele rulează vara: cu „UTC+2” fix, iulie e +03:00 (ora de vară), ianuarie +02:00.
+$tz_y = array( ( new DateTimeImmutable( '2027-07-15 10:00', LBB_Settings::tz() ) )->format( 'P' ), ( new DateTimeImmutable( '2027-01-15 10:00', LBB_Settings::tz() ) )->format( 'P' ) );
+lbb_t( 'fus orar: cu „UTC+2” fix, iulie e +03:00 (ora de vară) și ianuarie +02:00', array( '+03:00', '+02:00' ) === $tz_y, $tz_y );
 $chis = new DateTimeImmutable( 'now', new DateTimeZone( 'Europe/Chisinau' ) );
 if ( '+03:00' === $chis->format( 'P' ) ) {
 	// Vara: plecare peste 30 de minute (ora Chișinăului) = vânzare închisă (limita e 60 de minute).
