@@ -185,6 +185,11 @@ class LBB_Bookings {
 			return false;
 		}
 		$lock = self::lock( $route['id'], $booking['travel_date'], $booking['dep_time'] );
+		// Ca la rezervarea nouă: cursa ținută de alt client peste 10 secunde nu se reocupă fără lacăt (ultimul loc ar
+		// putea fi luat de doi); clientul alege din nou cursa.
+		if ( null === $lock ) {
+			return false;
+		}
 		try {
 			$ok = false;
 			foreach ( LBB_Routes::departures_on( $route, $booking['travel_date'] ) as $dep ) {

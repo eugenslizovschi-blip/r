@@ -3711,7 +3711,24 @@ if ( $lk_r ) {
 	}
 	$lk_db->close();
 }
-lbb_t( 'cursa ținută de alt client: rezervarea spune „încercați din nou” (nu trece fără lacăt), iar după eliberare merge', array( 'lacat' => '1', 'ocupat' => 'lbb_busy', 'liber' => 'trecut' ) === $lk_res, $lk_res );
+// La fel reocuparea locurilor unui coș expirat (refresh_hold): fără lacăt, nu.
+$lk_ref = array();
+if ( $lk_r ) {
+	$lk_db2 = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+	$lk_h3  = LBB_Bookings::create_hold( $lk_r, $tomorrow, $lk_r['times'][0], 1, 0, array( 'Lacat Trei' ), '+37369000052', 'lacat@example.com', 'MDL' );
+	if ( is_array( $lk_h3 ) ) {
+		$wpdb->update( LBB_Bookings::table(), array( 'expires_at' => gmdate( 'Y-m-d H:i:s', time() - 60 ) ), array( 'id' => $lk_h3['id'] ) );
+		add_filter( 'lbb_lock_timeout', $lk_to );
+		$lk_db2->get_var( $lk_db2->prepare( 'SELECT GET_LOCK(%s, 1)', $lk_name ) );
+		$lk_ref['ocupat'] = LBB_Bookings::refresh_hold( $lk_h3['token'] );
+		$lk_db2->get_var( $lk_db2->prepare( 'SELECT RELEASE_LOCK(%s)', $lk_name ) );
+		$lk_ref['liber'] = LBB_Bookings::refresh_hold( $lk_h3['token'] );
+		remove_filter( 'lbb_lock_timeout', $lk_to );
+		LBB_Bookings::release( $lk_h3['token'] );
+	}
+	$lk_db2->close();
+}
+lbb_t( 'cursa ținută de alt client: rezervarea spune „încercați din nou” (nu trece fără lacăt), iar după eliberare merge; la fel reocuparea unui coș expirat', array( 'lacat' => '1', 'ocupat' => 'lbb_busy', 'liber' => 'trecut' ) === $lk_res && array( 'ocupat' => false, 'liber' => true ) === $lk_ref, array( $lk_res, $lk_ref ) );
 
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
