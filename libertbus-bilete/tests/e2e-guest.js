@@ -5,6 +5,18 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const BASE = process.env.BASE || 'http://127.0.0.1:8080';
 const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
 let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
+// Răspunsul real al orelor, modificat în test. Dacă pagina se închide cu cererea încă pe drum, r.fetch() eșuează:
+// eroarea nu trebuie să oprească tot scriptul (ar ieși fără „GUEST: …”, ca un test picat).
+const patchDepartures = edit => async r => {
+  try {
+    const res = await r.fetch();
+    const body = await res.json();
+    edit(body);
+    await r.fulfill({ response: res, json: body });
+  } catch (e) {
+    await r.continue().catch(() => {});
+  }
+};
 (async () => {
   const browser = BROWSER = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -350,12 +362,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
       const s4 = await step();
       if (!s4 || s4.name !== 'Ziua următoare' || s4.date !== plus(2)) fail('„Ziua următoare” spre ziua de imediat după: ' + JSON.stringify(s4));
       // Joi e zi fără curse în Setări (sărbătoare, „closedDates” din răspuns): din marți, butonul duce direct luni.
-      const holiday = async r => {
-        const res = await r.fetch();
-        const body = await res.json();
-        body.closedDates = [plus(2)];
-        await r.fulfill({ response: res, json: body });
-      };
+      const holiday = patchDepartures(body => { body.closedDates = [plus(2)]; });
       const depUrl = u => /departures/.test(u.href);
       await p2.route(depUrl, holiday);
       await p2.fill('[data-lbb="date"]', plus(0));
@@ -368,12 +375,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
       const maxDate = await p2.getAttribute('[data-lbb="date"]', 'max');
       const allClosed = [];
       for (let d = plus(1); d <= maxDate; d = new Date(Date.parse(d + 'T12:00:00Z') + 86400000).toISOString().slice(0, 10)) allClosed.push(d);
-      const noMore = async r => {
-        const res = await r.fetch();
-        const body = await res.json();
-        body.closedDates = allClosed;
-        await r.fulfill({ response: res, json: body });
-      };
+      const noMore = patchDepartures(body => { body.closedDates = allClosed; });
       await p2.route(depUrl, noMore);
       await p2.fill('[data-lbb="date"]', plus(0));
       await p2.dispatchEvent('[data-lbb="date"]', 'change');
@@ -383,6 +385,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
       await p2.unroute(depUrl, noMore);
       if (!maxDate || allClosed.length < 30 || lastBtn) fail('„Ziua următoare” apare deși până la capătul intervalului nu mai e nicio zi cu curse: ' + JSON.stringify({ maxDate, n: allClosed.length, lastBtn }));
     }
+    await p2.unrouteAll({ behavior: 'ignoreErrors' });
     await p2.close();
   }
   // Ora aleasă rămâne aleasă când clientul schimbă data (dacă și în ziua nouă are locuri); altfel trebuie aleasă din nou.
@@ -393,12 +396,9 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const d1 = new Date(Date.now() + 86400000 * 10).toISOString().slice(0, 10);
     const d2 = new Date(Date.now() + 86400000 * 11).toISOString().slice(0, 10);
     // În ziua d2 cursa de 15:30 e plină.
-    await p6.route(u => /departures/.test(u.href), async r => {
-      const res = await r.fetch();
-      const body = await res.json();
+    await p6.route(u => /departures/.test(u.href), patchDepartures(body => {
       if (body.date === d2) body.departures = body.departures.map(d => d.time === '15:30' ? Object.assign({}, d, { bookable: false, free: 0, reason: 'full' }) : d);
-      await r.fulfill({ response: res, json: body });
-    });
+    }));
     await p6.goto(BASE + '/balti-iasi/');
     await p6.selectOption('[data-lbb="from"]', 'Chișinău');
     const iasiId = await p6.$$eval('[data-lbb="route"] option', os => { const o = os.find(x => x.textContent.trim() === 'Iași'); return o ? o.value : ''; });
@@ -418,6 +418,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
       const back = await setDate(d0);
       if (kept !== '15:30' || full === '15:30' || back !== '15:30') fail('ora aleasă nu se păstrează la schimbarea datei: ' + JSON.stringify({ kept, full, back }));
     }
+    await p6.unrouteAll({ behavior: 'ignoreErrors' });
     await p6.close();
   }
   // Seara, după ultima cursă de azi: data trece singură pe mâine, iar mesajul (citit și de cititorul de ecran) spune de ce.
@@ -425,13 +426,10 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const p5 = await browser.newPage({ viewport: { width: 390, height: 844 } });
     p5.on('pageerror', e => fail('pageerror: ' + e.message));
     let today = '';
-    await p5.route(u => /departures/.test(u.href), async r => {
-      const res = await r.fetch();
-      const body = await res.json();
+    await p5.route(u => /departures/.test(u.href), patchDepartures(body => {
       today = body.today;
       if (body.date === body.today) body.departures = body.departures.map(d => Object.assign({}, d, { bookable: false, reason: 'closed' }));
-      await r.fulfill({ response: res, json: body });
-    });
+    }));
     await p5.goto(BASE + '/balti-iasi/');
     await p5.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0, null, { timeout: 15000 }).catch(() => {});
     const moved = { date: await p5.inputValue('[data-lbb="date"]'), st: await p5.textContent('[data-lbb="status"]'), live: await p5.getAttribute('[data-lbb="status"]', 'aria-live') };
@@ -443,6 +441,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await p5.waitForFunction(() => !/Se verifică/.test(document.querySelector('[data-lbb="status"]').textContent) && document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0, null, { timeout: 15000 }).catch(() => {});
     const after = await p5.textContent('[data-lbb="status"]');
     if (/Azi nu mai sunt/.test(after)) fail('mesajul „Azi nu mai sunt plecări” rămâne după ce clientul alege data: „' + after + '”');
+    await p5.unrouteAll({ behavior: 'ignoreErrors' });
     await p5.close();
   }
   const day = new Date(Date.now() + 86400000 * (21 + Math.floor(Math.random() * 20))).toISOString().slice(0, 10);
