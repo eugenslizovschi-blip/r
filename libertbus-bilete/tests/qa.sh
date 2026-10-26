@@ -33,11 +33,11 @@ else
   echo "  sărit (setați PHPCS_DIR)"
 fi
 # Comparațiile stricte: pe PHP 7.4 (ca pe libertbus.md) „abc” == 0 e adevărat, pe PHP 8 nu; testele rulează pe PHP 8.
-echo "== Securitate WordPress (escapare, SQL pregătit, nonce, date de intrare), comparații stricte, texte traductibile și ore fără date() (fusul serverului)"
+echo "== Securitate WordPress (escapare, SQL pregătit, nonce, date de intrare), comparații stricte, texte traductibile, ore fără date() (fusul serverului), fără cod de depanare și funcții WordPress învechite"
 # WPCS_DIR = un director cu tests/wpcs/composer.json instalat (composer install); fără el pasul se sare.
 WPCS_DIR="${WPCS_DIR:-$(dirname "$WP_PATH")/wpcs}"
 if [ -x "$WPCS_DIR/vendor/bin/phpcs" ]; then
-  OUT_SEC=$("$WPCS_DIR/vendor/bin/phpcs" -q --standard=WordPress-Extra --sniffs=WordPress.Security.EscapeOutput,WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput,WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders,WordPress.WP.I18n,WordPress.PHP.StrictInArray,Universal.Operators.StrictComparisons,WordPress.DateTime.RestrictedFunctions,WordPress.DateTime.CurrentTimeTimestamp --extensions=php --ignore='*/tests/*' "$DIR" 2>&1)
+  OUT_SEC=$("$WPCS_DIR/vendor/bin/phpcs" -q --standard=WordPress-Extra --sniffs=WordPress.Security.EscapeOutput,WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput,WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders,WordPress.WP.I18n,WordPress.PHP.StrictInArray,Universal.Operators.StrictComparisons,WordPress.DateTime.RestrictedFunctions,WordPress.DateTime.CurrentTimeTimestamp,WordPress.WP.DeprecatedFunctions,WordPress.WP.DeprecatedParameters,WordPress.PHP.DevelopmentFunctions,WordPress.WP.DiscouragedFunctions,WordPress.Security.SafeRedirect,WordPress.WP.GlobalVariablesOverride,WordPress.PHP.RestrictedPHPFunctions,WordPress.DB.RestrictedFunctions,WordPress.WP.CronInterval,WordPress.PHP.NoSilencedErrors --extensions=php --ignore='*/tests/*' "$DIR" 2>&1)
   if [ -n "$OUT_SEC" ]; then echo "$OUT_SEC" | head -30; FAIL=1; else echo "  ok"; fi
 else
   echo "  sărit (setați WPCS_DIR)"
