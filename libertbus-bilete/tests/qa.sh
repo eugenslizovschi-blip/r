@@ -51,6 +51,11 @@ if [ -n "$ESLINT" ]; then
 else
   echo "  sărit (setați ESLINT)"
 fi
+# Și funcțiile care lipsesc pe telefoanele vechi (Android 4.4, iOS 9), pe care verificarea de sintaxă nu le vede:
+# includes/find/Object.assign/… și NodeList.forEach. Folosite cu verificare („x.closest ? x.closest(…)”) sunt permise.
+echo "== JavaScript: fără funcții lipsă pe telefoanele vechi"
+OUT_API=$(grep -nE '\.(includes|find|findIndex|startsWith|endsWith|padStart|padEnd|flat|flatMap)\(|Object\.(assign|values|entries|fromEntries)\(|Array\.from\(|Number\.isNaN\(|new URL\(|URLSearchParams|querySelectorAll\([^)]*\)\.forEach|\.closest\(' "$DIR/assets/lbb.js" "$DIR/assets/cookies.js" | grep -vE '\.closest \? ')
+if [ -n "$OUT_API" ]; then echo "$OUT_API" | head -10 | sed 's/^/  /'; FAIL=1; else echo "  ok"; fi
 # Pe site-ul de test toate emailurile se opresc înainte de trimitere (mu-plugin mail-dump). Pornim fără eroare
 # de email salvată: la final, una nouă înseamnă că un test sau codul a încercat să trimită un email real.
 (cd "$WP_PATH" && $WP_CLI option delete lbb_mail_failed >/dev/null 2>&1) || true
