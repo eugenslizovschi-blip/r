@@ -40,7 +40,10 @@ class LBB_Routes {
 		$row['capacity']    = (int) $row['capacity'];
 		$row['active']      = (int) $row['active'];
 		$row['times']       = self::parse_times( $row['departures'] );
-		$row['days']        = array_map( 'intval', array_filter( explode( ',', $row['weekdays'] ) ) );
+		// Doar zilele 1–7; o listă goală sau stricată (rută din baza de date, versiune veche) înseamnă zilnic, ca valoarea
+		// implicită a coloanei, nu o rută care nu mai circulă niciodată fără niciun mesaj.
+		$days               = array_values( array_intersect( array( 1, 2, 3, 4, 5, 6, 7 ), array_map( 'intval', explode( ',', (string) $row['weekdays'] ) ) ) );
+		$row['days']        = $days ? $days : array( 1, 2, 3, 4, 5, 6, 7 );
 		$row['boarding']    = isset( $row['boarding'] ) ? (string) $row['boarding'] : '';
 		// Coloana „notes” acceptă NULL (rută adăugată direct în baza de date): text gol, nu null în esc_textarea() (PHP 8.1+).
 		$row['notes']       = isset( $row['notes'] ) ? (string) $row['notes'] : '';

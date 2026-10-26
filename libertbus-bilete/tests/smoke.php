@@ -3599,6 +3599,20 @@ if ( is_int( $nz_r ) ) {
 }
 lbb_t( 'setări 0 sau prea mari în baza de date: la citire se folosesc valorile implicite / maximele, iar cursa peste 3 zile se vinde', array( 'cap' => $nz_def['default_capacity'], 'zile' => $nz_def['max_days_ahead'], 'pax' => $nz_def['max_passengers'], 'cos' => $nz_def['cart_hold_minutes'], 'plata' => $nz_def['payment_minutes'], 'cutoff' => LBB_Settings::MAXES['cutoff_minutes'], 'curse' => 1 ) === $nz_res, $nz_res );
 
+// Zilele de circulație goale sau stricate în baza de date (versiune veche, import): ruta circulă zilnic, nu niciodată.
+$wd_r   = LBB_Routes::save( array( 'origin' => 'ZileA', 'destination' => 'ZileB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$wd_res = array();
+if ( is_int( $wd_r ) ) {
+	$wd_day = ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '+3 days' )->format( 'Y-m-d' );
+	foreach ( array( 'gol' => '', 'stricat' => '0,8,x', 'luni' => '1,1,9' ) as $wd_k => $wd_v ) {
+		$wpdb->update( LBB_Routes::table(), array( 'weekdays' => $wd_v ), array( 'id' => $wd_r ) );
+		$wd_g = LBB_Routes::get( $wd_r );
+		$wd_res[ $wd_k ] = array( $wd_g['days'], count( LBB_Routes::departures_on( $wd_g, $wd_day ) ) > 0 || 'luni' === $wd_k );
+	}
+	LBB_Routes::delete( $wd_r );
+}
+lbb_t( 'zilele de circulație goale sau stricate în baza de date: ruta circulă zilnic (nu „niciodată”); „1,1,9” rămâne doar luni', array( 'gol' => array( array( 1, 2, 3, 4, 5, 6, 7 ), true ), 'stricat' => array( array( 1, 2, 3, 4, 5, 6, 7 ), true ), 'luni' => array( array( 1 ), true ) ) === $wd_res, $wd_res );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {
