@@ -36,6 +36,10 @@ class LBB_Routes {
 	private static function hydrate( array $row ) {
 		$row['id']          = (int) $row['id'];
 		$row['price']       = (float) $row['price'];
+		// Ca la salvare: „ron” (import, phpMyAdmin) e RON, nu o monedă fără curs, la care prețul rămânea neconvertit
+		// (100 RON apăreau „100 MDL”); o monedă necunoscută e MDL.
+		$row['currency']    = strtoupper( trim( (string) $row['currency'] ) );
+		$row['currency']    = in_array( $row['currency'], LBB_Settings::currencies(), true ) ? $row['currency'] : 'MDL';
 		$row['child_price'] = null === $row['child_price'] || '' === $row['child_price'] ? null : (float) $row['child_price'];
 		$row['capacity']    = (int) $row['capacity'];
 		$row['active']      = (int) $row['active'];

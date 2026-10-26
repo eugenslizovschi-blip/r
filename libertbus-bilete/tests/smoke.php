@@ -3613,6 +3613,20 @@ if ( is_int( $wd_r ) ) {
 }
 lbb_t( 'zilele de circulație goale sau stricate în baza de date: ruta circulă zilnic (nu „niciodată”); „1,1,9” rămâne doar luni', array( 'gol' => array( array( 1, 2, 3, 4, 5, 6, 7 ), true ), 'stricat' => array( array( 1, 2, 3, 4, 5, 6, 7 ), true ), 'luni' => array( array( 1 ), true ) ) === $wd_res, $wd_res );
 
+// Moneda rutei scrisă altfel în baza de date („ron”, import): prețul se convertește ca la RON, nu rămâne „100 MDL”.
+$mc_r   = LBB_Routes::save( array( 'origin' => 'MonA', 'destination' => 'MonB', 'departures' => '10:00', 'price' => 100, 'currency' => 'RON', 'active' => 1 ) );
+$mc_res = array();
+if ( is_int( $mc_r ) ) {
+	$mc_want = LBB_Routes::public_entry( LBB_Routes::get( $mc_r ) )['prices']['MDL'][0];
+	foreach ( array( 'mici' => 'ron', 'necunoscut' => 'XYZ' ) as $mc_k => $mc_v ) {
+		$wpdb->update( LBB_Routes::table(), array( 'currency' => $mc_v ), array( 'id' => $mc_r ) );
+		$mc_g = LBB_Routes::get( $mc_r );
+		$mc_res[ $mc_k ] = array( $mc_g['currency'], LBB_Routes::public_entry( $mc_g )['prices']['MDL'][0] );
+	}
+	LBB_Routes::delete( $mc_r );
+}
+lbb_t( 'moneda rutei „ron” în baza de date e RON (100 RON nu apar „100 MDL”); una necunoscută e MDL', isset( $mc_want ) && $mc_want > 300 && array( 'mici' => array( 'RON', $mc_want ), 'necunoscut' => array( 'MDL', 100.0 ) ) === $mc_res, array( $mc_res, isset( $mc_want ) ? $mc_want : null ) );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {
