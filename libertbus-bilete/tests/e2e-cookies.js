@@ -233,6 +233,25 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await page.goto(BASE + '/citat/');
     const where = await page.evaluate(() => { const n = document.getElementById('lbb-legal-links'); return n ? { inQuote: !!n.closest('blockquote'), inFooter: !!n.closest('footer') } : null; });
     if (!where || where.inQuote || !where.inFooter) fail('linkurile legale au ajuns în locul greșit pe o pagină cu citat ' + JSON.stringify(where));
+    // Telefon vechi fără Element.closest (Android 4.4, iOS 9): scriptul nu dă eroare, linkurile ajung tot în subsol.
+    const old = await ctx.newPage();
+    const errs = [];
+    old.on('pageerror', e => errs.push(e.message));
+    // Tema de test are subsolul găsit direct (#colophon…): selectorii aceia „lipsesc” aici, ca scriptul să ajungă la
+    // căutarea printre <footer>-ele paginii (temele fără clase cunoscute), cea care folosea closest.
+    await old.addInitScript(() => {
+      delete Element.prototype.closest;
+      const known = ['#Footer .copyright', '#colophon .site-info', '.site-footer .site-info', 'body>footer', '.wp-site-blocks>footer', 'footer.site-footer', '#colophon'];
+      const qs = Document.prototype.querySelector;
+      Document.prototype.querySelector = function (sel) { return known.indexOf(sel) > -1 ? null : qs.call(this, sel); };
+    });
+    await old.goto(BASE + '/citat/');
+    const where2 = await old.evaluate(() => {
+      const up = (n, tag) => { for (let e = n; e; e = e.parentElement) if (e.tagName === tag) return true; return false; };
+      const n = document.getElementById('lbb-legal-links');
+      return n ? { noClosest: !Element.prototype.closest, inQuote: up(n, 'BLOCKQUOTE'), inFooter: up(n, 'FOOTER'), moved: /is-in-footer/.test(n.className) } : null;
+    });
+    if (errs.length || !where2 || !where2.noClosest || where2.inQuote || !where2.inFooter || !where2.moved) fail('fără Element.closest (telefon vechi), linkurile legale nu ajung în subsol: ' + JSON.stringify({ where2, errs }));
     await ctx.close();
   }
 

@@ -130,7 +130,7 @@
     - pe lista de pasageri, o dată scrisă greșit de mână („31.11.2026”) nu mai arată „01.12.2026” fără pasageri, ci revine la ziua de azi.
   - **Bilet:** la printare, un bilet nu se mai rupe între două pagini; fără „Adaugă în calendar” la o rută ștearsă (linkul nu mergea).
   - **Accesibilitate:** butoanele formularului au contur vizibil la navigarea cu tastatura, și pe teme care îl ascund; linkurile din admin care se deschid într-o filă nouă o spun cititorului de ecran; cititorul de ecran anunță „Biletele se emit…” pe pagina de mulțumire și nota pentru grupuri de la listele de pasageri.
-  - **Telefoane vechi** (iPhone cu iOS sub 11.3, Android 4.4): după 8 secunde fără răspuns apare „Încearcă din nou” (nu „Se verifică locurile…” la nesfârșit); tasta Tab în fereastra pasului 2 nu mai dă eroare.
+  - **Telefoane vechi** (iPhone cu iOS sub 11.3, Android 4.4): după 8 secunde fără răspuns apare „Încearcă din nou” (nu „Se verifică locurile…” la nesfârșit); tasta Tab în fereastra pasului 2 nu mai dă eroare. Linkurile legale din subsol ajung în subsolul temei și pe telefoanele fără `Element.closest` (înainte scriptul dădea eroare acolo, pe temele fără clase cunoscute la subsol).
   - **Română corectă** la numere: „cel mult 20 de locuri”, „mai mult de 20 de persoane”, „ultimele 200 de rezervări”; data din politici după ora Chișinăului și cu fusul „UTC+2” fix.
   - **Date neobișnuite sau stricate:** pagina nu mai cade și nu mai arată „Array”:
     - un curs valutar 0 sau gol ajuns în baza de date ocolind Setările (import, versiune veche) nu mai lasă prețul neconvertit (600 MDL ar fi devenit „600 RON”): se folosește cursul implicit;
