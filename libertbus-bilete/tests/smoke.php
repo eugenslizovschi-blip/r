@@ -3577,6 +3577,28 @@ foreach ( array( 'zero' => 0, 'gol' => '', 'bun' => 4 ) as $rt_k => $rt_v ) {
 update_option( 'lbb_settings', $rt_keep );
 lbb_t( 'curs RON 0 sau gol în baza de date: prețul se convertește cu cursul implicit, nu rămâne „600 RON”; un curs bun se folosește', array( 'zero' => $rt_want, 'gol' => $rt_want, 'bun' => 150.0 ) === $rt_res, array( $rt_res, $rt_want ) );
 
+// Setări numerice ajunse în baza de date ocolind formularul (import, versiune veche): 0 la locuri, zile înainte sau
+// pasageri nu oprește vânzarea pe tăcute, iar „1500” de minute nu ține locurile blocate o zi.
+$nz_keep = get_option( 'lbb_settings' );
+$nz_def  = LBB_Settings::defaults();
+update_option( 'lbb_settings', array_merge( (array) $nz_keep, array( 'default_capacity' => 0, 'max_days_ahead' => '', 'max_passengers' => 0, 'cart_hold_minutes' => 0, 'payment_minutes' => -5, 'cutoff_minutes' => 99999 ) ) );
+$nz_r    = LBB_Routes::save( array( 'origin' => 'ZeroA', 'destination' => 'ZeroB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$nz_dep  = is_int( $nz_r ) ? LBB_Routes::departures_on( LBB_Routes::get( $nz_r ), ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '+3 days' )->format( 'Y-m-d' ) ) : array();
+$nz_res  = array(
+	'cap'  => is_int( $nz_r ) ? LBB_Routes::capacity( LBB_Routes::get( $nz_r ) ) : null,
+	'zile' => LBB_Settings::get( 'max_days_ahead' ),
+	'pax'  => LBB_Settings::get( 'max_passengers' ),
+	'cos'  => LBB_Settings::get( 'cart_hold_minutes' ),
+	'plata' => LBB_Settings::get( 'payment_minutes' ),
+	'cutoff' => LBB_Settings::get( 'cutoff_minutes' ),
+	'curse' => count( $nz_dep ),
+);
+update_option( 'lbb_settings', $nz_keep );
+if ( is_int( $nz_r ) ) {
+	LBB_Routes::delete( $nz_r );
+}
+lbb_t( 'setări 0 sau prea mari în baza de date: la citire se folosesc valorile implicite / maximele, iar cursa peste 3 zile se vinde', array( 'cap' => $nz_def['default_capacity'], 'zile' => $nz_def['max_days_ahead'], 'pax' => $nz_def['max_passengers'], 'cos' => $nz_def['cart_hold_minutes'], 'plata' => $nz_def['payment_minutes'], 'cutoff' => LBB_Settings::MAXES['cutoff_minutes'], 'curse' => 1 ) === $nz_res, $nz_res );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {

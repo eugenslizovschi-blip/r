@@ -24,6 +24,13 @@ class LBB_Settings {
 	);
 
 	/**
+	 * Numerele care nu au voie să fie 0: Setările nu le salvează așa, dar unul ajuns în baza de date ocolindu-le
+	 * (import, versiune veche) oprea vânzarea fără niciun mesaj („Locuri online pe cursă” 0 = toate cursele complete,
+	 * „Zile înainte” 0 = nicio cursă viitoare). La citire iau valoarea implicită.
+	 */
+	const NEVER_ZERO = array( 'default_capacity', 'max_passengers', 'max_days_ahead', 'cart_hold_minutes', 'payment_minutes' );
+
+	/**
 	 * Valorile implicite.
 	 *
 	 * Cursurile valutare spun cât valorează 1 unitate din moneda respectivă în MDL.
@@ -69,8 +76,21 @@ class LBB_Settings {
 	}
 
 	public static function all() {
-		$saved = get_option( self::OPTION, array() );
-		return wp_parse_args( is_array( $saved ) ? $saved : array(), self::defaults() );
+		$saved    = get_option( self::OPTION, array() );
+		$defaults = self::defaults();
+		$all      = wp_parse_args( is_array( $saved ) ? $saved : array(), $defaults );
+		foreach ( self::NEVER_ZERO as $key ) {
+			if ( (int) $all[ $key ] < 1 ) {
+				$all[ $key ] = $defaults[ $key ];
+			}
+		}
+		// La fel maximele: „1500” de minute ajuns în baza de date nu ține locurile blocate o zi.
+		foreach ( self::MAXES as $key => $max ) {
+			if ( (int) $all[ $key ] > $max ) {
+				$all[ $key ] = $max;
+			}
+		}
+		return $all;
 	}
 
 	public static function get( $key ) {
@@ -132,7 +152,7 @@ class LBB_Settings {
 		$clean['rate_MDL'] = 1;
 		// Un număr golit din greșeală sau 0 rămâne cel de dinainte: „Locuri online pe cursă” 0 ar face toate cursele
 		// „complet”, iar „Zile înainte” sau „Pasageri pe rezervare” 1 ar limita vânzarea la o zi sau un pasager.
-		foreach ( array( 'default_capacity', 'max_passengers', 'max_days_ahead', 'cart_hold_minutes', 'payment_minutes' ) as $key ) {
+		foreach ( self::NEVER_ZERO as $key ) {
 			if ( $clean[ $key ] < 1 ) {
 				$clean[ $key ] = (int) self::get( $key ) > 0 ? (int) self::get( $key ) : $defaults[ $key ];
 			}
