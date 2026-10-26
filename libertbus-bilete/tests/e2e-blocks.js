@@ -33,6 +33,12 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   ['email', 'billing-first_name', 'billing-last_name', 'billing-phone'].forEach(id => {
     if (!shown.includes(id)) fail('checkout cu blocuri: lipsește ' + id);
   });
+  // Cu „Transfer bancar” și „Plata la livrare” pornite (qa.sh le pornește cât rulează testul): la bilete Store API nu
+  // le oferă (comanda ar trece „în așteptare” / „în procesare” fără bani, cu biletul emis ca achitat).
+  const methods = async () => ((await (await page.request.get(BASE + '/wp-json/wc/store/v1/cart')).json()).payment_methods || []);
+  const offline = list => list.filter(m => ['bacs', 'cheque', 'cod'].includes(m));
+  const withTicket = process.env.OFFLINE_GATEWAYS ? await methods() : [];
+  if (offline(withTicket).length) fail('checkout cu blocuri: la un bilet se poate alege ' + offline(withTicket).join(', ') + ' (bilet „achitat” fără bani)');
   // Numele și telefonul din formular sunt deja completate (clientul nu le scrie din nou).
   const pre = await page.$eval('#billing-first_name', i => i.value).catch(() => '');
   if (pre !== 'Ion') fail('checkout cu blocuri: numele din formular nu e precompletat: ' + JSON.stringify(pre));
@@ -54,6 +60,8 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   await page.waitForTimeout(500);
   const after = await free();
   if (held === null || after !== held + 1) fail('coș cu blocuri: scoaterea biletului nu eliberează locul (' + held + ' → ' + after + ')');
+  // Reperul: fără bilet în coș, metodele pornite apar (altfel verificarea de mai sus n-ar spune nimic).
+  if (process.env.OFFLINE_GATEWAYS && offline(await methods()).length < 2) fail('test: transferul bancar și plata la livrare nu par pornite (coșul gol nu le oferă)');
   console.log('câmpuri vizibile: ' + shown.join(', '));
   console.log(process.exitCode ? 'BLOCKS: PROBLEME' : 'BLOCKS: OK');
   await browser.close();

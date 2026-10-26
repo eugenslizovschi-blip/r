@@ -148,7 +148,11 @@ CHK_OLD=$(cd "$WP_PATH" && $WP_CLI post get "$CHK_ID" --field=post_content 2>/de
 CART_ID=$(cd "$WP_PATH" && $WP_CLI option get woocommerce_cart_page_id 2>/dev/null)
 CART_OLD=$(cd "$WP_PATH" && $WP_CLI post get "$CART_ID" --field=post_content 2>/dev/null)
 (cd "$WP_PATH" && $WP_CLI post update "$CART_ID" --post_content='<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart alignwide is-loading"></div><!-- /wp:woocommerce/cart -->' >/dev/null 2>&1)
-OUT_BL=$(BASE="$BASE" node "$DIR/tests/e2e-blocks.js" 2>&1 | grep -v CERT_AUTHORITY)
+# Cât rulează testul: „Transfer bancar” și „Plata la livrare” pornite, ca să se vadă că la bilete nu se pot alege.
+GW_OLD=$(cd "$WP_PATH" && $WP_CLI eval 'echo wp_json_encode( array( get_option( "woocommerce_bacs_settings" ), get_option( "woocommerce_cod_settings" ) ) );' 2>/dev/null)
+(cd "$WP_PATH" && $WP_CLI eval 'foreach ( array( "bacs", "cod" ) as $g ) { $s = (array) get_option( "woocommerce_{$g}_settings", array() ); $s["enabled"] = "yes"; update_option( "woocommerce_{$g}_settings", $s ); }' >/dev/null 2>&1)
+OUT_BL=$(OFFLINE_GATEWAYS=1 BASE="$BASE" node "$DIR/tests/e2e-blocks.js" 2>&1 | grep -v CERT_AUTHORITY)
+(cd "$WP_PATH" && LBB_GW_OLD="$GW_OLD" $WP_CLI eval '$o = json_decode( (string) getenv( "LBB_GW_OLD" ), true ); foreach ( array( "bacs", "cod" ) as $i => $g ) { if ( is_array( $o ) && is_array( $o[ $i ] ) ) { update_option( "woocommerce_{$g}_settings", $o[ $i ] ); } else { delete_option( "woocommerce_{$g}_settings" ); } }' >/dev/null 2>&1)
 (cd "$WP_PATH" && $WP_CLI post update "$CHK_ID" --post_content="$CHK_OLD" >/dev/null 2>&1)
 (cd "$WP_PATH" && $WP_CLI post update "$CART_ID" --post_content="$CART_OLD" >/dev/null 2>&1)
 echo "$OUT_BL" | grep -q 'BLOCKS: OK' && echo "  ok" || { e2e_problems "$OUT_BL"; echo "  PROBLEME"; FAIL=1; }
