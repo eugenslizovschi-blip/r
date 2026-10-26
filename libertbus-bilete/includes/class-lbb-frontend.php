@@ -545,6 +545,7 @@ class LBB_Frontend {
 		ob_start();
 		?>
 		<?php $compact = '' !== $atts['compact']; ?>
+		<?php // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- configurația formularului (JSON) într-un atribut, fără ghilimele stricate de teme; nu e cod ascuns. ?>
 		<div class="lbb-booking<?php echo $compact ? ' lbb-compact' : ''; ?>" lang="<?php echo esc_attr( LBB_Settings::text_lang() ); ?>" data-step="<?php echo $error ? '2' : '1'; ?>" id="<?php echo esc_attr( $uid ); ?>" data-lbb-config="<?php echo esc_attr( base64_encode( wp_json_encode( $config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ); ?>">
 			<?php if ( $atts['title'] ) : ?>
 				<h3 class="lbb-title"><?php echo esc_html( $atts['title'] ); ?></h3>

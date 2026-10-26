@@ -969,14 +969,14 @@ class LBB_Admin {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="' . $name . '.csv"' );
 		$out = fopen( 'php://output', 'w' );
-		fwrite( $out, "\xEF\xBB\xBF" );
+		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- php://output (descărcarea CSV), nu un fișier pe disc.
 		// Separator, ghilimele și fără caracter de escape (RFC 4180), explicit: implicitul se schimbă în PHP 8.4+.
 		$sep = LBB_Settings::get( 'csv_separator' );
 		fputcsv( $out, array( 'Data', 'Ora', 'Plecare', 'Destinatie', 'Bilet', 'Locuri', 'Pasageri', 'Telefon', 'Email', 'Plata', 'Comanda', 'De incasat', 'Moneda' ), ';' === $sep ? ';' : ',', '"', '' );
 		foreach ( LBB_Bookings::manifest( $date, $route ) as $b ) {
 			fputcsv( $out, self::csv_fields( self::manifest_csv_row( $date, $b ), $sep ), ';' === $sep ? ';' : ',', '"', '' );
 		}
-		fclose( $out );
+		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://output, ca mai sus.
 		exit;
 	}
 
