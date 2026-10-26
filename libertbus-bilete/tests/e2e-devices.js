@@ -134,4 +134,6 @@ async function check(browser, state, [name, dev]) {
   results.sort((a, b) => LIST.findIndex(x => x[0] === a.device) - LIST.findIndex(x => x[0] === b.device));
   for (const r of results) console.log(`${r.issues.length ? '✗' : '✓'} ${r.device.padEnd(20)} pas1 ${r.step1 || '-'} | ${r.step2 || '-'}${r.issues.length ? '\n    - ' + r.issues.join('\n    - ') : ''}`);
   await browser.close();
+  // La sfârșit, câte dispozitive s-au verificat din câte: un script oprit la jumătate nu trece drept „verde”.
+  console.log(`DEVICES: ${results.length}/${LIST.length}`);
 })().catch(e => { console.error('FAIL', e.message); process.exit(1); });

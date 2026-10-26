@@ -6,6 +6,13 @@ DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FAIL=0
 # Coșurile WooCommerce rămase de la un test picat (coșul adminului se păstrează în contul lui) ar strica testele
 # următoare: un bilet cu 1 loc ar apărea în comanda altui test. Fiecare test din browser pornește cu coșuri goale.
+# Ce s-a întâmplat într-un test din browser care a picat: rândurile FAIL, mesajul unei erori Node (TimeoutError: …,
+# Error: …) și locul ei; dacă scriptul s-a oprit fără niciunul, ultimele lui rânduri (altfel nu se vede de ce a picat).
+e2e_problems() {
+  local found
+  found=$(printf '%s\n' "$1" | grep -E 'FAIL|^[A-Za-z]*Error|Error:|    at ' | head -10)
+  if [ -n "$found" ]; then printf '%s\n' "$found"; else printf '%s\n' "$1" | tail -5 | sed 's/^/  > /'; fi
+}
 fresh_carts() {
   (cd "$WP_PATH" && $WP_CLI eval 'global $wpdb; $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_sessions" ); $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE \"_woocommerce_persistent_cart_%\"" );' >/dev/null 2>&1) || true
 }
@@ -128,11 +135,11 @@ echo "$OUT_FLOW" | grep -q 'ticket:' && ! echo "$OUT_FLOW" | grep -q 'FAIL' || F
 fresh_carts
 echo "== Vizitator nelogat"
 OUT_GUEST=$(BASE="$BASE" node "$DIR/tests/e2e-guest.js" 2>&1 | grep -v CERT_AUTHORITY)
-echo "$OUT_GUEST" | grep -q 'GUEST: OK' && echo "  ok" || { echo "$OUT_GUEST" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
+echo "$OUT_GUEST" | grep -q 'GUEST: OK' && echo "  ok" || { e2e_problems "$OUT_GUEST"; echo "  PROBLEME"; FAIL=1; }
 fresh_carts
 echo "== Plată în RON + rezervare cu plata la urcare"
 OUT_CR=$(BASE="$BASE" node "$DIR/tests/e2e-currency-reserve.js" 2>&1 | grep -v CERT_AUTHORITY)
-echo "$OUT_CR" | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { echo "$OUT_CR" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
+echo "$OUT_CR" | grep -q 'CURRENCY+RESERVE: OK' && echo "  ok" || { e2e_problems "$OUT_CR"; echo "  PROBLEME"; FAIL=1; }
 fresh_carts
 echo "== Checkout și coș cu blocuri: fără adresă poștală, biletul afișat corect"
 CHK_ID=$(cd "$WP_PATH" && $WP_CLI option get woocommerce_checkout_page_id 2>/dev/null)
@@ -144,22 +151,22 @@ CART_OLD=$(cd "$WP_PATH" && $WP_CLI post get "$CART_ID" --field=post_content 2>/
 OUT_BL=$(BASE="$BASE" node "$DIR/tests/e2e-blocks.js" 2>&1 | grep -v CERT_AUTHORITY)
 (cd "$WP_PATH" && $WP_CLI post update "$CHK_ID" --post_content="$CHK_OLD" >/dev/null 2>&1)
 (cd "$WP_PATH" && $WP_CLI post update "$CART_ID" --post_content="$CART_OLD" >/dev/null 2>&1)
-echo "$OUT_BL" | grep -q 'BLOCKS: OK' && echo "  ok" || { echo "$OUT_BL" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
+echo "$OUT_BL" | grep -q 'BLOCKS: OK' && echo "  ok" || { e2e_problems "$OUT_BL"; echo "  PROBLEME"; FAIL=1; }
 fresh_carts
 echo "== Previzualizare doar pentru admin (plata online oprită pentru clienți)"
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=0; update_option("lbb_settings",$s);')
 LBB_PREVIEW_TOKEN=$(cd "$WP_PATH" && $WP_CLI eval 'echo LBB_Settings::preview_token();' 2>/dev/null) BASE="$BASE" node "$DIR/tests/e2e-preview.js" 2>&1 | grep -v CERT_AUTHORITY > "${TMPDIR:-/tmp}/lbb-preview.out"
-grep -q 'PREVIEW: OK' "${TMPDIR:-/tmp}/lbb-preview.out" && echo "  ok" || { grep -E 'FAIL|    at ' "${TMPDIR:-/tmp}/lbb-preview.out" | head -8; echo "  PROBLEME"; FAIL=1; }
+grep -q 'PREVIEW: OK' "${TMPDIR:-/tmp}/lbb-preview.out" && echo "  ok" || { e2e_problems "$(cat "${TMPDIR:-/tmp}/lbb-preview.out")"; echo "  PROBLEME"; FAIL=1; }
 (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["allow_pay"]=1; update_option("lbb_settings",$s);')
 fresh_carts
 echo "== Paginile de admin (Panou, Rute, Pasageri, Rezervări, Setări) și CSV-ul cu pasageri"
 BEFORE=$( [ -f "$LOG" ] && wc -l < "$LOG" || echo 0 )
 OUT_ADM=$(BASE="$BASE" node "$DIR/tests/e2e-admin.js" 2>&1 | grep -v CERT_AUTHORITY)
 NEW_ERR=$( [ -f "$LOG" ] && tail -n +$((BEFORE + 1)) "$LOG" | grep -E "Fatal|Warning|Notice|Deprecated" | grep -i lbb )
-echo "$OUT_ADM" | grep -q "ADMIN: OK" && [ -z "$NEW_ERR" ] && echo "  ok" || { echo "$OUT_ADM" | grep FAIL | head -5; echo "$NEW_ERR" | head -5; echo "  PROBLEME"; FAIL=1; }
+echo "$OUT_ADM" | grep -q "ADMIN: OK" && [ -z "$NEW_ERR" ] && echo "  ok" || { e2e_problems "$OUT_ADM"; echo "$NEW_ERR" | head -5; echo "  PROBLEME"; FAIL=1; }
 echo "== Cookies: banner, Google Analytics blocat până la acord, paginile legale"
 OUT_CC=$(BASE="$BASE" OUT="${OUT:-.}" node "$DIR/tests/e2e-cookies.js" 2>&1 | grep -v CERT_AUTHORITY)
-echo "$OUT_CC" | grep -q "COOKIES: OK" && echo "  ok" || { echo "$OUT_CC" | grep FAIL | head -5; echo "  PROBLEME"; FAIL=1; }
+echo "$OUT_CC" | grep -q "COOKIES: OK" && echo "  ok" || { e2e_problems "$OUT_CC"; echo "  PROBLEME"; FAIL=1; }
 echo "== Accesibilitate (axe-core): formular, banner cookies, pagina biletului, paginile de admin"
 # AXE_JS = axe.min.js din pachetul axe-core (tests/setup-local.sh îl descarcă); fără el pasul se sare.
 AXE_JS="${AXE_JS:-$(dirname "$WP_PATH")/axe/package/axe.min.js}"
@@ -169,7 +176,7 @@ if [ -f "$AXE_JS" ]; then
   (cd "$WP_PATH" && $WP_CLI eval '$s=LBB_Settings::all(); $s["pay_currencies"]="MDL,RON"; update_option("lbb_settings",$s);' >/dev/null 2>&1)
   OUT_A11Y=$(AXE_JS="$AXE_JS" BASE="$BASE" node "$DIR/tests/e2e-a11y.js" 2>&1 | grep -v CERT_AUTHORITY)
   (cd "$WP_PATH" && LBB_PAY_OLD="$PAY_OLD" $WP_CLI eval '$s=LBB_Settings::all(); $s["pay_currencies"]=getenv("LBB_PAY_OLD") ?: "MDL"; update_option("lbb_settings",$s);' >/dev/null 2>&1)
-  echo "$OUT_A11Y" | grep -q "A11Y: OK" && echo "  ok" || { echo "$OUT_A11Y" | grep -E 'FAIL|    at ' | head -8; echo "  PROBLEME"; FAIL=1; }
+  echo "$OUT_A11Y" | grep -q "A11Y: OK" && echo "  ok" || { e2e_problems "$OUT_A11Y"; echo "  PROBLEME"; FAIL=1; }
 else
   echo "  sărit (setați AXE_JS)"
 fi
@@ -177,6 +184,8 @@ echo "== Dispozitive (iPhone SE … desktop 1920), 5 browsere în paralel"
 OUT_DEV=$(BASE="$BASE" OUT="${OUT:-.}" PARALLEL=5 node "$DIR/tests/e2e-devices.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_DEV" | grep -E '^✗|^    -|FAIL' ; echo "$OUT_DEV" | grep -c '^✓' | sed 's/^/  dispozitive OK: /'
 echo "$OUT_DEV" | grep -qE '^✗|FAIL' && FAIL=1
+# Toate dispozitivele verificate („DEVICES: 10/10”): un script oprit brusc (fără ✗ sau FAIL) nu trece drept reușit.
+if ! echo "$OUT_DEV" | grep -qE '^DEVICES: ([0-9]+)/\1$'; then e2e_problems "$OUT_DEV"; echo "  PROBLEME: nu s-au verificat toate dispozitivele"; FAIL=1; fi
 # Orice avertisment PHP din această rulare, și cele raportate în fișierele WordPress/WooCommerce (ex. esc_url( null )
 # apelat din plugin apare în formatting.php, fără „lbb” în cale). Excepție: un notice al WooCommerce însuși, la
 # anonimizarea clientului din Unelte → Șterge datele personale (WC_Admin Customers DataStore, nu codul nostru), și
