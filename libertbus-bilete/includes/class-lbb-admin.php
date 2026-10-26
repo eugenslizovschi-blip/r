@@ -851,9 +851,13 @@ class LBB_Admin {
 	 * Codul biletului; rezervările fără cod (coș abandonat, anulate înainte de plată) arată „—”, iar cititorul de
 	 * ecran spune „fără cod” (liniuța singură e citită „linie lungă” sau deloc).
 	 */
-	private static function ticket_code_html( $code ) {
-		return '' === (string) $code
-			? '<span aria-hidden="true">—</span><span class="screen-reader-text">' . esc_html__( 'fără cod', 'libertbus-bilete' ) . '</span>'
+	private static function ticket_code_html( $code, $link = false ) {
+		if ( '' === (string) $code ) {
+			return '<span aria-hidden="true">—</span><span class="screen-reader-text">' . esc_html__( 'fără cod', 'libertbus-bilete' ) . '</span>';
+		}
+		// În Rezervări codul deschide biletul: clientul care l-a pierdut îl primește din nou (linkul copiat de acolo).
+		return $link
+			? '<a href="' . esc_url( LBB_Tickets::url( $code ) ) . '" target="_blank" rel="noopener"><code>' . esc_html( $code ) . '</code>' . self::new_tab_note() . '</a>'
 			: '<code>' . esc_html( $code ) . '</code>';
 	}
 
@@ -863,7 +867,8 @@ class LBB_Admin {
 	 */
 	private static function stack_table_style( $class, array $labels ) {
 		$t   = '.' . $class;
-		$css = $t . ' code{white-space:nowrap}' . $t . ' td a{text-decoration:underline}@media screen and (max-width:782px){'
+		// Codul biletului ca link (Rezervări): fără fundalul gri al lui <code>, pe care albastrul linkului n-are contrast.
+		$css = $t . ' code{white-space:nowrap}' . $t . ' td a{text-decoration:underline}' . $t . ' td a code{background:none;color:inherit;padding:0}@media screen and (max-width:782px){'
 			. $t . ' thead{display:none}'
 			. $t . ',' . $t . ' tbody,' . $t . ' tfoot,' . $t . ' tr,' . $t . ' td,' . $t . ' tfoot th{display:block;width:auto!important;box-sizing:border-box}'
 			. $t . ' tr{padding:8px 0;border-bottom:1px solid #dcdcde}'
@@ -1116,7 +1121,7 @@ class LBB_Admin {
 		}
 		foreach ( $rows as $b ) {
 			$order = $b['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( $b['order_id'] ) : null;
-			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( LBB_Bookings::route_name( $b ) ) . '<br>' . esc_html( LBB_WooCommerce::date_with_day( $b['travel_date'] ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $row_labels[ $b['status'] ] ) ? $row_labels[ $b['status'] ] : $b['status'] ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'] ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . self::contact_links( $b ) . '</td><td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ticket_code_html() și payment_label() escapează singure.
+			echo '<tr><td>' . esc_html( $b['id'] ) . '</td><td>' . esc_html( LBB_Bookings::route_name( $b ) ) . '<br>' . esc_html( LBB_WooCommerce::date_with_day( $b['travel_date'] ) . ' ' . $b['dep_time'] ) . '</td><td>' . esc_html( $b['seats'] ) . '</td><td>' . esc_html( isset( $row_labels[ $b['status'] ] ) ? $row_labels[ $b['status'] ] : $b['status'] ) . '</td><td>' . self::ticket_code_html( $b['ticket_code'], true ) . '</td><td>' . esc_html( implode( ', ', LBB_Bookings::passenger_labels( $b ) ) ) . '<br>' . self::contact_links( $b ) . '</td><td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ticket_code_html() și payment_label() escapează singure.
 			if ( $order ) {
 				echo '<a href="' . esc_url( $order->get_edit_order_url() ) . '">#' . esc_html( $order->get_order_number() ) . '</a> (' . esc_html( wc_get_order_status_name( $order->get_status() ) ) . ')';
 			}

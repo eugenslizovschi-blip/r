@@ -125,7 +125,7 @@
   - **Pentru birou:**
     - pe lista de pasageri, butonul „Azi” lângă „Ziua precedentă / următoare”;
     - în „Rezervări”, dacă un filtru (ex. „Anulate”) ascunde rezultatele căutării, apare „Vezi rezultatele din toate stările (N)”;
-    - căutarea din „Rezervări” găsește numele scrise fără diacritice („Stefan Turcanu” → „Ștefan Țurcanu”) și codul dictat la telefon fără liniuță („LB3KVU8W”, „lb 3kvu8w”), iar linkul biletului lipit întreg (primit de la client pe WhatsApp) sau textul de la „Trimite biletul” găsesc biletul după codul din ele;
+    - căutarea din „Rezervări” găsește numele scrise fără diacritice („Stefan Turcanu” → „Ștefan Țurcanu”) și codul dictat la telefon fără liniuță („LB3KVU8W”, „lb 3kvu8w”), iar linkul biletului lipit întreg (primit de la client pe WhatsApp) sau textul de la „Trimite biletul” găsesc biletul după codul din ele; în listă codul biletului deschide biletul (filă nouă), ca biroul să-i retrimită clientului linkul;
     - în Setări, „Separator în CSV”: „punct și virgulă” pentru Excel în română (altfel tot rândul apare într-o coloană), cu sumele scrise 30,5;
     - pe lista de pasageri, o dată scrisă greșit de mână („31.11.2026”) nu mai arată „01.12.2026” fără pasageri, ci revine la ziua de azi.
   - **Bilet:** la printare, un bilet nu se mai rupe între două pagini; fără „Adaugă în calendar” la o rută ștearsă (linkul nu mergea).

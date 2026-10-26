@@ -2111,6 +2111,10 @@ $_GET = array( 'page' => 'lbb-bookings', 'q' => 'rm2@example.com' );
 ob_start();
 LBB_Admin::page_bookings();
 $rm_list2 = ob_get_clean();
+// În Rezervări codul biletului deschide biletul (filă nouă), ca biroul să-i retrimită clientului linkul.
+$tl_rm  = $wpdb->get_row( 'SELECT ticket_code FROM ' . LBB_Bookings::table() . " WHERE email = 'rm@example.com' AND ticket_code <> '' LIMIT 1", ARRAY_A ); // phpcs:ignore WordPress.DB
+$tl_url = $tl_rm ? LBB_Tickets::url( $tl_rm['ticket_code'] ) : '';
+lbb_t( 'Rezervări: codul biletului e link spre bilet, într-o filă nouă (pentru retrimis clientului)', '' !== $tl_url && false !== strpos( $rm_list, '<a href="' . esc_url( $tl_url ) . '" target="_blank" rel="noopener"><code>' . $tl_rm['ticket_code'] . '</code>' ), $tl_rm );
 // Codul dictat la telefon, scris fără liniuță sau cu spațiu, găsește rezervarea.
 $cd_code = (string) $wpdb->get_var( 'SELECT ticket_code FROM ' . LBB_Bookings::table() . " WHERE ticket_code LIKE 'LB-%' LIMIT 1" ); // phpcs:ignore WordPress.DB
 $cd_bare = substr( $cd_code, 3 );
