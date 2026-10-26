@@ -233,11 +233,16 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await fillForm(p2, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
     const t = await p2.inputValue('[data-lbb="time"]');
     await p2.goto(BASE + '/politica-de-cookies/');
+    // Ca în e2e-guest.js: o cerere încă pe drum la închiderea paginii nu trebuie să oprească tot scriptul.
     await p2.route('**/lbb/v1/departures**', async route => {
-      const r = await route.fetch();
-      const j = await r.json();
-      (j.departures || []).forEach(d => { if (d.time === t) { d.bookable = false; d.reason = 'full'; d.free = 0; } });
-      await route.fulfill({ response: r, json: j });
+      try {
+        const r = await route.fetch();
+        const j = await r.json();
+        (j.departures || []).forEach(d => { if (d.time === t) { d.bookable = false; d.reason = 'full'; d.free = 0; } });
+        await route.fulfill({ response: r, json: j });
+      } catch (e) {
+        await route.continue().catch(() => {});
+      }
     });
     let backRequests = 0;
     p2.on('request', r => { if (/route_id=/.test(r.url())) backRequests++; });
@@ -249,6 +254,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const st = await p2.evaluate(() => { const s = document.querySelector('[data-lbb="time"]'); const o = s.options[s.selectedIndex]; return { v: s.value, disabled: !!(o && o.disabled), btn: document.querySelector('[data-lbb-submit]').disabled }; });
     if (st.disabled || st.v === t) fail('după „Înapoi” a rămas selectată ora plină ' + t + ': ' + JSON.stringify(st));
     if (!st.v && !st.btn) fail('fără oră aleasă butoanele trebuie să fie blocate');
+    await p2.unrouteAll({ behavior: 'ignoreErrors' });
     await p2.close();
   }
   // Telefon greșit, prins doar de server: după reîncărcare clientul nu reia totul de la capăt —
