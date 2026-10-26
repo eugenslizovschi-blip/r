@@ -40,7 +40,9 @@ class LBB_Routes {
 		// (100 RON apăreau „100 MDL”); o monedă necunoscută e MDL.
 		$row['currency']    = strtoupper( trim( (string) $row['currency'] ) );
 		$row['currency']    = in_array( $row['currency'], LBB_Settings::currencies(), true ) ? $row['currency'] : 'MDL';
-		$row['child_price'] = null === $row['child_price'] || '' === $row['child_price'] ? null : (float) $row['child_price'];
+		// Un preț negativ pentru copii (scris direct în baza de date; formularul nu-l salvează) ar scădea din total
+		// (3 adulți + 2 copii la -80: 140 MDL): nu e preț, copiii plătesc ca adulții.
+		$row['child_price'] = null === $row['child_price'] || '' === $row['child_price'] || (float) $row['child_price'] < 0 ? null : (float) $row['child_price'];
 		$row['capacity']    = (int) $row['capacity'];
 		$row['active']      = (int) $row['active'];
 		$row['times']       = self::parse_times( $row['departures'] );

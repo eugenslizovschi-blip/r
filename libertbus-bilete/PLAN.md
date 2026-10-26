@@ -135,6 +135,7 @@
     - la fel „Locuri online pe cursă”, „Zile înainte”, „Pasageri pe rezervare” sau timpii de ținere a locurilor ajunși 0 în baza de date (vânzarea se oprea fără mesaj: toate cursele „complet” sau nicio cursă viitoare): se folosește valoarea implicită, iar valorile prea mari se reduc la maxim, ca la salvarea din Setări;
     - o rută cu zilele de circulație goale sau stricate în baza de date (versiune veche, import) circulă zilnic, ca valoarea implicită, nu „niciodată” fără mesaj; zilele inexistente (0, 8) și dublurile se ignoră;
     - moneda unei rute scrisă „ron” în baza de date (import, phpMyAdmin) e RON: prețul se convertește, nu mai apare „100 MDL” în loc de ~390 MDL; o monedă necunoscută e MDL, ca la salvare;
+    - un preț negativ pentru copii în baza de date nu mai scade din total (1 adult + 2 copii la -80 MDL dădeau -60 MDL): copiii plătesc ca adulții; prețul 0 pentru copii rămâne gratuit;
     - o rezervare cu mai mulți copii decât locuri (modificată manual în baza de date) bloca pagina biletului, lista pentru șofer și CSV-ul până la limita serverului; acum se afișează normal;
     - fișierul „Adaugă în calendar” cu un text stricat (ex. dintr-o traducere coruptă) nu mai intră într-o buclă fără sfârșit, iar un loc de urcare cu rând nou Windows (import, phpMyAdmin) nu-l mai face invalid pentru calendarul de pe iPhone;
     - o listă de pasageri stricată în baza de date nu mai apare pe bilet ca „Array”;

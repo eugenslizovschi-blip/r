@@ -3627,6 +3627,24 @@ if ( is_int( $mc_r ) ) {
 }
 lbb_t( 'moneda rutei „ron” în baza de date e RON (100 RON nu apar „100 MDL”); una necunoscută e MDL', isset( $mc_want ) && $mc_want > 300 && array( 'mici' => array( 'RON', $mc_want ), 'necunoscut' => array( 'MDL', 100.0 ) ) === $mc_res, array( $mc_res, isset( $mc_want ) ? $mc_want : null ) );
 
+// Preț negativ pentru copii în baza de date: nu scade din total (copiii plătesc ca adulții); 0 rămâne gratuit.
+$cn_r   = LBB_Routes::save( array( 'origin' => 'NegA', 'destination' => 'NegB', 'departures' => '10:00', 'price' => 100, 'child_price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
+$cn_res = array();
+if ( is_int( $cn_r ) ) {
+	$cn_day = ( new DateTimeImmutable( LBB_Settings::today(), LBB_Settings::tz() ) )->modify( '+3 days' )->format( 'Y-m-d' );
+	foreach ( array( 'negativ' => -80, 'zero' => 0 ) as $cn_k => $cn_v ) {
+		$wpdb->update( LBB_Routes::table(), array( 'child_price' => $cn_v ), array( 'id' => $cn_r ) );
+		$cn_h = LBB_Bookings::create_hold( LBB_Routes::get( $cn_r ), $cn_day, '10:00', 1, 2, array( 'Ion Neg', 'Ana Neg', 'Dan Neg' ), '+37369000055', 'neg@example.com', 'MDL' );
+		$cn_res[ $cn_k ] = is_array( $cn_h ) ? (float) LBB_Bookings::get_by_token( $cn_h['token'] )['amount'] : ( is_wp_error( $cn_h ) ? $cn_h->get_error_message() : $cn_h );
+		if ( is_array( $cn_h ) ) {
+			LBB_Bookings::release( $cn_h['token'] );
+		}
+	}
+	$wpdb->delete( LBB_Bookings::table(), array( 'route_id' => $cn_r ) );
+	LBB_Routes::delete( $cn_r );
+}
+lbb_t( 'preț negativ pentru copii în baza de date: nu scade din total (1 adult + 2 copii = 300 MDL); prețul 0 rămâne gratuit pentru copii', array( 'negativ' => 300.0, 'zero' => 100.0 ) === $cn_res, $cn_res );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {
