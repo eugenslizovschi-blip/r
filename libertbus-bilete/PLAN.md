@@ -176,7 +176,7 @@ Vezi `README.md`. Pe scurt:
 ### Ce pot face eu, cu acordul dumneavoastră
 1. ~~Instalarea și activarea plugin-ului pe site.~~ Făcut. Rămâne actualizarea la versiunea de pe branch, cu arhiva făcută de `tests/build-zip.sh`.
 2. Fusul orar → Chișinău. Moneda WooCommerce → MDL.
-3. Paginile legale: confidențialitate și cookies sunt publicate și legate în subsol. Termenii, rambursarea și plata așteaptă verificarea dumneavoastră.
+3. Paginile legale: confidențialitate și cookies sunt publicate și legate în subsol. Termenii, rambursarea și plata așteaptă verificarea dumneavoastră. Dacă una e publicată înainte de completarea datelor firmei, vizitatorii văd „—” în locul câmpurilor goale (și „LibertBus” ca nume), nu „[completați în LibertBus → Setări]”, pe care îl vede doar administratorul.
 4. Pagină nouă „Rezervă bilet” cu formularul. Pe paginile de rută, formularul de contact se înlocuiește cu `[libertbus_rezervare from=".." to=".."]`. Butoanele „Rezervă” din „Orar Curse” vor duce spre formular.
 5. Oprirea WooPayments, care nu funcționează în Moldova.
 6. Test complet cu plata de test, apoi cu modul de test al băncii. Înainte: în Setări „Trimite un email de test”, iar în panoul „Gata de plăți?” toate rândurile verzi (inclusiv „Erorile PHP nu se afișează vizitatorilor”).

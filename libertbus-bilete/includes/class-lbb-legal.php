@@ -110,7 +110,14 @@ class LBB_Legal {
 		if ( 'company_email' === $key && ! $value ) {
 			$value = get_option( 'admin_email' );
 		}
-		return '' === $value ? '<mark>[' . esc_html__( 'completați în LibertBus → Setări', 'libertbus-bilete' ) . ']</mark>' : esc_html( $value );
+		if ( '' !== $value ) {
+			return esc_html( $value );
+		}
+		// Semnul „completați” e pentru cine editează pagina; un vizitator al unei pagini publicate prea devreme nu-l vede.
+		if ( current_user_can( 'edit_pages' ) ) {
+			return '<mark>[' . esc_html__( 'completați în LibertBus → Setări', 'libertbus-bilete' ) . ']</mark>';
+		}
+		return '<span class="lbb-firma-lipsa">' . ( 'company_name' === $key ? 'LibertBus' : '—' ) . '</span>';
 	}
 
 	/**

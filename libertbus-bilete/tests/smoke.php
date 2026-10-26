@@ -3645,6 +3645,20 @@ if ( is_int( $cn_r ) ) {
 }
 lbb_t( 'preț negativ pentru copii în baza de date: nu scade din total (1 adult + 2 copii = 300 MDL); prețul 0 rămâne gratuit pentru copii', array( 'negativ' => 300.0, 'zero' => 100.0 ) === $cn_res, $cn_res );
 
+// Datele firmei necompletate pe o pagină legală publicată prea devreme: administratorul vede „[completați…]”,
+// vizitatorul nu (numele e „LibertBus”, restul „—”); un câmp completat apare la toți.
+$cf_keep = get_option( 'lbb_settings' );
+$cf_user = get_current_user_id();
+update_option( 'lbb_settings', array_merge( (array) $cf_keep, array( 'company_name' => '', 'company_idno' => '', 'company_address' => 'Str. Test 1, Chișinău' ) ) );
+$cf_res = array();
+foreach ( array( 'admin' => 1, 'vizitator' => 0 ) as $cf_k => $cf_u ) {
+	wp_set_current_user( $cf_u );
+	$cf_res[ $cf_k ] = do_shortcode( '[lbb_firma camp="name"]|[lbb_firma camp="idno"]|[lbb_firma camp="address"]' );
+}
+wp_set_current_user( $cf_user );
+update_option( 'lbb_settings', $cf_keep );
+lbb_t( 'datele firmei necompletate: „[completați…]” doar pentru cine editează pagini; vizitatorul vede „LibertBus” / „—”, iar adresa completată apare la toți', 1 === preg_match( '#^<mark>\[completați în LibertBus → Setări\]</mark>\|<mark>\[completați în LibertBus → Setări\]</mark>\|Str\. Test 1, Chișinău$#u', $cf_res['admin'] ) && '<span class="lbb-firma-lipsa">LibertBus</span>|<span class="lbb-firma-lipsa">—</span>|Str. Test 1, Chișinău' === $cf_res['vizitator'], $cf_res );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {

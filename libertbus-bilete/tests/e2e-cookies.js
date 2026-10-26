@@ -139,7 +139,8 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
     await page.goto(BASE + '/politica-de-cookies/');
     const text = await page.textContent('body');
     if (!/_ga/.test(text) || !/lbb_cookie_consent/.test(text) || !/Doar|necesare/.test(text)) fail(vp.name + ': Politica de cookies nu descrie cookies-urile');
-    if (/completați în LibertBus/.test(text)) fail(vp.name + ': Politica de cookies are câmpuri necompletate');
+    // Câmp gol din datele firmei: „completați…” pentru admin, „—” marcat lbb-firma-lipsa pentru vizitator.
+    if (/completați în LibertBus/.test(text) || await page.$('.lbb-firma-lipsa')) fail(vp.name + ': Politica de cookies are câmpuri necompletate');
     await page.focus('a.lbb-cc-open');
     await page.keyboard.press('Enter');
     await page.waitForSelector('#lbb-cc:not([hidden])');
@@ -242,7 +243,7 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   const r = await p.goto(BASE + '/politica-de-confidentialitate/');
   const body = await p.textContent('body');
   if (r.status() !== 200 || !/Google Analytics/.test(body) || !/Politica de cookies/.test(body)) fail('Politica de confidențialitate lipsește sau nu pomenește cookies');
-  if (/completați în LibertBus/.test(body)) fail('Politica de confidențialitate are câmpuri necompletate');
+  if (/completați în LibertBus/.test(body) || await p.$('.lbb-firma-lipsa')) fail('Politica de confidențialitate are câmpuri necompletate');
   // Ecran foarte jos (telefon orizontal cu barele browserului): cu „Setări” deschis bannerul rămâne în ecran și se
   // derulează în el, ca „Detalii” de sus și „Salvez alegerea” să se poată atinge.
   {
