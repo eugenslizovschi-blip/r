@@ -3564,6 +3564,19 @@ if ( is_int( $pp_r ) ) {
 }
 lbb_t( 'plata sosită după plecarea autocarului: biletul se emite, biroul primește „Plată după plecare” cu cursa și telefonul clientului, comanda are nota', array( 'mail' => 1, 'to' => LBB_Settings::office_email(), 'cursa' => true, 'tel' => true, 'nota' => true, 'bilet' => 'confirmed' ) === $pp_res, $pp_res );
 
+// Un curs 0 sau gol ajuns în baza de date ocolind Setările (import, versiune veche): prețul se convertește cu cursul
+// implicit, nu rămâne neconvertit (600 MDL nu devin „600 RON”).
+$rt_keep = get_option( 'lbb_settings' );
+$rt_def  = LBB_Settings::defaults();
+$rt_want = round( 600 / (float) $rt_def['rate_RON'], 2 );
+$rt_res  = array();
+foreach ( array( 'zero' => 0, 'gol' => '', 'bun' => 4 ) as $rt_k => $rt_v ) {
+	update_option( 'lbb_settings', array_merge( (array) $rt_keep, array( 'rate_RON' => $rt_v ) ) );
+	$rt_res[ $rt_k ] = LBB_Settings::convert( 600, 'MDL', 'RON' );
+}
+update_option( 'lbb_settings', $rt_keep );
+lbb_t( 'curs RON 0 sau gol în baza de date: prețul se convertește cu cursul implicit, nu rămâne „600 RON”; un curs bun se folosește', array( 'zero' => $rt_want, 'gol' => $rt_want, 'bun' => 150.0 ) === $rt_res, array( $rt_res, $rt_want ) );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {

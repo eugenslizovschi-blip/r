@@ -131,6 +131,7 @@
   - **Telefoane vechi** (iPhone cu iOS sub 11.3, Android 4.4): după 8 secunde fără răspuns apare „Încearcă din nou” (nu „Se verifică locurile…” la nesfârșit); tasta Tab în fereastra pasului 2 nu mai dă eroare.
   - **Română corectă** la numere: „cel mult 20 de locuri”, „mai mult de 20 de persoane”, „ultimele 200 de rezervări”; data din politici după ora Chișinăului și cu fusul „UTC+2” fix.
   - **Date neobișnuite sau stricate:** pagina nu mai cade și nu mai arată „Array”:
+    - un curs valutar 0 sau gol ajuns în baza de date ocolind Setările (import, versiune veche) nu mai lasă prețul neconvertit (600 MDL ar fi devenit „600 RON”): se folosește cursul implicit;
     - o rezervare cu mai mulți copii decât locuri (modificată manual în baza de date) bloca pagina biletului, lista pentru șofer și CSV-ul până la limita serverului; acum se afișează normal;
     - fișierul „Adaugă în calendar” cu un text stricat (ex. dintr-o traducere coruptă) nu mai intră într-o buclă fără sfârșit, iar un loc de urcare cu rând nou Windows (import, phpMyAdmin) nu-l mai face invalid pentru calendarul de pe iPhone;
     - o listă de pasageri stricată în baza de date nu mai apare pe bilet ca „Array”;

@@ -381,6 +381,19 @@ class LBB_Settings {
 	}
 
 	/**
+	 * Câți MDL valorează 1 unitate din monedă. Un curs 0 sau gol ajuns în baza de date ocolind Setările (import,
+	 * versiune veche) ia cursul implicit: altfel suma rămânea neconvertită și 600 MDL deveneau „600 RON”.
+	 */
+	private static function rate( $currency ) {
+		$rate = (float) str_replace( ',', '.', (string) self::get( 'rate_' . $currency ) );
+		if ( $rate <= 0 ) {
+			$defaults = self::defaults();
+			$rate     = isset( $defaults[ 'rate_' . $currency ] ) ? (float) $defaults[ 'rate_' . $currency ] : 0.0;
+		}
+		return $rate;
+	}
+
+	/**
 	 * Convertește o sumă din moneda rutei în moneda magazinului WooCommerce.
 	 */
 	public static function convert( $amount, $from, $to = null ) {
@@ -388,8 +401,8 @@ class LBB_Settings {
 		if ( $from === $to ) {
 			return (float) $amount;
 		}
-		$rate_from = (float) self::get( 'rate_' . $from );
-		$rate_to   = (float) self::get( 'rate_' . $to );
+		$rate_from = self::rate( $from );
+		$rate_to   = self::rate( $to );
 		if ( $rate_from <= 0 || $rate_to <= 0 ) {
 			return (float) $amount;
 		}
