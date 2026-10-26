@@ -3687,6 +3687,32 @@ null === $gw_keep ? delete_option( 'woocommerce_cod_settings' ) : update_option(
 $gw_off = $gw_row();
 lbb_t( 'panou: „Plata la livrare” pornită e pomenită la plata cu cardul („nu apar la bilete”); oprită, nu', false !== strpos( (string) $gw_on, 'Plata la livrare test: pornite în WooCommerce, dar nu apar la bilete' ) && false === strpos( (string) $gw_off, 'nu apar la bilete' ), array( $gw_on, $gw_off ) );
 
+// Cursa ținută de alt client (altă conexiune la baza de date are lacătul): rezervarea nu trece fără lacăt (ar putea lua
+// același ultim loc), ci spune „încercați din nou”; după eliberare merge.
+$lk_r   = LBB_Routes::find( 'Bălți', 'Iași' );
+$lk_res = array();
+if ( $lk_r ) {
+	$lk_db   = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+	$lk_name = 'lbb_' . md5( $wpdb->prefix . $lk_r['id'] . $tomorrow . $lk_r['times'][0] );
+	$lk_got  = $lk_db->get_var( $lk_db->prepare( 'SELECT GET_LOCK(%s, 1)', $lk_name ) );
+	$lk_to   = function () {
+		return 1;
+	};
+	add_filter( 'lbb_lock_timeout', $lk_to );
+	$lk_busy = LBB_Bookings::create_hold( $lk_r, $tomorrow, $lk_r['times'][0], 1, 0, array( 'Lacat Unu' ), '+37369000052', 'lacat@example.com', 'MDL' );
+	$lk_db->get_var( $lk_db->prepare( 'SELECT RELEASE_LOCK(%s)', $lk_name ) );
+	$lk_free = LBB_Bookings::create_hold( $lk_r, $tomorrow, $lk_r['times'][0], 1, 0, array( 'Lacat Doi' ), '+37369000052', 'lacat@example.com', 'MDL' );
+	remove_filter( 'lbb_lock_timeout', $lk_to );
+	$lk_res = array( 'lacat' => (string) $lk_got, 'ocupat' => is_wp_error( $lk_busy ) ? $lk_busy->get_error_code() : 'trecut', 'liber' => is_array( $lk_free ) ? 'trecut' : ( is_wp_error( $lk_free ) ? $lk_free->get_error_code() : $lk_free ) );
+	foreach ( array( $lk_busy, $lk_free ) as $lk_h ) {
+		if ( is_array( $lk_h ) ) {
+			LBB_Bookings::release( $lk_h['token'] );
+		}
+	}
+	$lk_db->close();
+}
+lbb_t( 'cursa ținută de alt client: rezervarea spune „încercați din nou” (nu trece fără lacăt), iar după eliberare merge', array( 'lacat' => '1', 'ocupat' => 'lbb_busy', 'liber' => 'trecut' ) === $lk_res, $lk_res );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {

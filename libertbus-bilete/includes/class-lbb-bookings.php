@@ -53,11 +53,20 @@ class LBB_Bookings {
 		return $out;
 	}
 
+	/**
+	 * Lacătul cursei (MySQL GET_LOCK), ca doi clienți să nu ia același ultim loc.
+	 *
+	 * @return string|null Numele lacătului; '' dacă baza de date nu are GET_LOCK (se lucrează fără, ca înainte);
+	 *                     null dacă alt client îl ține de prea mult (cursa e ocupată acum).
+	 */
 	private static function lock( $route_id, $date, $time ) {
 		global $wpdb;
 		$name = 'lbb_' . md5( $wpdb->prefix . $route_id . $date . $time );
-		$got  = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 10)', $name ) );
-		return '1' === (string) $got ? $name : '';
+		$got  = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $name, max( 1, (int) apply_filters( 'lbb_lock_timeout', 10 ) ) ) );
+		if ( '1' === (string) $got ) {
+			return $name;
+		}
+		return '0' === (string) $got ? null : '';
 	}
 
 	private static function unlock( $name ) {
@@ -92,6 +101,10 @@ class LBB_Bookings {
 		}
 
 		$lock = self::lock( $route['id'], $date, $time );
+		// Alt client ține cursa de peste 10 secunde (vârf de rezervări): fără lacăt, amândoi ar putea lua ultimul loc.
+		if ( null === $lock ) {
+			return new WP_Error( 'lbb_busy', __( 'Multe rezervări chiar acum la această cursă. Încercați din nou peste câteva secunde.', 'libertbus-bilete' ) );
+		}
 		try {
 			$departure = null;
 			foreach ( LBB_Routes::departures_on( $route, $date ) as $dep ) {
