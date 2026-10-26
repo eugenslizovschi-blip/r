@@ -2129,6 +2129,7 @@ foreach ( array( 'link' => LBB_Tickets::url( $cd_code ), 'text' => 'Bilet Libert
 	$cd_codes          = wp_list_pluck( LBB_Bookings::recent( 50, '', $cd_q ), 'ticket_code' );
 	$cd_more[ $cd_k ] = array( in_array( $cd_code, $cd_codes, true ), count( array_unique( $cd_codes ) ) );
 }
+lbb_t( 'Rezervări: câmpul de căutare spune că merge și linkul biletului (eticheta și textul din câmp)', false !== strpos( $rm_list, 'Caută după codul sau linkul biletului' ) && false !== strpos( $rm_list, 'placeholder="Cod sau link bilet' ) );
 lbb_t( 'Rezervări: linkul biletului lipit întreg sau textul „Trimite biletul” găsesc biletul, doar pe el', '' !== $cd_code && array( 'link' => array( true, 1 ), 'text' => array( true, 1 ) ) === $cd_more, $cd_more );
 // Numele căutat fără diacritice („Stefan Turcanu”) găsește pasagerul salvat „Ștefan Țurcanu”.
 $dn_r  = LBB_Routes::save( array( 'origin' => 'DiacrA', 'destination' => 'DiacrB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );

@@ -1102,8 +1102,8 @@ class LBB_Admin {
 		if ( $status ) {
 			echo '<input type="hidden" name="status" value="' . esc_attr( $status ) . '">';
 		}
-		echo '<label class="screen-reader-text" for="lbb-q">' . esc_html__( 'Caută după cod, telefon, nume, email sau numărul comenzii', 'libertbus-bilete' ) . '</label>'
-			. '<input type="search" id="lbb-q" name="q" value="' . esc_attr( $search ) . '" placeholder="' . esc_attr__( 'Cod, telefon, nume, email, nr. comandă', 'libertbus-bilete' ) . '"> '
+		echo '<label class="screen-reader-text" for="lbb-q">' . esc_html__( 'Caută după codul sau linkul biletului, telefon, nume, email sau numărul comenzii', 'libertbus-bilete' ) . '</label>'
+			. '<input type="search" id="lbb-q" name="q" value="' . esc_attr( $search ) . '" placeholder="' . esc_attr__( 'Cod sau link bilet, telefon, nume, email, nr. comandă', 'libertbus-bilete' ) . '"> '
 			. '<button class="button">' . esc_html__( 'Caută', 'libertbus-bilete' ) . '</button></form><br class="clear">';
 		$limit = max( 1, (int) apply_filters( 'lbb_bookings_list_limit', 200 ) );
 		$rows  = LBB_Bookings::recent( $limit, $status, $search );
