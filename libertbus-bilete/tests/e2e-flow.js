@@ -164,4 +164,6 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     if (res.status() !== 200 || !/Blocuri Test/.test(bTicket) || !/Achitat online/.test(bTicket)) console.log('FAIL plata prin finalizarea cu blocuri (Store API) nu dă biletul: ' + res.status() + ' ' + JSON.stringify(done).slice(0, 200) + ' | ' + bTicket.slice(0, 200));
   }
   await browser.close();
+  // Ultimul rând: QA știe că scriptul a ajuns la capăt (un „ticket:” de la început nu ajunge).
+  console.log('FLOW: DONE');
 })().catch(require('./crash')('flow', () => BROWSER));

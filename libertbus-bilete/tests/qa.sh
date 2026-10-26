@@ -130,7 +130,7 @@ fresh_carts
 echo "== Rezervare cap-coadă"
 OUT_FLOW=$(BASE="$BASE" node "$DIR/tests/e2e-flow.js" 2>&1 | grep -v CERT_AUTHORITY)
 echo "$OUT_FLOW" | grep -E 'ticket:|FAIL|ALERT|pageerror'
-echo "$OUT_FLOW" | grep -q 'ticket:' && ! echo "$OUT_FLOW" | grep -q 'FAIL' || FAIL=1
+echo "$OUT_FLOW" | grep -q 'ticket:' && echo "$OUT_FLOW" | grep -q '^FLOW: DONE$' && ! echo "$OUT_FLOW" | grep -q 'FAIL' || { echo "$OUT_FLOW" | grep -q '^FLOW: DONE$' || { e2e_problems "$OUT_FLOW"; echo "  PROBLEME: testul nu a ajuns la capăt"; }; FAIL=1; }
 [ -f "$LOG" ] && tail -n +$((LOG_START + 1)) "$LOG" | grep -E "Fatal|Warning|Notice" | grep -i lbb && FAIL=1
 fresh_carts
 echo "== Vizitator nelogat"
