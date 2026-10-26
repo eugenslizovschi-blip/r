@@ -580,6 +580,13 @@ class LBB_Bookings {
 		if ( preg_match( '/^LB[\s\-_.]*([A-Z0-9]{3,})$/i', $search, $m ) ) {
 			$or .= $wpdb->prepare( ' OR b.ticket_code LIKE %s', 'LB-' . $wpdb->esc_like( strtoupper( $m[1] ) ) . '%' );
 		}
+		// Linkul biletului lipit întreg (trimis de client pe WhatsApp: „…?lbb_bilet=LB-3KVU8W&k=…”) sau textul de la
+		// „Trimite biletul” („Bilet LibertBus LB-3KVU8W: Bălți → Iași, …”): codul din el găsește biletul.
+		if ( preg_match_all( '/\bLB-([A-Z0-9]{6})\b/i', $search, $codes ) ) {
+			foreach ( array_unique( $codes[1] ) as $code ) {
+				$or .= $wpdb->prepare( ' OR b.ticket_code = %s', 'LB-' . strtoupper( $code ) );
+			}
+		}
 		// Numărul comenzii WooCommerce („#1234” din emailul de plată sau din Paynet) găsește biletele comenzii.
 		if ( preg_match( '/^#?\s*(\d{1,10})$/', $search, $m ) && (int) $m[1] > 0 ) {
 			$or .= $wpdb->prepare( ' OR b.order_id = %d', (int) $m[1] );

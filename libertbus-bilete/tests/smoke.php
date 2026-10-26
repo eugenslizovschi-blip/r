@@ -2119,6 +2119,13 @@ foreach ( array( 'LB' . $cd_bare, 'lb ' . strtolower( $cd_bare ), 'LB_' . $cd_ba
 	$cd_got[ $cd_q ] = in_array( $cd_code, wp_list_pluck( LBB_Bookings::recent( 50, '', $cd_q ), 'ticket_code' ), true );
 }
 lbb_t( 'Rezervări: codul scris fără liniuță („LB3KVU8W”, „lb 3kvu8w”) găsește biletul', '' !== $cd_bare && ! in_array( false, $cd_got, true ), $cd_got );
+// Linkul biletului lipit întreg sau textul de la „Trimite biletul”: codul din ele găsește biletul (și numai pe el).
+$cd_more = array();
+foreach ( array( 'link' => LBB_Tickets::url( $cd_code ), 'text' => 'Bilet LibertBus ' . strtolower( $cd_code ) . ': Bălți → Iași, 01.11.2026 (duminică), 08:45' ) as $cd_k => $cd_q ) {
+	$cd_codes          = wp_list_pluck( LBB_Bookings::recent( 50, '', $cd_q ), 'ticket_code' );
+	$cd_more[ $cd_k ] = array( in_array( $cd_code, $cd_codes, true ), count( array_unique( $cd_codes ) ) );
+}
+lbb_t( 'Rezervări: linkul biletului lipit întreg sau textul „Trimite biletul” găsesc biletul, doar pe el', '' !== $cd_code && array( 'link' => array( true, 1 ), 'text' => array( true, 1 ) ) === $cd_more, $cd_more );
 // Numele căutat fără diacritice („Stefan Turcanu”) găsește pasagerul salvat „Ștefan Țurcanu”.
 $dn_r  = LBB_Routes::save( array( 'origin' => 'DiacrA', 'destination' => 'DiacrB', 'departures' => '10:00', 'price' => 50, 'currency' => 'MDL', 'active' => 1 ) );
 $dn_rt = is_int( $dn_r ) ? LBB_Routes::get( $dn_r ) : null;
