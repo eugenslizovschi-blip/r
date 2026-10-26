@@ -2413,7 +2413,7 @@ $api_nc = function ( $params ) use ( $api ) {
 	$req = new WP_REST_Request( 'GET', '/lbb/v1/departures' );
 	$req->set_query_params( $params );
 	$res = apply_filters( 'rest_post_dispatch', rest_ensure_response( $api( $params ) ), rest_get_server(), $req );
-	return array( $res->get_status(), $res->get_headers()['Cache-Control'] ?? '' );
+	return array( $res->get_status(), $res->get_headers()['Cache-Control'] ?? '', $res->get_headers()['X-LiteSpeed-Cache-Control'] ?? '' );
 };
 $api_nc_404 = $api_nc( array( 'route_id' => 999999, 'date' => $tomorrow ) );
 $api_nc_400 = $api_nc( array( 'route_id' => $rid2, 'date' => '07.10.2026' ) );
@@ -2423,7 +2423,7 @@ $nc_other = apply_filters( 'rest_post_dispatch', rest_ensure_response( array( 'o
 $nc_store = new WP_REST_Request( 'GET', '/wc/store/v1/products' );
 $nc_store = apply_filters( 'rest_post_dispatch', rest_ensure_response( array( 'ok' => 1 ) ), rest_get_server(), $nc_store );
 lbb_t( 'API: „fără cache” doar pe rutele lbb/v1, nu pe restul API-ului WordPress și WooCommerce', ! isset( $nc_other->get_headers()['Cache-Control'] ) && ! isset( $nc_store->get_headers()['Cache-Control'] ), array( $nc_other->get_headers(), $nc_store->get_headers() ) );
-lbb_t( 'API: și răspunsurile de eroare (404, 400) sunt fără cache', array( 404, 'no-store' ) === $api_nc_404 && array( 400, 'no-store' ) === $api_nc_400, array( $api_nc_404, $api_nc_400 ) );
+lbb_t( 'API: și răspunsurile de eroare (404, 400) sunt fără cache, și pentru cache-ul LiteSpeed', array( 404, 'no-store', 'no-cache' ) === $api_nc_404 && array( 400, 'no-store', 'no-cache' ) === $api_nc_400, array( $api_nc_404, $api_nc_400 ) );
 lbb_t( 'API: o dată imposibilă (31 februarie) nu are plecări', 200 === ( $api_imp = $api( array( 'route_id' => $rid2, 'date' => ( (int) gmdate( 'Y' ) + 1 ) . '-02-31' ) ) )->get_status() && array() === array_filter( $api_imp->get_data()['departures'], function ( $d ) { return ! empty( $d['bookable'] ); } ), $api_imp->get_data() );
 $wpdb->update( LBB_Routes::table(), array( 'active' => 0 ), array( 'id' => $rid2 ) );
 $api_off  = $api( array( 'route_id' => $rid2, 'date' => $tomorrow ) )->get_status();
@@ -3658,6 +3658,16 @@ foreach ( array( 'admin' => 1, 'vizitator' => 0 ) as $cf_k => $cf_u ) {
 wp_set_current_user( $cf_user );
 update_option( 'lbb_settings', $cf_keep );
 lbb_t( 'datele firmei necompletate: „[completați…]” doar pentru cine editează pagini; vizitatorul vede „LibertBus” / „—”, iar adresa completată apare la toți', 1 === preg_match( '#^<mark>\[completați în LibertBus → Setări\]</mark>\|<mark>\[completați în LibertBus → Setări\]</mark>\|Str\. Test 1, Chișinău$#u', $cf_res['admin'] ) && '<span class="lbb-firma-lipsa">LibertBus</span>|<span class="lbb-firma-lipsa">—</span>|Str. Test 1, Chișinău' === $cf_res['vizitator'], $cf_res );
+
+// Pagina biletului: fără cache nici la serverele LiteSpeed (ca al site-ului), cu antetul lor.
+$ls_r = LBB_Routes::find( 'Bălți', 'Iași' );
+$ls_h = $ls_r ? LBB_Bookings::create_hold( $ls_r, $tomorrow, $ls_r['times'][0], 1, 0, array( 'Cache Test' ), '+37369000053', 'cache@example.com', 'MDL' ) : null;
+$ls_b = is_array( $ls_h ) ? LBB_Bookings::reserve( $ls_h['token'] ) : null;
+$ls_g = $ls_b ? wp_remote_get( LBB_Tickets::url( $ls_b['ticket_code'] ), array( 'timeout' => 20 ) ) : null;
+if ( $ls_b ) {
+	LBB_Bookings::cancel( $ls_b['id'] );
+}
+lbb_t( 'pagina biletului: fără cache și pentru LiteSpeed (X-LiteSpeed-Cache-Control: no-cache), cu Cache-Control no-store', $ls_g && ! is_wp_error( $ls_g ) && 'no-cache' === wp_remote_retrieve_header( $ls_g, 'x-litespeed-cache-control' ) && false !== strpos( (string) wp_remote_retrieve_header( $ls_g, 'cache-control' ), 'no-store' ), $ls_g && ! is_wp_error( $ls_g ) ? wp_remote_retrieve_headers( $ls_g )->getAll() : $ls_g );
 
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();

@@ -704,6 +704,10 @@ class LBB_Tickets {
 		nocache_headers();
 		// Date personale: nimic în cache (nici la hosting), fără indexare, iar linkul cu cheia k= nu pleacă în Referer.
 		header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private' );
+		// Serverele LiteSpeed (ca cel al site-ului) au cache-ul lor, care ascultă de antetul lor și de plugin-ul LiteSpeed
+		// Cache: un bilet anulat sau abia plătit nu trebuie să rămână servit cu starea veche.
+		header( 'X-LiteSpeed-Cache-Control: no-cache' );
+		do_action( 'litespeed_control_set_nocache', 'lbb ticket' );
 		header( 'X-Robots-Tag: noindex, nofollow' );
 		header( 'Referrer-Policy: no-referrer' );
 		// Butonul de plată și codul QR nu se pot încadra pe alt site (clickjacking); nici fișierul .ics nu se ghicește ca HTML.
