@@ -3669,6 +3669,24 @@ if ( $ls_b ) {
 }
 lbb_t( 'pagina biletului: fără cache și pentru LiteSpeed (X-LiteSpeed-Cache-Control: no-cache), cu Cache-Control no-store', $ls_g && ! is_wp_error( $ls_g ) && 'no-cache' === wp_remote_retrieve_header( $ls_g, 'x-litespeed-cache-control' ) && false !== strpos( (string) wp_remote_retrieve_header( $ls_g, 'cache-control' ), 'no-store' ), $ls_g && ! is_wp_error( $ls_g ) ? wp_remote_retrieve_headers( $ls_g )->getAll() : $ls_g );
 
+// Panoul „Gata de plăți?”: „Plata la livrare” pornită apare la rândul plății cu cardul, cu explicația că la bilete
+// nu se vede (ca biroul să nu se mire); oprită, rândul nu o pomenește.
+$gw_keep = get_option( 'woocommerce_cod_settings', null );
+$gw_row  = function () {
+	WC()->payment_gateways()->init();
+	foreach ( LBB_Admin::checklist() as $gw_i ) {
+		if ( 'gateway' === $gw_i['id'] ) {
+			return $gw_i['detail'];
+		}
+	}
+	return null;
+};
+update_option( 'woocommerce_cod_settings', array_merge( (array) $gw_keep, array( 'enabled' => 'yes', 'title' => 'Plata la livrare test' ) ) );
+$gw_on = $gw_row();
+null === $gw_keep ? delete_option( 'woocommerce_cod_settings' ) : update_option( 'woocommerce_cod_settings', $gw_keep );
+$gw_off = $gw_row();
+lbb_t( 'panou: „Plata la livrare” pornită e pomenită la plata cu cardul („nu apar la bilete”); oprită, nu', false !== strpos( (string) $gw_on, 'Plata la livrare test: pornite în WooCommerce, dar nu apar la bilete' ) && false === strpos( (string) $gw_off, 'nu apar la bilete' ), array( $gw_on, $gw_off ) );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {

@@ -75,20 +75,29 @@ class LBB_Admin {
 				implode( ', ', $pay ) . ( count( $pay ) > 1 ? ' — ' . __( 'verificați că procesatorul încasează în fiecare dintre ele. Dacă banca primește doar MDL, lăsați doar MDL: clientul cu card în RON plătește oricum, conversia o face banca lui.', 'libertbus-bilete' ) : '' ),
 				admin_url( 'admin.php?page=lbb-settings' ) );
 
-			$real = array();
-			$test = false;
+			$real    = array();
+			$offline = array();
+			$test    = false;
 			foreach ( WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : array() as $gateway ) {
 				if ( 'yes' !== $gateway->enabled ) {
 					continue;
 				}
 				if ( 'lbb_test' === $gateway->id ) {
 					$test = true;
-				} elseif ( ! in_array( $gateway->id, array( 'bacs', 'cheque', 'cod' ), true ) ) {
+				} elseif ( in_array( $gateway->id, array( 'bacs', 'cheque', 'cod' ), true ) ) {
+					$offline[] = $gateway->get_title() ? $gateway->get_title() : $gateway->id;
+				} else {
 					$real[] = $gateway->get_method_title() ? $gateway->get_method_title() : $gateway->id;
 				}
 			}
+			// Transfer bancar, cec, plata la livrare: pornite în WooCommerce, dar ascunse la bilete (biletul s-ar emite
+			// „achitat” fără bani); biroul află de ce clienții nu le văd.
+			$offline_note = $offline
+				/* translators: %s: metodele de plată, ex. „Transfer bancar, Plata la livrare” */
+				? ' ' . sprintf( __( '(%s: pornite în WooCommerce, dar nu apar la bilete, care se plătesc doar cu cardul sau la urcare.)', 'libertbus-bilete' ), implode( ', ', $offline ) )
+				: '';
 			$add( 'gateway', (bool) $real, __( 'O metodă de plată cu cardul este activă', 'libertbus-bilete' ),
-				$real ? implode( ', ', $real ) : __( 'Instalați plugin-ul WooCommerce al băncii (Paynet, MAIB, Victoriabank, BT iPay), introduceți datele primite de la bancă și activați-l.', 'libertbus-bilete' ),
+				( $real ? implode( ', ', $real ) : __( 'Instalați plugin-ul WooCommerce al băncii (Paynet, MAIB, Victoriabank, BT iPay), introduceți datele primite de la bancă și activați-l.', 'libertbus-bilete' ) ) . $offline_note,
 				admin_url( 'admin.php?page=wc-settings&tab=checkout' ) );
 			$add( 'allow_pay', LBB_Settings::get( 'allow_pay' ) ? true : 'warn', __( 'Butonul „Achit online cu cardul” e pornit', 'libertbus-bilete' ),
 				LBB_Settings::get( 'allow_pay' ) ? '' : __( 'Acum clienții pot doar rezerva cu plata la urcare. Porniți butonul din Setări după ce plata cu cardul e activă.', 'libertbus-bilete' ),
