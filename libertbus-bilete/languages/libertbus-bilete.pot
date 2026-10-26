@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T10:59:22+00:00\n"
+"POT-Creation-Date: 2026-10-26T11:59:59+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: libertbus-bilete\n"
@@ -2356,7 +2356,7 @@ msgid "Rezervarea %1$s pentru %2$s, %3$s a fost anulată. Locurile nu mai sunt p
 msgstr ""
 
 #: includes/class-lbb-tickets.php:276
-#: includes/class-lbb-tickets.php:788
+#: includes/class-lbb-tickets.php:789
 msgid "Rezervați din nou online"
 msgstr ""
 
@@ -2547,6 +2547,14 @@ msgid "Trimite biletul"
 msgstr ""
 
 #: includes/class-lbb-tickets.php:787
+msgid "Linkul a fost copiat"
+msgstr ""
+
+#: includes/class-lbb-tickets.php:787
+msgid "Copiază linkul biletului"
+msgstr ""
+
+#: includes/class-lbb-tickets.php:788
 msgid "Achită acum"
 msgstr ""
 

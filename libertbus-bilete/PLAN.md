@@ -149,6 +149,7 @@
   - **Cookie-uri blocate în browser:** „Achit online” nu mai trimite clientul la o plată cu coșul gol (coșul WooCommerce se ține într-un cookie), ci îi spune că plata online are nevoie de cookie-uri, cu telefonul biroului.
   - **Produsul intern „Bilet autocar”:** mutat la Gunoi din greșeală, revine singur (același produs, aceeași adresă); șters definitiv, se face altul. Pus pe ciornă sau privat, panoul „Gata de plăți?” spune că nu e publicat și ce de apăsat (înainte scria „Se recreează automat”).
   - **Codul QR pentru cititorul de ecran:** „Cod QR al biletului …” se anunță doar după ce codul e desenat; fără JavaScript nu se mai anunță un cod care nu există.
+  - **„Copiază linkul biletului” pe calculator:** unde browserul nu are „Trimite” (desktop), pe bilet apare butonul care copiază textul biletului cu linkul lui, gata de lipit în WhatsApp Web, email sau Messenger; confirmă „Linkul a fost copiat” (anunțat și de cititorul de ecran). Pe telefon rămâne „Trimite biletul”.
   - **Link de bilet greșit sau tăiat:** pagina „Biletul nu a fost găsit” are butonul „Rezervați online” (sau spre prima pagină a site-ului), iar titlul ei din fila browserului are și numele site-ului.
   - **Altele:**
     - arhiva de instalare se face cu `tests/build-zip.sh` (~150 KB, doar ce rulează pe site; fără teste și capturi de ecran);

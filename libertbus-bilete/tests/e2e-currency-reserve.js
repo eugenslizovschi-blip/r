@@ -153,10 +153,24 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (!cal || !/^text\/calendar/.test(cal.headers()['content-type'] || '') || !/^BEGIN:VCALENDAR\r\n/.test(calBody) || !calBody.includes('UID:' + code + '@') || !/DTSTART:\d{8}T\d{6}Z/.test(calBody)) fail('„Adaugă în calendar” de pe bilet nu dă un .ics valid: ' + calHref + ' ' + calBody.slice(0, 120));
   // „Trimite biletul”: ascuns unde browserul nu poate partaja; unde poate (telefon), trimite linkul biletului.
   if (await guest.isVisible('.actions .share')) fail('„Trimite biletul” apare deși browserul nu poate partaja');
+  // Pe calculator, fără „Trimite”: „Copiază linkul biletului” pune în clipboard textul biletului și linkul lui.
+  {
+    await guest.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin: new URL(guest.url()).origin });
+    const canCopy = await guest.isVisible('.actions .copy');
+    let copied = '';
+    if (canCopy) {
+      await guest.click('.actions .copy');
+      await guest.waitForFunction(() => /copiat/.test(document.querySelector('.copy-status').textContent), null, { timeout: 5000 }).catch(() => {});
+      copied = await guest.evaluate(() => navigator.clipboard.readText()).catch(() => '');
+    }
+    const btnText = canCopy ? await guest.textContent('.actions .copy') : '';
+    if (!canCopy || !copied.endsWith(' ' + guest.url()) || copied.indexOf('Rezervare LibertBus ' + code + ': ') !== 0 || !/copiat/.test(btnText)) fail('„Copiază linkul biletului” nu copiază textul și linkul biletului: ' + JSON.stringify({ canCopy, copied, btnText }));
+  }
   const sharePage = await guest.context().newPage();
   await sharePage.addInitScript(() => { navigator.share = d => { window.__shared = d; return Promise.resolve(); }; });
   await sharePage.goto(guest.url());
   if (!(await sharePage.isVisible('.actions .share'))) fail('„Trimite biletul” lipsește pe un telefon care poate partaja');
+  if (await sharePage.isVisible('.actions .copy')) fail('pe un telefon care poate partaja apare și „Copiază linkul biletului” (două butoane pentru același lucru)');
   else {
     await sharePage.click('.actions .share');
     const shared = await sharePage.evaluate(() => window.__shared || null);
