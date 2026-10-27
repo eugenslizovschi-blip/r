@@ -25,6 +25,7 @@
 - Paginile „Politica de confidențialitate” și „Politica de cookies” sunt publicate. Linkurile lor și „Setări cookies” apar în subsol, sub „© 2026 Libertbus.md”.
 - Paginile de termeni, rambursare și plată sunt create ca ciorne. Le publicați după ce le verificați.
 - Versiunea 1.5.0, cu îmbunătățirile făcute după 1.4.1, e pe acest branch, nu pe live. O pun pe live doar cu acordul dumneavoastră:
+  - **Actualizarea:** trecerea de la 1.4.1 la 1.5.0 e verificată pe tabele exact ca cele de pe site: rutele și biletele deja vândute rămân și se citesc corect, iar coloanele noi (locul de urcare, reamintirea) apar singure.
   - **Cookies și lege:**
     - Google Tag Manager blocat până la acord;
     - toate cookies-urile de urmărire șterse la retragerea acordului;

@@ -3742,6 +3742,86 @@ if ( $lk_r ) {
 }
 lbb_t( 'cursa ținută de alt client: rezervarea spune „încercați din nou” (nu trece fără lacăt), iar după eliberare merge; la fel reocuparea unui coș expirat', array( 'lacat' => '1', 'ocupat' => 'lbb_busy', 'liber' => 'trecut' ) === $lk_res && array( 'ocupat' => false, 'liber' => true ) === $lk_ref, array( $lk_res, $lk_ref ) );
 
+// Actualizarea de pe site: 1.4.1 (baza de date versiunea 2) → acum. Tabelele exact ca în 1.4.1, sub alt prefix, cu o rută
+// și un bilet plătit; instalarea de acum le aduce la zi (coloane și indexuri noi), iar datele vechi se citesc corect.
+$up_keep = $wpdb->prefix;
+$wpdb->prefix = 'lbbup_';
+$up_res = array();
+foreach ( array( 'lbb_routes', 'lbb_bookings' ) as $up_t ) {
+	$wpdb->query( "DROP TABLE IF EXISTS lbbup_{$up_t}" ); // phpcs:ignore WordPress.DB
+}
+require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+$up_cs = $wpdb->get_charset_collate();
+dbDelta( "CREATE TABLE lbbup_lbb_routes (
+	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	origin varchar(100) NOT NULL,
+	destination varchar(100) NOT NULL,
+	departures varchar(255) NOT NULL DEFAULT '',
+	weekdays varchar(20) NOT NULL DEFAULT '1,2,3,4,5,6,7',
+	price decimal(10,2) NOT NULL DEFAULT 0,
+	child_price decimal(10,2) DEFAULT NULL,
+	currency char(3) NOT NULL DEFAULT 'MDL',
+	capacity smallint(5) unsigned NOT NULL DEFAULT 0,
+	active tinyint(1) NOT NULL DEFAULT 1,
+	page_url varchar(255) NOT NULL DEFAULT '',
+	notes text NULL,
+	created_at datetime NOT NULL,
+	updated_at datetime NOT NULL,
+	PRIMARY KEY  (id),
+	KEY origin (origin),
+	KEY active (active)
+) $up_cs;" );
+dbDelta( "CREATE TABLE lbbup_lbb_bookings (
+	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	route_id bigint(20) unsigned NOT NULL,
+	travel_date date NOT NULL,
+	dep_time char(5) NOT NULL,
+	seats smallint(5) unsigned NOT NULL DEFAULT 1,
+	children smallint(5) unsigned NOT NULL DEFAULT 0,
+	status varchar(20) NOT NULL DEFAULT 'hold',
+	token varchar(64) NOT NULL,
+	order_id bigint(20) unsigned NOT NULL DEFAULT 0,
+	item_id bigint(20) unsigned NOT NULL DEFAULT 0,
+	ticket_code varchar(20) NOT NULL DEFAULT '',
+	passengers text NULL,
+	phone varchar(40) NOT NULL DEFAULT '',
+	email varchar(190) NOT NULL DEFAULT '',
+	amount decimal(10,2) NOT NULL DEFAULT 0,
+	currency char(3) NOT NULL DEFAULT '',
+	pay_currency char(3) NOT NULL DEFAULT '',
+	expires_at datetime NULL,
+	created_at datetime NOT NULL,
+	updated_at datetime NOT NULL,
+	PRIMARY KEY  (id),
+	UNIQUE KEY token (token),
+	KEY departure (route_id,travel_date,dep_time,status),
+	KEY order_id (order_id),
+	KEY ticket_code (ticket_code)
+) $up_cs;" );
+$up_now = gmdate( 'Y-m-d H:i:s' );
+$wpdb->insert( 'lbbup_lbb_routes', array( 'origin' => 'Vechi', 'destination' => 'Nou', 'departures' => '08:45', 'price' => 250, 'currency' => 'MDL', 'active' => 1, 'created_at' => $up_now, 'updated_at' => $up_now ) );
+$up_rid = (int) $wpdb->insert_id;
+$wpdb->insert( 'lbbup_lbb_bookings', array( 'route_id' => $up_rid, 'travel_date' => $tomorrow, 'dep_time' => '08:45', 'seats' => 1, 'status' => 'confirmed', 'token' => 'tok-vechi-141', 'ticket_code' => 'LB-UP141A', 'passengers' => wp_json_encode( array( 'Ion Vechi' ) ), 'phone' => '+37369000141', 'email' => 'vechi@example.com', 'amount' => 250, 'currency' => 'MDL', 'pay_currency' => 'MDL', 'created_at' => $up_now, 'updated_at' => $up_now ) );
+LBB_Install::create_tables();
+$up_rcols = $wpdb->get_col( 'SHOW COLUMNS FROM lbbup_lbb_routes' ); // phpcs:ignore WordPress.DB
+$up_bcols = $wpdb->get_col( 'SHOW COLUMNS FROM lbbup_lbb_bookings' ); // phpcs:ignore WordPress.DB
+$up_bix   = array_unique( wp_list_pluck( $wpdb->get_results( 'SHOW INDEX FROM lbbup_lbb_bookings' ), 'Key_name' ) ); // phpcs:ignore WordPress.DB
+$up_route = LBB_Routes::get( $up_rid );
+$up_book  = LBB_Bookings::get_by_code( 'LB-UP141A' );
+$up_res   = array(
+	'boarding' => in_array( 'boarding', $up_rcols, true ),
+	'reminded' => in_array( 'reminded_at', $up_bcols, true ),
+	'indexuri' => ! array_diff( array( 'travel_date', 'phone' ), $up_bix ),
+	'ruta'     => $up_route ? array( $up_route['times'], $up_route['boarding'], count( $up_route['days'] ) ) : null,
+	'bilet'    => $up_book ? array( $up_book['status'], $up_book['passengers'], null === ( $up_book['reminded_at'] ?? null ) ) : null,
+	'plecari'  => $up_route ? count( LBB_Routes::departures_on( $up_route, $tomorrow ) ) : null,
+);
+foreach ( array( 'lbb_routes', 'lbb_bookings' ) as $up_t ) {
+	$wpdb->query( "DROP TABLE IF EXISTS lbbup_{$up_t}" ); // phpcs:ignore WordPress.DB
+}
+$wpdb->prefix = $up_keep;
+lbb_t( 'actualizare de la 1.4.1 (bază de date v2, ca pe site): coloanele și indexurile noi apar, ruta și biletul vechi se citesc corect', array( 'boarding' => true, 'reminded' => true, 'indexuri' => true, 'ruta' => array( array( '08:45' ), '', 7 ), 'bilet' => array( 'confirmed', array( 'Ion Vechi' ), true ), 'plecari' => 1 ) === $up_res && $wpdb->prefix === $up_keep, $up_res );
+
 // Cod: fiecare comentariu de funcție stă deasupra funcției lui (unul urmat direct de altul rămâne orfan după o mutare).
 $dc_orph = array();
 foreach ( glob( LBB_DIR . 'includes/*.php' ) as $dc_f ) {
