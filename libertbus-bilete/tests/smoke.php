@@ -2075,6 +2075,26 @@ lbb_t( 'lista de rute arată prețul ca în formular și pe bilet („50 MDL”)
 $bd_rs = LBB_Tickets::share_text( array_merge( $bd_b, array( 'status' => 'reserved' ) ) );
 lbb_t( '„Trimite biletul” la o rezervare cu plata la urcare scrie „Rezervare”, ca pagina, și suma de achitat la urcare; biletul plătit nu are sumă', 0 === strpos( $bd_rs, 'Rezervare LibertBus LB-URC1: ' ) && '. De achitat la urcare: ' . LBB_WooCommerce::money( 50, 'MDL' ) === substr( $bd_rs, -strlen( '. De achitat la urcare: ' . LBB_WooCommerce::money( 50, 'MDL' ) ) ) && false === strpos( $bd_s, 'De achitat' ), $bd_rs );
 lbb_t( '„Trimite biletul” are și textul cursei (cod, rută, zi, oră) și locul de urcare; o rută ștearsă nu lasă text gol', 'Bilet LibertBus LB-URC1: UrcareA → UrcareB, ' . LBB_WooCommerce::date_with_day( $tomorrow ) . ', 10:00. Urcare: Autogara Nord, peronul 3' === $bd_s && false !== strpos( LBB_Tickets::share_text( array_merge( $bd_b, array( 'route_id' => 0 ) ) ), '(rută ștearsă)' ) && false === strpos( LBB_Tickets::share_text( array_merge( $bd_b, array( 'route_id' => 0 ) ) ), 'Urcare:' ), $bd_s );
+// Biletul unei rute șterse (după ultima cursă), deschis mai târziu din email: ruta scrisă pe comandă, nu „#12”;
+// fără comandă (plata la urcare) sau cu articolul comenzii dispărut, „(rută ștearsă)”.
+$dr_res = array();
+if ( function_exists( 'wc_create_order' ) ) {
+	$dr_o    = wc_create_order();
+	$dr_item = new WC_Order_Item_Product();
+	$dr_item->set_name( 'Bilet autocar' );
+	$dr_item->add_meta_data( __( 'Ruta', 'libertbus-bilete' ), 'Vechi → Nou', true );
+	$dr_o->add_item( $dr_item );
+	$dr_o->save();
+	$dr_gone = array_merge( $bd_b, array( 'route_id' => 987654, 'order_id' => $dr_o->get_id() ) );
+	$dr_res  = array(
+		'comanda'   => LBB_WooCommerce::describe( array_merge( $dr_gone, array( 'item_id' => $dr_item->get_id() ) ) )[ __( 'Ruta', 'libertbus-bilete' ) ],
+		'fara'      => LBB_WooCommerce::describe( array_merge( $dr_gone, array( 'item_id' => 0, 'order_id' => 0 ) ) )[ __( 'Ruta', 'libertbus-bilete' ) ],
+		'disparut'  => LBB_WooCommerce::describe( array_merge( $dr_gone, array( 'item_id' => 999999999 ) ) )[ __( 'Ruta', 'libertbus-bilete' ) ],
+		'pe_bilet'  => false !== strpos( LBB_Tickets::html( array_merge( $dr_gone, array( 'item_id' => $dr_item->get_id() ) ) ), 'Vechi → Nou' ),
+	);
+	$dr_o->delete( true );
+}
+lbb_t( 'rută ștearsă: biletul arată ruta de pe comandă sau „(rută ștearsă)”, nu numărul intern „#…”', array( 'comanda' => 'Vechi → Nou', 'fara' => '(rută ștearsă)', 'disparut' => '(rută ștearsă)', 'pe_bilet' => true ) === $dr_res, $dr_res );
 lbb_t( 'locul de urcare ajunge și în formular (rezumatul de dinainte de plată)', 'Autogara Nord, peronul 3' === ( $bd_m['boarding'] ?? null ) && false !== strpos( (string) file_get_contents( LBB_DIR . 'assets/lbb.js' ), "t.boarding + ': ' + route.boarding" ), $bd_m );
 lbb_t( 'locul de urcare al rutei apare pe bilet și în calendar; fără el, rândul lipsește și calendarul are orașul', 'Autogara Nord, peronul 3' === ( $bd_d['Loc de urcare'] ?? null ) && false !== strpos( $bd_h, 'Autogara Nord, peronul 3' ) && false !== strpos( $bd_i, "LOCATION:Autogara Nord\\, peronul 3\r\n" ) && ! isset( $bd_n['Loc de urcare'] ) && false !== strpos( $bd_i2, "LOCATION:UrcareA\r\n" ), array( $bd_d, $bd_n, $bd_e ) );
 

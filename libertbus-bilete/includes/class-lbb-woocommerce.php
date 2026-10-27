@@ -136,12 +136,36 @@ class LBB_WooCommerce {
 	}
 
 	/**
+	 * Ruta ștearsă din admin (după ultima ei cursă): pe biletul deschis mai târziu din email clientul vede ruta scrisă pe
+	 * comandă, nu „#12” (numărul intern); fără comandă (plata la urcare), „(rută ștearsă)”, ca în lista Rezervări.
+	 *
+	 * @param array $booking Rezervarea.
+	 */
+	private static function deleted_route_name( array $booking ) {
+		if ( ! empty( $booking['item_id'] ) && class_exists( 'WC_Order_Item_Product' ) ) {
+			try {
+				$item = new WC_Order_Item_Product( (int) $booking['item_id'] );
+				foreach ( array_unique( array( __( 'Ruta', 'libertbus-bilete' ), 'Ruta' ) ) as $label ) {
+					$name = (string) $item->get_meta( $label );
+					if ( '' !== $name ) {
+						return $name;
+					}
+				}
+			} catch ( Exception $e ) {
+				// Articolul comenzii nu mai există (comandă ștearsă): rămâne textul general.
+				unset( $e );
+			}
+		}
+		return __( '(rută ștearsă)', 'libertbus-bilete' );
+	}
+
+	/**
 	 * Descrierea biletului: ruta, data, ora, pasagerii.
 	 */
 	public static function describe( array $booking ) {
 		$route = LBB_Routes::get( $booking['route_id'] );
 		$lines = array(
-			__( 'Ruta', 'libertbus-bilete' )      => $route ? $route['origin'] . ' → ' . $route['destination'] : '#' . $booking['route_id'],
+			__( 'Ruta', 'libertbus-bilete' )      => $route ? $route['origin'] . ' → ' . $route['destination'] : self::deleted_route_name( $booking ),
 			__( 'Data', 'libertbus-bilete' )      => self::date_with_day( $booking['travel_date'] ),
 			__( 'Ora plecării', 'libertbus-bilete' ) => $booking['dep_time'],
 		);

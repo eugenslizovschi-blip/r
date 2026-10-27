@@ -31,6 +31,7 @@
     - toate cookies-urile de urmărire șterse la retragerea acordului;
     - din tastatură, „Setări” duce direct la prima bifă;
     - un acord dat pe un text mai vechi al politicii nu mai contează: bannerul reapare.
+  - **Biletul unei rute șterse** (după ultima ei cursă), deschis mai târziu din email: arată ruta de pe comandă, nu un număr intern („Ruta #12”).
   - **Formularul de rezervare:**
     - emailul scris pe telefon cu virgulă în loc de punct („ion@gmail,com”, chiar și „ion@gmail,con”), cu punct dublu sau cu punct la capăt primește propunerea „ați vrut să scrieți ion@gmail.com?”, nu doar „adresă invalidă”: imediat, lângă câmp, la apăsarea butonului, fără reîncărcarea paginii;
     - după „Înapoi” din plată rămân data, ora și locurile corecte, iar butoanele merg;
