@@ -650,6 +650,21 @@
 			this.setCustomValidity( this.value.trim() && ( ! letters || letters.length < 2 ) ? t.nameInvalid : '' );
 		}
 
+		// Ca pe server (LBB_Frontend::email_typo): virgulă în loc de punct („gmail,com”) sau punct la capăt („gmail.com.”),
+		// scrise ușor pe telefon. În locul mesajului general al browserului, câmpul propune adresa reparată.
+		var emailInput = root.querySelector( '[name="lbb_email"]' );
+		function checkEmail() {
+			var value = emailInput.value.trim();
+			var at = value.lastIndexOf( '@' );
+			var domain = at > 0 ? value.slice( at + 1 ).toLowerCase() : '';
+			var clean = domain.replace( /,/g, '.' ).replace( /^\.+|\.+$/g, '' );
+			emailInput.setCustomValidity( t.emailFix && clean && clean !== domain ? t.emailFix.replace( '%s', value.slice( 0, at + 1 ) + clean ) : '' );
+		}
+		if ( emailInput ) {
+			emailInput.addEventListener( 'input', checkEmail );
+			checkEmail();
+		}
+
 		function summary() {
 			var route = currentRoute();
 			var dep = currentDeparture();

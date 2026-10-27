@@ -255,6 +255,14 @@ class LBB_Frontend {
 		);
 		$at     = strrpos( $email, '@' );
 		$domain = false === $at ? '' : strtolower( substr( $email, $at + 1 ) );
+		// Pe telefon: virgulă în loc de punct („gmail,com”) sau punct rămas la capăt („gmail.com.”). Browserul le
+		// refuză cu un mesaj general; propunem adresa reparată, cu restul verificărilor aplicate și pe ea.
+		$clean = trim( str_replace( ',', '.', $domain ), '.' );
+		if ( false !== $at && '' !== $clean && $clean !== $domain ) {
+			$fixed = substr( $email, 0, $at + 1 ) . $clean;
+			$again = self::email_typo( $fixed );
+			return '' !== $again ? $again : $fixed;
+		}
 		foreach ( $typos as $right => $wrong ) {
 			if ( in_array( $domain, $wrong, true ) ) {
 				return substr( $email, 0, $at + 1 ) . ( false === strpos( $right, '.' ) ? $right . '.com' : $right );
@@ -507,6 +515,8 @@ class LBB_Frontend {
 				'child'       => __( 'copil', 'libertbus-bilete' ),
 				'adult'       => __( 'adult', 'libertbus-bilete' ),
 				'nameInvalid' => __( 'Scrieți numele și prenumele ca în pașaport (cel puțin două litere).', 'libertbus-bilete' ),
+				/* translators: %s: adresa corectată, ex. ion@gmail.com */
+				'emailFix'    => __( 'Verificați adresa de email: ați vrut să scrieți %s? Acolo primiți biletul.', 'libertbus-bilete' ),
 				'namePh'      => __( 'Nume și prenume', 'libertbus-bilete' ),
 				'error'       => __( 'Nu am putut verifica locurile.', 'libertbus-bilete' ),
 				'retry'       => __( 'Încearcă din nou', 'libertbus-bilete' ),

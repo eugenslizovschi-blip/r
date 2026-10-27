@@ -300,6 +300,14 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const msg = alert ? await alert.innerText() : '';
     const field = await p4.$eval('input[name="lbb_email"]', i => ({ value: i.value, bad: i.getAttribute('aria-invalid') }));
     if (/lbb_bilet=/.test(p4.url()) || !/test@gmail\.com/.test(msg) || field.value !== 'test@gmail.con' || field.bad !== 'true') fail('emailul „gmail.con” nu e semnalat corect: ' + JSON.stringify({ url: p4.url(), msg, field }));
+    // Virgulă în loc de punct sau punct la capăt, scrise ușor pe telefon: browserul nu trimite formularul, iar câmpul
+    // propune adresa reparată (nu mesajul general al browserului); după corectare câmpul e din nou valid.
+    const typed = {};
+    for (const v of ['test@gmail,com', 'test@gmail.com.', 'test@gmail.com']) {
+      await p4.fill('input[name="lbb_email"]', v);
+      typed[v] = await p4.$eval('input[name="lbb_email"]', i => i.checkValidity() ? '' : i.validationMessage);
+    }
+    if (!/test@gmail\.com\?/.test(typed['test@gmail,com']) || !/test@gmail\.com\?/.test(typed['test@gmail.com.']) || typed['test@gmail.com'] !== '') fail('emailul cu virgulă sau punct la capăt nu propune adresa reparată: ' + JSON.stringify(typed));
     await p4.close();
   }
   // O eroare de la server care trimite la telefon („Pentru grupuri sunați la …”, aici 99 de locuri trimise de mână):
