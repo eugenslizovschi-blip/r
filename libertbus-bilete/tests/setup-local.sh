@@ -26,6 +26,11 @@ if [ "${PHP84:-1}" != 0 ] && ! command -v php8.4 >/dev/null && [ -f /etc/apt/sou
   DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends php8.4-cli php8.4-mysql php8.4-mbstring php8.4-xml php8.4-curl php8.4-zip php8.4-gd php8.4-intl >/dev/null 2>&1 \
     || echo "PHP 8.4 nu s-a putut instala (testele cu PHP 8.4 se sar)"
 fi
+# PHP 8.5, cea mai nouă versiune stabilă: aceeași verificare (teste + deprecări din plugin). PHP85=0 sare peste.
+if [ "${PHP85:-1}" != 0 ] && ! command -v php8.5 >/dev/null && [ -f /etc/apt/sources.list.d/ondrej-php.list ]; then
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends php8.5-cli php8.5-mysql php8.5-mbstring php8.5-xml php8.5-curl php8.5-zip php8.5-gd php8.5-intl >/dev/null 2>&1 \
+    || echo "PHP 8.5 nu s-a putut instala (testele cu PHP 8.5 se sar)"
+fi
 [ -f wp-cli.phar ] || curl -sSL -o wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 # Aceeași versiune ca pe libertbus.md; WP_VERSION=7.1.3 tests/setup-local.sh … testează o actualizare.
 WP_VERSION="${WP_VERSION:-6.4.3}"

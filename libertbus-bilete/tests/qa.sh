@@ -104,23 +104,26 @@ if [ -n "$PHP74_BIN" ] && [ "${WP_CLI#php }" != "$WP_CLI" ]; then
   C74=$(echo "$OUT_74" | sed -n 's/^\([0-9]*\) ok, \([0-9]*\) eșuate.*/\1 \2/p' | awk '{print $1+$2}')
   [ "$C74" = "$SMOKE_N" ] || { echo "  pe PHP 7.4 au rulat $C74 verificări, pe PHP 8 $SMOKE_N"; FAIL=1; }
 fi
-# PHP 8.4 (spre care se poate actualiza serverul): testele automate trec și plugin-ul nu produce nicio depreciere sau
-# avertisment. WordPress 6.4 / WooCommerce 8.7 (ca pe site) au ele deprecări pe PHP 8.4: după verificare le scoatem din
-# debug.log, ca pasul „Avertismente PHP” să judece doar restul. PHP84_BIN=/cale/php8.4 alege alt binar.
-PHP84_BIN="${PHP84_BIN:-$(command -v php8.4 || true)}"
-if [ -n "$PHP84_BIN" ] && [ "${WP_CLI#php }" != "$WP_CLI" ]; then
-  echo "== Teste automate cu PHP 8.4 (fără deprecări din plugin)"
-  LOG84="$WP_PATH/wp-content/debug.log"
-  N84=$(wc -l < "$LOG84" 2>/dev/null || echo 0)
-  OUT_84=$(cd "$WP_PATH" && "$PHP84_BIN" -d error_reporting=E_ALL ${WP_CLI#php } eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
-  echo "$OUT_84" | grep -E "FAIL|eșuate|Fatal|Parse error"
-  echo "$OUT_84" | grep -q " 0 eșuate" || FAIL=1
-  C84=$(echo "$OUT_84" | sed -n 's/^\([0-9]*\) ok, \([0-9]*\) eșuate.*/\1 \2/p' | awk '{print $1+$2}')
-  [ "$C84" = "$SMOKE_N" ] || { echo "  pe PHP 8.4 au rulat $C84 verificări, pe PHP 8.3 $SMOKE_N"; FAIL=1; }
-  PLUG84=$( { tail -n +$((N84 + 1)) "$LOG84" 2>/dev/null; echo "$OUT_84"; } | grep -E "(Deprecated|Warning|Notice):" | grep "libertbus-bilete/" | sort -u)
-  if [ -n "$PLUG84" ]; then echo "$PLUG84" | head -10; FAIL=1; else echo "  fără deprecări din plugin"; fi
-  [ -f "$LOG84" ] && head -n "$N84" "$LOG84" > "$LOG84.tmp" && cat "$LOG84.tmp" > "$LOG84" && rm -f "$LOG84.tmp"
-fi
+# PHP 8.4 și 8.5 (spre care se poate actualiza serverul): testele automate trec și plugin-ul nu produce nicio depreciere
+# sau avertisment. WordPress 6.4 / WooCommerce 8.7 (ca pe site) au ele deprecări pe PHP 8.4+: după verificare le scoatem
+# din debug.log, ca pasul „Avertismente PHP” să judece doar restul. PHP84_BIN / PHP85_BIN=/cale/php aleg alt binar.
+for PV in 8.4 8.5; do
+  PV_VAR="PHP${PV/./}_BIN"
+  PV_BIN="${!PV_VAR:-$(command -v "php$PV" || true)}"
+  if [ -n "$PV_BIN" ] && [ "${WP_CLI#php }" != "$WP_CLI" ]; then
+    echo "== Teste automate cu PHP $PV (fără deprecări din plugin)"
+    LOGPV="$WP_PATH/wp-content/debug.log"
+    NPV=$(wc -l < "$LOGPV" 2>/dev/null || echo 0)
+    OUT_PV=$(cd "$WP_PATH" && "$PV_BIN" -d error_reporting=E_ALL ${WP_CLI#php } eval-file "$DIR/tests/smoke.php" 2>&1 | grep -v sendmail)
+    echo "$OUT_PV" | grep -E "FAIL|eșuate|Fatal|Parse error"
+    echo "$OUT_PV" | grep -q " 0 eșuate" || FAIL=1
+    CPV=$(echo "$OUT_PV" | sed -n 's/^\([0-9]*\) ok, \([0-9]*\) eșuate.*/\1 \2/p' | awk '{print $1+$2}')
+    [ "$CPV" = "$SMOKE_N" ] || { echo "  pe PHP $PV au rulat $CPV verificări, pe PHP 8.3 $SMOKE_N"; FAIL=1; }
+    PLUGPV=$( { tail -n +$((NPV + 1)) "$LOGPV" 2>/dev/null; echo "$OUT_PV"; } | grep -E "(Deprecated|Warning|Notice):" | grep "libertbus-bilete/" | sort -u)
+    if [ -n "$PLUGPV" ]; then echo "$PLUGPV" | head -10; FAIL=1; else echo "  fără deprecări din plugin"; fi
+    [ -f "$LOGPV" ] && head -n "$NPV" "$LOGPV" > "$LOGPV.tmp" && cat "$LOGPV.tmp" > "$LOGPV" && rm -f "$LOGPV.tmp"
+  fi
+done
 # Încălzire: după repornirea containerului prima comandă WooCommerce poate dura peste 30 s (cache-uri reci)
 # și testele din browser ar pica din timeout, nu din cauza codului.
 for u in / /balti-iasi/ /checkout/ /wp-login.php; do curl -s -o /dev/null -m 60 "$BASE$u" || true; done
