@@ -178,8 +178,15 @@ fi
 # toate testele din browser să treacă regulat și prin el. Cu stocarea comenzilor (oră pară / impară) se acoperă cele
 # 4 combinații în 4 ore. SERVER_PHP=php sau SERVER_PHP=php7.4 o fixează.
 SERVER_PHP="${SERVER_PHP:-$( command -v php7.4 >/dev/null && [ $(( 10#$(date -u +%H) / 2 % 2 )) -eq 1 ] && echo php7.4 || echo php )}"
-pkill -f "[p]hp(7\.4)? -S 127\.0\.0\.1:8080" 2>/dev/null || true; sleep 1
+# Orice server de test rămas pe port, cu orice PHP (php, php7.4, php8.5…): unul uitat ar ține portul, cel nou n-ar porni,
+# iar testele ar rula pe versiunea veche.
+pkill -f "[p]hp[0-9.]* -S 127\.0\.0\.1:8080" 2>/dev/null || true; sleep 1
 (PHP_CLI_SERVER_WORKERS=4 nohup "$SERVER_PHP" -S 127.0.0.1:8080 -t wordpress router.php > server.log 2>&1 &)
-echo "Serverul web rulează pe PHP $("$SERVER_PHP" -r 'echo PHP_VERSION;')"
 for i in 1 2 3 4 5 6 7 8 9 10; do curl -s -o /dev/null http://127.0.0.1:8080/ && break; sleep 1; done
+# Versiunea o spune serverul care răspunde, nu binarul cerut: dacă cel nou n-a pornit, ne oprim aici.
+PROBE="lbb-php-version-$$.php"; echo '<?php echo PHP_VERSION;' > "wordpress/$PROBE"
+SERVED=$(curl -s "http://127.0.0.1:8080/$PROBE"); rm -f "wordpress/$PROBE"
+WANTED=$("$SERVER_PHP" -r 'echo PHP_VERSION;')
+[ "$SERVED" = "$WANTED" ] || { echo "Serverul web de pe 127.0.0.1:8080 răspunde cu PHP ${SERVED:-?}, nu cu $WANTED (vezi $W/server.log)" >&2; exit 1; }
+echo "Serverul web rulează pe PHP $SERVED"
 curl -s -o /dev/null -w "WordPress de test: %{http_code}\n" http://127.0.0.1:8080/rezervare-bilet/
