@@ -32,7 +32,7 @@
     - din tastatură, „Setări” duce direct la prima bifă;
     - un acord dat pe un text mai vechi al politicii nu mai contează: bannerul reapare.
   - **Formularul de rezervare:**
-    - emailul scris pe telefon cu virgulă în loc de punct („ion@gmail,com”, chiar și „ion@gmail,con”), cu punct dublu sau cu punct la capăt primește direct în câmp propunerea „ați vrut să scrieți ion@gmail.com?”, nu mesajul general al browserului, adesea în engleză;
+    - emailul scris pe telefon cu virgulă în loc de punct („ion@gmail,com”, chiar și „ion@gmail,con”), cu punct dublu sau cu punct la capăt primește propunerea „ați vrut să scrieți ion@gmail.com?”, nu doar „adresă invalidă”: imediat, lângă câmp, la apăsarea butonului, fără reîncărcarea paginii;
     - după „Înapoi” din plată rămân data, ora și locurile corecte, iar butoanele merg;
     - câmpul cu eroarea de la server e marcat cu roșu;
     - calendarul nu lasă alegerea unei zile din trecut sau de după perioada de vânzare nici dacă JavaScript se încarcă greu;

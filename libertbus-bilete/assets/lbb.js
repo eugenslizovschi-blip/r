@@ -651,8 +651,8 @@
 		}
 
 		// Ca pe server (LBB_Frontend::email_typo): virgulă în loc de punct („gmail,com”), punct dublu („gmail..com”) sau la
-		// capăt („gmail.com.”), scrise ușor pe telefon. În locul mesajului general al browserului, câmpul propune adresa
-		// reparată, cu „.con”, „.cmo”… făcut „.com”, ca serverul (altfel „gmail,con” ar cere două corecturi).
+		// capăt („gmail.com.”), scrise ușor pe telefon. La trimitere (mai jos) câmpul propune imediat adresa reparată, fără
+		// drumul până la server, cu „.con”, „.cmo”… făcut „.com”, ca serverul (altfel „gmail,con” ar cere două corecturi).
 		var emailInput = root.querySelector( '[name="lbb_email"]' );
 		function checkEmail() {
 			var value = emailInput.value.trim();
@@ -1056,13 +1056,14 @@
 				e.preventDefault();
 				return;
 			}
-			// Formularul are novalidate (restul erorilor vin de la server): numele greșite le oprim aici.
-			var nameInputs = el.names.querySelectorAll( 'input' );
-			for ( var k = 0; k < nameInputs.length; k++ ) {
-				if ( nameInputs[ k ].validity.customError ) {
+			// Formularul are novalidate (restul erorilor vin de la server): numele greșite și emailul cu adresa reparată
+			// propusă le oprim aici, cu mesajul lângă câmp.
+			var checked = Array.prototype.slice.call( el.names.querySelectorAll( 'input' ) ).concat( emailInput ? [ emailInput ] : [] );
+			for ( var k = 0; k < checked.length; k++ ) {
+				if ( checked[ k ].validity.customError ) {
 					e.preventDefault();
-					nameInputs[ k ].focus();
-					nameInputs[ k ].reportValidity();
+					checked[ k ].focus();
+					checked[ k ].reportValidity();
 					return;
 				}
 			}

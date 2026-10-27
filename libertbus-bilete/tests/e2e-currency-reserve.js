@@ -329,14 +329,22 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const msg = alert ? await alert.innerText() : '';
     const field = await p4.$eval('input[name="lbb_email"]', i => ({ value: i.value, bad: i.getAttribute('aria-invalid') }));
     if (/lbb_bilet=/.test(p4.url()) || !/test@gmail\.com/.test(msg) || field.value !== 'test@gmail.con' || field.bad !== 'true') fail('emailul „gmail.con” nu e semnalat corect: ' + JSON.stringify({ url: p4.url(), msg, field }));
-    // Virgulă în loc de punct sau punct la capăt, scrise ușor pe telefon: browserul nu trimite formularul, iar câmpul
-    // propune adresa reparată (nu mesajul general al browserului); după corectare câmpul e din nou valid.
+    // Virgulă în loc de punct sau punct la capăt, scrise ușor pe telefon: câmpul propune adresa reparată; după corectare
+    // câmpul e din nou valid.
     const typed = {};
     for (const v of ['test@gmail,com', 'test@gmail.com.', 'test@gmail..com', 'test@gmail,con', 'test@gmail.com']) {
       await p4.fill('input[name="lbb_email"]', v);
       typed[v] = await p4.$eval('input[name="lbb_email"]', i => i.checkValidity() ? '' : i.validationMessage);
     }
     if (['test@gmail,com', 'test@gmail.com.', 'test@gmail..com', 'test@gmail,con'].some(v => !/test@gmail\.com\?/.test(typed[v])) || typed['test@gmail.com'] !== '') fail('emailul cu virgulă, punct dublu sau la capăt nu propune adresa reparată: ' + JSON.stringify(typed));
+    // Formularul are novalidate: propunerea trebuie să oprească trimiterea, cu focusul pe email, nu să rămână în câmp
+    // nevăzută până la răspunsul serverului.
+    await p4.fill('input[name="lbb_email"]', 'test@gmail,com');
+    await p4.evaluate(() => { window.__stay = 1; });
+    await p4.click('[data-lbb-submit][value="reserve"]');
+    await p4.waitForTimeout(800);
+    const stopped = await p4.evaluate(() => ({ stay: window.__stay === 1, focus: document.activeElement && document.activeElement.name })).catch(() => ({ stay: false }));
+    if (!stopped.stay || stopped.focus !== 'lbb_email') fail('emailul „gmail,com” a fost trimis la server în loc să fie oprit cu propunerea lângă câmp: ' + JSON.stringify(stopped));
     await p4.close();
   }
   // O eroare de la server care trimite la telefon („Pentru grupuri sunați la …”, aici 99 de locuri trimise de mână):
