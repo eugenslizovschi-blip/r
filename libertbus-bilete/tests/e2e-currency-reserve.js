@@ -139,6 +139,19 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const printed = await guest.evaluate(() => ({ state: getComputedStyle(document.querySelector('.state')).display, actions: getComputedStyle(document.querySelector('.actions')).display }));
   await guest.emulateMedia({ media: 'screen' });
   if (printed.state === 'none' || printed.actions !== 'none') fail('pagina biletului printată: ' + JSON.stringify(printed));
+  // Biletul printat sau salvat ca PDF încape pe o singură foaie, A4 sau Letter, cu codul QR pe ea (o a doua pagină goală
+  // sau QR-ul rupt pe pagina următoare ar face șoferul să caute biletul pe două foi).
+  // page.pdf() păstrează media emulată: după emulateMedia('screen') de mai sus ar folosi stilul de ecran, nu pe cel de print.
+  {
+    const pages = {};
+    await guest.emulateMedia({ media: 'print' });
+    for (const format of ['A4', 'Letter']) {
+      const pdf = (await guest.pdf({ format })).toString('latin1');
+      pages[format] = { pagini: (pdf.match(/\/Type\s*\/Page[^s]/g) || []).length, imagini: (pdf.match(/\/Subtype\s*\/Image/g) || []).length };
+    }
+    await guest.emulateMedia({ media: 'screen' });
+    if (Object.values(pages).some(x => x.pagini !== 1 || x.imagini < 1)) fail('biletul printat nu încape pe o foaie cu codul QR: ' + JSON.stringify(pages));
+  }
   // Un link cu cheia greșită nu arată nimic din rezervare.
   const forged = await guest.request.get(guest.url().replace(/([?&]k=)[^&]+/, '$1' + '0'.repeat(20)));
   const fbody = await forged.text();
