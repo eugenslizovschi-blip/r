@@ -356,7 +356,9 @@ class LBB_Bookings {
 				$item  = new WC_Order_Item_Product( (int) $booking['item_id'] );
 				$order = $item->get_order();
 				if ( $order && $order->get_currency() === $cur ) {
-					return array( round( (float) $item->get_total() + (float) $item->get_total_tax(), 2 ), $cur );
+					// O rambursare parțială a biletului (ex. locul unui copil) scade din suma plătită.
+					$paid = (float) $item->get_total() + (float) $item->get_total_tax() - (float) $order->get_total_refunded_for_item( $item->get_id() );
+					return array( round( max( 0, $paid ), 2 ), $cur );
 				}
 			} catch ( Exception $e ) {
 				// Articolul comenzii nu mai există: suma din rezervare.
