@@ -552,6 +552,28 @@ const patchDepartures = edit => async r => {
   const after = (await (await page.request.get(`${BASE}/wp-json/lbb/v1/departures?route_id=${routeId}&date=${day}`)).json()).departures.find(d => d.time === time).free;
   if (after !== before) fail(`locul nu s-a eliberat după scoaterea din coș (înainte ${before}, după ${after})`);
   console.log(`locuri: ${before} → ${during} → ${after}`);
+  // „Anulează?” după scoatere (coșul clasic): biletul revine în coș cu locul ținut din nou, nu fără loc; scos iar, locul
+  // se eliberează iar.
+  {
+    const free = async () => (await (await page.request.get(`${BASE}/wp-json/lbb/v1/departures?route_id=${routeId}&date=${day}`)).json()).departures.find(d => d.time === time).free;
+    const undo = await page.$('a.restore-item');
+    if (!undo) fail('lipsește „Anulează?” după scoaterea biletului din coș');
+    else {
+      // waitForNavigation, nu networkidle: pagina e deja „liniștită” înainte de clic, iar o altă cerere a coșului pornită
+      // în paralel ar citi coșul de dinainte de „Anulează” și l-ar salva peste el.
+      await Promise.all([page.waitForNavigation(), undo.click()]);
+      const back = await page.$$eval('.woocommerce-cart-form .cart_item', r => r.length);
+      const held = await free();
+      let again = null;
+      if (back === 1) {
+        // Scoaterea din coșul clasic merge prin AJAX (fără navigare), ca mai sus.
+        await Promise.all([page.waitForLoadState('networkidle'), page.click('.product-remove a.remove')]);
+        await page.waitForTimeout(800);
+        again = await free();
+      }
+      if (back !== 1 || held !== before - 1 || again !== before) fail('„Anulează?” după scoaterea biletului din coș: ' + JSON.stringify({ back, before, held, again }));
+    }
+  }
 
   // Adulți și copii: când scade numărul adulților, numele copilului rămâne la copil (nu trece un adult pe locul de copil).
   {
