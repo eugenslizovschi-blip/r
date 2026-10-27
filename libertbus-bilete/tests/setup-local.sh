@@ -27,9 +27,9 @@ if [ "${PHP84:-1}" != 0 ] && ! command -v php8.4 >/dev/null && [ -f /etc/apt/sou
     || echo "PHP 8.4 nu s-a putut instala (testele cu PHP 8.4 se sar)"
 fi
 [ -f wp-cli.phar ] || curl -sSL -o wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-# Aceeași versiune ca pe libertbus.md; WP_VERSION=7.1.2 tests/setup-local.sh … testează o actualizare.
+# Aceeași versiune ca pe libertbus.md; WP_VERSION=7.1.3 tests/setup-local.sh … testează o actualizare.
 WP_VERSION="${WP_VERSION:-6.4.3}"
-# La fel WooCommerce (8.7.0 pe site). WP_VERSION=7.1.2 WC_VERSION=11.2.1 … = combinația de după actualizare. Înapoi la
+# La fel WooCommerce (8.7.0 pe site). WP_VERSION=7.1.3 WC_VERSION=11.2.1 … = combinația de după actualizare. Înapoi la
 # o versiune mai veche: directorul de lucru și baza „wp” de la zero (WooCommerce nu coboară versiunea bazei de date).
 WC_VERSION="${WC_VERSION:-8.7.0}"
 [ -d wordpress ] || { curl -sSL -o wp.zip "https://wordpress.org/wordpress-$WP_VERSION.zip" && unzip -q wp.zip; }
