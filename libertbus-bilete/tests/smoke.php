@@ -2557,6 +2557,33 @@ $pl_res = array();
 if ( is_int( $pl_r ) && function_exists( 'curl_multi_init' ) ) {
 	$pl_keep = get_option( 'lbb_settings', array() );
 	update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_reserve' => 1, 'reserve_limit' => 0 ) ) );
+	// Întâi: serverul chiar răspunde în paralel (altfel cele 6 cereri ar trece pe rând și testul n-ar mai încerca lacătul).
+	// 4 cereri simultane la un fișier care așteaptă puțin și spune procesul care a răspuns: cel puțin 2 procese diferite.
+	$pl_probe = ABSPATH . 'lbb-paralel-' . wp_generate_password( 8, false ) . '.php';
+	file_put_contents( $pl_probe, '<?php usleep( 600000 ); echo getmypid();' );
+	$pl_mh = curl_multi_init();
+	$pl_ph = array();
+	for ( $pl_i = 0; $pl_i < 4; $pl_i++ ) {
+		$pl_h = curl_init( site_url( '/' . basename( $pl_probe ) ) );
+		curl_setopt_array( $pl_h, array( CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15 ) );
+		curl_multi_add_handle( $pl_mh, $pl_h );
+		$pl_ph[] = $pl_h;
+	}
+	do {
+		$pl_st = curl_multi_exec( $pl_mh, $pl_run );
+		if ( $pl_run ) {
+			curl_multi_select( $pl_mh, 1 );
+		}
+	} while ( $pl_run && CURLM_OK === $pl_st );
+	$pl_pids = array();
+	foreach ( $pl_ph as $pl_h ) {
+		$pl_pids[] = trim( (string) curl_multi_getcontent( $pl_h ) );
+		curl_multi_remove_handle( $pl_mh, $pl_h );
+	}
+	curl_multi_close( $pl_mh );
+	unlink( $pl_probe );
+	$pl_par = count( array_unique( array_filter( $pl_pids, 'ctype_digit' ) ) );
+
 	$pl_mh = curl_multi_init();
 	$pl_hs = array();
 	for ( $pl_i = 0; $pl_i < 6; $pl_i++ ) {
@@ -2624,7 +2651,7 @@ if ( is_int( $pl_r ) && function_exists( 'curl_multi_init' ) ) {
 	LBB_Routes::delete( $pl_r );
 }
 $pl_ok = count( array_keys( $pl_res, 'ok', true ) );
-lbb_t( '6 rezervări simultane pe ultimele 2 locuri: trec exact 2, ceilalți primesc „locurile s-au terminat”; o rezervare așteaptă cât cursa e blocată de alta (lacăt), apoi trece', 2 === $pl_ok && 4 === count( array_keys( $pl_res, 'plin', true ) ) && 2 === ( $pl_db ?? -1 ) && array( 'luat' => true, 'asteapta' => true, 'dupa' => 302 ) === ( $pl_lock ?? null ), array( $pl_res, $pl_db ?? null, $pl_lock ?? null ) );
+lbb_t( '6 rezervări simultane pe ultimele 2 locuri (serverul de test răspunde chiar în paralel, din cel puțin 2 procese): trec exact 2, ceilalți primesc „locurile s-au terminat”; o rezervare așteaptă cât cursa e blocată de alta (lacăt), apoi trece', ( $pl_par ?? 0 ) >= 2 && 2 === $pl_ok && 4 === count( array_keys( $pl_res, 'plin', true ) ) && 2 === ( $pl_db ?? -1 ) && array( 'luat' => true, 'asteapta' => true, 'dupa' => 302 ) === ( $pl_lock ?? null ), array( $pl_res, $pl_db ?? null, $pl_lock ?? null, $pl_pids ?? null ) );
 
 // Biletul nu se poate pune în coș ocolind formularul (fără cursă, locuri ținute și preț calculat): nici cu
 // ?add-to-cart=ID, nici prin Store API (coșul și finalizarea cu blocuri). Cereri HTTP reale, cu cookie-urile sesiunii.

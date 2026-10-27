@@ -548,8 +548,8 @@ const patchDepartures = edit => async r => {
   // Scoatem biletul din coș: locul trebuie eliberat.
   await page.goto(BASE + '/cart/');
   // Scoaterea din coșul clasic merge prin AJAX, fără navigare: așteptăm „Anulează?”, care apare abia după ce serverul a
-  // scos biletul. networkidle se împlinea deja înainte de clic, iar pauza fixă mergea doar pentru că serverul de test
-  // răspunde la cereri pe rând; pe un server cu mai multe procese verificarea locurilor ar fi putut-o lua înainte.
+  // scos biletul. networkidle se împlinea deja înainte de clic, iar o pauză fixă nu garantează nimic: serverul de test
+  // are 4 procese, deci verificarea locurilor poate ajunge la server înaintea scoaterii (sau după ea, din noroc).
   const removeFromCart = async () => {
     await page.click('.product-remove a.remove');
     await page.waitForSelector('a.restore-item', { timeout: 20000 }).catch(() => {});
