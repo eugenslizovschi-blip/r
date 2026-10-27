@@ -2592,9 +2592,25 @@ $pl_res = array();
 if ( is_int( $pl_r ) && function_exists( 'curl_multi_init' ) ) {
 	$pl_keep = get_option( 'lbb_settings', array() );
 	update_option( 'lbb_settings', array_merge( LBB_Settings::all(), array( 'allow_reserve' => 1, 'reserve_limit' => 0 ) ) );
+	// Cererile pornesc la 20 ms una după alta, nu în aceeași clipă: un proces al serverului PHP de test acceptă toate
+	// conexiunile sosite deodată și le tratează pe rând, deci „simultan” ar fi fost de fapt una după alta. Așa fiecare
+	// conexiune e preluată de un proces liber, iar cererile (mai lungi de 20 ms) chiar se suprapun.
+	$pl_go = function ( $mh, array $handles ) {
+		foreach ( $handles as $h ) {
+			curl_multi_add_handle( $mh, $h );
+			curl_multi_exec( $mh, $run );
+			usleep( 20000 );
+		}
+		do {
+			$st = curl_multi_exec( $mh, $run );
+			if ( $run ) {
+				curl_multi_select( $mh, 1 );
+			}
+		} while ( $run && CURLM_OK === $st );
+	};
 	// Întâi: serverul chiar răspunde în paralel (altfel cele 6 cereri ar trece pe rând și testul n-ar mai încerca lacătul).
-	// Cereri simultane la un fișier care așteaptă puțin și spune procesul care a răspuns: cel puțin 2 procese diferite.
-	// Serverul PHP nu împarte cererile egal (uneori toate ajung la același proces), deci până la 3 încercări a câte 6.
+	// Cereri la un fișier care așteaptă puțin și spune procesul care a răspuns: cel puțin 2 procese diferite (până la 3
+	// încercări a câte 6).
 	$pl_probe = ABSPATH . 'lbb-paralel-' . wp_generate_password( 8, false ) . '.php';
 	file_put_contents( $pl_probe, '<?php usleep( 600000 ); echo getmypid();' );
 	$pl_par  = 0;
@@ -2605,15 +2621,9 @@ if ( is_int( $pl_r ) && function_exists( 'curl_multi_init' ) ) {
 		for ( $pl_i = 0; $pl_i < 6; $pl_i++ ) {
 			$pl_h = curl_init( site_url( '/' . basename( $pl_probe ) ) );
 			curl_setopt_array( $pl_h, array( CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15 ) );
-			curl_multi_add_handle( $pl_mh, $pl_h );
 			$pl_ph[] = $pl_h;
 		}
-		do {
-			$pl_st = curl_multi_exec( $pl_mh, $pl_run );
-			if ( $pl_run ) {
-				curl_multi_select( $pl_mh, 1 );
-			}
-		} while ( $pl_run && CURLM_OK === $pl_st );
+		$pl_go( $pl_mh, $pl_ph );
 		$pl_pids = array();
 		foreach ( $pl_ph as $pl_h ) {
 			$pl_pids[] = trim( (string) curl_multi_getcontent( $pl_h ) );
@@ -2621,6 +2631,9 @@ if ( is_int( $pl_r ) && function_exists( 'curl_multi_init' ) ) {
 		}
 		curl_multi_close( $pl_mh );
 		$pl_par = count( array_unique( array_filter( $pl_pids, 'ctype_digit' ) ) );
+		if ( $pl_par < 2 ) {
+			usleep( 500000 ); // Un proces ocupat (ex. WP-Cron) se eliberează între încercări.
+		}
 	}
 	unlink( $pl_probe );
 
@@ -2639,15 +2652,9 @@ if ( is_int( $pl_r ) && function_exists( 'curl_multi_init' ) ) {
 				'lbb_phone' => '+3736900' . sprintf( '%04d', 5100 + $pl_i ), 'lbb_email' => 'paralel' . $pl_i . '@example.com', 'lbb_currency' => 'MDL',
 			) ),
 		) );
-		curl_multi_add_handle( $pl_mh, $pl_h );
 		$pl_hs[] = $pl_h;
 	}
-	do {
-		$pl_st = curl_multi_exec( $pl_mh, $pl_run );
-		if ( $pl_run ) {
-			curl_multi_select( $pl_mh, 1 );
-		}
-	} while ( $pl_run && CURLM_OK === $pl_st );
+	$pl_go( $pl_mh, $pl_hs );
 	foreach ( $pl_hs as $pl_h ) {
 		$pl_code  = curl_getinfo( $pl_h, CURLINFO_HTTP_CODE );
 		$pl_body  = (string) curl_multi_getcontent( $pl_h );
