@@ -994,15 +994,19 @@ $pd_nw = count( array_keys( $pd_cls, 'lbb-warn', true ) );
 // Pe fiecare rând: „Rezolvă” la ce lipsește, „Verifică” la ce e de verificat (cu titlul pentru cititorul de ecran).
 $pd_rows = preg_split( '/<tr>/', $pd_html );
 $pd_btn  = true;
+// Câte rânduri „lipsește” au buton: în datele de test cel puțin unul (HTTPS, datele firmei), altfel partea cu
+// „Rezolvă” n-ar verifica nimic, iar butoanele ar putea dispărea fără ca testul să observe.
+$pd_nbb = 0;
 foreach ( $pd_rows as $pd_r ) {
 	if ( false !== strpos( $pd_r, 'class="lbb-warn"' ) && false !== strpos( $pd_r, 'class="button"' ) ) {
 		$pd_btn = $pd_btn && false !== strpos( $pd_r, '>Verifică</a>' ) && false !== strpos( $pd_r, 'aria-label="Verifică: ' );
 	}
 	if ( false !== strpos( $pd_r, 'class="lbb-bad"' ) && false !== strpos( $pd_r, 'class="button"' ) ) {
 		$pd_btn = $pd_btn && false !== strpos( $pd_r, '>Rezolvă</a>' );
+		$pd_nbb++;
 	}
 }
-lbb_t( 'panoul: butonul spune „Verifică” la avertismente și „Rezolvă” la ce lipsește', $pd_btn && false !== strpos( $pd_html, '>Verifică</a>' ), null );
+lbb_t( 'panoul: butonul spune „Verifică” la avertismente și „Rezolvă” la ce lipsește (cel puțin un rând „lipsește” are buton)', $pd_btn && $pd_nbb >= 1 && false !== strpos( $pd_html, '>Verifică</a>' ), $pd_nbb );
 lbb_t( 'panoul „Gata de plăți?”: problemele sunt primele (lipsă, apoi de verificat, apoi gata), cu numărul lor în titlu', count( $pd_cls ) === count( LBB_Admin::checklist() ) && $pd_rank === $pd_sorted && $pd_nw >= 1
 	&& false !== strpos( $pd_html, $pd_nw . ' de verificat' ) && ( 0 === $pd_nb || false !== strpos( $pd_html, $pd_nb . ' de rezolvat' ) ), array( $pd_cls, $pd_nb, $pd_nw ) );
 
