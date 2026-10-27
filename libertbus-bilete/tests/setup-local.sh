@@ -124,6 +124,9 @@ $WP eval 'global $wpdb; $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_
 $WP option update woocommerce_newly_installed no >/dev/null
 STORAGE="${LBB_ORDER_STORAGE:-$( [ $(( 10#$(date -u +%H) % 2 )) -eq 0 ] && echo hpos || echo posts )}"
 $WP eval 'foreach ( wc_get_orders( array( "limit" => -1, "return" => "ids", "status" => "any" ) ) as $id ) { $o = wc_get_order( $id ); if ( $o ) { $o->delete( true ); } }' >/dev/null 2>&1 || true
+# WooCommerce 9+ (ex. 11.2 pe WordPress 7.1) refuză schimbarea și cu comenzile șterse: rămân înregistrări nesincronizate
+# între tabele. Sincronizarea întâi („wc hpos sync”; „wc cot sync” pe versiunile mai vechi), apoi schimbarea.
+$WP wc hpos sync >/dev/null 2>&1 || $WP wc cot sync >/dev/null 2>&1 || true
 $WP option update woocommerce_custom_orders_table_enabled "$( [ "$STORAGE" = hpos ] && echo yes || echo no )" >/dev/null
 echo "Comenzi WooCommerce stocate în: $STORAGE ($($WP eval 'echo WC_Data_Store::load( "order" )->get_current_class_name();' 2>/dev/null))"
 # Imită modulul „GA Google Analytics” de pe libertbus.md (același cod), plus scripturi care NU trebuie blocate.
