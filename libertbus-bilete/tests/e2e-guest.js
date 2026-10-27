@@ -547,8 +547,14 @@ const patchDepartures = edit => async r => {
 
   // Scoatem biletul din coș: locul trebuie eliberat.
   await page.goto(BASE + '/cart/');
-  await Promise.all([page.waitForLoadState('networkidle'), page.click('.product-remove a.remove')]);
-  await page.waitForTimeout(800);
+  // Scoaterea din coșul clasic merge prin AJAX, fără navigare: așteptăm „Anulează?”, care apare abia după ce serverul a
+  // scos biletul. networkidle se împlinea deja înainte de clic, iar pauza fixă mergea doar pentru că serverul de test
+  // răspunde la cereri pe rând; pe un server cu mai multe procese verificarea locurilor ar fi putut-o lua înainte.
+  const removeFromCart = async () => {
+    await page.click('.product-remove a.remove');
+    await page.waitForSelector('a.restore-item', { timeout: 20000 }).catch(() => {});
+  };
+  await removeFromCart();
   const after = (await (await page.request.get(`${BASE}/wp-json/lbb/v1/departures?route_id=${routeId}&date=${day}`)).json()).departures.find(d => d.time === time).free;
   if (after !== before) fail(`locul nu s-a eliberat după scoaterea din coș (înainte ${before}, după ${after})`);
   console.log(`locuri: ${before} → ${during} → ${after}`);
@@ -566,9 +572,7 @@ const patchDepartures = edit => async r => {
       const held = await free();
       let again = null;
       if (back === 1) {
-        // Scoaterea din coșul clasic merge prin AJAX (fără navigare), ca mai sus.
-        await Promise.all([page.waitForLoadState('networkidle'), page.click('.product-remove a.remove')]);
-        await page.waitForTimeout(800);
+        await removeFromCart();
         again = await free();
       }
       if (back !== 1 || held !== before - 1 || again !== before) fail('„Anulează?” după scoaterea biletului din coș: ' + JSON.stringify({ back, before, held, again }));
