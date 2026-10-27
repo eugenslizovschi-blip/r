@@ -650,15 +650,17 @@
 			this.setCustomValidity( this.value.trim() && ( ! letters || letters.length < 2 ) ? t.nameInvalid : '' );
 		}
 
-		// Ca pe server (LBB_Frontend::email_typo): virgulă în loc de punct („gmail,com”) sau punct la capăt („gmail.com.”),
-		// scrise ușor pe telefon. În locul mesajului general al browserului, câmpul propune adresa reparată.
+		// Ca pe server (LBB_Frontend::email_typo): virgulă în loc de punct („gmail,com”), punct dublu („gmail..com”) sau la
+		// capăt („gmail.com.”), scrise ușor pe telefon. În locul mesajului general al browserului, câmpul propune adresa
+		// reparată, cu „.con”, „.cmo”… făcut „.com”, ca serverul (altfel „gmail,con” ar cere două corecturi).
 		var emailInput = root.querySelector( '[name="lbb_email"]' );
 		function checkEmail() {
 			var value = emailInput.value.trim();
 			var at = value.lastIndexOf( '@' );
 			var domain = at > 0 ? value.slice( at + 1 ).toLowerCase() : '';
-			var clean = domain.replace( /,/g, '.' ).replace( /^\.+|\.+$/g, '' );
-			emailInput.setCustomValidity( t.emailFix && clean && clean !== domain ? t.emailFix.replace( '%s', value.slice( 0, at + 1 ) + clean ) : '' );
+			var clean = domain.replace( /,/g, '.' ).replace( /\.{2,}/g, '.' ).replace( /^\.+|\.+$/g, '' );
+			var fix = clean.replace( /^(.+\.)(con|cmo|comm|coom|cpm|xom|vom)$/, '$1com' );
+			emailInput.setCustomValidity( t.emailFix && clean && clean !== domain ? t.emailFix.replace( '%s', value.slice( 0, at + 1 ) + fix ) : '' );
 		}
 		if ( emailInput ) {
 			emailInput.addEventListener( 'input', checkEmail );

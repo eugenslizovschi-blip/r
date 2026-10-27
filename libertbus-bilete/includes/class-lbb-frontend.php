@@ -255,9 +255,9 @@ class LBB_Frontend {
 		);
 		$at     = strrpos( $email, '@' );
 		$domain = false === $at ? '' : strtolower( substr( $email, $at + 1 ) );
-		// Pe telefon: virgulă în loc de punct („gmail,com”) sau punct rămas la capăt („gmail.com.”). Browserul le
-		// refuză cu un mesaj general; propunem adresa reparată, cu restul verificărilor aplicate și pe ea.
-		$clean = trim( str_replace( ',', '.', $domain ), '.' );
+		// Pe telefon: virgulă în loc de punct („gmail,com”), punct dublu („gmail..com”) sau rămas la capăt („gmail.com.”).
+		// Browserul le refuză cu un mesaj general; propunem adresa reparată, cu restul verificărilor aplicate și pe ea.
+		$clean = trim( preg_replace( '/\.{2,}/', '.', str_replace( ',', '.', $domain ) ), '.' );
 		if ( false !== $at && '' !== $clean && $clean !== $domain ) {
 			$fixed = substr( $email, 0, $at + 1 ) . $clean;
 			$again = self::email_typo( $fixed );

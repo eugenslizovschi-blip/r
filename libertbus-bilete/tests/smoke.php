@@ -594,8 +594,8 @@ lbb_t( 'orice domeniu terminat în „.con”, „.cmo”, „.comm” primește
 // Pe telefon: virgulă în loc de punct sau punct la capăt în domeniu. Browserul le refuză cu mesajul lui general; serverul
 // (și formularul, în JS) propune adresa reparată, iar o greșeală din listă rămasă după reparare e corectată și ea.
 $r_comma = LBB_Frontend::book( array_merge( $base, array( 'lbb_email' => 'ion.rusu@gmail,com' ) ) );
-$et_cm   = array( LBB_Frontend::email_typo( 'ion@gmail.com.' ), LBB_Frontend::email_typo( 'Ion@Gmail,Con' ), LBB_Frontend::email_typo( 'a@firma,md' ), LBB_Frontend::email_typo( 'a@firma.md' ), LBB_Frontend::email_typo( 'a@,.' ), LBB_Frontend::email_typo( 'a,b' ) );
-lbb_t( 'email cu virgulă în loc de punct („gmail,com”) sau punct la capăt („gmail.com.”): adresa reparată propusă', is_wp_error( $r_comma ) && 'lbb_email' === $r_comma->get_error_code() && false !== strpos( $r_comma->get_error_message(), 'ion.rusu@gmail.com?' ) && array( 'ion@gmail.com', 'Ion@gmail.com', 'a@firma.md', '', '', '' ) === $et_cm, array( $r_comma, $et_cm ) );
+$et_cm   = array( LBB_Frontend::email_typo( 'ion@gmail.com.' ), LBB_Frontend::email_typo( 'Ion@Gmail,Con' ), LBB_Frontend::email_typo( 'a@firma,md' ), LBB_Frontend::email_typo( 'a@firma.md' ), LBB_Frontend::email_typo( 'a@,.' ), LBB_Frontend::email_typo( 'a,b' ), LBB_Frontend::email_typo( 'ion@gmail..com' ), LBB_Frontend::email_typo( 'ion@firma,,md.' ) );
+lbb_t( 'email cu virgulă în loc de punct („gmail,com”), punct dublu („gmail..com”) sau la capăt („gmail.com.”): adresa reparată propusă', is_wp_error( $r_comma ) && 'lbb_email' === $r_comma->get_error_code() && false !== strpos( $r_comma->get_error_message(), 'ion.rusu@gmail.com?' ) && array( 'ion@gmail.com', 'Ion@gmail.com', 'a@firma.md', '', '', '', 'ion@gmail.com', 'ion@firma.md' ) === $et_cm, array( $r_comma, $et_cm ) );
 // „ion@gmail” e email valid pentru browser (type=email nu cere punct); sanitize_email îl golea și mesajul era doar „adresă invalidă”.
 $r     = LBB_Frontend::book( array_merge( $base, array( 'lbb_email' => ' ion.rusu@Gmail ' ) ) );
 $r_bad = LBB_Frontend::book( array_merge( $base, array( 'lbb_email' => 'ion rusu@gmail' ) ) );
