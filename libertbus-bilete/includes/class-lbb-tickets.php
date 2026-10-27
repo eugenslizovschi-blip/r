@@ -811,11 +811,16 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 			var label = b.textContent;
 			b.hidden = false;
 			b.addEventListener('click', function(){
-				navigator.clipboard.writeText(s.getAttribute('data-share-text') + ' ' + s.getAttribute('data-share-url')).then(function(){
+				var text = s.getAttribute('data-share-text') + ' ' + s.getAttribute('data-share-url');
+				navigator.clipboard.writeText(text).then(function(){
 					b.textContent = b.getAttribute('data-copied');
 					document.querySelector('.copy-status').textContent = b.getAttribute('data-copied');
 					setTimeout(function(){ b.textContent = label; }, 3000);
-				}).catch(function(){});
+				}).catch(function(){
+					// Copierea refuzată (permisiuni, browser în mod restrâns): apăsarea nu rămâne fără efect, textul se
+					// arată selectat în fereastra browserului, gata de copiat cu Ctrl+C.
+					window.prompt(label, text);
+				});
 			});
 		})(document.querySelector('.actions .copy'), document.querySelector('.actions .share'));
 		// Array.prototype.forEach, nu NodeList.forEach: pe telefoanele vechi (Android 4.4, iOS 9) acela lipsește și

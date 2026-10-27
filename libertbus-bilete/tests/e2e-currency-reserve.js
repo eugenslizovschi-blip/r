@@ -179,6 +179,20 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     const btnText = canCopy ? await guest.textContent('.actions .copy') : '';
     if (!canCopy || !copied.endsWith(' ' + guest.url()) || copied.indexOf('Rezervare LibertBus ' + code + ': ') !== 0 || !/copiat/.test(btnText)) fail('„Copiază linkul biletului” nu copiază textul și linkul biletului: ' + JSON.stringify({ canCopy, copied, btnText }));
   }
+  // Copierea refuzată de browser: textul și linkul biletului apar în fereastra browserului, gata de copiat de mână.
+  {
+    const denied = await guest.evaluate(async () => {
+      const b = document.querySelector('.actions .copy');
+      if (!b) return null;
+      let shown = null;
+      navigator.clipboard.writeText = () => Promise.reject(new Error('NotAllowedError'));
+      window.prompt = (m, v) => { shown = { m, v }; return null; };
+      b.click();
+      for (let i = 0; i < 20 && !shown; i++) await new Promise(r => setTimeout(r, 50));
+      return shown;
+    });
+    if (!denied || !denied.m || !(denied.v || '').endsWith(' ' + guest.url()) || (denied.v || '').indexOf('Rezervare LibertBus ' + code + ': ') !== 0) fail('„Copiază linkul biletului” cu copierea refuzată nu arată linkul de copiat: ' + JSON.stringify(denied));
+  }
   const sharePage = await guest.context().newPage();
   await sharePage.addInitScript(() => { navigator.share = d => { window.__shared = d; return Promise.resolve(); }; });
   await sharePage.goto(guest.url());
