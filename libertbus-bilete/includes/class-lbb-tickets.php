@@ -802,7 +802,11 @@ body{margin:0;padding:16px;background:#f5f7fa;font-family:-apple-system,BlinkMac
 			if (!b || !navigator.share) { return; }
 			b.hidden = false;
 			b.addEventListener('click', function(){
-				navigator.share({title: b.getAttribute('data-share-title'), text: b.getAttribute('data-share-text'), url: b.getAttribute('data-share-url')}).catch(function(){});
+				navigator.share({title: b.getAttribute('data-share-title'), text: b.getAttribute('data-share-text'), url: b.getAttribute('data-share-url')}).catch(function(e){
+					// Clientul a închis lista de aplicații (AbortError): nimic. Partajarea refuzată de telefon: textul și linkul
+					// apar selectate, gata de copiat, ca apăsarea să nu rămână fără efect.
+					if (!e || e.name !== 'AbortError') { window.prompt(b.textContent, b.getAttribute('data-share-text') + ' ' + b.getAttribute('data-share-url')); }
+				});
 			});
 		})(document.querySelector('.share'));
 		// Pe calculator (fără „Trimite”): textul biletului cu linkul, gata de lipit în WhatsApp Web, email sau Messenger.

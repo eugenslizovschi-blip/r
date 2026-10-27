@@ -201,7 +201,22 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   else {
     await sharePage.click('.actions .share');
     const shared = await sharePage.evaluate(() => window.__shared || null);
-    if (!shared || shared.url !== guest.url() || !new RegExp('^' + code + ' · .+ → .+ · \\d\\d\\.\\d\\d\\.\\d{4} — ').test(shared.title || '') || !new RegExp('^Rezervare LibertBus ' + code + ': .+ → .+, \\d\\d\\.\\d\\d\\.\\d{4} \\(\\S+\\), \\d\\d:\\d\\d(\\. Urcare: .+)?\\. De achitat la urcare: [\\d.,]+\\s(MDL|RON)$').test(shared.text || '')) fail('„Trimite biletul” nu trimite linkul biletului: ' + JSON.stringify(shared));
+    if (!shared || shared.url !== guest.url() || !new RegExp('^' + code + ' · .+ → .+ · \\d\\d\\.\\d\\d\\.\\d{4} — ').test(shared.title || '') || !new RegExp('^Rezervare LibertBus ' + code + ': .+ → .+, \\d\\d\\.\\d\\d\\.\\d{4} \\(\\S+\\), \\d\\d:\\d\\d(\\. Urcare: .+)?\\. De achitat la urcare: [\\d.,]+\\s(MDL|RON)$').test(shared.text || '')) fail('„Trimite biletul” nu trimite linkul biletului: ' + JSON.stringify(shared));    // Partajarea refuzată de telefon (NotAllowedError): textul și linkul apar de copiat; anulată de client
+    // (AbortError, lista de aplicații închisă): nimic.
+    const refused = await sharePage.evaluate(async () => {
+      const out = {};
+      for (const name of ['NotAllowedError', 'AbortError']) {
+        let shown = null;
+        navigator.share = () => Promise.reject(new DOMException('x', name));
+        window.prompt = (m, v) => { shown = { m, v }; return null; };
+        document.querySelector('.actions .share').click();
+        await new Promise(r => setTimeout(r, 300));
+        out[name] = shown;
+      }
+      return out;
+    });
+    const nv = (refused.NotAllowedError || {}).v || '';
+    if (!nv.endsWith(' ' + guest.url()) || nv.indexOf('Rezervare LibertBus ' + code + ': ') !== 0 || refused.AbortError !== null) fail('„Trimite biletul” refuzat de telefon nu arată linkul de copiat (sau îl arată și la anulare): ' + JSON.stringify(refused));
   }
   await sharePage.close();
   // Telefon vechi, fără NodeList.forEach (Android 4.4, iOS 9): codul QR se desenează totuși, fără erori.
