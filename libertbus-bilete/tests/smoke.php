@@ -1547,8 +1547,19 @@ $ix_names = function () use ( $wpdb ) {
 };
 $ix_new = $ix_names();
 $wpdb->query( 'ALTER TABLE ' . LBB_Bookings::table() . ' DROP INDEX travel_date, DROP INDEX phone' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+// „lbb_needs_product” se citește la fiecare cerere: după crearea produsului rămâne 0 și încărcată automat (fără o
+// interogare în plus pe fiecare pagină); o instalare veche, care o ștersese, o primește la actualizare.
+$np_auto = function () use ( $wpdb ) {
+	$row = $wpdb->get_row( "SELECT option_value, autoload FROM {$wpdb->options} WHERE option_name = 'lbb_needs_product'", ARRAY_A );
+	return $row ? array( $row['option_value'], in_array( $row['autoload'], array( 'yes', 'on', 'auto-on', 'auto' ), true ) ) : null;
+};
+LBB_Install::ensure_product();
+$np_new = $np_auto();
+delete_option( 'lbb_needs_product' );
 update_option( 'lbb_db_version', '5' );
 LBB_Install::maybe_upgrade();
+$np_up = $np_auto();
+lbb_t( 'opțiunea „lbb_needs_product” rămâne 0 și încărcată automat după crearea produsului și după actualizare (fără interogare pe fiecare pagină)', array( '0', true ) === $np_new && array( '0', true ) === $np_up && ! get_option( 'lbb_needs_product' ), array( $np_new, $np_up ) );
 $ix_up = $ix_names();
 lbb_t( 'tabelul rezervărilor are indexuri pe dată și telefon, și după actualizarea de la versiunea 5', in_array( 'travel_date', $ix_new, true ) && in_array( 'phone', $ix_new, true ) && in_array( 'travel_date', $ix_up, true ) && in_array( 'phone', $ix_up, true ) && LBB_DB_VERSION === get_option( 'lbb_db_version' ), array( $ix_new, $ix_up ) );
 

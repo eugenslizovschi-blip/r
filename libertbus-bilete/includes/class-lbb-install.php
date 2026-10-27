@@ -42,6 +42,8 @@ class LBB_Install {
 			// Versiunea 6: indexuri pe dată și telefon (lista de pasageri a zilei, reamintirile și curățenia orare, limita de
 			// rezervări pe telefon): datele se păstrează 3 ani, iar fără ele fiecare căutare citește tot tabelul.
 			add_action( 'init', array( __CLASS__, 'backfill_codes' ), 30 );
+			// Instalările mai vechi au șters opțiunea după crearea produsului: o punem la loc, încărcată automat.
+			add_option( 'lbb_needs_product', 0, '', true );
 		}
 		if ( get_option( 'lbb_needs_product' ) && class_exists( 'WooCommerce' ) ) {
 			add_action( 'init', array( __CLASS__, 'ensure_product' ), 20 );
@@ -211,7 +213,9 @@ class LBB_Install {
 			update_option( self::PRODUCT_OPTION, $id );
 			self::publish_if_scheduled( $id );
 		}
-		delete_option( 'lbb_needs_product' );
+		// 0, nu ștearsă: opțiunea se citește la fiecare cerere (maybe_upgrade), iar una lipsă costă o interogare de fiecare
+		// dată; încărcată automat cu celelalte opțiuni, nu mai costă nimic.
+		update_option( 'lbb_needs_product', 0, true );
 	}
 
 	/**
