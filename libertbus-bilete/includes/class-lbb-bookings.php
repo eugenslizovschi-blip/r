@@ -346,10 +346,23 @@ class LBB_Bookings {
 	}
 
 	/**
-	 * Suma de plată în moneda aleasă de client.
+	 * Suma de plată în moneda aleasă de client. La biletul plătit: suma încasată (articolul comenzii), nu recalculată
+	 * cu cursul de azi — după o schimbare a cursului RON biletul și emailul ar arăta altă sumă decât cea plătită.
 	 */
 	public static function pay_amount( array $booking ) {
 		$cur = $booking['pay_currency'] ? $booking['pay_currency'] : $booking['currency'];
+		if ( 'confirmed' === ( $booking['status'] ?? '' ) && ! empty( $booking['item_id'] ) && class_exists( 'WC_Order_Item_Product' ) ) {
+			try {
+				$item  = new WC_Order_Item_Product( (int) $booking['item_id'] );
+				$order = $item->get_order();
+				if ( $order && $order->get_currency() === $cur ) {
+					return array( round( (float) $item->get_total() + (float) $item->get_total_tax(), 2 ), $cur );
+				}
+			} catch ( Exception $e ) {
+				// Articolul comenzii nu mai există: suma din rezervare.
+				unset( $e );
+			}
+		}
 		return array( LBB_Settings::convert( $booking['amount'], $booking['currency'], $cur ), $cur );
 	}
 

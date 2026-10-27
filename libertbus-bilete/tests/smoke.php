@@ -2106,6 +2106,36 @@ if ( function_exists( 'wc_create_order' ) ) {
 	$dr_o->delete( true );
 }
 lbb_t( 'rută ștearsă: biletul arată ruta de pe comandă sau „(rută ștearsă)”, nu numărul intern „#…”', array( 'comanda' => 'Vechi → Nou', 'fara' => '(rută ștearsă)', 'disparut' => '(rută ștearsă)', 'pe_bilet' => true ) === $dr_res, $dr_res );
+// Biletul plătit în RON arată suma încasată (de pe comandă), nu suma recalculată cu cursul de azi: după o schimbare a
+// cursului, biletul și emailul ar arăta altă sumă decât cea plătită. Fără comandă sau în altă monedă: suma din rezervare.
+$pm_res = array();
+if ( function_exists( 'wc_create_order' ) ) {
+	$pm_o    = wc_create_order();
+	$pm_o->set_currency( 'RON' );
+	$pm_item = new WC_Order_Item_Product();
+	$pm_item->set_name( 'Bilet autocar' );
+	$pm_item->set_subtotal( 149.5 );
+	$pm_item->set_total( 149.5 );
+	$pm_o->add_item( $pm_item );
+	$pm_o->save();
+	$pm_b    = array_merge( $bd_b, array( 'status' => 'confirmed', 'amount' => 600, 'currency' => 'MDL', 'pay_currency' => 'RON', 'order_id' => $pm_o->get_id(), 'item_id' => $pm_item->get_id() ) );
+	$pm_now  = LBB_Settings::convert( 600, 'MDL', 'RON' );
+	$pm_res  = array(
+		'platit'   => LBB_Bookings::pay_amount( $pm_b ),
+		'bilet'    => LBB_WooCommerce::describe( $pm_b )[ __( 'Achitat online', 'libertbus-bilete' ) ] ?? null,
+		'fara'     => LBB_Bookings::pay_amount( array_merge( $pm_b, array( 'item_id' => 0 ) ) ),
+		'alta'     => LBB_Bookings::pay_amount( array_merge( $pm_b, array( 'pay_currency' => 'MDL' ) ) ),
+		'urcare'   => LBB_Bookings::pay_amount( array_merge( $pm_b, array( 'status' => 'reserved' ) ) ),
+	);
+	$pm_o->delete( true );
+}
+lbb_t( 'biletul plătit arată suma încasată de pe comandă (149,50 RON), nu recalculată cu cursul de azi; fără comandă, în altă monedă sau la urcare, suma din rezervare', isset( $pm_now ) && 149.5 !== $pm_now && array(
+	'platit' => array( 149.5, 'RON' ),
+	'bilet'  => LBB_WooCommerce::money( 149.5, 'RON' ),
+	'fara'   => array( $pm_now, 'RON' ),
+	'alta'   => array( (float) 600, 'MDL' ),
+	'urcare' => array( $pm_now, 'RON' ),
+) === $pm_res, array( $pm_res, $pm_now ?? null ) );
 lbb_t( 'locul de urcare ajunge și în formular (rezumatul de dinainte de plată)', 'Autogara Nord, peronul 3' === ( $bd_m['boarding'] ?? null ) && false !== strpos( (string) file_get_contents( LBB_DIR . 'assets/lbb.js' ), "t.boarding + ': ' + route.boarding" ), $bd_m );
 lbb_t( 'locul de urcare al rutei apare pe bilet și în calendar; fără el, rândul lipsește și calendarul are orașul', 'Autogara Nord, peronul 3' === ( $bd_d['Loc de urcare'] ?? null ) && false !== strpos( $bd_h, 'Autogara Nord, peronul 3' ) && false !== strpos( $bd_i, "LOCATION:Autogara Nord\\, peronul 3\r\n" ) && ! isset( $bd_n['Loc de urcare'] ) && false !== strpos( $bd_i2, "LOCATION:UrcareA\r\n" ), array( $bd_d, $bd_n, $bd_e ) );
 
