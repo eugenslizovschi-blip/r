@@ -93,7 +93,7 @@ async function scan(page, label, include) {
   await page.waitForFunction(() => document.querySelectorAll('[data-lbb="time"] option:not([disabled]):not([value=""])').length > 0);
   if (!(await page.inputValue('[data-lbb="time"]'))) await page.selectOption('[data-lbb="time"]', await page.$eval('[data-lbb="time"] option:not([disabled]):not([value=""])', o => o.value));
   await page.fill('input[name="lbb_names[]"]', 'Test Accesibil');
-  await page.fill('input[name="lbb_phone"]', '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
+  await page.fill('input[name="lbb_phone"]', '+3736' + String(Math.floor(1e6 + Math.random() * 9e6)));
   await page.fill('input[name="lbb_email"]', 'a11y@example.com');
   // Ca pe un telefon care poate partaja: pe bilet apare și „Trimite biletul”, verificat și el.
   await page.addInitScript(() => { navigator.share = () => Promise.resolve(); });

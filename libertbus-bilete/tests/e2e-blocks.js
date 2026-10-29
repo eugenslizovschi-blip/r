@@ -22,7 +22,7 @@ const fail = (m) => { console.error('FAIL ' + m); process.exitCode = 1; };
   // Locurile libere ale cursei, din același API ca formularul (biletul din coș ține un loc).
   const free = async () => { const r = await page.request.get(BASE + '/?rest_route=/lbb/v1/departures&route_id=' + routeId + '&date=' + day); const d = (await r.json()).departures || []; const x = d.find(o => o.time === time); return x ? x.free : null; };
   await page.fill('input[name="lbb_names[]"]', 'Ion Bloc');
-  await page.fill('input[name="lbb_phone"]', '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
+  await page.fill('input[name="lbb_phone"]', '+3736' + String(Math.floor(1e6 + Math.random() * 9e6)));
   await page.fill('input[name="lbb_email"]', 'bloc@example.com');
   await Promise.all([page.waitForNavigation(), page.click('[data-lbb-submit][value="pay"]')]);
   await page.waitForSelector('.wc-block-checkout #billing-first_name').catch(() => fail('checkout-ul cu blocuri nu s-a încărcat: ' + page.url()));

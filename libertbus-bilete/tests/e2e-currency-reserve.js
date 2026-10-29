@@ -70,7 +70,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   // Testul nu e despre cookies: vizitatorul și-a ales deja preferința (bannerul e testat în e2e-cookies.js).
   await guest.context().addCookies([{ name: 'lbb_cookie_consent', value: 'necessary', url: BASE }]);
   guest.on('pageerror', e => fail('pageerror: ' + e.message));
-  await fillForm(guest, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
+  await fillForm(guest, '+3736' + String(Math.floor(1e6 + Math.random() * 9e6)));
   await guest.screenshot({ path: (process.env.OUT || '.') + '/form-buttons.png', fullPage: true });
   const chosenTime = await guest.inputValue('[data-lbb="time"]');
   // Internet lent: cât serverul nu a răspuns, sub butoane scrie ce se întâmplă (anunțat și cititoarelor de ecran).
@@ -272,7 +272,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   // (Chrome pune la loc alegerea veche când formularul reface lista orelor, chiar dacă ora e acum plină).
   {
     const p2 = await guestCtx.newPage();
-    await fillForm(p2, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
+    await fillForm(p2, '+3736' + String(Math.floor(1e6 + Math.random() * 9e6)));
     const t = await p2.inputValue('[data-lbb="time"]');
     await p2.goto(BASE + '/politica-de-cookies/');
     // Ca în e2e-guest.js: o cerere încă pe drum la închiderea paginii nu trebuie să oprească tot scriptul.
@@ -373,7 +373,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   {
     const p6 = await guestCtx.newPage();
     await p6.addInitScript(() => { Object.defineProperty(SubmitEvent.prototype, 'submitter', { get() { return undefined; }, configurable: true }); });
-    await fillForm(p6, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
+    await fillForm(p6, '+3736' + String(Math.floor(1e6 + Math.random() * 9e6)));
     await Promise.all([p6.waitForNavigation(), p6.click('[data-lbb-submit][value="reserve"]')]);
     const st6 = (await p6.textContent('.state').catch(() => '')).trim();
     if (!/lbb_bilet=/.test(p6.url()) || !/achitați la urcare/.test(st6)) fail('fără e.submitter (Safari < 15.4) „Rezerv” nu duce la rezervare: ' + JSON.stringify({ url: p6.url(), st6 }));
@@ -383,7 +383,7 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   {
     const p7 = await guestCtx.newPage({ viewport: { width: 320, height: 640 } });
     await p7.setViewportSize({ width: 320, height: 640 });
-    await fillForm(p7, '+3736' + String(Math.floor(1e7 + Math.random() * 8e7)));
+    await fillForm(p7, '+3736' + String(Math.floor(1e6 + Math.random() * 9e6)));
     await p7.fill('input[name="lbb_names[]"]', 'Maximilian-Constantin Popescu-Vasilescu-Andronachescu');
     await Promise.all([p7.waitForNavigation(), p7.click('[data-lbb-submit][value="reserve"]')]);
     const fit = await p7.evaluate(() => {

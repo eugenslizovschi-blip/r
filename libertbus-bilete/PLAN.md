@@ -34,6 +34,7 @@
   - **Suma de pe biletul plătit:** biletul și emailul arată suma încasată de pe comandă, minus o rambursare parțială a biletului (ex. locul unui copil); înainte, după o schimbare a cursului RON în Setări, un bilet deja plătit arăta altă sumă decât cea plătită.
   - **Biletul unei rute șterse** (după ultima ei cursă), deschis mai târziu din email: arată ruta de pe comandă, nu un număr intern („Ruta #12”).
   - **Formularul de rezervare:**
+    - un telefon +373 sau +40 cu o cifră lipsă sau în plus („+373 69 184 11”), pe care biroul nu l-ar putea suna, e oprit cu mesajul „după +373 urmează 8 cifre, după +40 urmează 9 cifre”;
     - emailul scris pe telefon cu virgulă în loc de punct („ion@gmail,com”, chiar și „ion@gmail,con”), cu punct dublu sau cu punct la capăt primește propunerea „ați vrut să scrieți ion@gmail.com?”, nu doar „adresă invalidă”: imediat, lângă câmp, la apăsarea butonului, fără reîncărcarea paginii;
     - după „Înapoi” din plată rămân data, ora și locurile corecte, iar butoanele merg;
     - câmpul cu eroarea de la server e marcat cu roșu;

@@ -334,6 +334,11 @@ class LBB_Frontend {
 		if ( $digits < 8 || $digits > 15 ) {
 			return new WP_Error( 'lbb_phone', __( 'Introduceți un număr de telefon valid, cu prefixul țării (+373 sau +40).', 'libertbus-bilete' ) );
 		}
+		// Moldova are +373 și 8 cifre, România +40 și 9, niciuna cu 0 după prefix (normalize_phone l-a scos deja când lungimea era bună):
+		// o cifră lipsă sau în plus dă un număr care nu poate fi sunat.
+		if ( preg_match( '/^\+(?:373|40)/', $phone ) && ! preg_match( '/^\+(?:373[1-9]\d{7}|40[1-9]\d{8})$/', $phone ) ) {
+			return new WP_Error( 'lbb_phone', __( 'Numărul de telefon pare incomplet sau are o cifră în plus: după +373 urmează 8 cifre, după +40 urmează 9 cifre.', 'libertbus-bilete' ) );
+		}
 		$typed = isset( $data['lbb_email'] ) ? trim( sanitize_text_field( $data['lbb_email'] ) ) : '';
 		// „ion@gmail” nu trece de sanitize_email (domeniu fără punct), așa că propunerea se face pe ce s-a scris.
 		$fixed = self::email_typo( $typed );
