@@ -122,7 +122,7 @@
   - **Panoul „Gata de plăți?”** avertizează dacă bannerul de cookies e oprit sau dacă telefonul pentru clienți e incomplet; arată și dacă WooCommerce anonimizează comenzile finalizate (politica promite 3 ani), cu link direct la setare; verifică și că IDNO-ul firmei are 13 cifre (banca îl compară cu cel de pe site); avertizează dacă pagina de finalizare a comenzii folosește blocul „Checkout”, unde plata băncii poate lipsi dacă modulul ei nu are varianta pentru blocuri (soluția: [woocommerce_checkout]); arată și ultima eroare la trimiterea emailurilor din ultimele 7 zile (ex. hostingul blochează emailul și clienții nu primesc biletele), cu link spre un plugin SMTP (adresele de email din mesajul de eroare nu se păstrează).
   - **Setări mai sigure la salvare** (avertizarea apare imediat, nu doar în Panou):
     - IDNO-ul care nu are 13 cifre („are 12 cifre, nu 13”);
-    - telefonul pentru clienți incomplet sau fără prefixul țării (clienții din România n-ar putea suna);
+    - telefonul pentru clienți incomplet, +373 / +40 cu o cifră lipsă sau în plus, sau fără prefixul țării (clienții din România n-ar putea suna);
     - culoarea butoanelor scrisă fără „#” („1e40af”) se păstrează, nu mai revine pe tăcute la verde.
   - **Emailuri:**
     - un email terminat în „.con”, „.cmo”, „.comm” (la orice domeniu, ex. „ion@firma.con”) e oprit cu „.com” propus;

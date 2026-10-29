@@ -1160,6 +1160,8 @@ $se_id0  = $se_go( 'birou@firma.md', array( 'company_idno' => '' ) );
 $se_tl   = $se_go( 'birou@firma.md', array( 'support_phone' => '069 184 111' ) );
 $se_ts   = $se_go( 'birou@firma.md', array( 'support_phone' => '+373 69' ) );
 $se_ti   = $se_go( 'birou@firma.md', array( 'support_phone' => '+373 691 84 111' ) );
+$se_tn   = $se_go( 'birou@firma.md', array( 'support_phone' => '+373 691 84 11' ) );
+$se_tr   = $se_go( 'birou@firma.md', array( 'support_phone' => '+40 740 123 4567' ) );
 update_option( 'lbb_settings', $se_keep[0] );
 list( , $_POST, $_REQUEST ) = $se_keep;
 wp_set_current_user( $se_keep[3] );
@@ -1167,6 +1169,7 @@ lbb_t( 'Setări: emailul biroului greșit e semnalat la salvare (nevalid: unde m
 lbb_t( 'Setări: IDNO-ul fără 13 cifre e semnalat la salvare; 13 cifre (și cu spații) sau gol nu', false !== strpos( $se_id12[0], 'IDNO-ul „100360012345” are 12 cifre, nu 13' ) && $se_id12[1] && false === strpos( $se_id13[0], 'IDNO' ) && ! $se_id13[1] && false === strpos( $se_id0[0], 'IDNO' ) && ! $se_id0[1], array( $se_id12, $se_id13, $se_id0 ) );
 lbb_t( 'Setări: avertizarea IDNO în română corectă („1 cifră”, „21 de cifre”)', false !== strpos( $se_id1[0], '„7” are 1 cifră, nu 13' ) && false !== strpos( $se_id21[0], 'are 21 de cifre, nu 13' ), array( $se_id1[0], $se_id21[0] ) );
 lbb_t( 'Setări: telefonul pentru clienți incomplet sau fără prefixul țării e semnalat la salvare; +373 … nu', false !== strpos( $se_tl[0], '„069 184 111” nu are prefixul țării' ) && $se_tl[1] && false !== strpos( $se_ts[0], '„+373 69” e incomplet' ) && $se_ts[1] && false === strpos( $se_ti[0], 'telefonul' ) && ! $se_ti[1], array( $se_tl, $se_ts, $se_ti ) );
+lbb_t( 'Setări: telefonul pentru clienți +373 / +40 cu o cifră lipsă sau în plus e semnalat la salvare', false !== strpos( $se_tn[0], '„+373 691 84 11” pare incomplet sau are o cifră în plus' ) && $se_tn[1] && false !== strpos( $se_tr[0], '„+40 740 123 4567” pare incomplet' ) && $se_tr[1] && false === strpos( $se_tn[0], 'prefixul țării' ), array( $se_tn, $se_tr ) );
 lbb_t( 'Setări: cursul RON scris invers („0,256” în loc de 3,9) e semnalat la salvare; un curs normal nu', false !== strpos( $se_inv[0], 'cursul RON 0,256 pare scris invers' ) && $se_inv[1] && false === strpos( $se_norm[0], 'invers' ) && ! $se_norm[1], array( $se_inv, $se_norm ) );
 
 // Culoarea butoanelor copiată fără „#” se păstrează; un cod stricat revine la culoarea implicită.
@@ -3135,6 +3138,11 @@ $ph_item = function () {
 update_option( 'lbb_settings', array_merge( $cl_keep, array( 'support_phone' => '+373 691 84 111' ) ) );
 $it = $ph_item();
 lbb_t( 'panou: un telefon complet apare ca bifat', $it && true === $it['ok'], $it );
+foreach ( array( '+373 691 84 11', '+373 691 84 1111', '+40 740 123 45' ) as $ph_len ) {
+	update_option( 'lbb_settings', array_merge( $cl_keep, array( 'support_phone' => $ph_len ) ) );
+	$it = $ph_item();
+	lbb_t( 'panou: telefonul „' . $ph_len . '” cu o cifră lipsă sau în plus apare ca problemă, cu numărul și regula', $it && false === $it['ok'] && false !== strpos( $it['detail'], $ph_len ) && false !== strpos( $it['detail'], 'după +373 urmează 8 cifre' ), $it );
+}
 foreach ( array( '+373', '', '069 18' ) as $ph_bad ) {
 	update_option( 'lbb_settings', array_merge( $cl_keep, array( 'support_phone' => $ph_bad ) ) );
 	$it = $ph_item();

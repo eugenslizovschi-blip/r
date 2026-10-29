@@ -229,6 +229,18 @@ class LBB_Frontend {
 	}
 
 	/**
+	 * Un număr +373 / +40 cu altă lungime decât cea a țării, care nu poate fi sunat. Moldova are +373 și 8 cifre, România
+	 * +40 și 9, niciuna cu 0 după prefix (normalize_phone îl scoate când lungimea e bună). Numerele altor țări nu se judecă.
+	 *
+	 * @param string $phone Numărul, cum a fost scris.
+	 * @return bool
+	 */
+	public static function phone_length_bad( $phone ) {
+		$phone = self::normalize_phone( $phone );
+		return preg_match( '/^\+(?:373|40)/', $phone ) && ! preg_match( '/^\+(?:373[1-9]\d{7}|40[1-9]\d{8})$/', $phone );
+	}
+
+	/**
 	 * Mesajul pentru un număr +373 / +40 cu altă lungime, același pe server și lângă câmp (lbb.js).
 	 *
 	 * @return string
@@ -343,9 +355,7 @@ class LBB_Frontend {
 		if ( $digits < 8 || $digits > 15 ) {
 			return new WP_Error( 'lbb_phone', __( 'Introduceți un număr de telefon valid, cu prefixul țării (+373 sau +40).', 'libertbus-bilete' ) );
 		}
-		// Moldova are +373 și 8 cifre, România +40 și 9, niciuna cu 0 după prefix (normalize_phone l-a scos deja când lungimea era bună):
-		// o cifră lipsă sau în plus dă un număr care nu poate fi sunat.
-		if ( preg_match( '/^\+(?:373|40)/', $phone ) && ! preg_match( '/^\+(?:373[1-9]\d{7}|40[1-9]\d{8})$/', $phone ) ) {
+		if ( self::phone_length_bad( $phone ) ) {
 			return new WP_Error( 'lbb_phone', self::phone_length_text() );
 		}
 		$typed = isset( $data['lbb_email'] ) ? trim( sanitize_text_field( $data['lbb_email'] ) ) : '';

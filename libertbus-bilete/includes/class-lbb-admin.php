@@ -217,16 +217,21 @@ class LBB_Admin {
 		// Numărul apare în formular, pe bilet și în emailuri, ca link de apel: cu mai puțin de 8 cifre nu sună nicăieri.
 		$phone = trim( (string) LBB_Settings::get( 'support_phone' ) );
 		// Fără prefixul țării („069 184 111”) numărul se formează doar din Moldova: clienții din România nu pot suna.
-		$phone_ok   = strlen( preg_replace( '/\D/', '', $phone ) ) >= 8;
+		// „+373 69 184 11”: destule cifre, dar una lipsește, și nici așa nu sună.
+		$phone_len  = LBB_Frontend::phone_length_bad( $phone );
+		$phone_ok   = strlen( preg_replace( '/\D/', '', $phone ) ) >= 8 && ! $phone_len;
 		$phone_intl = (bool) preg_match( '/^\s*(\+|00)/', $phone );
 		$add( 'phone', $phone_ok ? ( $phone_intl ? true : 'warn' ) : false, __( 'Telefonul pentru clienți e complet', 'libertbus-bilete' ),
 			'' === $phone
 				? __( 'Lipsește. Clienții îl văd în formular, pe bilet și în emailuri.', 'libertbus-bilete' )
-				: ( $phone_ok && ! $phone_intl
+				: ( $phone_len
+					/* translators: %s: numărul de telefon din setări */
+					? sprintf( __( 'Acum: %s. Pare incomplet sau are o cifră în plus: după +373 urmează 8 cifre, după +40 urmează 9.', 'libertbus-bilete' ), $phone )
+					: ( $phone_ok && ! $phone_intl
 					/* translators: %s: numărul de telefon din setări */
 					? sprintf( __( 'Acum: %s, fără prefixul țării. Scrieți-l ca +373 …: altfel clienții din România nu vă pot suna.', 'libertbus-bilete' ), $phone )
 					/* translators: %s: numărul de telefon din setări */
-					: sprintf( __( 'Acum: %s. Clienții îl văd în formular, pe bilet și în emailuri, cu prefixul țării (ex. +373 691 84 111).', 'libertbus-bilete' ), $phone ) ),
+					: sprintf( __( 'Acum: %s. Clienții îl văd în formular, pe bilet și în emailuri, cu prefixul țării (ex. +373 691 84 111).', 'libertbus-bilete' ), $phone ) ) ),
 			admin_url( 'admin.php?page=lbb-settings' ) );
 
 		$add( 'cookies', (bool) LBB_Settings::get( 'cookie_banner' ), __( 'Bannerul de cookies e pornit', 'libertbus-bilete' ),
@@ -1322,14 +1327,18 @@ class LBB_Admin {
 		// prefixul țării clienții din România nu pot suna (aceeași regulă ca în Panou).
 		$tel       = trim( (string) LBB_Settings::get( 'support_phone' ) );
 		$tel_short = '' !== $tel && strlen( preg_replace( '/\D/', '', $tel ) ) < 8;
-		$tel_local = '' !== $tel && ! $tel_short && ! preg_match( '/^\s*(\+|00)/', $tel );
+		$tel_len   = '' !== $tel && ! $tel_short && LBB_Frontend::phone_length_bad( $tel );
+		$tel_local = '' !== $tel && ! $tel_short && ! $tel_len && ! preg_match( '/^\s*(\+|00)/', $tel );
 		if ( $tel_short ) {
 			/* translators: %s: telefonul salvat */
 			$msg .= ' ' . sprintf( __( 'Atenție: telefonul pentru clienți „%s” e incomplet (are mai puțin de 8 cifre).', 'libertbus-bilete' ), $tel );
+		} elseif ( $tel_len ) {
+			/* translators: %s: telefonul salvat */
+			$msg .= ' ' . sprintf( __( 'Atenție: telefonul pentru clienți „%s” pare incomplet sau are o cifră în plus: după +373 urmează 8 cifre, după +40 urmează 9.', 'libertbus-bilete' ), $tel );
 		} elseif ( $tel_local ) {
 			/* translators: %s: telefonul salvat */
 			$msg .= ' ' . sprintf( __( 'Atenție: telefonul pentru clienți „%s” nu are prefixul țării. Scrieți-l ca +373 …: altfel clienții din România nu vă pot suna.', 'libertbus-bilete' ), $tel );
 		}
-		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold || $bad || $typo || $inverted || $idno_bad || $tel_short || $tel_local );
+		self::redirect( 'lbb-settings', $msg, $closed['bad'] || $sold || $bad || $typo || $inverted || $idno_bad || $tel_short || $tel_len || $tel_local );
 	}
 }
