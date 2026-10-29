@@ -196,7 +196,8 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   if (onScreen.head.includes('Urcat') || onScreen.boxes) fail('coloana „Urcat” apare și pe ecran: ' + JSON.stringify(onScreen));
   // „Ziua următoare ›” / „‹ Ziua precedentă” schimbă ziua cu una și păstrează ruta aleasă (inclusiv peste sfârșitul lunii).
   const navRoute = await page.$eval('select[name="route"] option:nth-child(2)', o => o.value);
-  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&date=2026-10-31&route=' + navRoute);
+  // Zile îndepărtate, nu „anul curent”: altfel ziua „precedentă” ajunge cândva chiar azi, când butonul „Azi” lipsește.
+  await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&date=2099-10-31&route=' + navRoute);
   // Săgețile „‹ ›” sunt decor: numele linkurilor pentru cititorul de ecran e doar „Ziua precedentă” / „Ziua următoare”.
   const arrowNames = [await page.getByRole('link', { name: 'Ziua precedentă', exact: true }).count(), await page.getByRole('link', { name: 'Ziua următoare', exact: true }).count()];
   if (arrowNames[0] !== 1 || arrowNames[1] !== 1) fail('săgețile din „‹ Ziua precedentă” / „Ziua următoare ›” sunt citite de cititorul de ecran: ' + JSON.stringify(arrowNames));
@@ -211,8 +212,8 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
   const todayQ = new URL(page.url()).searchParams;
   // Pe lista de azi butonul lipsește; dacă reapare, trebuie să ducă la altă zi (miezul nopții a trecut între clicuri).
   const todayAgain = await page.$eval('.lbb-day-nav a.lbb-today', a => new URL(a.href).searchParams.get('date')).catch(() => null);
-  if (!todayQ.get('date') || todayQ.get('date') === '2026-10-30' || todayQ.get('route') !== navRoute || todayAgain === todayQ.get('date')) fail('butonul „Azi” pe lista de pasageri: ' + JSON.stringify({ today: todayQ.toString(), again: todayAgain }));
-  if (nextQ.get('date') !== '2026-11-01' || nextQ.get('route') !== navRoute || !/01\.11\.2026/.test(nextH) || prevQ.get('date') !== '2026-10-30' || prevQ.get('route') !== navRoute) fail('navigarea între zile pe lista de pasageri: ' + JSON.stringify({ next: nextQ.toString(), nextH, prev: prevQ.toString() }));
+  if (!todayQ.get('date') || todayQ.get('date') === '2099-10-30' || todayQ.get('route') !== navRoute || todayAgain === todayQ.get('date')) fail('butonul „Azi” pe lista de pasageri: ' + JSON.stringify({ today: todayQ.toString(), again: todayAgain }));
+  if (nextQ.get('date') !== '2099-11-01' || nextQ.get('route') !== navRoute || !/01\.11\.2099/.test(nextH) || prevQ.get('date') !== '2099-10-30' || prevQ.get('route') !== navRoute) fail('navigarea între zile pe lista de pasageri: ' + JSON.stringify({ next: nextQ.toString(), nextH, prev: prevQ.toString() }));
   // O zi fără pasageri trimite la următoarea zi cu pasageri, unde lista chiar are rânduri.
   await page.goto(BASE + '/wp-admin/admin.php?page=lbb-manifest&date=2000-01-01');
   const nextLink = await page.$('a.lbb-next-day');
