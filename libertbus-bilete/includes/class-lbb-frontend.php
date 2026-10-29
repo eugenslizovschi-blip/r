@@ -229,6 +229,15 @@ class LBB_Frontend {
 	}
 
 	/**
+	 * Mesajul pentru un număr +373 / +40 cu altă lungime, același pe server și lângă câmp (lbb.js).
+	 *
+	 * @return string
+	 */
+	private static function phone_length_text() {
+		return __( 'Numărul de telefon pare incomplet sau are o cifră în plus: după +373 urmează 8 cifre, după +40 urmează 9 cifre.', 'libertbus-bilete' );
+	}
+
+	/**
 	 * Linkul de apel pentru un număr scris oricum („069 000 111”, „+373 69…”, „0040 …”): cu prefixul țării,
 	 * ca să sune corect și de pe un telefon din altă țară.
 	 *
@@ -337,7 +346,7 @@ class LBB_Frontend {
 		// Moldova are +373 și 8 cifre, România +40 și 9, niciuna cu 0 după prefix (normalize_phone l-a scos deja când lungimea era bună):
 		// o cifră lipsă sau în plus dă un număr care nu poate fi sunat.
 		if ( preg_match( '/^\+(?:373|40)/', $phone ) && ! preg_match( '/^\+(?:373[1-9]\d{7}|40[1-9]\d{8})$/', $phone ) ) {
-			return new WP_Error( 'lbb_phone', __( 'Numărul de telefon pare incomplet sau are o cifră în plus: după +373 urmează 8 cifre, după +40 urmează 9 cifre.', 'libertbus-bilete' ) );
+			return new WP_Error( 'lbb_phone', self::phone_length_text() );
 		}
 		$typed = isset( $data['lbb_email'] ) ? trim( sanitize_text_field( $data['lbb_email'] ) ) : '';
 		// „ion@gmail” nu trece de sanitize_email (domeniu fără punct), așa că propunerea se face pe ce s-a scris.
@@ -522,6 +531,7 @@ class LBB_Frontend {
 				'nameInvalid' => __( 'Scrieți numele și prenumele ca în pașaport (cel puțin două litere).', 'libertbus-bilete' ),
 				/* translators: %s: adresa corectată, ex. ion@gmail.com */
 				'emailFix'    => __( 'Verificați adresa de email: ați vrut să scrieți %s? Acolo primiți biletul.', 'libertbus-bilete' ),
+				'phoneLength' => self::phone_length_text(),
 				'namePh'      => __( 'Nume și prenume', 'libertbus-bilete' ),
 				'error'       => __( 'Nu am putut verifica locurile.', 'libertbus-bilete' ),
 				'retry'       => __( 'Încearcă din nou', 'libertbus-bilete' ),

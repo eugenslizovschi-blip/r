@@ -345,6 +345,21 @@ let BROWSER = null; // pentru capturile de la eroare (tests/crash.js)
     await p4.waitForTimeout(800);
     const stopped = await p4.evaluate(() => ({ stay: window.__stay === 1, focus: document.activeElement && document.activeElement.name })).catch(() => ({ stay: false }));
     if (!stopped.stay || stopped.focus !== 'lbb_email') fail('emailul „gmail,com” a fost trimis la server în loc să fie oprit cu propunerea lângă câmp: ' + JSON.stringify(stopped));
+    // Telefonul +373 / +40 cu o cifră lipsă sau în plus: aceeași regulă ca pe server, oprit lângă câmp, fără drumul la server.
+    await p4.fill('input[name="lbb_email"]', 'test@gmail.com');
+    const tel = {};
+    for (const v of ['+373 69 184 11', '+373 69 184 1111', '00373 69 184 11', '+40 740 123 45', '+373 69 184 111', '+373 069 184 111', '0037369184111', '+40 (0)740 123 456', '+40 21 123 4567', '069 184 111', '+380 50 123 4567']) {
+      await p4.fill('input[name="lbb_phone"]', v);
+      tel[v] = await p4.$eval('input[name="lbb_phone"]', i => i.checkValidity() ? '' : i.validationMessage);
+    }
+    const telBad = ['+373 69 184 11', '+373 69 184 1111', '00373 69 184 11', '+40 740 123 45'];
+    if (telBad.some(v => !/8 cifre/.test(tel[v])) || Object.keys(tel).some(v => !telBad.includes(v) && tel[v] !== '')) fail('telefonul +373/+40 cu altă lungime nu e semnalat lângă câmp (sau unul corect e): ' + JSON.stringify(tel));
+    await p4.fill('input[name="lbb_phone"]', '+373 69 184 11');
+    await p4.evaluate(() => { window.__stay = 1; });
+    await p4.click('[data-lbb-submit][value="reserve"]');
+    await p4.waitForTimeout(800);
+    const telStopped = await p4.evaluate(() => ({ stay: window.__stay === 1, focus: document.activeElement && document.activeElement.name })).catch(() => ({ stay: false }));
+    if (!telStopped.stay || telStopped.focus !== 'lbb_phone') fail('telefonul cu o cifră lipsă a fost trimis la server în loc să fie oprit lângă câmp: ' + JSON.stringify(telStopped));
     await p4.close();
   }
   // O eroare de la server care trimite la telefon („Pentru grupuri sunați la …”, aici 99 de locuri trimise de mână):

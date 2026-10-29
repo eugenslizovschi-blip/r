@@ -667,6 +667,20 @@
 			checkEmail();
 		}
 
+		// Ca pe server (LBB_Frontend::book): +373 urmat de 8 cifre, +40 de 9, cu cel mult un 0 de prisos după prefix. Altă
+		// lungime nu poate fi sunată, așa că trimiterea se oprește lângă câmp. Numerele fără prefix rămân pe seama serverului.
+		var phoneInput = root.querySelector( '[name="lbb_phone"]' );
+		function checkPhone() {
+			var p = phoneInput.value.replace( /[^\d+]/g, '' ).replace( /^00/, '+' );
+			p = '+' === p.charAt( 0 ) ? '+' + p.replace( /\+/g, '' ) : p.replace( /\+/g, '' );
+			var bad = /^\+(373|40)/.test( p ) && ! /^\+(3730?[1-9]\d{7}|40(0[237]\d{8}|[1-9]\d{8}))$/.test( p );
+			phoneInput.setCustomValidity( t.phoneLength && bad ? t.phoneLength : '' );
+		}
+		if ( phoneInput ) {
+			phoneInput.addEventListener( 'input', checkPhone );
+			checkPhone();
+		}
+
 		function summary() {
 			var route = currentRoute();
 			var dep = currentDeparture();
@@ -1056,9 +1070,9 @@
 				e.preventDefault();
 				return;
 			}
-			// Formularul are novalidate (restul erorilor vin de la server): numele greșite și emailul cu adresa reparată
-			// propusă le oprim aici, cu mesajul lângă câmp.
-			var checked = Array.prototype.slice.call( el.names.querySelectorAll( 'input' ) ).concat( emailInput ? [ emailInput ] : [] );
+			// Formularul are novalidate (restul erorilor vin de la server): numele greșite, telefonul +373/+40 cu altă lungime
+			// și emailul cu adresa reparată propusă le oprim aici, cu mesajul lângă câmp.
+			var checked = Array.prototype.slice.call( el.names.querySelectorAll( 'input' ) ).concat( phoneInput ? [ phoneInput ] : [], emailInput ? [ emailInput ] : [] );
 			for ( var k = 0; k < checked.length; k++ ) {
 				if ( checked[ k ].validity.customError ) {
 					e.preventDefault();
